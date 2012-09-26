@@ -10,7 +10,7 @@ TypeScript integration points are highlighted:
 
 
 === Running ===
-..\..\bin\tsc js\todos.ts
+tsc js\todos.ts
 open index.html
 
 

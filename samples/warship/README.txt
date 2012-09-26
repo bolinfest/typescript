@@ -8,5 +8,5 @@ The classic grid-based warship combat game
 
 
 === Running ===
-..\..\bin\tsc warship.ts
+tsc warship.ts
 start default.html

@@ -11,7 +11,6 @@
 ************************************************/
 declare var process: NodeProcess;
 declare var global: any;
-declare var querystring: Querystring;
 
 declare var console: {
     log(...data: any[]): void;
@@ -115,7 +114,7 @@ interface NodeProcess extends EventEmitter {
     execPath: string;
     abort(): void;
     chdir(directory: string): void;
-    cwd(directory: string): void;
+    cwd(): void;
     env: any;
     exit(code?: number): void;
     getgid(): number;
@@ -202,18 +201,18 @@ interface NodeBuffer {
     INSPECT_MAX_BYTES: number;
 }
 
-interface Querystring {
-    stringify(obj: any, sep?: string, eq?: string): string;
-    parse(str: string, sep?: string, eq?: string, options?: { maxKeys?: number; }): any;
-    escape(): any;
-    unescape(): any;
-}
-
 /************************************************
 *                                               *
 *                   MODULES                     *
 *                                               *
 ************************************************/
+declare module "querystring" {
+    export function stringify(obj: any, sep?: string, eq?: string): string;
+    export function parse(str: string, sep?: string, eq?: string, options?: { maxKeys?: number; }): any;
+    export function escape(): any;
+    export function unescape(): any;
+}
+
 declare module "events" {
     export interface NodeEventEmitter {
         addListener(event: string, listener: Function);
@@ -294,9 +293,9 @@ declare module "http" {
 
     export var STATUS_CODES;
     export function createServer(requestListener?: (request: ServerRequest, response: ServerResponse) =>void ): Server;
-    export function createClient(port?: number, host?: string): ClientRequest;
-    export function request(options: any, callback: Function): ClientRequest;
-    export function get(options: any, callback: Function): ClientRequest;
+    export function createClient(port?: number, host?: string): any;
+    export function request(options: any, callback?: Function): ClientRequest;
+    export function get(options: any, callback?: Function): ClientRequest;
     export var globalAgent: Agent;
 }
 
@@ -418,6 +417,7 @@ declare module "os" {
 declare module "https" {
     import tls = module("tls");
     import events = module("events");
+    import http = module("http");
 
     export interface ServerOptions {
         pfx?: any;
@@ -462,8 +462,8 @@ declare module "https" {
     };
     export interface Server extends tls.Server { }
     export function createServer(options: ServerOptions, requestListener?: Function): Server;
-    export function request(options: RequestOptions, callback: (res: events.NodeEventEmitter) =>void ): events.NodeEventEmitter;
-    export function get(options: RequestOptions, callback: (res: events.NodeEventEmitter) =>void ): events.NodeEventEmitter;
+    export function request(options: RequestOptions, callback?: (res: events.NodeEventEmitter) =>void ): http.ClientRequest;
+    export function get(options: RequestOptions, callback?: (res: events.NodeEventEmitter) =>void ): http.ClientRequest;
     export var globalAgent: NodeAgent;
 }
 

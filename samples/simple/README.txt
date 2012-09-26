@@ -8,4 +8,4 @@ Simple use of classes and inheritance:
 
 
 === Running ===
-..\..\bin\tsc simple.ts
+tsc simple.ts
