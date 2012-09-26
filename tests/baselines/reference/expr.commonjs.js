@@ -8,7 +8,6 @@ var E;
     E._map[2] = "Blue";
     E.Blue = 2;
 })(E || (E = {}));
-
 function f() {
     var a;
     var n = 3;

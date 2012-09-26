@@ -27,7 +27,6 @@ var M;
     M.C = C;    
     M.V = 0;
 })(M || (M = {}));
-
 var c = new M.C();
 c.pub;
 c.priv;

@@ -13,7 +13,6 @@ var Outer;
         }
         .ExportFunc = ExportFunc;
     })( || ( = {}));
-
     var export_var;
     Outer.outer_var_export = 0;
     function outerFuncExport() {
@@ -21,5 +20,4 @@ var Outer;
     }
     Outer.outerFuncExport = outerFuncExport;
 })(Outer || (Outer = {}));
-
 Outer.NonExportFunc();

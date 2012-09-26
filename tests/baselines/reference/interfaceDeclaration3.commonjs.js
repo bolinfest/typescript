@@ -21,10 +21,8 @@ var M1;
         return C5;
     })();    
 })(M1 || (M1 = {}));
-
 (function (M2) {
-    
-    var C1 = (function () {
+        var C1 = (function () {
         function C1() { }
         return C1;
     })();    
@@ -37,7 +35,6 @@ var M1;
         return C3;
     })();    
 })(exports.M2 || (exports.M2 = {}));
-
 var C1 = (function () {
     function C1() { }
     return C1;

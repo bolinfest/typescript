@@ -1,0 +1,1 @@
+0.ts line 8 col 21: Keyword 'this' cannot be referenced in initializers in a class body, or in super constructor calls

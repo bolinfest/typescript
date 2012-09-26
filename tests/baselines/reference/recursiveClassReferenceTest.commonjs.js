@@ -3,8 +3,6 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 }
-
-
 var Sample;
 (function (Sample) {
     (function (Actions) {
@@ -23,15 +21,11 @@ var Sample;
                 Find.StartFindAction = StartFindAction;                
             })(Thing.Find || (Thing.Find = {}));
             var Find = Thing.Find;
-
         })(Actions.Thing || (Actions.Thing = {}));
         var Thing = Actions.Thing;
-
     })(Sample.Actions || (Sample.Actions = {}));
     var Actions = Sample.Actions;
-
 })(Sample || (Sample = {}));
-
 var Sample;
 (function (Sample) {
     (function (Thing) {
@@ -57,12 +51,9 @@ var Sample;
             Widgets.FindWidget = FindWidget;            
         })(Thing.Widgets || (Thing.Widgets = {}));
         var Widgets = Thing.Widgets;
-
     })(Sample.Thing || (Sample.Thing = {}));
     var Thing = Sample.Thing;
-
 })(Sample || (Sample = {}));
-
 var AbstractMode = (function () {
     function AbstractMode() { }
     AbstractMode.prototype.getInitialState = function () {
@@ -105,11 +96,8 @@ var Sample;
                 PlainText.Mode = Mode;                
             })(Languages.PlainText || (Languages.PlainText = {}));
             var PlainText = Languages.PlainText;
-
         })(Thing.Languages || (Thing.Languages = {}));
         var Languages = Thing.Languages;
-
     })(Sample.Thing || (Sample.Thing = {}));
     var Thing = Sample.Thing;
-
 })(Sample || (Sample = {}));

@@ -5,7 +5,6 @@
     })();
     Foo.C = C;    
 })(exports.Foo || (exports.Foo = {}));
-
 (function (Foo) {
     function Bar() {
         if(true) {
@@ -22,4 +21,3 @@
         return;
     }
 })(exports.Foo || (exports.Foo = {}));
-

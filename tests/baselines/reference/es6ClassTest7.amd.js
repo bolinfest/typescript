@@ -3,7 +3,6 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 }
-
 var Bar = (function (_super) {
     __extends(Bar, _super);
     function Bar() {

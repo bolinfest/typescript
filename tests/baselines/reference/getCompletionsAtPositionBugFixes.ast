@@ -54,7 +54,6 @@
                 {"nodeType": "Asg", "minChar": 120, "limChar": 127, "startLine": 9, "startCol": 16, "endLine": 9, "endCol": 23, "children": [
                   {"nodeType": "Name", "minChar": 120, "limChar": 121, "startLine": 9, "startCol": 16, "endLine": 9, "endCol": 17, "children": []},
                   {"nodeType": "Name", "minChar": 124, "limChar": 127, "startLine": 9, "startCol": 20, "endLine": 9, "endCol": 23, "children": []}]}]},
-              {"nodeType": "Empty", "minChar": 127, "limChar": 128, "startLine": 9, "startCol": 23, "endLine": 9, "endCol": 24, "children": []},
               {"nodeType": "Name", "minChar": 134, "limChar": 147, "startLine": 10, "startCol": 5, "endLine": 10, "endCol": 18, "children": []},
               {"nodeType": "Comment", "minChar": 138, "limChar": 146, "startLine": 10, "startCol": 9, "endLine": 10, "endCol": 17, "children": []}]}]}]}]}]}
 }

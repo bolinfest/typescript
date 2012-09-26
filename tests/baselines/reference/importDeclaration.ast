@@ -16,9 +16,7 @@
         {"nodeType": "Import", "minChar": 19, "limChar": 40, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 22, "children": [
           {"nodeType": "Name", "minChar": 26, "limChar": 29, "startLine": 4, "startCol": 8, "endLine": 4, "endCol": 11, "children": []},
           {"nodeType": "Name", "minChar": 36, "limChar": 39, "startLine": 4, "startCol": 18, "endLine": 4, "endCol": 21, "children": []}]},
-        {"nodeType": "Empty", "minChar": 39, "limChar": 40, "startLine": 4, "startCol": 21, "endLine": 4, "endCol": 22, "children": []},
         {"nodeType": "Import", "minChar": 44, "limChar": 60, "startLine": 6, "startCol": 1, "endLine": 6, "endCol": 17, "children": [
           {"nodeType": "Name", "minChar": 51, "limChar": 55, "startLine": 6, "startCol": 8, "endLine": 6, "endCol": 12, "children": []},
-          {"nodeType": "Name", "minChar": 56, "limChar": 59, "startLine": 6, "startCol": 13, "endLine": 6, "endCol": 16, "children": []}]},
-        {"nodeType": "Empty", "minChar": 59, "limChar": 60, "startLine": 6, "startCol": 16, "endLine": 6, "endCol": 17, "children": []}]}]}
+          {"nodeType": "Name", "minChar": 56, "limChar": 59, "startLine": 6, "startCol": 13, "endLine": 6, "endCol": 16, "children": []}]}]}]}
 }

@@ -13,12 +13,10 @@ var Outer;
         }
         .ExportFunc = ExportFunc;
     })( || ( = {}));
-
     Outer.outer_var_export = 0;
     function outerFuncExport() {
         return 0;
     }
     Outer.outerFuncExport = outerFuncExport;
 })(Outer || (Outer = {}));
-
 Outer.ExportFunc();

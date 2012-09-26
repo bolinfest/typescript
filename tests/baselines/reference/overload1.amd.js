@@ -29,7 +29,6 @@ var O;
     })(B);
     O.C = C;    
 })(O || (O = {}));
-
 var e = x.g(new O.A());
 var y = x.f(3);
 y = x.f("nope");

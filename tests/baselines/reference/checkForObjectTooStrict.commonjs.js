@@ -11,7 +11,6 @@ var Foo;
     })();
     Foo.Object = Object;    
 })(Foo || (Foo = {}));
-
 var Bar = (function (_super) {
     __extends(Bar, _super);
     function Bar() {

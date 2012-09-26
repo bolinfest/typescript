@@ -8,7 +8,6 @@ var M;
     })();
     M.C = C;    
 })(M || (M = {}));
-
 var c = new M.C();
 c.salt();
 c.saltbar();

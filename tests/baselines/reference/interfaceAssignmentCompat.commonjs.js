@@ -10,7 +10,6 @@ var M;
         Color.Brown = 2;
     })(M.Color || (M.Color = {}));
     var Color = M.Color;
-
     function CompareEyes(a, b) {
         return a.color - b.color;
     }
@@ -45,5 +44,4 @@ var M;
     }
     M.test = test;
 })(M || (M = {}));
-
 M.test();

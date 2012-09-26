@@ -5,6 +5,4 @@ var _modes;
         return Mode;
     })();    
 })(_modes || (_modes = {}));
-
-
 var m;

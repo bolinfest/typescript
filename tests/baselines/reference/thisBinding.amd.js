@@ -17,7 +17,6 @@ var M;
     })();
     M.C = C;    
 })(M || (M = {}));
-
 var C = (function () {
     function C() { }
     C.prototype.f = function (x) {

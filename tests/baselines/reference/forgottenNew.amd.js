@@ -6,5 +6,4 @@ var Tools;
     })();
     Tools.NullLogger = NullLogger;    
 })(Tools || (Tools = {}));
-
 var logger = Tools.NullLogger();

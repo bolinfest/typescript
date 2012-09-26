@@ -575,7 +575,12 @@ module TypeScript {
                     this.reportParseError("Expected module name");
                     alias = new MissingIdentifier();
                     alias.minChar = this.scanner.startPos;
-                    alias.limChar = this.scanner.startPos;
+                    if (this.tok.tokenId == TokenID.SColon) {
+                        alias.limChar = this.scanner.startPos;
+                    } else {
+                        alias.limChar = this.scanner.pos;
+                        this.tok = this.scanner.scan();
+                    }
                     alias.flags |= ASTFlags.Error;
                     limChar = alias.limChar;
                 }
@@ -3287,6 +3292,7 @@ module TypeScript {
                         }
                         else {
                             ast = this.parseImportDecl(errorRecoverySet, modifiers);
+                            needTerminator = true;
                         }
                         break;
                     case TokenID.EXPORT:

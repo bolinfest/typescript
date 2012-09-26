@@ -9,7 +9,6 @@ var M;
     })();
     M.C = C;    
 })(M || (M = {}));
-
 var c = new M.C();
 c.m(function (n) {
     return "hello: " + n;

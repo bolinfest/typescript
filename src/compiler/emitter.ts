@@ -1805,6 +1805,7 @@ module TypeScript {
                         }
                     }
                     else if (startLine &&
+                             (emitNode.nodeType != NodeType.Module) &&
                              (emitNode.nodeType != NodeType.Interface) &&
                              (!((emitNode.nodeType == NodeType.VarDecl) &&
                                 ((((<VarDecl>emitNode).varFlags) & VarFlags.Ambient) == VarFlags.Ambient) &&

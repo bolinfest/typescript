@@ -6,7 +6,6 @@ var C1T5 = (function () {
     }
     return C1T5;
 })();
-
 var bigClass = (function () {
     function bigClass() {
         this.break = 1;

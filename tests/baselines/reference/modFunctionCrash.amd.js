@@ -1,4 +1,3 @@
-
 Q.f(function () {
     this;
 });

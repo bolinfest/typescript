@@ -10,7 +10,6 @@ var Foo;
     })();    
     Foo.Outer = 0;
 })(Foo || (Foo = {}));
-
 var Foo;
 (function (Foo) {
     var Helper = (function () {

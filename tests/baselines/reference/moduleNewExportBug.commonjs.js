@@ -7,5 +7,4 @@ var mod1;
         return C;
     })();    
 })(mod1 || (mod1 = {}));
-
 var c;

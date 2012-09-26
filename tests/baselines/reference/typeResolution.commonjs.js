@@ -70,7 +70,6 @@ function QQ() {
             })();            
         })(SubModule1.SubSubModule1 || (SubModule1.SubSubModule1 = {}));
         var SubSubModule1 = SubModule1.SubSubModule1;
-
         var ClassA = (function () {
             function ClassA() {
 function AA() {
@@ -88,7 +87,6 @@ function AA() {
         })();        
     })(TopLevelModule1.SubModule1 || (TopLevelModule1.SubModule1 = {}));
     var SubModule1 = TopLevelModule1.SubModule1;
-
     (function (SubModule2) {
         (function (SubSubModule2) {
             var ClassA = (function () {
@@ -114,10 +112,8 @@ function AA() {
             SubSubModule2.ClassC = ClassC;            
         })(SubModule2.SubSubModule2 || (SubModule2.SubSubModule2 = {}));
         var SubSubModule2 = SubModule2.SubSubModule2;
-
     })(TopLevelModule1.SubModule2 || (TopLevelModule1.SubModule2 = {}));
     var SubModule2 = TopLevelModule1.SubModule2;
-
     var ClassA = (function () {
         function ClassA() { }
         ClassA.prototype.AisIn1 = function () {
@@ -132,9 +128,7 @@ function AA() {
         })();
         NotExportedModule.ClassA = ClassA;        
     })(NotExportedModule || (NotExportedModule = {}));
-
 })(exports.TopLevelModule1 || (exports.TopLevelModule1 = {}));
-
 var TopLevelModule2;
 (function (TopLevelModule2) {
     (function (SubModule3) {
@@ -147,6 +141,4 @@ var TopLevelModule2;
         SubModule3.ClassA = ClassA;        
     })(TopLevelModule2.SubModule3 || (TopLevelModule2.SubModule3 = {}));
     var SubModule3 = TopLevelModule2.SubModule3;
-
 })(TopLevelModule2 || (TopLevelModule2 = {}));
-

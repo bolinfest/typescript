@@ -1,7 +1,6 @@
 var A;
 (function (A) {
-    
-    (function (B) {
+        (function (B) {
         var C = (function () {
             function C() {
                 this.x = BB.Elephant.X;
@@ -11,5 +10,4 @@ var A;
         B.C = C;        
     })(A.B || (A.B = {}));
     var B = A.B;
-
 })(A || (A = {}));

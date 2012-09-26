@@ -4,5 +4,4 @@
         inner.a = local;
     })(outer.inner || (outer.inner = {}));
     var inner = outer.inner;
-
 })(exports.outer || (exports.outer = {}));

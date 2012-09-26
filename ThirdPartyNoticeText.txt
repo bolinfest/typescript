@@ -2,26 +2,8 @@
 
 This file is based on or incorporates material from the projects listed below (collectively “Third Party Code”).   Microsoft is not the original author of the Third Party Code.   The original copyright notice and the license, under which Microsoft received such Third Party Code, are set forth below.  Such license and notices are provided for informational purposes only.  Microsoft licenses the Third Party Code to you under the terms of the Apache 2.0 License.  
 
-Array filter Compatibility Method, 
+Array Filter Compatibility Method, 
 Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/filter
-
-Array forEach Compatibility Method, 
-Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/forEach
-
-Array indexOf Compatibility Method, 
-Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
-
-Array map Compatibility Method, 
-Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/map
-
-Array Reduce Compatibility Method, 
-Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/Reduce
-
-String Trim Compatibility Method, 
-Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/Trim
-
-Date now Compatibility Method, 
-Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/now
 
 Copyright © 2007 - 2012 Mozilla Developer Network and individual contributors
 

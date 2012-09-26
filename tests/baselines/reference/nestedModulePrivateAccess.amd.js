@@ -5,5 +5,4 @@ var a;
     (function (b) {
         var y = x;
     })(b || (b = {}));
-
 })(a || (a = {}));

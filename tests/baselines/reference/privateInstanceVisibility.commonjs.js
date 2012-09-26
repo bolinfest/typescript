@@ -12,7 +12,6 @@ var Test;
     })();
     Test.Example = Example;    
 })(Test || (Test = {}));
-
 var C = (function () {
     function C() { }
     C.prototype.getX = function () {

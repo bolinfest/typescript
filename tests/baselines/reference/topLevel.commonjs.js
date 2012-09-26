@@ -19,5 +19,4 @@ var M;
 (function (M) {
     M.origin = new Point(0, 0);
 })(M || (M = {}));
-
 result += (M.origin.move(1, 1));

@@ -196,4 +196,5 @@ clean: clean-local
 	if exist $(BUILT) rmdir /S /Q $(BUILT)
 
 baseline-accept:
-	robocopy tests\baselines\local tests\baselines\reference /mir
+	start /wait robocopy tests\baselines\local tests\baselines\reference /mir
+	del /q tests\baselines\local\*
