@@ -2,7 +2,7 @@
 
 === Overview ===
 
-This sample shows a simple jQuery application in TypeScript using a jQuery TypeScript typing.
+This sample shows a simple jQuery application in TypeScript using the official jQuery TypeScript typings.
 
 === Usage === 
 
