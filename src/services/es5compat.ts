@@ -1,10 +1,16 @@
 // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
 // See LICENSE.txt in the project root for complete license information.
 
-/*----------------- ThirdPartyNotices------------------------------------------------------------------
+/*----------------- ThirdPartyNotices -------------------------------------------------------
 
-This file is based on or incorporates material from the projects listed below (collectively “Third Party Code”).   Microsoft is not the original author of the Third Party Code.   The original copyright notice and the license, under which Microsoft received such Third Party Code, are set forth below.  Such license and notices are provided for informational purposes only.  Microsoft licenses the Third Party Code to you under the terms of the Apache 2.0 License.  
+This file is based on or incorporates material from the projects listed below 
+(collectively "Third Party Code"). Microsoft is not the original author of the 
+Third Party Code. The original copyright notice and the license, under which 
+Microsoft received such Third Party Code, are set forth below. Such license and 
+notices are provided for informational purposes only. Microsoft licenses the Third 
+Party Code to you under the terms of the Apache 2.0 License.
 
+--
 Array filter Compatibility Method, 
 Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/filter
 
@@ -26,14 +32,20 @@ Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Globa
 Date now Compatibility Method, 
 Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Date/now
 
-Copyright © 2007 - 2012 Mozilla Developer Network and individual contributors
+Copyright (c) 2007 - 2012 Mozilla Developer Network and individual contributors
 
-Licensed by Microsoft under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0  
+Licensed by Microsoft under the Apache License, Version 2.0 (the "License"); you 
+may not use this file except in compliance with the License. You may obtain a copy 
+of the License at http://www.apache.org/licenses/LICENSE-2.0
 
-THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABLITY OR NON-INFRINGEMENT. 
+THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED WARRANTIES OR 
+CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABLITY OR NON-INFRINGEMENT. 
 
-See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+See the Apache Version 2.0 License for specific language governing permissions and 
+limitations under the License.
 
+--
 Original License provided for Informational Purposes Only
 MIT License
 
@@ -56,7 +68,8 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
--------------End of ThirdPartyNotices---------------------------------------*/
+------------- End of ThirdPartyNotices --------------------------------------------------- */
+
 
 // Compatibility with non ES5 compliant engines
 if (!String.prototype.trim) {
