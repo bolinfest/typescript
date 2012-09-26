@@ -1,0 +1,2 @@
+0.ts line 6 col 19: The property '_store' does not exist on value of type 'Bar'
+0.ts line 11 col 12: The property '_store' does not exist on value of type 'Bar'

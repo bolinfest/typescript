@@ -1,0 +1,2 @@
+0.ts line 20 col 32: The symbol 'Mode' is not visible at this point
+0.ts line 21 col 15: The symbol 'Mode' is not visible at this point

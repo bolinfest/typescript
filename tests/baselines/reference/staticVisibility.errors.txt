@@ -1,0 +1,4 @@
+0.ts line 10 col 8: The name 's' does not exist in the current scope
+0.ts line 13 col 8: The name 'b' does not exist in the current scope
+0.ts line 18 col 8: The name 'v' does not exist in the current scope
+0.ts line 33 col 28: The name 'barback' does not exist in the current scope

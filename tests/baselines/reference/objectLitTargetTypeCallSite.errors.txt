@@ -1,0 +1,2 @@
+0.ts line 5 col 0: Supplied parameters do not match any signature of call target:
+	Could not apply type '{ a: number; b: string; }' to argument 1, which is of type '{ a: bool; b: string; }'

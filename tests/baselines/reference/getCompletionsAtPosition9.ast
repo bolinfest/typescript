@@ -1,0 +1,40 @@
+{
+  "sourceText": [
+    "module Bar \r\n",
+    "{\r\n",
+    "    export class Bleah {\r\n",
+    "    }\r\n",
+    "    export class Foo extends Bleah {\r\n",
+    "    }\r\n",
+    "}\r\n",
+    "\r\n",
+    "function Blah(x:Bar.Bleah) {\r\n",
+    "}\r\n",
+    ""],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 132, "startLine": 1, "startCol": 1, "endLine": 11, "endCol": 1, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 132, "startLine": 1, "startCol": 1, "endLine": 11, "endCol": 1, "children": [
+        {"nodeType": "Module", "minChar": 0, "limChar": 95, "startLine": 1, "startCol": 1, "endLine": 7, "endCol": 2, "children": [
+          {"nodeType": "Name", "minChar": 7, "limChar": 10, "startLine": 1, "startCol": 8, "endLine": 1, "endCol": 11, "children": []},
+          {"nodeType": "List", "minChar": 13, "limChar": 95, "startLine": 2, "startCol": 1, "endLine": 7, "endCol": 2, "children": [
+            {"nodeType": "Class", "minChar": 20, "limChar": 47, "startLine": 3, "startCol": 5, "endLine": 4, "endCol": 6, "children": [
+              {"nodeType": "Name", "minChar": 33, "limChar": 38, "startLine": 3, "startCol": 18, "endLine": 3, "endCol": 23, "children": []},
+              {"nodeType": "List", "minChar": 39, "limChar": 47, "startLine": 3, "startCol": 24, "endLine": 4, "endCol": 6, "children": []}]},
+            {"nodeType": "Class", "minChar": 53, "limChar": 92, "startLine": 5, "startCol": 5, "endLine": 6, "endCol": 6, "children": [
+              {"nodeType": "Name", "minChar": 66, "limChar": 69, "startLine": 5, "startCol": 18, "endLine": 5, "endCol": 21, "children": []},
+              {"nodeType": "List", "minChar": 84, "limChar": 92, "startLine": 5, "startCol": 36, "endLine": 6, "endCol": 6, "children": []},
+              {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": [
+                {"nodeType": "Name", "minChar": 78, "limChar": 83, "startLine": 5, "startCol": 30, "endLine": 5, "endCol": 35, "children": []}]},
+              {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": []}]}]}]},
+        {"nodeType": "FuncDecl", "minChar": 99, "limChar": 130, "startLine": 9, "startCol": 1, "endLine": 10, "endCol": 2, "children": [
+          {"nodeType": "Name", "minChar": 108, "limChar": 112, "startLine": 9, "startCol": 10, "endLine": 9, "endCol": 14, "children": []},
+          {"nodeType": "List", "minChar": 112, "limChar": 125, "startLine": 9, "startCol": 14, "endLine": 9, "endCol": 27, "children": [
+            {"nodeType": "ArgDecl", "minChar": 113, "limChar": 124, "startLine": 9, "startCol": 15, "endLine": 9, "endCol": 26, "children": [
+              {"nodeType": "Name", "minChar": 113, "limChar": 114, "startLine": 9, "startCol": 15, "endLine": 9, "endCol": 16, "children": []},
+              {"nodeType": "TypeRef", "minChar": 115, "limChar": 124, "startLine": 9, "startCol": 17, "endLine": 9, "endCol": 26, "children": [
+                {"nodeType": "Dot", "minChar": 115, "limChar": 124, "startLine": 9, "startCol": 17, "endLine": 9, "endCol": 26, "children": [
+                  {"nodeType": "Name", "minChar": 115, "limChar": 118, "startLine": 9, "startCol": 17, "endLine": 9, "endCol": 20, "children": []},
+                  {"nodeType": "Name", "minChar": 119, "limChar": 124, "startLine": 9, "startCol": 21, "endLine": 9, "endCol": 26, "children": []}]}]}]}]},
+          {"nodeType": "List", "minChar": 126, "limChar": 130, "startLine": 9, "startCol": 28, "endLine": 10, "endCol": 2, "children": [
+            {"nodeType": "EndCode", "minChar": 130, "limChar": 130, "startLine": 10, "startCol": 2, "endLine": 10, "endCol": 2, "children": []}]}]}]}]}
+}

@@ -1,0 +1,5 @@
+0.ts line 27 col 24: The name 'ItemSet' does not exist in the current scope
+0.ts line 25 col 0: A export class may only extend other classes, Event is an interface.
+0.ts line 5 col 2: Malformed function body (is this a class named the same as an existing interface?)
+0.ts line 27 col 24: The name 'ItemSet' does not exist in the current scope
+0.ts line 29 col 9: The property 'add' does not exist on value of type 'Event'

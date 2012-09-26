@@ -1,0 +1,4 @@
+
+Q.f(function () {
+    this;
+});

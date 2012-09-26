@@ -1,0 +1,1 @@
+0.ts line 8 col 8: Cannot convert 'string' to '(n: number) => bool': Type '(n: number) => bool' requires a call signature, but Type 'String' lacks one

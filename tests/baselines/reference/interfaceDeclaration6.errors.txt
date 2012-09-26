@@ -1,0 +1,2 @@
+0.ts line 3 col 26: Type of overridden member 'foo' is not subtype of original member defined by type 'i1'
+0.ts line 5 col 1: Signature for 'bar' is duplicated

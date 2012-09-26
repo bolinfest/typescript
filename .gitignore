@@ -1,0 +1,15 @@
+built/
+tests/projects/*/*.js
+tests/projects/*/*/*.js
+tests/projects/*/*/*/*.js
+diff-*.html
+test-args.txt
+*.sln
+*.suo
+~*.docx
+tests/baselines/local/*
+tests/services/baselines/local/*
+tests/services/browser/typescriptServices.js
+src/compiler/*.js
+baseline-report.html
+*.swp

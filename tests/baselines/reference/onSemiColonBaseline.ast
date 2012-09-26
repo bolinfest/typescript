@@ -1,0 +1,19 @@
+{
+  "sourceText": [
+    "var a = b + c ^ d - e * ++f;"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 28, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 29, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 28, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 29, "children": [
+        {"nodeType": "VarDecl", "minChar": 0, "limChar": 28, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 29, "children": [
+          {"nodeType": "Name", "minChar": 4, "limChar": 5, "startLine": 1, "startCol": 5, "endLine": 1, "endCol": 6, "children": []},
+          {"nodeType": "Xor", "minChar": 8, "limChar": 27, "startLine": 1, "startCol": 9, "endLine": 1, "endCol": 28, "children": [
+            {"nodeType": "Add", "minChar": 8, "limChar": 13, "startLine": 1, "startCol": 9, "endLine": 1, "endCol": 14, "children": [
+              {"nodeType": "Name", "minChar": 8, "limChar": 9, "startLine": 1, "startCol": 9, "endLine": 1, "endCol": 10, "children": []},
+              {"nodeType": "Name", "minChar": 12, "limChar": 13, "startLine": 1, "startCol": 13, "endLine": 1, "endCol": 14, "children": []}]},
+            {"nodeType": "Sub", "minChar": 16, "limChar": 27, "startLine": 1, "startCol": 17, "endLine": 1, "endCol": 28, "children": [
+              {"nodeType": "Name", "minChar": 16, "limChar": 17, "startLine": 1, "startCol": 17, "endLine": 1, "endCol": 18, "children": []},
+              {"nodeType": "Mul", "minChar": 20, "limChar": 27, "startLine": 1, "startCol": 21, "endLine": 1, "endCol": 28, "children": [
+                {"nodeType": "Name", "minChar": 20, "limChar": 21, "startLine": 1, "startCol": 21, "endLine": 1, "endCol": 22, "children": []},
+                {"nodeType": "IncPre", "minChar": 24, "limChar": 27, "startLine": 1, "startCol": 25, "endLine": 1, "endCol": 28, "children": [
+                  {"nodeType": "Name", "minChar": 26, "limChar": 27, "startLine": 1, "startCol": 27, "endLine": 1, "endCol": 28, "children": []}]}]}]}]}]}]}]}
+}

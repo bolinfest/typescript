@@ -1,0 +1,5 @@
+// 0.ts  line 6 col 19: Property getters may not take any arguments
+// 0.ts  line 7 col 29: Property setters may not declare a return type
+0.ts line 5 col 4: Duplicate identifier 'Foo'
+0.ts line 10 col 4: Getter and setter accessors do not agree in visibility
+0.ts line 7 col 4: Function declared a non-void return type, but has no return expression

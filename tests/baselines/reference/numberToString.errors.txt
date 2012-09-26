@@ -1,0 +1,2 @@
+0.ts line 2 col 11: Cannot convert 'number' to 'string'
+0.ts line 9 col 0: Supplied parameters do not match any signature of call target

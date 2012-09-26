@@ -1,0 +1,1 @@
+0.ts line 8 col 0: Base type 'B' is referenced before its declaration

@@ -1,0 +1,11 @@
+// 0.ts  line 3 col 8: Expected ';'
+// 0.ts  line 3 col 8: Unexpected '{' in class definition
+// 0.ts  line 7 col 6: Check format of expression term
+// 0.ts  line 7 col 15: Expected ';'
+// 0.ts  line 11 col 4: 'property' statements are only allowed within classes
+// 0.ts  line 11 col 17: Expected ';'
+// 0.ts  line 13 col 8: return statement outside of function body
+// 0.ts  line 17 col 0: Unexpected statement block terminator '}'
+0.ts line 5 col 21: The name 'someInitThatMightFail' does not exist in the current scope
+0.ts line 7 col 12: The name 'e' does not exist in the current scope
+0.ts line 11 col 11: The name 'baz' does not exist in the current scope

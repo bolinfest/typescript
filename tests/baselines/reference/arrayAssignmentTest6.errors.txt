@@ -1,0 +1,2 @@
+0.ts line 14 col 4: Class 'Bug' declares interface 'IMode' but does not implement it: Types of property 'tokenize' of types 'Bug' and 'IMode' are incompatible:
+	Call signatures of types '(line: string,tokens: IToken[],includeStates: bool) => ILineTokens' and '(line: string,state: IState,includeStates: bool) => ILineTokens' are incompatible

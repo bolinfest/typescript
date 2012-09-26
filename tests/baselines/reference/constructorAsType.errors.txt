@@ -1,0 +1,1 @@
+0.ts line 1 col 39: Cannot convert '() => { name: string; }' to 'new() => { name: string; }': Type '() => { name: string; }' requires a call signature, but Type 'new() => { name: string; }' lacks one

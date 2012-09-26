@@ -1,0 +1,2 @@
+0.ts line 5 col 14: Cannot convert 'number' to 'bool'
+0.ts line 10 col 3: Operator '===' cannot be applied to types 'any' and 'void'

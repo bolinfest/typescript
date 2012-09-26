@@ -1,0 +1,6 @@
+0.ts line 2 col 0: Supplied parameters do not match any signature of call target:
+	Could not apply type '{ a: number; }' to argument 1, which is of type '{ b: number; }'
+0.ts line 5 col 0: Supplied parameters do not match any signature of call target:
+	Could not apply type 'number[]' to argument 1, which is of type 'string[]'
+0.ts line 8 col 0: Supplied parameters do not match any signature of call target:
+	Call signatures of types '(s: string) => any' and '(n: number) => number' are incompatible

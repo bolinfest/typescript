@@ -1,0 +1,9 @@
+0.ts line 9 col 17: The name 'loc' does not exist in the current scope
+0.ts line 17 col 58: Keyword 'this' cannot be referenced in initializers in a class body, or in super constructor calls
+0.ts line 17 col 52: Supplied parameters do not match any signature of call target
+0.ts line 18 col 61: Keyword 'this' cannot be referenced in initializers in a class body, or in super constructor calls
+0.ts line 19 col 67: Keyword 'this' cannot be referenced in initializers in a class body, or in super constructor calls
+0.ts line 19 col 52: Supplied parameters do not match any signature of call target
+0.ts line 22 col 8: The name 'x' does not exist in the current scope
+0.ts line 23 col 6: The name 'x' does not exist in the current scope
+0.ts line 26 col 8: The name 'x' does not exist in the current scope

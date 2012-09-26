@@ -1,0 +1,27 @@
+{
+  "sourceText": [
+    "//\r\n",
+    "// Note: Do not add more tests at the end of this file, as\r\n",
+    "//       the purpose of this test is to verity smart indent\r\n",
+    "//       works for unterminated function arguments at the end of a file.\r\n",
+    "//\r\n",
+    "\r\n",
+    "function foo(a,\r\n",
+    "\r\n",
+    ""],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 224, "startLine": 1, "startCol": 1, "endLine": 9, "endCol": 1, "children": [
+      {"nodeType": "List", "minChar": 205, "limChar": 224, "startLine": 7, "startCol": 1, "endLine": 9, "endCol": 1, "children": [
+        {"nodeType": "FuncDecl", "minChar": 205, "limChar": 224, "startLine": 7, "startCol": 1, "endLine": 9, "endCol": 1, "children": [
+          {"nodeType": "Name", "minChar": 214, "limChar": 217, "startLine": 7, "startCol": 10, "endLine": 7, "endCol": 13, "children": []},
+          {"nodeType": "List", "minChar": 217, "limChar": 220, "startLine": 7, "startCol": 13, "endLine": 7, "endCol": 16, "children": [
+            {"nodeType": "ArgDecl", "minChar": 218, "limChar": 219, "startLine": 7, "startCol": 14, "endLine": 7, "endCol": 15, "children": [
+              {"nodeType": "Name", "minChar": 218, "limChar": 219, "startLine": 7, "startCol": 14, "endLine": 7, "endCol": 15, "children": []}]}]},
+          {"nodeType": "List", "minChar": 224, "limChar": 224, "startLine": 9, "startCol": 1, "endLine": 9, "endCol": 1, "children": [
+            {"nodeType": "EndCode", "minChar": 224, "limChar": 224, "startLine": 9, "startCol": 1, "endLine": 9, "endCol": 1, "children": []}]}]},
+        {"nodeType": "Comment", "minChar": 0, "limChar": 2, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 3, "children": []},
+        {"nodeType": "Comment", "minChar": 4, "limChar": 62, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 59, "children": []},
+        {"nodeType": "Comment", "minChar": 64, "limChar": 123, "startLine": 3, "startCol": 1, "endLine": 3, "endCol": 60, "children": []},
+        {"nodeType": "Comment", "minChar": 125, "limChar": 197, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 73, "children": []},
+        {"nodeType": "Comment", "minChar": 199, "limChar": 201, "startLine": 5, "startCol": 1, "endLine": 5, "endCol": 3, "children": []}]}]}
+}

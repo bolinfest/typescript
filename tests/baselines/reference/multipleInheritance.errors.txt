@@ -1,0 +1,10 @@
+// 0.ts  line 9 col 23: A class may only extend one other class
+// 0.ts  line 18 col 23: A class may only extend one other class
+// 0.ts  line 30 col 16: Expected '=>'
+// 0.ts  line 31 col 4: Expected type name
+// 0.ts  line 31 col 4: Expected ';'
+0.ts line 9 col 0: duplicate member name in bases for C: B2 and B1 both contain member with name x
+0.ts line 18 col 0: duplicate member name in bases for E: B2 and B1 both contain member with name x
+0.ts line 26 col 4: Type of overridden member 'y' is not subtype of original member defined by type 'N'
+0.ts line 35 col 4: Cannot override field 'f' with method
+0.ts line 36 col 4: Type of overridden member 'g' is not subtype of original member defined by type 'Good'

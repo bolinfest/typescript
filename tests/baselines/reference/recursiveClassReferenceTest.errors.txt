@@ -1,0 +1,8 @@
+// 0.ts  line 4 col 15: Module name missing
+// 0.ts  line 40 col 17: '=>' may not be used for class methods
+// 0.ts  line 72 col 71: '=>' may not be used for class methods
+// 0.ts  line 89 col 26: '=>' may not be used for class methods
+0.ts line 61 col 10: The name 'domNode' does not exist in the current scope
+0.ts line 89 col 29: The name 'mode' does not exist in the current scope
+0.ts line 96 col 14: Supplied parameters do not match any signature of call target:
+	Type 'Window' is missing property 'getInitialState' from type 'IMode'

@@ -1,0 +1,1 @@
+0.ts line 218 col 18: Cannot convert '{ x: number; y: number; add: (dx: number,dy: number) => Point; }' to 'Point'

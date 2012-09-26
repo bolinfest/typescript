@@ -1,0 +1,2 @@
+// 0.ts  line 5 col 11: Module name missing
+0.ts line 20 col 6: The property 'NonExportFunc' does not exist on value of type 'Outer'

@@ -1,0 +1,49 @@
+{
+  "sourceText": [
+    "// Should still highlight even though it's invalid assignment\r\n",
+    "var ^^[|foo|] = function() { };\r\n",
+    "\r\n",
+    "[|fo^^o|] = [|f^^oo|] + 1;"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 124, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 27, "children": [
+      {"nodeType": "List", "minChar": 63, "limChar": 124, "startLine": 2, "startCol": 1, "endLine": 4, "endCol": 27, "children": [
+        {"nodeType": "VarDecl", "minChar": 63, "limChar": 69, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 7, "children": [
+          {"nodeType": "Name", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": []}]},
+        {"nodeType": "Comment", "minChar": 0, "limChar": 61, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 62, "children": [
+          {"nodeType": "Asg", "minChar": 69, "limChar": 94, "startLine": 2, "startCol": 7, "endLine": 2, "endCol": 32, "children": [
+            {"nodeType": "ArrayLit", "minChar": 69, "limChar": 76, "startLine": 2, "startCol": 7, "endLine": 2, "endCol": 14, "children": [
+              {"nodeType": "List", "minChar": 70, "limChar": 75, "startLine": 2, "startCol": 8, "endLine": 2, "endCol": 13, "children": [
+                {"nodeType": "Or", "minChar": 70, "limChar": 75, "startLine": 2, "startCol": 8, "endLine": 2, "endCol": 13, "children": [
+                  {"nodeType": "Or", "minChar": 70, "limChar": 74, "startLine": 2, "startCol": 8, "endLine": 2, "endCol": 12, "children": [
+                    {"nodeType": "Name", "minChar": 70, "limChar": 70, "startLine": 2, "startCol": 8, "endLine": 2, "endCol": 8, "children": []},
+                    {"nodeType": "Name", "minChar": 71, "limChar": 74, "startLine": 2, "startCol": 9, "endLine": 2, "endCol": 12, "children": []}]},
+                  {"nodeType": "Name", "minChar": 75, "limChar": 75, "startLine": 2, "startCol": 13, "endLine": 2, "endCol": 13, "children": []}]}]}]},
+            {"nodeType": "FuncDecl", "minChar": 79, "limChar": 93, "startLine": 2, "startCol": 17, "endLine": 2, "endCol": 31, "children": [
+              {"nodeType": "List", "minChar": 90, "limChar": 93, "startLine": 2, "startCol": 28, "endLine": 2, "endCol": 31, "children": [
+                {"nodeType": "EndCode", "minChar": 93, "limChar": 93, "startLine": 2, "startCol": 31, "endLine": 2, "endCol": 31, "children": []}]}]}]},
+          {"nodeType": "Asg", "minChar": 98, "limChar": 124, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 27, "children": [
+            {"nodeType": "ArrayLit", "minChar": 98, "limChar": 107, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 10, "children": [
+              {"nodeType": "List", "minChar": 99, "limChar": 106, "startLine": 4, "startCol": 2, "endLine": 4, "endCol": 9, "children": [
+                {"nodeType": "Or", "minChar": 99, "limChar": 106, "startLine": 4, "startCol": 2, "endLine": 4, "endCol": 9, "children": [
+                  {"nodeType": "Or", "minChar": 99, "limChar": 105, "startLine": 4, "startCol": 2, "endLine": 4, "endCol": 8, "children": [
+                    {"nodeType": "Name", "minChar": 99, "limChar": 99, "startLine": 4, "startCol": 2, "endLine": 4, "endCol": 2, "children": []},
+                    {"nodeType": "Xor", "minChar": 100, "limChar": 105, "startLine": 4, "startCol": 3, "endLine": 4, "endCol": 8, "children": [
+                      {"nodeType": "Xor", "minChar": 100, "limChar": 103, "startLine": 4, "startCol": 3, "endLine": 4, "endCol": 6, "children": [
+                        {"nodeType": "Name", "minChar": 100, "limChar": 102, "startLine": 4, "startCol": 3, "endLine": 4, "endCol": 5, "children": []},
+                        {"nodeType": "Name", "minChar": 103, "limChar": 103, "startLine": 4, "startCol": 6, "endLine": 4, "endCol": 6, "children": []}]},
+                      {"nodeType": "Name", "minChar": 104, "limChar": 105, "startLine": 4, "startCol": 7, "endLine": 4, "endCol": 8, "children": []}]}]},
+                  {"nodeType": "Name", "minChar": 106, "limChar": 106, "startLine": 4, "startCol": 9, "endLine": 4, "endCol": 9, "children": []}]}]}]},
+            {"nodeType": "Add", "minChar": 110, "limChar": 123, "startLine": 4, "startCol": 13, "endLine": 4, "endCol": 26, "children": [
+              {"nodeType": "ArrayLit", "minChar": 110, "limChar": 119, "startLine": 4, "startCol": 13, "endLine": 4, "endCol": 22, "children": [
+                {"nodeType": "List", "minChar": 111, "limChar": 118, "startLine": 4, "startCol": 14, "endLine": 4, "endCol": 21, "children": [
+                  {"nodeType": "Or", "minChar": 111, "limChar": 118, "startLine": 4, "startCol": 14, "endLine": 4, "endCol": 21, "children": [
+                    {"nodeType": "Or", "minChar": 111, "limChar": 117, "startLine": 4, "startCol": 14, "endLine": 4, "endCol": 20, "children": [
+                      {"nodeType": "Name", "minChar": 111, "limChar": 111, "startLine": 4, "startCol": 14, "endLine": 4, "endCol": 14, "children": []},
+                      {"nodeType": "Xor", "minChar": 112, "limChar": 117, "startLine": 4, "startCol": 15, "endLine": 4, "endCol": 20, "children": [
+                        {"nodeType": "Xor", "minChar": 112, "limChar": 114, "startLine": 4, "startCol": 15, "endLine": 4, "endCol": 17, "children": [
+                          {"nodeType": "Name", "minChar": 112, "limChar": 113, "startLine": 4, "startCol": 15, "endLine": 4, "endCol": 16, "children": []},
+                          {"nodeType": "Name", "minChar": 114, "limChar": 114, "startLine": 4, "startCol": 17, "endLine": 4, "endCol": 17, "children": []}]},
+                        {"nodeType": "Name", "minChar": 115, "limChar": 117, "startLine": 4, "startCol": 18, "endLine": 4, "endCol": 20, "children": []}]}]},
+                    {"nodeType": "Name", "minChar": 118, "limChar": 118, "startLine": 4, "startCol": 21, "endLine": 4, "endCol": 21, "children": []}]}]}]},
+              {"nodeType": "NumberLit", "minChar": 122, "limChar": 123, "startLine": 4, "startCol": 25, "endLine": 4, "endCol": 26, "children": []}]}]}]}]}]}
+}

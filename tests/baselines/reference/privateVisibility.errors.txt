@@ -1,0 +1,3 @@
+0.ts line 9 col 2: The property 'privMeth' does not exist on value of type 'Foo'
+0.ts line 10 col 2: The property 'privProp' does not exist on value of type 'Foo'
+0.ts line 24 col 2: The property 'priv' does not exist on value of type 'M.C'

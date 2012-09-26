@@ -1,0 +1,5 @@
+// 0.ts  line 2 col 8: Multiple modifiers may not be applied to class members
+// 0.ts  line 3 col 9: Multiple modifiers may not be applied to class members
+// 0.ts  line 4 col 8: Multiple modifiers may not be applied to class members
+// 0.ts  line 5 col 8: Multiple modifiers may not be applied to class members
+// 0.ts  line 6 col 9: Multiple modifiers may not be applied to class members

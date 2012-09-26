@@ -1,0 +1,21 @@
+{
+  "sourceText": [
+    "// Neither should cause highlighting to occur\r\n",
+    "f^^oo = fo^^o;\r\n",
+    ""],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 63, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 1, "children": [
+      {"nodeType": "List", "minChar": 47, "limChar": 63, "startLine": 2, "startCol": 1, "endLine": 3, "endCol": 1, "children": [
+        {"nodeType": "Asg", "minChar": 47, "limChar": 61, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 15, "children": [
+          {"nodeType": "Xor", "minChar": 47, "limChar": 52, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 6, "children": [
+            {"nodeType": "Xor", "minChar": 47, "limChar": 49, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 3, "children": [
+              {"nodeType": "Name", "minChar": 47, "limChar": 48, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 2, "children": []},
+              {"nodeType": "Name", "minChar": 49, "limChar": 49, "startLine": 2, "startCol": 3, "endLine": 2, "endCol": 3, "children": []}]},
+            {"nodeType": "Name", "minChar": 50, "limChar": 52, "startLine": 2, "startCol": 4, "endLine": 2, "endCol": 6, "children": []}]},
+          {"nodeType": "Xor", "minChar": 55, "limChar": 60, "startLine": 2, "startCol": 9, "endLine": 2, "endCol": 14, "children": [
+            {"nodeType": "Xor", "minChar": 55, "limChar": 58, "startLine": 2, "startCol": 9, "endLine": 2, "endCol": 12, "children": [
+              {"nodeType": "Name", "minChar": 55, "limChar": 57, "startLine": 2, "startCol": 9, "endLine": 2, "endCol": 11, "children": []},
+              {"nodeType": "Name", "minChar": 58, "limChar": 58, "startLine": 2, "startCol": 12, "endLine": 2, "endCol": 12, "children": []}]},
+            {"nodeType": "Name", "minChar": 59, "limChar": 60, "startLine": 2, "startCol": 13, "endLine": 2, "endCol": 14, "children": []}]}]},
+        {"nodeType": "Comment", "minChar": 0, "limChar": 45, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 46, "children": []}]}]}
+}

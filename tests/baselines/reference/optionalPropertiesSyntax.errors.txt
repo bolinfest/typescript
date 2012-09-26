@@ -1,0 +1,14 @@
+// 0.ts  line 11 col 6: Expected ';'
+// 0.ts  line 12 col 6: Expected identifier in property declaration
+// 0.ts  line 13 col 0: Expected ';'
+// 0.ts  line 18 col 10: Expected ';'
+// 0.ts  line 19 col 10: Expected identifier in property declaration
+// 0.ts  line 20 col 0: Expected ';'
+// 0.ts  line 32 col 17: Expected ';'
+// 0.ts  line 33 col 18: Expected identifier in property declaration
+// 0.ts  line 35 col 0: Expected ';'
+0.ts line 25 col 4: Duplicate identifier 'prop'
+0.ts line 3 col 4: Signature for 'fn' is duplicated
+0.ts line 10 col 4: Signature is duplicated
+0.ts line 17 col 4: Signature is duplicated
+0.ts line 31 col 4: Signature for '__item' is duplicated

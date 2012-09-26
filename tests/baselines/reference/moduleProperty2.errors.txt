@@ -1,0 +1,4 @@
+0.ts line 2 col 14: The name 'x' does not exist in the current scope
+0.ts line 3 col 14: The name 'y' does not exist in the current scope
+0.ts line 7 col 16: The property 'y' does not exist on value of type 'M'
+0.ts line 8 col 16: The property 'z' does not exist on value of type 'M'

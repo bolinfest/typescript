@@ -1,0 +1,3 @@
+0.ts line 3 col 4: Duplicate identifier 'item'
+0.ts line 8 col 4: Duplicate identifier 'item'
+0.ts line 39 col 0: Class 'C1' declares interface 'I3' but does not implement it: Type 'C1' is missing property 'prototype' from type 'I3'

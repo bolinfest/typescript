@@ -1,0 +1,1 @@
+0.ts line 2 col 30: The name 'I' does not exist in the current scope

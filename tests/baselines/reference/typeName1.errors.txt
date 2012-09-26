@@ -1,0 +1,15 @@
+0.ts line 9 col 50: Cannot convert 'number' to '{ f(s: string): number; f(n: number): string; }': Type 'Number' is missing property 'f' from type '{ f(s: string): number; f(n: number): string; }'
+0.ts line 10 col 32: Cannot convert 'number' to 'f(s: string): number; ': Type 'Number' is missing property 'f' from type 'f(s: string): number; '
+0.ts line 11 col 48: Cannot convert 'number' to '{ (s: string): number; (n: number): string; }': Type '{ (s: string): number; (n: number): string; }' requires a call signature, but Type 'Number' lacks one
+0.ts line 12 col 63: Cannot convert 'number' to '{ x: any; y: any; z: number; f(n: number): string; f(s: string): number; }': Type 'Number' is missing property 'x' from type '{ x: any; y: any; z: number; f(n: number): string; f(s: string): number; }'
+0.ts line 13 col 99: Cannot convert 'number' to '{ x: any; y: any; z: number; f(n: number): string; f(s: string): number; (s: string): number; (n: number): string; }': Type 'Number' is missing property 'x' from type '{ x: any; y: any; z: number; f(n: number): string; f(s: string): number; (s: string): number; (n: number): string; }'
+0.ts line 14 col 62: Cannot convert 'number' to '{ z: number; f: { (n: number): string; (s: string): number; }; }': Type 'Number' is missing property 'z' from type '{ z: number; f: { (n: number): string; (s: string): number; }; }'
+0.ts line 15 col 24: Cannot convert 'number' to '(s: string) => bool': Type '(s: string) => bool' requires a call signature, but Type 'Number' lacks one
+0.ts line 16 col 64: Cannot convert 'number' to '{ z: I; (): bool; [s: string]: { x: any; y: any; }; [n: number]: { x: any; y: any; }; }': Type 'Number' is missing property 'z' from type '{ z: I; (): bool; [s: string]: { x: any; y: any; }; [n: number]: { x: any; y: any; }; }'
+0.ts line 17 col 9: Cannot convert 'number' to 'I': Type 'Number' is missing property 'k' from type 'I'
+0.ts line 18 col 18: Cannot convert 'number' to 'I[][][][]'
+0.ts line 19 col 26: Cannot convert 'number' to '{ z: I; x: bool; }[][]'
+0.ts line 20 col 104: Cannot convert 'number' to '{ z: I; x: bool; y: (s: string) => bool; w: { z: I; (): bool; [s: string]: { x: any; y: any; }; [n: number]: { x: any; y: any; }; }; }[][]'
+0.ts line 21 col 87: Cannot convert 'number' to '{ x: string; w: { y: number; }; (): {}; new(): number; new(n: number): number; }': Type 'Number' is missing property 'x' from type '{ x: string; w: { y: number; }; (): {}; new(): number; new(n: number): number; }'
+0.ts line 22 col 47: Cannot convert 'number' to '{ f(x: number): bool; p: any; q: any; (): string; }': Type 'Number' is missing property 'f' from type '{ f(x: number): bool; p: any; q: any; (): string; }'
+0.ts line 23 col 15: Cannot convert '{ zeek: number; new(): C; }' to 'number'

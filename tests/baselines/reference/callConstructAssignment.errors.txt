@@ -1,0 +1,2 @@
+0.ts line 7 col 6: Cannot convert 'new() => any' to '() => void': Type '() => void' requires a call signature, but Type 'new() => any' lacks one
+0.ts line 8 col 6: Cannot convert '() => void' to 'new() => any': Type '() => void' requires a call signature, but Type 'new() => any' lacks one

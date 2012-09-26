@@ -1,0 +1,1 @@
+0.ts line 22 col 0: Class 'C6' declares interface 'i1' but does not implement it: Types of property 'name' of types 'C6' and 'i1' are incompatible

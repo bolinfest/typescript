@@ -1,0 +1,2 @@
+0.ts line 14 col 7: Cannot convert '{ x: number; }' to 'new() => any': Type 'new() => any' requires a construct signature, but Type '{ x: number; }' lacks one
+0.ts line 16 col 7: Cannot convert '{ x: number; }' to '() => void': Type '() => void' requires a call signature, but Type '{ x: number; }' lacks one

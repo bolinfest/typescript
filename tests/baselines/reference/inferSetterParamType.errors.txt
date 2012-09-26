@@ -1,0 +1,2 @@
+0.ts line 15 col 12: Cannot convert 'string' to 'number'
+0.ts line 15 col 4: Getter and setter types do not agree

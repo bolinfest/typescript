@@ -1,0 +1,4 @@
+0.ts line 2 col 28: Expected type
+0.ts line 7 col 28: The name 'B' does not exist in the current scope
+0.ts line 1 col 0: Base type must be interface or class
+0.ts line 1 col 0: Base type must be interface or class

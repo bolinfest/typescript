@@ -1,0 +1,1 @@
+0.ts line 11 col 22: Cannot convert '{ Moo: () => string; }' to 'ITextWriter2': Type '{ Moo: () => string; }' is missing property 'Write' from type 'ITextWriter2'

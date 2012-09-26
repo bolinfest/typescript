@@ -1,0 +1,10 @@
+{
+  "sourceText": [
+    "interface     "],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 14, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 15, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 14, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 15, "children": [
+        {"nodeType": "Interface", "minChar": 0, "limChar": 9, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 10, "children": [
+          {"nodeType": "Name", "minChar": 14, "limChar": 14, "startLine": 1, "startCol": 15, "endLine": 1, "endCol": 15, "children": []},
+          {"nodeType": "List", "minChar": 14, "limChar": 14, "startLine": 1, "startCol": 15, "endLine": 1, "endCol": 15, "children": []}]}]}]}
+}

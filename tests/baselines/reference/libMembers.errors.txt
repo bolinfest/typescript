@@ -1,0 +1,2 @@
+0.ts line 4 col 2: The property 'subby' does not exist on value of type 'string'
+0.ts line 12 col 14: The property 'prototype' does not exist on value of type 'C'

@@ -1,0 +1,4 @@
+// 0.ts  line 1 col 10: interface missing name
+// 0.ts  line 3 col 10: interface missing name
+// 0.ts  line 3 col 10: Expected '{'
+// 0.ts  line 4 col 0: Expected '}'

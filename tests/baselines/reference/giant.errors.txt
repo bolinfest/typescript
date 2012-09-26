@@ -1,0 +1,37 @@
+// 0.ts  line 154 col 38: Expected ';'
+// 0.ts  line 233 col 38: Expected ';'
+// 0.ts  line 238 col 34: Expected ';'
+// 0.ts  line 240 col 23: Expected ';'
+// 0.ts  line 243 col 20: Expected ';'
+// 0.ts  line 244 col 21: Expected ';'
+// 0.ts  line 245 col 21: Expected ';'
+// 0.ts  line 246 col 22: Property accessors may not be declared in ambient classes
+// 0.ts  line 247 col 30: Expected ';'
+// 0.ts  line 248 col 22: Property accessors may not be declared in ambient classes
+// 0.ts  line 249 col 22: Expected ';'
+// 0.ts  line 250 col 23: Property accessors may not be declared in ambient classes
+// 0.ts  line 251 col 31: Expected ';'
+// 0.ts  line 252 col 23: Property accessors may not be declared in ambient classes
+// 0.ts  line 254 col 20: Expected ';'
+// 0.ts  line 255 col 28: Unexpected ')' in class definition
+// 0.ts  line 255 col 30: Unexpected '{' in class definition
+// 0.ts  line 256 col 8: Statics may only be class members
+// 0.ts  line 257 col 8: Statics may only be class members
+// 0.ts  line 258 col 8: Statics may only be class members
+// 0.ts  line 262 col 21: Expected ';'
+// 0.ts  line 267 col 29: Expected ';'
+// 0.ts  line 272 col 0: Unexpected statement block terminator '}'
+0.ts line 61 col 4: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 63 col 4: Index signatures may take only one parameter
+0.ts line 75 col 4: Signature for 'p7' is duplicated
+0.ts line 125 col 8: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 127 col 8: Index signatures may take only one parameter
+0.ts line 139 col 8: Signature for 'p7' is duplicated
+0.ts line 204 col 8: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 206 col 8: Index signatures may take only one parameter
+0.ts line 218 col 8: Signature for 'p7' is duplicated
+0.ts line 245 col 8: Signature for 'pgF' is duplicated
+0.ts line 247 col 8: Signature for 'psF' is duplicated
+0.ts line 249 col 8: Signature for 'rgF' is duplicated
+0.ts line 251 col 8: Signature for 'rsF' is duplicated
+0.ts line 256 col 8: Overload declaration lacks definition

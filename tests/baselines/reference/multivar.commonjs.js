@@ -1,0 +1,7 @@
+var a;
+var b;
+var c;
+
+var x = 1;
+var y = 2;
+var z = 3;

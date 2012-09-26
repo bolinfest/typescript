@@ -1,0 +1,2 @@
+0.ts line 2 col 5: Cannot convert 'number' to 'string'
+0.ts line 2 col 5: Variable declarations for for/in expressions may not contain a type annotation

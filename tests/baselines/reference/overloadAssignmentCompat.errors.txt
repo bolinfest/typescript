@@ -1,0 +1,3 @@
+0.ts line 21 col 0: Overload signature is not compatible with function definition
+0.ts line 22 col 0: Overload signature is not compatible with function definition
+0.ts line 35 col 0: Overload signature is not compatible with function definition

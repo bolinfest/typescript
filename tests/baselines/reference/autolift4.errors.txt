@@ -1,0 +1,1 @@
+0.ts line 19 col 69: The property 'm' does not exist on value of type 'Point3D'

@@ -1,0 +1,31 @@
+{
+  "sourceText": [
+    "///<reference path='getDefinitionsAtPosition3.ts' />\r\n",
+    "var remVar;\r\n",
+    "function remFn() { }\r\n",
+    "class remCls { }\r\n",
+    "interface remInt{ }\r\n",
+    "module remMod{ export var foo;}\r\n",
+    ""],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 161, "startLine": 1, "startCol": 1, "endLine": 7, "endCol": 1, "children": [
+      {"nodeType": "List", "minChar": 54, "limChar": 161, "startLine": 2, "startCol": 1, "endLine": 7, "endCol": 1, "children": [
+        {"nodeType": "VarDecl", "minChar": 54, "limChar": 65, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 12, "children": [
+          {"nodeType": "Name", "minChar": 58, "limChar": 64, "startLine": 2, "startCol": 5, "endLine": 2, "endCol": 11, "children": []}]},
+        {"nodeType": "Comment", "minChar": 0, "limChar": 52, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 53, "children": [
+          {"nodeType": "FuncDecl", "minChar": 67, "limChar": 87, "startLine": 3, "startCol": 1, "endLine": 3, "endCol": 21, "children": [
+            {"nodeType": "Name", "minChar": 76, "limChar": 81, "startLine": 3, "startCol": 10, "endLine": 3, "endCol": 15, "children": []},
+            {"nodeType": "List", "minChar": 84, "limChar": 87, "startLine": 3, "startCol": 18, "endLine": 3, "endCol": 21, "children": [
+              {"nodeType": "EndCode", "minChar": 87, "limChar": 87, "startLine": 3, "startCol": 21, "endLine": 3, "endCol": 21, "children": []}]}]},
+          {"nodeType": "Class", "minChar": 89, "limChar": 105, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 17, "children": [
+            {"nodeType": "Name", "minChar": 95, "limChar": 101, "startLine": 4, "startCol": 7, "endLine": 4, "endCol": 13, "children": []},
+            {"nodeType": "List", "minChar": 102, "limChar": 105, "startLine": 4, "startCol": 14, "endLine": 4, "endCol": 17, "children": []}]},
+          {"nodeType": "Interface", "minChar": 107, "limChar": 126, "startLine": 5, "startCol": 1, "endLine": 5, "endCol": 20, "children": [
+            {"nodeType": "Name", "minChar": 117, "limChar": 123, "startLine": 5, "startCol": 11, "endLine": 5, "endCol": 17, "children": []},
+            {"nodeType": "List", "minChar": 123, "limChar": 126, "startLine": 5, "startCol": 17, "endLine": 5, "endCol": 20, "children": []}]},
+          {"nodeType": "Module", "minChar": 128, "limChar": 159, "startLine": 6, "startCol": 1, "endLine": 6, "endCol": 32, "children": [
+            {"nodeType": "Name", "minChar": 135, "limChar": 141, "startLine": 6, "startCol": 8, "endLine": 6, "endCol": 14, "children": []},
+            {"nodeType": "List", "minChar": 141, "limChar": 159, "startLine": 6, "startCol": 14, "endLine": 6, "endCol": 32, "children": [
+              {"nodeType": "VarDecl", "minChar": 143, "limChar": 158, "startLine": 6, "startCol": 16, "endLine": 6, "endCol": 31, "children": [
+                {"nodeType": "Name", "minChar": 154, "limChar": 157, "startLine": 6, "startCol": 27, "endLine": 6, "endCol": 30, "children": []}]}]}]}]}]}]}
+}

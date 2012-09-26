@@ -1,0 +1,1 @@
+0.ts line 9 col 14: Cannot convert '{ 0: { id: string; }; 1: { id: string; }; }' to 'JQuery': Index signatures of types '{ 0: { id: string; }; 1: { id: string; }; }' and 'JQuery' are incompatible

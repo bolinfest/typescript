@@ -1,0 +1,2 @@
+0.ts line 1 col 34: Expected type
+0.ts line 1 col 0: Base type must be interface or class

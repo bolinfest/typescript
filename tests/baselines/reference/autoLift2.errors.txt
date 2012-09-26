@@ -1,0 +1,12 @@
+// 0.ts  line 5 col 16: Expected ';'
+// 0.ts  line 5 col 16: Check format of expression term
+// 0.ts  line 6 col 16: Expected ';'
+// 0.ts  line 6 col 16: Check format of expression term
+0.ts line 5 col 13: The property 'foo' does not exist on value of type 'A'
+0.ts line 5 col 18: The name 'any' does not exist in the current scope
+0.ts line 6 col 13: The property 'bar' does not exist on value of type 'A'
+0.ts line 6 col 18: The name 'any' does not exist in the current scope
+0.ts line 12 col 10: The property 'foo' does not exist on value of type 'A'
+0.ts line 14 col 10: The property 'bar' does not exist on value of type 'A'
+0.ts line 16 col 32: The property 'foo' does not exist on value of type 'A'
+0.ts line 18 col 32: The property 'bar' does not exist on value of type 'A'

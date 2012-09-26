@@ -1,0 +1,19 @@
+{
+  "sourceText": [
+    "var  a=b+c^d-e*++f;"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 19, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 20, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 19, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 20, "children": [
+        {"nodeType": "VarDecl", "minChar": 0, "limChar": 19, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 20, "children": [
+          {"nodeType": "Name", "minChar": 5, "limChar": 6, "startLine": 1, "startCol": 6, "endLine": 1, "endCol": 7, "children": []},
+          {"nodeType": "Xor", "minChar": 7, "limChar": 18, "startLine": 1, "startCol": 8, "endLine": 1, "endCol": 19, "children": [
+            {"nodeType": "Add", "minChar": 7, "limChar": 10, "startLine": 1, "startCol": 8, "endLine": 1, "endCol": 11, "children": [
+              {"nodeType": "Name", "minChar": 7, "limChar": 8, "startLine": 1, "startCol": 8, "endLine": 1, "endCol": 9, "children": []},
+              {"nodeType": "Name", "minChar": 9, "limChar": 10, "startLine": 1, "startCol": 10, "endLine": 1, "endCol": 11, "children": []}]},
+            {"nodeType": "Sub", "minChar": 11, "limChar": 18, "startLine": 1, "startCol": 12, "endLine": 1, "endCol": 19, "children": [
+              {"nodeType": "Name", "minChar": 11, "limChar": 12, "startLine": 1, "startCol": 12, "endLine": 1, "endCol": 13, "children": []},
+              {"nodeType": "Mul", "minChar": 13, "limChar": 18, "startLine": 1, "startCol": 14, "endLine": 1, "endCol": 19, "children": [
+                {"nodeType": "Name", "minChar": 13, "limChar": 14, "startLine": 1, "startCol": 14, "endLine": 1, "endCol": 15, "children": []},
+                {"nodeType": "IncPre", "minChar": 15, "limChar": 18, "startLine": 1, "startCol": 16, "endLine": 1, "endCol": 19, "children": [
+                  {"nodeType": "Name", "minChar": 17, "limChar": 18, "startLine": 1, "startCol": 18, "endLine": 1, "endCol": 19, "children": []}]}]}]}]}]}]}]}
+}

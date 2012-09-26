@@ -1,0 +1,11 @@
+{
+  "sourceText": [
+    "[1,2];"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 6, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 7, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 6, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 7, "children": [
+        {"nodeType": "ArrayLit", "minChar": 0, "limChar": 6, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 7, "children": [
+          {"nodeType": "List", "minChar": 1, "limChar": 4, "startLine": 1, "startCol": 2, "endLine": 1, "endCol": 5, "children": [
+            {"nodeType": "NumberLit", "minChar": 1, "limChar": 2, "startLine": 1, "startCol": 2, "endLine": 1, "endCol": 3, "children": []},
+            {"nodeType": "NumberLit", "minChar": 3, "limChar": 4, "startLine": 1, "startCol": 4, "endLine": 1, "endCol": 5, "children": []}]}]}]}]}
+}

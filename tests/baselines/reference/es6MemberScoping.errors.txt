@@ -1,0 +1,1 @@
+0.ts line 9 col 20: The name 'store' does not exist in the current scope

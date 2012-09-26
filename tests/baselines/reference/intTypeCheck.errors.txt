@@ -1,0 +1,46 @@
+0.ts line 35 col 4: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 37 col 4: Index signatures may take only one parameter
+0.ts line 68 col 4: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 70 col 4: Index signatures may take only one parameter
+0.ts line 80 col 4: Signature for 'p7' is duplicated
+0.ts line 95 col 15: Cannot convert 'Object' to 'i1': Type 'Object' is missing property 'p' from type 'i1'
+0.ts line 96 col 15: Value of type 'i1' is not newable
+0.ts line 97 col 15: Cannot convert 'HTMLImageElement' to 'i1': Type 'HTMLImageElement' is missing property 'p' from type 'i1'
+0.ts line 99 col 15: Cannot convert '() => void' to 'i1': Type '() => void' is missing property 'p' from type 'i1'
+0.ts line 102 col 15: Value of type 'i1' is not newable
+0.ts line 103 col 16: Value of type '{}' is not newable
+0.ts line 108 col 16: Cannot convert '{}' to 'i2': Type 'i2' requires a call signature, but Type '{}' lacks one
+0.ts line 109 col 16: Cannot convert 'Object' to 'i2': Type 'i2' requires a call signature, but Type 'Object' lacks one
+0.ts line 111 col 16: Cannot convert 'HTMLImageElement' to 'i2': Type 'i2' requires a call signature, but Type 'HTMLImageElement' lacks one
+0.ts line 117 col 16: Value of type '{}' is not newable
+0.ts line 122 col 16: Cannot convert '{}' to 'i3': Type 'i3' requires a construct signature, but Type '{}' lacks one
+0.ts line 123 col 16: Cannot convert 'Object' to 'i3': Type 'i3' requires a construct signature, but Type 'Object' lacks one
+0.ts line 125 col 16: Cannot convert 'HTMLImageElement' to 'i3': Type 'i3' requires a construct signature, but Type 'HTMLImageElement' lacks one
+0.ts line 127 col 16: Cannot convert '() => void' to 'i3': Type '() => void' requires a call signature, but Type 'i3' lacks one
+0.ts line 131 col 16: Value of type '{}' is not newable
+0.ts line 138 col 16: Value of type 'i4' is not newable
+0.ts line 141 col 16: Cannot convert '() => void' to 'i4': Type '() => void' requires a call signature, but Type 'i4' lacks one
+0.ts line 144 col 16: Value of type 'i4' is not newable
+0.ts line 145 col 16: Value of type '{}' is not newable
+0.ts line 150 col 16: Cannot convert '{}' to 'i5': Type '{}' is missing property 'p' from type 'i5'
+0.ts line 151 col 16: Cannot convert 'Object' to 'i5': Type 'Object' is missing property 'p' from type 'i5'
+0.ts line 152 col 16: Value of type 'i5' is not newable
+0.ts line 153 col 16: Cannot convert 'HTMLImageElement' to 'i5': Type 'HTMLImageElement' is missing property 'p' from type 'i5'
+0.ts line 155 col 16: Cannot convert '() => void' to 'i5': Type '() => void' is missing property 'p' from type 'i5'
+0.ts line 158 col 16: Value of type 'i5' is not newable
+0.ts line 159 col 16: Value of type '{}' is not newable
+0.ts line 164 col 16: Cannot convert '{}' to 'i6': Type 'i6' requires a call signature, but Type '{}' lacks one
+0.ts line 165 col 16: Cannot convert 'Object' to 'i6': Type 'i6' requires a call signature, but Type 'Object' lacks one
+0.ts line 167 col 16: Cannot convert 'HTMLImageElement' to 'i6': Type 'i6' requires a call signature, but Type 'HTMLImageElement' lacks one
+0.ts line 169 col 16: Cannot convert '() => void' to 'i6': Call signatures of types '() => void' and 'i6' are incompatible
+0.ts line 173 col 16: Value of type '{}' is not newable
+0.ts line 178 col 16: Cannot convert '{}' to 'i7': Type 'i7' requires a construct signature, but Type '{}' lacks one
+0.ts line 179 col 16: Cannot convert 'Object' to 'i7': Type 'i7' requires a construct signature, but Type 'Object' lacks one
+0.ts line 181 col 20: Cannot convert 'HTMLImageElement' to 'i7': Type 'i7' is missing property 'width' from type 'HTMLImageElement':
+	Type 'i7' requires a construct signature, but Type 'HTMLImageElement' lacks one
+0.ts line 183 col 16: Cannot convert '() => void' to 'i7': Type '() => void' requires a call signature, but Type 'i7' lacks one
+0.ts line 187 col 16: Value of type '{}' is not newable
+0.ts line 194 col 16: Value of type 'i8' is not newable
+0.ts line 197 col 16: Cannot convert '() => void' to 'i8': Type '() => void' requires a call signature, but Type 'i8' lacks one
+0.ts line 200 col 16: Value of type 'i8' is not newable
+0.ts line 201 col 16: Value of type '{}' is not newable

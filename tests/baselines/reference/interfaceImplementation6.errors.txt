@@ -1,0 +1,1 @@
+0.ts line 13 col 0: Class 'C3' declares interface 'I1' but does not implement it: Type 'C3' is missing property 'item' from type 'I1'

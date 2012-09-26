@@ -1,0 +1,1 @@
+0.ts line 34 col 11: Cannot convert '() => C2' to 'I4': Type 'I4' requires a construct signature, but Type '() => C2' lacks one

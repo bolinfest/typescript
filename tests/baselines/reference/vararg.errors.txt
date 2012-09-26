@@ -1,0 +1,8 @@
+0.ts line 12 col 30: ... parameter must have array type
+0.ts line 17 col 12: The name 'builder' does not exist in the current scope
+0.ts line 19 col 16: The name 'builder' does not exist in the current scope
+0.ts line 21 col 19: The name 'builder' does not exist in the current scope
+0.ts line 28 col 8: Supplied parameters do not match any signature of call target
+0.ts line 29 col 8: Supplied parameters do not match any signature of call target
+0.ts line 32 col 8: Supplied parameters do not match any signature of call target
+0.ts line 33 col 8: Supplied parameters do not match any signature of call target

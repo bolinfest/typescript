@@ -1,0 +1,12 @@
+// 0.ts  line 7 col 14: Expected ';'
+// 0.ts  line 7 col 14: Check format of expression term
+// 0.ts  line 13 col 14: Expected ';'
+// 0.ts  line 13 col 14: Check format of expression term
+0.ts line 7 col 13: The property 'y' does not exist on value of type 'B'
+0.ts line 7 col 16: The name 'any' does not exist in the current scope
+0.ts line 12 col 4: Constructors for derived classes must contain a call to the class's 'super' constructor
+0.ts line 13 col 13: The property 'x' does not exist on value of type 'C'
+0.ts line 13 col 16: The name 'any' does not exist in the current scope
+0.ts line 11 col 0: Class 'C' declares interface 'I' but does not implement it: Type 'C' is missing property 'x' from type 'I'
+0.ts line 17 col 8: The property 'x' does not exist on value of type 'C'
+0.ts line 18 col 8: The property 'y' does not exist on value of type 'C'

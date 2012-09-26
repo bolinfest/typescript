@@ -1,0 +1,2 @@
+0.ts line 24 col 10: Cannot convert '() => any' to 'any[]'
+0.ts line 25 col 10: Cannot convert 'C3' to 'any[]'

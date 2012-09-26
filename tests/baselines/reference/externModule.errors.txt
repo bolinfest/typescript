@@ -1,0 +1,5 @@
+// 0.ts  line 1 col 15: Module name missing
+0.ts line 32 col 10: The name 'XDate' does not exist in the current scope
+0.ts line 34 col 6: The name 'XDate' does not exist in the current scope
+0.ts line 36 col 6: The name 'XDate' does not exist in the current scope
+0.ts line 37 col 2: The name 'XDate' does not exist in the current scope

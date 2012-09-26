@@ -1,0 +1,28 @@
+{
+  "sourceText": [
+    "with (foo.bar) \r\n",
+    "\r\n",
+    "   {\r\n",
+    "\r\n",
+    "     }\r\n",
+    "\r\n",
+    "with (bar.blah)\r\n",
+    "{\r\n",
+    "}\r\n",
+    ""],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 60, "startLine": 1, "startCol": 1, "endLine": 10, "endCol": 1, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 60, "startLine": 1, "startCol": 1, "endLine": 10, "endCol": 1, "children": [
+        {"nodeType": "With", "minChar": 0, "limChar": 33, "startLine": 1, "startCol": 1, "endLine": 5, "endCol": 7, "children": [
+          {"nodeType": "Dot", "minChar": 6, "limChar": 13, "startLine": 1, "startCol": 7, "endLine": 1, "endCol": 14, "children": [
+            {"nodeType": "Name", "minChar": 6, "limChar": 9, "startLine": 1, "startCol": 7, "endLine": 1, "endCol": 10, "children": []},
+            {"nodeType": "Name", "minChar": 10, "limChar": 13, "startLine": 1, "startCol": 11, "endLine": 1, "endCol": 14, "children": []}]},
+          {"nodeType": "Block", "minChar": 22, "limChar": 33, "startLine": 3, "startCol": 4, "endLine": 5, "endCol": 7, "children": [
+            {"nodeType": "List", "minChar": 22, "limChar": 33, "startLine": 3, "startCol": 4, "endLine": 5, "endCol": 7, "children": []}]}]},
+        {"nodeType": "With", "minChar": 37, "limChar": 58, "startLine": 7, "startCol": 1, "endLine": 9, "endCol": 2, "children": [
+          {"nodeType": "Dot", "minChar": 43, "limChar": 51, "startLine": 7, "startCol": 7, "endLine": 7, "endCol": 15, "children": [
+            {"nodeType": "Name", "minChar": 43, "limChar": 46, "startLine": 7, "startCol": 7, "endLine": 7, "endCol": 10, "children": []},
+            {"nodeType": "Name", "minChar": 47, "limChar": 51, "startLine": 7, "startCol": 11, "endLine": 7, "endCol": 15, "children": []}]},
+          {"nodeType": "Block", "minChar": 54, "limChar": 58, "startLine": 8, "startCol": 1, "endLine": 9, "endCol": 2, "children": [
+            {"nodeType": "List", "minChar": 54, "limChar": 58, "startLine": 8, "startCol": 1, "endLine": 9, "endCol": 2, "children": []}]}]}]}]}
+}

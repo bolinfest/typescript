@@ -1,0 +1,1 @@
+// 0.ts  line 12 col 4: Expected ';'

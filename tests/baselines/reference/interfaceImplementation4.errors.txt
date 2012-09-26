@@ -1,0 +1,1 @@
+0.ts line 8 col 0: Class 'C5' declares interface 'I1' but does not implement it: Type 'C5' is missing property 'iObj' from type 'I1'

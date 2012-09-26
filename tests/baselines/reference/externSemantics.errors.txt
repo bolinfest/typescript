@@ -1,0 +1,2 @@
+0.ts line 1 col 0: Ambient variable can not have an initializer
+0.ts line 3 col 0: Ambient variable can not have an initializer

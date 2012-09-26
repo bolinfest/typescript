@@ -1,0 +1,8 @@
+{
+  "sourceText": [
+    ".    "],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 5, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 6, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 5, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 6, "children": [
+        {"nodeType": "Name", "minChar": 0, "limChar": 1, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 2, "children": []}]}]}
+}

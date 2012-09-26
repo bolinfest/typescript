@@ -1,0 +1,11 @@
+// 0.ts  line 13 col 11: Expected module name
+// 0.ts  line 14 col 11: Expected module name
+// 0.ts  line 15 col 11: Expected module name
+0.ts line 11 col 11: The name 'no' does not exist in the current scope
+0.ts line 11 col 11: A module cannot be aliased to a non-module type
+0.ts line 12 col 12: The name 'no' does not exist in the current scope
+0.ts line 12 col 12: A module cannot be aliased to a non-module type
+0.ts line 13 col 11: A module cannot be aliased to a non-module type
+0.ts line 14 col 11: A module cannot be aliased to a non-module type
+0.ts line 15 col 11: A module cannot be aliased to a non-module type
+0.ts line 16 col 11: A module cannot be aliased to a non-module type

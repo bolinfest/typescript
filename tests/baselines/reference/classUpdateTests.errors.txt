@@ -1,0 +1,14 @@
+// 0.ts  line 93 col 2: Property declarations are not permitted within constructor bodies
+// 0.ts  line 99 col 10: Property declarations are not permitted within constructor bodies
+// 0.ts  line 105 col 2: Property declarations are not permitted within constructor bodies
+// 0.ts  line 111 col 10: Property declarations are not permitted within constructor bodies
+0.ts line 46 col 0: A export class may only extend other classes, Object is an interface.
+0.ts line 34 col 1: Constructors for derived classes must contain a call to the class's 'super' constructor
+0.ts line 43 col 1: Calls to 'super' constructor are not allowed in classes that either inherit directly from 'Object' or have no base class
+0.ts line 43 col 17: Keyword 'super' can only be used inside a class instance method
+0.ts line 47 col 1: Calls to 'super' constructor are not allowed in classes that either inherit directly from 'Object' or have no base class
+0.ts line 57 col 1: If a derived class contains initialized properties or constructor parameter properties, the first statement in the constructor body must be a call to the super constructor
+0.ts line 70 col 1: If a derived class contains initialized properties or constructor parameter properties, the first statement in the constructor body must be a call to the super constructor
+0.ts line 81 col 13: Keyword 'this' cannot be referenced in initializers in a class body, or in super constructor calls
+0.ts line 105 col 14: The name 'p1' does not exist in the current scope
+0.ts line 111 col 15: The name 'p1' does not exist in the current scope

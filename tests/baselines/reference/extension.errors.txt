@@ -1,0 +1,6 @@
+// 0.ts  line 16 col 11: modifiers can not appear before an expression statement or label
+// 0.ts  line 16 col 21: Expected ';'
+// 0.ts  line 16 col 21: statement not permitted within ambient module
+0.ts line 16 col 21: Duplicate identifier 'C'
+0.ts line 16 col 11: The name 'extension' does not exist in the current scope
+0.ts line 22 col 2: The property 'pe' does not exist on value of type 'M.C'

@@ -1,0 +1,2 @@
+0.ts line 1 col 41: Cannot convert '() => number' to 'new() => void': Type '() => number' requires a call signature, but Type 'new() => void' lacks one
+0.ts line 1 col 15: Constructors may not have a return type of 'void'

@@ -1,0 +1,11 @@
+{
+  "sourceText": [
+    "// \r\n",
+    "var  "],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 10, "startLine": 1, "startCol": 1, "endLine": 2, "endCol": 6, "children": [
+      {"nodeType": "List", "minChar": 5, "limChar": 10, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 6, "children": [
+        {"nodeType": "VarDecl", "minChar": 5, "limChar": 8, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 4, "children": [
+          {"nodeType": "Name", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": []}]},
+        {"nodeType": "Comment", "minChar": 0, "limChar": 3, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 4, "children": []}]}]}
+}

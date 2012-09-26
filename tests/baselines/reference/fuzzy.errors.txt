@@ -1,0 +1,5 @@
+0.ts line 21 col 19: Cannot convert '{ anything: number; oneI: C; }' to 'R': Types of property 'oneI' of types '{ anything: number; oneI: C; }' and 'R' are incompatible:
+	Type 'C' is missing property 'alsoWorks' from type 'I'
+0.ts line 25 col 22: Cannot convert '{ oneI: C; }' to 'R': Types of property 'oneI' of types 'R' and '{ oneI: C; }' are incompatible:
+	Type '{ oneI: C; }' is missing property 'anything' from type 'R'
+0.ts line 13 col 4: Class 'C' declares interface 'I' but does not implement it: Type 'C' is missing property 'alsoWorks' from type 'I'

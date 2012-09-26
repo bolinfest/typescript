@@ -1,0 +1,24 @@
+{
+  "sourceText": [
+    "$    (   document   )   .  ready  (   function   (   )   {   \r\n",
+    "    alert    (           'i am ready'  )   ;\r\n",
+    "           }                 );"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 140, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 32, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 140, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 32, "children": [
+        {"nodeType": "Call", "minChar": 0, "limChar": 140, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 32, "children": [
+          {"nodeType": "Dot", "minChar": 0, "limChar": 32, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 33, "children": [
+            {"nodeType": "Call", "minChar": 0, "limChar": 21, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 22, "children": [
+              {"nodeType": "Name", "minChar": 0, "limChar": 1, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 2, "children": []},
+              {"nodeType": "List", "minChar": 5, "limChar": 21, "startLine": 1, "startCol": 6, "endLine": 1, "endCol": 22, "children": [
+                {"nodeType": "Name", "minChar": 9, "limChar": 17, "startLine": 1, "startCol": 10, "endLine": 1, "endCol": 18, "children": []}]}]},
+            {"nodeType": "Name", "minChar": 27, "limChar": 32, "startLine": 1, "startCol": 28, "endLine": 1, "endCol": 33, "children": []}]},
+          {"nodeType": "List", "minChar": 34, "limChar": 139, "startLine": 1, "startCol": 35, "endLine": 3, "endCol": 31, "children": [
+            {"nodeType": "FuncDecl", "minChar": 38, "limChar": 121, "startLine": 1, "startCol": 39, "endLine": 3, "endCol": 13, "children": [
+              {"nodeType": "List", "minChar": 57, "limChar": 121, "startLine": 1, "startCol": 58, "endLine": 3, "endCol": 13, "children": [
+                {"nodeType": "Call", "minChar": 67, "limChar": 107, "startLine": 2, "startCol": 5, "endLine": 2, "endCol": 45, "children": [
+                  {"nodeType": "Name", "minChar": 67, "limChar": 72, "startLine": 2, "startCol": 5, "endLine": 2, "endCol": 10, "children": []},
+                  {"nodeType": "List", "minChar": 76, "limChar": 103, "startLine": 2, "startCol": 14, "endLine": 2, "endCol": 41, "children": [
+                    {"nodeType": "QString", "minChar": 88, "limChar": 100, "startLine": 2, "startCol": 26, "endLine": 2, "endCol": 38, "children": []}]}]},
+                {"nodeType": "EndCode", "minChar": 121, "limChar": 121, "startLine": 3, "startCol": 13, "endLine": 3, "endCol": 13, "children": []}]}]}]}]}]}]}
+}

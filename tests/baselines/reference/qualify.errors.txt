@@ -1,0 +1,8 @@
+0.ts line 21 col 16: Cannot convert 'number' to 'I': Type 'Number' is missing property 'p' from type 'I'
+0.ts line 30 col 21: Cannot convert 'number' to 'T.U.I2': Type 'Number' is missing property 'q' from type 'I2'
+0.ts line 45 col 21: Cannot convert 'I4' to 'K1.I3': Type 'I4' is missing property 'zeep' from type 'I3'
+0.ts line 46 col 23: Cannot convert 'I4' to 'K1.I3[]'
+0.ts line 47 col 25: Cannot convert 'I4' to '() => K1.I3': Type '() => I3' requires a call signature, but Type 'I4' lacks one
+0.ts line 48 col 31: Cannot convert 'I4' to '(k: K1.I3) => void': Type '(k: I3) => void' requires a call signature, but Type 'I4' lacks one
+0.ts line 49 col 26: Cannot convert 'I4' to '{ k: K1.I3; }': Type 'I4' is missing property 'k' from type '{ k: I3; }'
+0.ts line 58 col 10: Cannot convert 'I' to 'T.I': Type 'I' is missing property 'p' from type 'I'

@@ -1,0 +1,2 @@
+0.ts line 5 col 4: Cannot convert 'number' to 'string'
+0.ts line 5 col 4: The in operator requires the left operand to be of type Any or the String primitive type, and the right operand to be of type Any or an object type

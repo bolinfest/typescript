@@ -1,0 +1,3 @@
+// 0.ts  line 11 col 4: Expected '}'
+// 0.ts  line 17 col 0: Unexpected statement block terminator '}'
+0.ts line 3 col 6: All symbols within a 'with' block will be typed as 'any'

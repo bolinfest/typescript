@@ -1,0 +1,5 @@
+0.ts line 19 col 43: use of variable 'x' that is not definitely assigned
+0.ts line 18 col 0: Class 'C4' declares interface 'I1' but does not implement it: Types of property 'getset1' of types 'C4' and 'I1' are incompatible
+0.ts line 22 col 0: Class 'C5' declares interface 'I1' but does not implement it: Types of property 'getset1' of types 'C5' and 'I1' are incompatible
+0.ts line 28 col 43: use of variable 'x' that is not definitely assigned
+0.ts line 26 col 0: Class 'C6' declares interface 'I1' but does not implement it: Types of property 'getset1' of types 'C6' and 'I1' are incompatible

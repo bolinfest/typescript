@@ -1,0 +1,30 @@
+{
+  "sourceText": [
+    "/// <reference path=\"getDefinitionsAtPositionPartialInterface1.ts\"/>\r\n",
+    "\r\n",
+    "module A {\r\n",
+    "    export interface IA {\r\n",
+    "        x: number;\r\n",
+    "    }\r\n",
+    "\r\n",
+    "    var x: IA;\r\n",
+    "}"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 157, "startLine": 1, "startCol": 1, "endLine": 9, "endCol": 2, "children": [
+      {"nodeType": "List", "minChar": 72, "limChar": 157, "startLine": 3, "startCol": 1, "endLine": 9, "endCol": 2, "children": [
+        {"nodeType": "Module", "minChar": 72, "limChar": 157, "startLine": 3, "startCol": 1, "endLine": 9, "endCol": 2, "children": [
+          {"nodeType": "Name", "minChar": 79, "limChar": 80, "startLine": 3, "startCol": 8, "endLine": 3, "endCol": 9, "children": []},
+          {"nodeType": "List", "minChar": 81, "limChar": 157, "startLine": 3, "startCol": 10, "endLine": 9, "endCol": 2, "children": [
+            {"nodeType": "Interface", "minChar": 88, "limChar": 136, "startLine": 4, "startCol": 5, "endLine": 6, "endCol": 6, "children": [
+              {"nodeType": "Name", "minChar": 105, "limChar": 107, "startLine": 4, "startCol": 22, "endLine": 4, "endCol": 24, "children": []},
+              {"nodeType": "List", "minChar": 108, "limChar": 136, "startLine": 4, "startCol": 25, "endLine": 6, "endCol": 6, "children": [
+                {"nodeType": "VarDecl", "minChar": 119, "limChar": 129, "startLine": 5, "startCol": 9, "endLine": 5, "endCol": 19, "children": [
+                  {"nodeType": "Name", "minChar": 119, "limChar": 120, "startLine": 5, "startCol": 9, "endLine": 5, "endCol": 10, "children": []},
+                  {"nodeType": "TypeRef", "minChar": 122, "limChar": 128, "startLine": 5, "startCol": 12, "endLine": 5, "endCol": 18, "children": [
+                    {"nodeType": "Name", "minChar": 122, "limChar": 128, "startLine": 5, "startCol": 12, "endLine": 5, "endCol": 18, "children": []}]}]}]}]},
+            {"nodeType": "VarDecl", "minChar": 144, "limChar": 154, "startLine": 8, "startCol": 5, "endLine": 8, "endCol": 15, "children": [
+              {"nodeType": "Name", "minChar": 148, "limChar": 149, "startLine": 8, "startCol": 9, "endLine": 8, "endCol": 10, "children": []},
+              {"nodeType": "TypeRef", "minChar": 151, "limChar": 153, "startLine": 8, "startCol": 12, "endLine": 8, "endCol": 14, "children": [
+                {"nodeType": "Name", "minChar": 151, "limChar": 153, "startLine": 8, "startCol": 12, "endLine": 8, "endCol": 14, "children": []}]}]}]}]},
+        {"nodeType": "Comment", "minChar": 0, "limChar": 68, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 69, "children": []}]}]}
+}

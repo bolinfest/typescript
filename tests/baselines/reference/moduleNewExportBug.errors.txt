@@ -1,0 +1,1 @@
+0.ts line 10 col 8: The symbol 'C' is not visible at this point

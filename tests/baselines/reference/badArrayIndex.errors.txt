@@ -1,0 +1,2 @@
+// 0.ts  line 1 col 21: Check format of expression term
+0.ts line 1 col 14: The name 'number' does not exist in the current scope

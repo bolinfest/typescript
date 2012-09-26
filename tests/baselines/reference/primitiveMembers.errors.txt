@@ -1,0 +1,2 @@
+0.ts line 5 col 2: The property 'toBAZ' does not exist on value of type 'number'
+0.ts line 11 col 4: Cannot convert 'Number' to 'number'

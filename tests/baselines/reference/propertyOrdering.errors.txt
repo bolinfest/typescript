@@ -1,0 +1,4 @@
+0.ts line 6 col 22: The name 'store' does not exist in the current scope
+0.ts line 9 col 33: The property 'store' does not exist on value of type 'Foo'
+0.ts line 16 col 24: The property '_store' does not exist on value of type 'Bar'
+0.ts line 20 col 13: The property '_store' does not exist on value of type 'Bar'

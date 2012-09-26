@@ -1,0 +1,429 @@
+{
+  "sourceText": [
+    "///<reference path='getDefinitionsAtPosition2.ts' />\r\n",
+    "var locVar;\r\n",
+    "function locFn() { }\r\n",
+    "class locCls { }\r\n",
+    "interface locInt{ }\r\n",
+    "module locMod{ export var foo = 1;}\r\n",
+    "\r\n",
+    "locVar = 1;\r\n",
+    "locFn();\r\n",
+    "var foo = new locCls();\r\n",
+    "class fooCls implements locInt { }\r\n",
+    "var fooVar = locMod.foo;\r\n",
+    "\r\n",
+    "remVar = 1;\r\n",
+    "remFn();\r\n",
+    "var remfoo = new remCls();\r\n",
+    "class remfooCls implements remInt { }\r\n",
+    "var remfooVar = remMod.foo;\r\n",
+    "\r\n",
+    "rem2Var = 1;\r\n",
+    "rem2Fn();\r\n",
+    "var rem2foo = new rem2Cls();\r\n",
+    "class rem2fooCls implements rem2Int { }\r\n",
+    "var rem2fooVar = rem2Mod.foo;\r\n",
+    "\r\n",
+    "var shdVar = \"foo\";\r\n",
+    "module shdModule {\r\n",
+    "    var shdVar;\r\n",
+    "    shdVar = 1;\r\n",
+    "}\r\n",
+    "\r\n",
+    "function fnOverload( );\r\n",
+    "function fnOverload(foo: string);\r\n",
+    "function fnOverload(foo: any) { };\r\n",
+    "\r\n",
+    "fnOverload();\r\n",
+    "fnOverload(\"test\");\r\n",
+    "\r\n",
+    "class clsOverload {\r\n",
+    "    constructor ();\r\n",
+    "    constructor (foo: string);\r\n",
+    "    constructor (foo: any)  { }\r\n",
+    "};\r\n",
+    "\r\n",
+    "var clsOverloadVar = new clsOverload();\r\n",
+    "clsOverloadVar = new clsOverload(\"test\");\r\n",
+    "\r\n",
+    "class clsInOverload {\r\n",
+    "    static fnOverload( );\r\n",
+    "    static fnOverload(foo: string);\r\n",
+    "    static fnOverload(foo: any) { };\r\n",
+    "    public fnOverload():any;\r\n",
+    "    public fnOverload(foo: string);\r\n",
+    "    public fnOverload(foo: any) { return \"foo\" };\r\n",
+    "    public fnOverload1():any;\r\n",
+    "    public fnOverload1(foo: string);\r\n",
+    "    public fnOverload1(foo: any) { return \"foo\" };\r\n",
+    "\r\n",
+    "    constructor () { }\r\n",
+    "} \r\n",
+    "\r\n",
+    "clsInOverload.fnOverload();\r\n",
+    "clsInOverload.fnOverload(\"test\");\r\n",
+    "\r\n",
+    "var clsInOverloadVar = new clsInOverload();\r\n",
+    "var foo3 = clsInOverloadVar.fnOverload();\r\n",
+    "foo3 = clsInOverloadVar.fnOverload(\"test\");\r\n",
+    "\r\n",
+    "function fnInOverload() {\r\n",
+    "    static fnOverload():any;\r\n",
+    "    static fnOverload(foo: string); \r\n",
+    "    static fnOverload(foo: any){ return \"foo\" };\r\n",
+    "}\r\n",
+    "\r\n",
+    "fnInOverload.fnOverload();                            \r\n",
+    "fnInOverload.fnOverload(\"test\");\r\n",
+    "\r\n",
+    "interface sInt {\r\n",
+    "    sVar: number;\r\n",
+    "    sFn: () => void;    \r\n",
+    "}\r\n",
+    "\r\n",
+    "class iClass implements sInt {\r\n",
+    "    public sVar = 1;\r\n",
+    "    public sFn() {\r\n",
+    "    }\r\n",
+    "}\r\n",
+    "\r\n",
+    "declare var ambientVar;\r\n",
+    "\r\n",
+    "ambientVar = 1;"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 1979, "startLine": 1, "startCol": 1, "endLine": 91, "endCol": 16, "children": [
+      {"nodeType": "List", "minChar": 54, "limChar": 1979, "startLine": 2, "startCol": 1, "endLine": 91, "endCol": 16, "children": [
+        {"nodeType": "VarDecl", "minChar": 54, "limChar": 65, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 12, "children": [
+          {"nodeType": "Name", "minChar": 58, "limChar": 64, "startLine": 2, "startCol": 5, "endLine": 2, "endCol": 11, "children": []}]},
+        {"nodeType": "Comment", "minChar": 0, "limChar": 52, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 53, "children": [
+          {"nodeType": "FuncDecl", "minChar": 67, "limChar": 87, "startLine": 3, "startCol": 1, "endLine": 3, "endCol": 21, "children": [
+            {"nodeType": "Name", "minChar": 76, "limChar": 81, "startLine": 3, "startCol": 10, "endLine": 3, "endCol": 15, "children": []},
+            {"nodeType": "List", "minChar": 84, "limChar": 87, "startLine": 3, "startCol": 18, "endLine": 3, "endCol": 21, "children": [
+              {"nodeType": "EndCode", "minChar": 87, "limChar": 87, "startLine": 3, "startCol": 21, "endLine": 3, "endCol": 21, "children": []}]}]},
+          {"nodeType": "Class", "minChar": 89, "limChar": 105, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 17, "children": [
+            {"nodeType": "Name", "minChar": 95, "limChar": 101, "startLine": 4, "startCol": 7, "endLine": 4, "endCol": 13, "children": []},
+            {"nodeType": "List", "minChar": 102, "limChar": 105, "startLine": 4, "startCol": 14, "endLine": 4, "endCol": 17, "children": []}]},
+          {"nodeType": "Interface", "minChar": 107, "limChar": 126, "startLine": 5, "startCol": 1, "endLine": 5, "endCol": 20, "children": [
+            {"nodeType": "Name", "minChar": 117, "limChar": 123, "startLine": 5, "startCol": 11, "endLine": 5, "endCol": 17, "children": []},
+            {"nodeType": "List", "minChar": 123, "limChar": 126, "startLine": 5, "startCol": 17, "endLine": 5, "endCol": 20, "children": []}]},
+          {"nodeType": "Module", "minChar": 128, "limChar": 163, "startLine": 6, "startCol": 1, "endLine": 6, "endCol": 36, "children": [
+            {"nodeType": "Name", "minChar": 135, "limChar": 141, "startLine": 6, "startCol": 8, "endLine": 6, "endCol": 14, "children": []},
+            {"nodeType": "List", "minChar": 141, "limChar": 163, "startLine": 6, "startCol": 14, "endLine": 6, "endCol": 36, "children": [
+              {"nodeType": "VarDecl", "minChar": 143, "limChar": 162, "startLine": 6, "startCol": 16, "endLine": 6, "endCol": 35, "children": [
+                {"nodeType": "Name", "minChar": 154, "limChar": 157, "startLine": 6, "startCol": 27, "endLine": 6, "endCol": 30, "children": []},
+                {"nodeType": "NumberLit", "minChar": 160, "limChar": 161, "startLine": 6, "startCol": 33, "endLine": 6, "endCol": 34, "children": []}]}]}]},
+          {"nodeType": "Asg", "minChar": 167, "limChar": 178, "startLine": 8, "startCol": 1, "endLine": 8, "endCol": 12, "children": [
+            {"nodeType": "Name", "minChar": 167, "limChar": 173, "startLine": 8, "startCol": 1, "endLine": 8, "endCol": 7, "children": []},
+            {"nodeType": "NumberLit", "minChar": 176, "limChar": 177, "startLine": 8, "startCol": 10, "endLine": 8, "endCol": 11, "children": []}]},
+          {"nodeType": "Call", "minChar": 180, "limChar": 188, "startLine": 9, "startCol": 1, "endLine": 9, "endCol": 9, "children": [
+            {"nodeType": "Name", "minChar": 180, "limChar": 185, "startLine": 9, "startCol": 1, "endLine": 9, "endCol": 6, "children": []},
+            {"nodeType": "List", "minChar": 185, "limChar": 187, "startLine": 9, "startCol": 6, "endLine": 9, "endCol": 8, "children": []}]},
+          {"nodeType": "VarDecl", "minChar": 190, "limChar": 213, "startLine": 10, "startCol": 1, "endLine": 10, "endCol": 24, "children": [
+            {"nodeType": "Name", "minChar": 194, "limChar": 197, "startLine": 10, "startCol": 5, "endLine": 10, "endCol": 8, "children": []},
+            {"nodeType": "New", "minChar": 200, "limChar": 212, "startLine": 10, "startCol": 11, "endLine": 10, "endCol": 23, "children": [
+              {"nodeType": "Name", "minChar": 204, "limChar": 210, "startLine": 10, "startCol": 15, "endLine": 10, "endCol": 21, "children": []},
+              {"nodeType": "List", "minChar": 210, "limChar": 212, "startLine": 10, "startCol": 21, "endLine": 10, "endCol": 23, "children": []}]}]},
+          {"nodeType": "Class", "minChar": 215, "limChar": 249, "startLine": 11, "startCol": 1, "endLine": 11, "endCol": 35, "children": [
+            {"nodeType": "Name", "minChar": 221, "limChar": 227, "startLine": 11, "startCol": 7, "endLine": 11, "endCol": 13, "children": []},
+            {"nodeType": "List", "minChar": 246, "limChar": 249, "startLine": 11, "startCol": 32, "endLine": 11, "endCol": 35, "children": []},
+            {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": []},
+            {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": [
+              {"nodeType": "Name", "minChar": 239, "limChar": 245, "startLine": 11, "startCol": 25, "endLine": 11, "endCol": 31, "children": []}]}]},
+          {"nodeType": "VarDecl", "minChar": 251, "limChar": 275, "startLine": 12, "startCol": 1, "endLine": 12, "endCol": 25, "children": [
+            {"nodeType": "Name", "minChar": 255, "limChar": 261, "startLine": 12, "startCol": 5, "endLine": 12, "endCol": 11, "children": []},
+            {"nodeType": "Dot", "minChar": 264, "limChar": 274, "startLine": 12, "startCol": 14, "endLine": 12, "endCol": 24, "children": [
+              {"nodeType": "Name", "minChar": 264, "limChar": 270, "startLine": 12, "startCol": 14, "endLine": 12, "endCol": 20, "children": []},
+              {"nodeType": "Name", "minChar": 271, "limChar": 274, "startLine": 12, "startCol": 21, "endLine": 12, "endCol": 24, "children": []}]}]},
+          {"nodeType": "Asg", "minChar": 279, "limChar": 290, "startLine": 14, "startCol": 1, "endLine": 14, "endCol": 12, "children": [
+            {"nodeType": "Name", "minChar": 279, "limChar": 285, "startLine": 14, "startCol": 1, "endLine": 14, "endCol": 7, "children": []},
+            {"nodeType": "NumberLit", "minChar": 288, "limChar": 289, "startLine": 14, "startCol": 10, "endLine": 14, "endCol": 11, "children": []}]},
+          {"nodeType": "Call", "minChar": 292, "limChar": 300, "startLine": 15, "startCol": 1, "endLine": 15, "endCol": 9, "children": [
+            {"nodeType": "Name", "minChar": 292, "limChar": 297, "startLine": 15, "startCol": 1, "endLine": 15, "endCol": 6, "children": []},
+            {"nodeType": "List", "minChar": 297, "limChar": 299, "startLine": 15, "startCol": 6, "endLine": 15, "endCol": 8, "children": []}]},
+          {"nodeType": "VarDecl", "minChar": 302, "limChar": 328, "startLine": 16, "startCol": 1, "endLine": 16, "endCol": 27, "children": [
+            {"nodeType": "Name", "minChar": 306, "limChar": 312, "startLine": 16, "startCol": 5, "endLine": 16, "endCol": 11, "children": []},
+            {"nodeType": "New", "minChar": 315, "limChar": 327, "startLine": 16, "startCol": 14, "endLine": 16, "endCol": 26, "children": [
+              {"nodeType": "Name", "minChar": 319, "limChar": 325, "startLine": 16, "startCol": 18, "endLine": 16, "endCol": 24, "children": []},
+              {"nodeType": "List", "minChar": 325, "limChar": 327, "startLine": 16, "startCol": 24, "endLine": 16, "endCol": 26, "children": []}]}]},
+          {"nodeType": "Class", "minChar": 330, "limChar": 367, "startLine": 17, "startCol": 1, "endLine": 17, "endCol": 38, "children": [
+            {"nodeType": "Name", "minChar": 336, "limChar": 345, "startLine": 17, "startCol": 7, "endLine": 17, "endCol": 16, "children": []},
+            {"nodeType": "List", "minChar": 364, "limChar": 367, "startLine": 17, "startCol": 35, "endLine": 17, "endCol": 38, "children": []},
+            {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": []},
+            {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": [
+              {"nodeType": "Name", "minChar": 357, "limChar": 363, "startLine": 17, "startCol": 28, "endLine": 17, "endCol": 34, "children": []}]}]},
+          {"nodeType": "VarDecl", "minChar": 369, "limChar": 396, "startLine": 18, "startCol": 1, "endLine": 18, "endCol": 28, "children": [
+            {"nodeType": "Name", "minChar": 373, "limChar": 382, "startLine": 18, "startCol": 5, "endLine": 18, "endCol": 14, "children": []},
+            {"nodeType": "Dot", "minChar": 385, "limChar": 395, "startLine": 18, "startCol": 17, "endLine": 18, "endCol": 27, "children": [
+              {"nodeType": "Name", "minChar": 385, "limChar": 391, "startLine": 18, "startCol": 17, "endLine": 18, "endCol": 23, "children": []},
+              {"nodeType": "Name", "minChar": 392, "limChar": 395, "startLine": 18, "startCol": 24, "endLine": 18, "endCol": 27, "children": []}]}]},
+          {"nodeType": "Asg", "minChar": 400, "limChar": 412, "startLine": 20, "startCol": 1, "endLine": 20, "endCol": 13, "children": [
+            {"nodeType": "Name", "minChar": 400, "limChar": 407, "startLine": 20, "startCol": 1, "endLine": 20, "endCol": 8, "children": []},
+            {"nodeType": "NumberLit", "minChar": 410, "limChar": 411, "startLine": 20, "startCol": 11, "endLine": 20, "endCol": 12, "children": []}]},
+          {"nodeType": "Call", "minChar": 414, "limChar": 423, "startLine": 21, "startCol": 1, "endLine": 21, "endCol": 10, "children": [
+            {"nodeType": "Name", "minChar": 414, "limChar": 420, "startLine": 21, "startCol": 1, "endLine": 21, "endCol": 7, "children": []},
+            {"nodeType": "List", "minChar": 420, "limChar": 422, "startLine": 21, "startCol": 7, "endLine": 21, "endCol": 9, "children": []}]},
+          {"nodeType": "VarDecl", "minChar": 425, "limChar": 453, "startLine": 22, "startCol": 1, "endLine": 22, "endCol": 29, "children": [
+            {"nodeType": "Name", "minChar": 429, "limChar": 436, "startLine": 22, "startCol": 5, "endLine": 22, "endCol": 12, "children": []},
+            {"nodeType": "New", "minChar": 439, "limChar": 452, "startLine": 22, "startCol": 15, "endLine": 22, "endCol": 28, "children": [
+              {"nodeType": "Name", "minChar": 443, "limChar": 450, "startLine": 22, "startCol": 19, "endLine": 22, "endCol": 26, "children": []},
+              {"nodeType": "List", "minChar": 450, "limChar": 452, "startLine": 22, "startCol": 26, "endLine": 22, "endCol": 28, "children": []}]}]},
+          {"nodeType": "Class", "minChar": 455, "limChar": 494, "startLine": 23, "startCol": 1, "endLine": 23, "endCol": 40, "children": [
+            {"nodeType": "Name", "minChar": 461, "limChar": 471, "startLine": 23, "startCol": 7, "endLine": 23, "endCol": 17, "children": []},
+            {"nodeType": "List", "minChar": 491, "limChar": 494, "startLine": 23, "startCol": 37, "endLine": 23, "endCol": 40, "children": []},
+            {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": []},
+            {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": [
+              {"nodeType": "Name", "minChar": 483, "limChar": 490, "startLine": 23, "startCol": 29, "endLine": 23, "endCol": 36, "children": []}]}]},
+          {"nodeType": "VarDecl", "minChar": 496, "limChar": 525, "startLine": 24, "startCol": 1, "endLine": 24, "endCol": 30, "children": [
+            {"nodeType": "Name", "minChar": 500, "limChar": 510, "startLine": 24, "startCol": 5, "endLine": 24, "endCol": 15, "children": []},
+            {"nodeType": "Dot", "minChar": 513, "limChar": 524, "startLine": 24, "startCol": 18, "endLine": 24, "endCol": 29, "children": [
+              {"nodeType": "Name", "minChar": 513, "limChar": 520, "startLine": 24, "startCol": 18, "endLine": 24, "endCol": 25, "children": []},
+              {"nodeType": "Name", "minChar": 521, "limChar": 524, "startLine": 24, "startCol": 26, "endLine": 24, "endCol": 29, "children": []}]}]},
+          {"nodeType": "VarDecl", "minChar": 529, "limChar": 548, "startLine": 26, "startCol": 1, "endLine": 26, "endCol": 20, "children": [
+            {"nodeType": "Name", "minChar": 533, "limChar": 539, "startLine": 26, "startCol": 5, "endLine": 26, "endCol": 11, "children": []},
+            {"nodeType": "QString", "minChar": 542, "limChar": 547, "startLine": 26, "startCol": 14, "endLine": 26, "endCol": 19, "children": []}]},
+          {"nodeType": "Module", "minChar": 550, "limChar": 605, "startLine": 27, "startCol": 1, "endLine": 30, "endCol": 2, "children": [
+            {"nodeType": "Name", "minChar": 557, "limChar": 566, "startLine": 27, "startCol": 8, "endLine": 27, "endCol": 17, "children": []},
+            {"nodeType": "List", "minChar": 567, "limChar": 605, "startLine": 27, "startCol": 18, "endLine": 30, "endCol": 2, "children": [
+              {"nodeType": "VarDecl", "minChar": 574, "limChar": 585, "startLine": 28, "startCol": 5, "endLine": 28, "endCol": 16, "children": [
+                {"nodeType": "Name", "minChar": 578, "limChar": 584, "startLine": 28, "startCol": 9, "endLine": 28, "endCol": 15, "children": []}]},
+              {"nodeType": "Asg", "minChar": 591, "limChar": 602, "startLine": 29, "startCol": 5, "endLine": 29, "endCol": 16, "children": [
+                {"nodeType": "Name", "minChar": 591, "limChar": 597, "startLine": 29, "startCol": 5, "endLine": 29, "endCol": 11, "children": []},
+                {"nodeType": "NumberLit", "minChar": 600, "limChar": 601, "startLine": 29, "startCol": 14, "endLine": 29, "endCol": 15, "children": []}]}]}]},
+          {"nodeType": "FuncDecl", "minChar": 609, "limChar": 632, "startLine": 32, "startCol": 1, "endLine": 32, "endCol": 24, "children": [
+            {"nodeType": "Name", "minChar": 618, "limChar": 628, "startLine": 32, "startCol": 10, "endLine": 32, "endCol": 20, "children": []}]},
+          {"nodeType": "FuncDecl", "minChar": 634, "limChar": 667, "startLine": 33, "startCol": 1, "endLine": 33, "endCol": 34, "children": [
+            {"nodeType": "Name", "minChar": 643, "limChar": 653, "startLine": 33, "startCol": 10, "endLine": 33, "endCol": 20, "children": []},
+            {"nodeType": "List", "minChar": 653, "limChar": 666, "startLine": 33, "startCol": 20, "endLine": 33, "endCol": 33, "children": [
+              {"nodeType": "ArgDecl", "minChar": 654, "limChar": 665, "startLine": 33, "startCol": 21, "endLine": 33, "endCol": 32, "children": [
+                {"nodeType": "Name", "minChar": 654, "limChar": 657, "startLine": 33, "startCol": 21, "endLine": 33, "endCol": 24, "children": []},
+                {"nodeType": "TypeRef", "minChar": 659, "limChar": 665, "startLine": 33, "startCol": 26, "endLine": 33, "endCol": 32, "children": [
+                  {"nodeType": "Name", "minChar": 659, "limChar": 665, "startLine": 33, "startCol": 26, "endLine": 33, "endCol": 32, "children": []}]}]}]}]},
+          {"nodeType": "FuncDecl", "minChar": 669, "limChar": 702, "startLine": 34, "startCol": 1, "endLine": 34, "endCol": 34, "children": [
+            {"nodeType": "Name", "minChar": 678, "limChar": 688, "startLine": 34, "startCol": 10, "endLine": 34, "endCol": 20, "children": []},
+            {"nodeType": "List", "minChar": 688, "limChar": 698, "startLine": 34, "startCol": 20, "endLine": 34, "endCol": 30, "children": [
+              {"nodeType": "ArgDecl", "minChar": 689, "limChar": 697, "startLine": 34, "startCol": 21, "endLine": 34, "endCol": 29, "children": [
+                {"nodeType": "Name", "minChar": 689, "limChar": 692, "startLine": 34, "startCol": 21, "endLine": 34, "endCol": 24, "children": []},
+                {"nodeType": "TypeRef", "minChar": 694, "limChar": 697, "startLine": 34, "startCol": 26, "endLine": 34, "endCol": 29, "children": [
+                  {"nodeType": "Name", "minChar": 694, "limChar": 697, "startLine": 34, "startCol": 26, "endLine": 34, "endCol": 29, "children": []}]}]}]},
+            {"nodeType": "List", "minChar": 699, "limChar": 702, "startLine": 34, "startCol": 31, "endLine": 34, "endCol": 34, "children": [
+              {"nodeType": "EndCode", "minChar": 702, "limChar": 702, "startLine": 34, "startCol": 34, "endLine": 34, "endCol": 34, "children": []}]}]},
+          {"nodeType": "Empty", "minChar": 702, "limChar": 703, "startLine": 34, "startCol": 34, "endLine": 34, "endCol": 35, "children": []},
+          {"nodeType": "Call", "minChar": 707, "limChar": 720, "startLine": 36, "startCol": 1, "endLine": 36, "endCol": 14, "children": [
+            {"nodeType": "Name", "minChar": 707, "limChar": 717, "startLine": 36, "startCol": 1, "endLine": 36, "endCol": 11, "children": []},
+            {"nodeType": "List", "minChar": 717, "limChar": 719, "startLine": 36, "startCol": 11, "endLine": 36, "endCol": 13, "children": []}]},
+          {"nodeType": "Call", "minChar": 722, "limChar": 741, "startLine": 37, "startCol": 1, "endLine": 37, "endCol": 20, "children": [
+            {"nodeType": "Name", "minChar": 722, "limChar": 732, "startLine": 37, "startCol": 1, "endLine": 37, "endCol": 11, "children": []},
+            {"nodeType": "List", "minChar": 732, "limChar": 740, "startLine": 37, "startCol": 11, "endLine": 37, "endCol": 19, "children": [
+              {"nodeType": "QString", "minChar": 733, "limChar": 739, "startLine": 37, "startCol": 12, "endLine": 37, "endCol": 18, "children": []}]}]},
+          {"nodeType": "Class", "minChar": 745, "limChar": 853, "startLine": 39, "startCol": 1, "endLine": 43, "endCol": 2, "children": [
+            {"nodeType": "Name", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": []},
+            {"nodeType": "List", "minChar": 763, "limChar": 853, "startLine": 39, "startCol": 19, "endLine": 43, "endCol": 2, "children": [
+              {"nodeType": "FuncDecl", "minChar": 770, "limChar": 785, "startLine": 40, "startCol": 5, "endLine": 40, "endCol": 20, "children": [
+                {"nodeType": "Name", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": []},
+                {"nodeType": "TypeRef", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": [
+                  {"nodeType": "Name", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": []}]}]},
+              {"nodeType": "FuncDecl", "minChar": 791, "limChar": 817, "startLine": 41, "startCol": 5, "endLine": 41, "endCol": 31, "children": [
+                {"nodeType": "Name", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": []},
+                {"nodeType": "List", "minChar": 803, "limChar": 816, "startLine": 41, "startCol": 17, "endLine": 41, "endCol": 30, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 804, "limChar": 815, "startLine": 41, "startCol": 18, "endLine": 41, "endCol": 29, "children": [
+                    {"nodeType": "Name", "minChar": 804, "limChar": 807, "startLine": 41, "startCol": 18, "endLine": 41, "endCol": 21, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 809, "limChar": 815, "startLine": 41, "startCol": 23, "endLine": 41, "endCol": 29, "children": [
+                      {"nodeType": "Name", "minChar": 809, "limChar": 815, "startLine": 41, "startCol": 23, "endLine": 41, "endCol": 29, "children": []}]}]}]},
+                {"nodeType": "TypeRef", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": [
+                  {"nodeType": "Name", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": []}]}]},
+              {"nodeType": "FuncDecl", "minChar": 823, "limChar": 850, "startLine": 42, "startCol": 5, "endLine": 42, "endCol": 32, "children": [
+                {"nodeType": "Name", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": []},
+                {"nodeType": "List", "minChar": 835, "limChar": 845, "startLine": 42, "startCol": 17, "endLine": 42, "endCol": 27, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 836, "limChar": 844, "startLine": 42, "startCol": 18, "endLine": 42, "endCol": 26, "children": [
+                    {"nodeType": "Name", "minChar": 836, "limChar": 839, "startLine": 42, "startCol": 18, "endLine": 42, "endCol": 21, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 841, "limChar": 844, "startLine": 42, "startCol": 23, "endLine": 42, "endCol": 26, "children": [
+                      {"nodeType": "Name", "minChar": 841, "limChar": 844, "startLine": 42, "startCol": 23, "endLine": 42, "endCol": 26, "children": []}]}]}]},
+                {"nodeType": "TypeRef", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": [
+                  {"nodeType": "Name", "minChar": 751, "limChar": 762, "startLine": 39, "startCol": 7, "endLine": 39, "endCol": 18, "children": []}]},
+                {"nodeType": "List", "minChar": 847, "limChar": 850, "startLine": 42, "startCol": 29, "endLine": 42, "endCol": 32, "children": [
+                  {"nodeType": "EndCode", "minChar": 850, "limChar": 850, "startLine": 42, "startCol": 32, "endLine": 42, "endCol": 32, "children": []}]}]}]}]},
+          {"nodeType": "Empty", "minChar": 853, "limChar": 854, "startLine": 43, "startCol": 2, "endLine": 43, "endCol": 3, "children": []},
+          {"nodeType": "VarDecl", "minChar": 858, "limChar": 897, "startLine": 45, "startCol": 1, "endLine": 45, "endCol": 40, "children": [
+            {"nodeType": "Name", "minChar": 862, "limChar": 876, "startLine": 45, "startCol": 5, "endLine": 45, "endCol": 19, "children": []},
+            {"nodeType": "New", "minChar": 879, "limChar": 896, "startLine": 45, "startCol": 22, "endLine": 45, "endCol": 39, "children": [
+              {"nodeType": "Name", "minChar": 883, "limChar": 894, "startLine": 45, "startCol": 26, "endLine": 45, "endCol": 37, "children": []},
+              {"nodeType": "List", "minChar": 894, "limChar": 896, "startLine": 45, "startCol": 37, "endLine": 45, "endCol": 39, "children": []}]}]},
+          {"nodeType": "Asg", "minChar": 899, "limChar": 940, "startLine": 46, "startCol": 1, "endLine": 46, "endCol": 42, "children": [
+            {"nodeType": "Name", "minChar": 899, "limChar": 913, "startLine": 46, "startCol": 1, "endLine": 46, "endCol": 15, "children": []},
+            {"nodeType": "New", "minChar": 916, "limChar": 939, "startLine": 46, "startCol": 18, "endLine": 46, "endCol": 41, "children": [
+              {"nodeType": "Name", "minChar": 920, "limChar": 931, "startLine": 46, "startCol": 22, "endLine": 46, "endCol": 33, "children": []},
+              {"nodeType": "List", "minChar": 931, "limChar": 939, "startLine": 46, "startCol": 33, "endLine": 46, "endCol": 41, "children": [
+                {"nodeType": "QString", "minChar": 932, "limChar": 938, "startLine": 46, "startCol": 34, "endLine": 46, "endCol": 40, "children": []}]}]}]},
+          {"nodeType": "Class", "minChar": 944, "limChar": 1335, "startLine": 48, "startCol": 1, "endLine": 60, "endCol": 2, "children": [
+            {"nodeType": "Name", "minChar": 950, "limChar": 963, "startLine": 48, "startCol": 7, "endLine": 48, "endCol": 20, "children": []},
+            {"nodeType": "List", "minChar": 964, "limChar": 1335, "startLine": 48, "startCol": 21, "endLine": 60, "endCol": 2, "children": [
+              {"nodeType": "FuncDecl", "minChar": 971, "limChar": 992, "startLine": 49, "startCol": 5, "endLine": 49, "endCol": 26, "children": [
+                {"nodeType": "Name", "minChar": 978, "limChar": 988, "startLine": 49, "startCol": 12, "endLine": 49, "endCol": 22, "children": []}]},
+              {"nodeType": "FuncDecl", "minChar": 998, "limChar": 1029, "startLine": 50, "startCol": 5, "endLine": 50, "endCol": 36, "children": [
+                {"nodeType": "Name", "minChar": 1005, "limChar": 1015, "startLine": 50, "startCol": 12, "endLine": 50, "endCol": 22, "children": []},
+                {"nodeType": "List", "minChar": 1015, "limChar": 1028, "startLine": 50, "startCol": 22, "endLine": 50, "endCol": 35, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 1016, "limChar": 1027, "startLine": 50, "startCol": 23, "endLine": 50, "endCol": 34, "children": [
+                    {"nodeType": "Name", "minChar": 1016, "limChar": 1019, "startLine": 50, "startCol": 23, "endLine": 50, "endCol": 26, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 1021, "limChar": 1027, "startLine": 50, "startCol": 28, "endLine": 50, "endCol": 34, "children": [
+                      {"nodeType": "Name", "minChar": 1021, "limChar": 1027, "startLine": 50, "startCol": 28, "endLine": 50, "endCol": 34, "children": []}]}]}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1035, "limChar": 1066, "startLine": 51, "startCol": 5, "endLine": 51, "endCol": 36, "children": [
+                {"nodeType": "Name", "minChar": 1042, "limChar": 1052, "startLine": 51, "startCol": 12, "endLine": 51, "endCol": 22, "children": []},
+                {"nodeType": "List", "minChar": 1052, "limChar": 1062, "startLine": 51, "startCol": 22, "endLine": 51, "endCol": 32, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 1053, "limChar": 1061, "startLine": 51, "startCol": 23, "endLine": 51, "endCol": 31, "children": [
+                    {"nodeType": "Name", "minChar": 1053, "limChar": 1056, "startLine": 51, "startCol": 23, "endLine": 51, "endCol": 26, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 1058, "limChar": 1061, "startLine": 51, "startCol": 28, "endLine": 51, "endCol": 31, "children": [
+                      {"nodeType": "Name", "minChar": 1058, "limChar": 1061, "startLine": 51, "startCol": 28, "endLine": 51, "endCol": 31, "children": []}]}]}]},
+                {"nodeType": "List", "minChar": 1063, "limChar": 1066, "startLine": 51, "startCol": 33, "endLine": 51, "endCol": 36, "children": [
+                  {"nodeType": "EndCode", "minChar": 1066, "limChar": 1066, "startLine": 51, "startCol": 36, "endLine": 51, "endCol": 36, "children": []}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1066, "limChar": 1097, "startLine": 51, "startCol": 36, "endLine": 52, "endCol": 29, "children": [
+                {"nodeType": "Name", "minChar": 1080, "limChar": 1090, "startLine": 52, "startCol": 12, "endLine": 52, "endCol": 22, "children": []},
+                {"nodeType": "TypeRef", "minChar": 1093, "limChar": 1096, "startLine": 52, "startCol": 25, "endLine": 52, "endCol": 28, "children": [
+                  {"nodeType": "Name", "minChar": 1093, "limChar": 1096, "startLine": 52, "startCol": 25, "endLine": 52, "endCol": 28, "children": []}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1103, "limChar": 1134, "startLine": 53, "startCol": 5, "endLine": 53, "endCol": 36, "children": [
+                {"nodeType": "Name", "minChar": 1110, "limChar": 1120, "startLine": 53, "startCol": 12, "endLine": 53, "endCol": 22, "children": []},
+                {"nodeType": "List", "minChar": 1120, "limChar": 1133, "startLine": 53, "startCol": 22, "endLine": 53, "endCol": 35, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 1121, "limChar": 1132, "startLine": 53, "startCol": 23, "endLine": 53, "endCol": 34, "children": [
+                    {"nodeType": "Name", "minChar": 1121, "limChar": 1124, "startLine": 53, "startCol": 23, "endLine": 53, "endCol": 26, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 1126, "limChar": 1132, "startLine": 53, "startCol": 28, "endLine": 53, "endCol": 34, "children": [
+                      {"nodeType": "Name", "minChar": 1126, "limChar": 1132, "startLine": 53, "startCol": 28, "endLine": 53, "endCol": 34, "children": []}]}]}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1140, "limChar": 1184, "startLine": 54, "startCol": 5, "endLine": 54, "endCol": 49, "children": [
+                {"nodeType": "Name", "minChar": 1147, "limChar": 1157, "startLine": 54, "startCol": 12, "endLine": 54, "endCol": 22, "children": []},
+                {"nodeType": "List", "minChar": 1157, "limChar": 1167, "startLine": 54, "startCol": 22, "endLine": 54, "endCol": 32, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 1158, "limChar": 1166, "startLine": 54, "startCol": 23, "endLine": 54, "endCol": 31, "children": [
+                    {"nodeType": "Name", "minChar": 1158, "limChar": 1161, "startLine": 54, "startCol": 23, "endLine": 54, "endCol": 26, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 1163, "limChar": 1166, "startLine": 54, "startCol": 28, "endLine": 54, "endCol": 31, "children": [
+                      {"nodeType": "Name", "minChar": 1163, "limChar": 1166, "startLine": 54, "startCol": 28, "endLine": 54, "endCol": 31, "children": []}]}]}]},
+                {"nodeType": "List", "minChar": 1168, "limChar": 1184, "startLine": 54, "startCol": 33, "endLine": 54, "endCol": 49, "children": [
+                  {"nodeType": "Return", "minChar": 1170, "limChar": 1182, "startLine": 54, "startCol": 35, "endLine": 54, "endCol": 47, "children": [
+                    {"nodeType": "QString", "minChar": 1177, "limChar": 1182, "startLine": 54, "startCol": 42, "endLine": 54, "endCol": 47, "children": []}]},
+                  {"nodeType": "EndCode", "minChar": 1184, "limChar": 1184, "startLine": 54, "startCol": 49, "endLine": 54, "endCol": 49, "children": []}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1184, "limChar": 1216, "startLine": 54, "startCol": 49, "endLine": 55, "endCol": 30, "children": [
+                {"nodeType": "Name", "minChar": 1198, "limChar": 1209, "startLine": 55, "startCol": 12, "endLine": 55, "endCol": 23, "children": []},
+                {"nodeType": "TypeRef", "minChar": 1212, "limChar": 1215, "startLine": 55, "startCol": 26, "endLine": 55, "endCol": 29, "children": [
+                  {"nodeType": "Name", "minChar": 1212, "limChar": 1215, "startLine": 55, "startCol": 26, "endLine": 55, "endCol": 29, "children": []}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1222, "limChar": 1254, "startLine": 56, "startCol": 5, "endLine": 56, "endCol": 37, "children": [
+                {"nodeType": "Name", "minChar": 1229, "limChar": 1240, "startLine": 56, "startCol": 12, "endLine": 56, "endCol": 23, "children": []},
+                {"nodeType": "List", "minChar": 1240, "limChar": 1253, "startLine": 56, "startCol": 23, "endLine": 56, "endCol": 36, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 1241, "limChar": 1252, "startLine": 56, "startCol": 24, "endLine": 56, "endCol": 35, "children": [
+                    {"nodeType": "Name", "minChar": 1241, "limChar": 1244, "startLine": 56, "startCol": 24, "endLine": 56, "endCol": 27, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 1246, "limChar": 1252, "startLine": 56, "startCol": 29, "endLine": 56, "endCol": 35, "children": [
+                      {"nodeType": "Name", "minChar": 1246, "limChar": 1252, "startLine": 56, "startCol": 29, "endLine": 56, "endCol": 35, "children": []}]}]}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1260, "limChar": 1305, "startLine": 57, "startCol": 5, "endLine": 57, "endCol": 50, "children": [
+                {"nodeType": "Name", "minChar": 1267, "limChar": 1278, "startLine": 57, "startCol": 12, "endLine": 57, "endCol": 23, "children": []},
+                {"nodeType": "List", "minChar": 1278, "limChar": 1288, "startLine": 57, "startCol": 23, "endLine": 57, "endCol": 33, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 1279, "limChar": 1287, "startLine": 57, "startCol": 24, "endLine": 57, "endCol": 32, "children": [
+                    {"nodeType": "Name", "minChar": 1279, "limChar": 1282, "startLine": 57, "startCol": 24, "endLine": 57, "endCol": 27, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 1284, "limChar": 1287, "startLine": 57, "startCol": 29, "endLine": 57, "endCol": 32, "children": [
+                      {"nodeType": "Name", "minChar": 1284, "limChar": 1287, "startLine": 57, "startCol": 29, "endLine": 57, "endCol": 32, "children": []}]}]}]},
+                {"nodeType": "List", "minChar": 1289, "limChar": 1305, "startLine": 57, "startCol": 34, "endLine": 57, "endCol": 50, "children": [
+                  {"nodeType": "Return", "minChar": 1291, "limChar": 1303, "startLine": 57, "startCol": 36, "endLine": 57, "endCol": 48, "children": [
+                    {"nodeType": "QString", "minChar": 1298, "limChar": 1303, "startLine": 57, "startCol": 43, "endLine": 57, "endCol": 48, "children": []}]},
+                  {"nodeType": "EndCode", "minChar": 1305, "limChar": 1305, "startLine": 57, "startCol": 50, "endLine": 57, "endCol": 50, "children": []}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1305, "limChar": 1332, "startLine": 57, "startCol": 50, "endLine": 59, "endCol": 23, "children": [
+                {"nodeType": "Name", "minChar": 950, "limChar": 963, "startLine": 48, "startCol": 7, "endLine": 48, "endCol": 20, "children": []},
+                {"nodeType": "TypeRef", "minChar": 950, "limChar": 963, "startLine": 48, "startCol": 7, "endLine": 48, "endCol": 20, "children": [
+                  {"nodeType": "Name", "minChar": 950, "limChar": 963, "startLine": 48, "startCol": 7, "endLine": 48, "endCol": 20, "children": []}]},
+                {"nodeType": "List", "minChar": 1329, "limChar": 1332, "startLine": 59, "startCol": 20, "endLine": 59, "endCol": 23, "children": [
+                  {"nodeType": "EndCode", "minChar": 1332, "limChar": 1332, "startLine": 59, "startCol": 23, "endLine": 59, "endCol": 23, "children": []}]}]}]}]},
+          {"nodeType": "Call", "minChar": 1340, "limChar": 1367, "startLine": 62, "startCol": 1, "endLine": 62, "endCol": 28, "children": [
+            {"nodeType": "Dot", "minChar": 1340, "limChar": 1364, "startLine": 62, "startCol": 1, "endLine": 62, "endCol": 25, "children": [
+              {"nodeType": "Name", "minChar": 1340, "limChar": 1353, "startLine": 62, "startCol": 1, "endLine": 62, "endCol": 14, "children": []},
+              {"nodeType": "Name", "minChar": 1354, "limChar": 1364, "startLine": 62, "startCol": 15, "endLine": 62, "endCol": 25, "children": []}]},
+            {"nodeType": "List", "minChar": 1364, "limChar": 1366, "startLine": 62, "startCol": 25, "endLine": 62, "endCol": 27, "children": []}]},
+          {"nodeType": "Call", "minChar": 1369, "limChar": 1402, "startLine": 63, "startCol": 1, "endLine": 63, "endCol": 34, "children": [
+            {"nodeType": "Dot", "minChar": 1369, "limChar": 1393, "startLine": 63, "startCol": 1, "endLine": 63, "endCol": 25, "children": [
+              {"nodeType": "Name", "minChar": 1369, "limChar": 1382, "startLine": 63, "startCol": 1, "endLine": 63, "endCol": 14, "children": []},
+              {"nodeType": "Name", "minChar": 1383, "limChar": 1393, "startLine": 63, "startCol": 15, "endLine": 63, "endCol": 25, "children": []}]},
+            {"nodeType": "List", "minChar": 1393, "limChar": 1401, "startLine": 63, "startCol": 25, "endLine": 63, "endCol": 33, "children": [
+              {"nodeType": "QString", "minChar": 1394, "limChar": 1400, "startLine": 63, "startCol": 26, "endLine": 63, "endCol": 32, "children": []}]}]},
+          {"nodeType": "VarDecl", "minChar": 1406, "limChar": 1449, "startLine": 65, "startCol": 1, "endLine": 65, "endCol": 44, "children": [
+            {"nodeType": "Name", "minChar": 1410, "limChar": 1426, "startLine": 65, "startCol": 5, "endLine": 65, "endCol": 21, "children": []},
+            {"nodeType": "New", "minChar": 1429, "limChar": 1448, "startLine": 65, "startCol": 24, "endLine": 65, "endCol": 43, "children": [
+              {"nodeType": "Name", "minChar": 1433, "limChar": 1446, "startLine": 65, "startCol": 28, "endLine": 65, "endCol": 41, "children": []},
+              {"nodeType": "List", "minChar": 1446, "limChar": 1448, "startLine": 65, "startCol": 41, "endLine": 65, "endCol": 43, "children": []}]}]},
+          {"nodeType": "VarDecl", "minChar": 1451, "limChar": 1492, "startLine": 66, "startCol": 1, "endLine": 66, "endCol": 42, "children": [
+            {"nodeType": "Name", "minChar": 1455, "limChar": 1459, "startLine": 66, "startCol": 5, "endLine": 66, "endCol": 9, "children": []},
+            {"nodeType": "Call", "minChar": 1462, "limChar": 1491, "startLine": 66, "startCol": 12, "endLine": 66, "endCol": 41, "children": [
+              {"nodeType": "Dot", "minChar": 1462, "limChar": 1489, "startLine": 66, "startCol": 12, "endLine": 66, "endCol": 39, "children": [
+                {"nodeType": "Name", "minChar": 1462, "limChar": 1478, "startLine": 66, "startCol": 12, "endLine": 66, "endCol": 28, "children": []},
+                {"nodeType": "Name", "minChar": 1479, "limChar": 1489, "startLine": 66, "startCol": 29, "endLine": 66, "endCol": 39, "children": []}]},
+              {"nodeType": "List", "minChar": 1489, "limChar": 1491, "startLine": 66, "startCol": 39, "endLine": 66, "endCol": 41, "children": []}]}]},
+          {"nodeType": "Asg", "minChar": 1494, "limChar": 1537, "startLine": 67, "startCol": 1, "endLine": 67, "endCol": 44, "children": [
+            {"nodeType": "Name", "minChar": 1494, "limChar": 1498, "startLine": 67, "startCol": 1, "endLine": 67, "endCol": 5, "children": []},
+            {"nodeType": "Call", "minChar": 1501, "limChar": 1536, "startLine": 67, "startCol": 8, "endLine": 67, "endCol": 43, "children": [
+              {"nodeType": "Dot", "minChar": 1501, "limChar": 1528, "startLine": 67, "startCol": 8, "endLine": 67, "endCol": 35, "children": [
+                {"nodeType": "Name", "minChar": 1501, "limChar": 1517, "startLine": 67, "startCol": 8, "endLine": 67, "endCol": 24, "children": []},
+                {"nodeType": "Name", "minChar": 1518, "limChar": 1528, "startLine": 67, "startCol": 25, "endLine": 67, "endCol": 35, "children": []}]},
+              {"nodeType": "List", "minChar": 1528, "limChar": 1536, "startLine": 67, "startCol": 35, "endLine": 67, "endCol": 43, "children": [
+                {"nodeType": "QString", "minChar": 1529, "limChar": 1535, "startLine": 67, "startCol": 36, "endLine": 67, "endCol": 42, "children": []}]}]}]},
+          {"nodeType": "FuncDecl", "minChar": 1541, "limChar": 1687, "startLine": 69, "startCol": 1, "endLine": 73, "endCol": 2, "children": [
+            {"nodeType": "Name", "minChar": 1550, "limChar": 1562, "startLine": 69, "startCol": 10, "endLine": 69, "endCol": 22, "children": []},
+            {"nodeType": "List", "minChar": 1565, "limChar": 1687, "startLine": 69, "startCol": 25, "endLine": 73, "endCol": 2, "children": [
+              {"nodeType": "FuncDecl", "minChar": 1572, "limChar": 1596, "startLine": 70, "startCol": 5, "endLine": 70, "endCol": 29, "children": [
+                {"nodeType": "Name", "minChar": 1579, "limChar": 1589, "startLine": 70, "startCol": 12, "endLine": 70, "endCol": 22, "children": []},
+                {"nodeType": "TypeRef", "minChar": 1592, "limChar": 1595, "startLine": 70, "startCol": 25, "endLine": 70, "endCol": 28, "children": [
+                  {"nodeType": "Name", "minChar": 1592, "limChar": 1595, "startLine": 70, "startCol": 25, "endLine": 70, "endCol": 28, "children": []}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1602, "limChar": 1633, "startLine": 71, "startCol": 5, "endLine": 71, "endCol": 36, "children": [
+                {"nodeType": "Name", "minChar": 1609, "limChar": 1619, "startLine": 71, "startCol": 12, "endLine": 71, "endCol": 22, "children": []},
+                {"nodeType": "List", "minChar": 1619, "limChar": 1632, "startLine": 71, "startCol": 22, "endLine": 71, "endCol": 35, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 1620, "limChar": 1631, "startLine": 71, "startCol": 23, "endLine": 71, "endCol": 34, "children": [
+                    {"nodeType": "Name", "minChar": 1620, "limChar": 1623, "startLine": 71, "startCol": 23, "endLine": 71, "endCol": 26, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 1625, "limChar": 1631, "startLine": 71, "startCol": 28, "endLine": 71, "endCol": 34, "children": [
+                      {"nodeType": "Name", "minChar": 1625, "limChar": 1631, "startLine": 71, "startCol": 28, "endLine": 71, "endCol": 34, "children": []}]}]}]}]},
+              {"nodeType": "FuncDecl", "minChar": 1640, "limChar": 1683, "startLine": 72, "startCol": 5, "endLine": 72, "endCol": 48, "children": [
+                {"nodeType": "Name", "minChar": 1647, "limChar": 1657, "startLine": 72, "startCol": 12, "endLine": 72, "endCol": 22, "children": []},
+                {"nodeType": "List", "minChar": 1657, "limChar": 1667, "startLine": 72, "startCol": 22, "endLine": 72, "endCol": 32, "children": [
+                  {"nodeType": "ArgDecl", "minChar": 1658, "limChar": 1666, "startLine": 72, "startCol": 23, "endLine": 72, "endCol": 31, "children": [
+                    {"nodeType": "Name", "minChar": 1658, "limChar": 1661, "startLine": 72, "startCol": 23, "endLine": 72, "endCol": 26, "children": []},
+                    {"nodeType": "TypeRef", "minChar": 1663, "limChar": 1666, "startLine": 72, "startCol": 28, "endLine": 72, "endCol": 31, "children": [
+                      {"nodeType": "Name", "minChar": 1663, "limChar": 1666, "startLine": 72, "startCol": 28, "endLine": 72, "endCol": 31, "children": []}]}]}]},
+                {"nodeType": "List", "minChar": 1667, "limChar": 1683, "startLine": 72, "startCol": 32, "endLine": 72, "endCol": 48, "children": [
+                  {"nodeType": "Return", "minChar": 1669, "limChar": 1681, "startLine": 72, "startCol": 34, "endLine": 72, "endCol": 46, "children": [
+                    {"nodeType": "QString", "minChar": 1676, "limChar": 1681, "startLine": 72, "startCol": 41, "endLine": 72, "endCol": 46, "children": []}]},
+                  {"nodeType": "EndCode", "minChar": 1683, "limChar": 1683, "startLine": 72, "startCol": 48, "endLine": 72, "endCol": 48, "children": []}]}]},
+              {"nodeType": "Empty", "minChar": 1683, "limChar": 1684, "startLine": 72, "startCol": 48, "endLine": 72, "endCol": 49, "children": []},
+              {"nodeType": "EndCode", "minChar": 1687, "limChar": 1687, "startLine": 73, "startCol": 2, "endLine": 73, "endCol": 2, "children": []}]}]},
+          {"nodeType": "Call", "minChar": 1691, "limChar": 1717, "startLine": 75, "startCol": 1, "endLine": 75, "endCol": 27, "children": [
+            {"nodeType": "Dot", "minChar": 1691, "limChar": 1714, "startLine": 75, "startCol": 1, "endLine": 75, "endCol": 24, "children": [
+              {"nodeType": "Name", "minChar": 1691, "limChar": 1703, "startLine": 75, "startCol": 1, "endLine": 75, "endCol": 13, "children": []},
+              {"nodeType": "Name", "minChar": 1704, "limChar": 1714, "startLine": 75, "startCol": 14, "endLine": 75, "endCol": 24, "children": []}]},
+            {"nodeType": "List", "minChar": 1714, "limChar": 1716, "startLine": 75, "startCol": 24, "endLine": 75, "endCol": 26, "children": []}]},
+          {"nodeType": "Call", "minChar": 1747, "limChar": 1779, "startLine": 76, "startCol": 1, "endLine": 76, "endCol": 33, "children": [
+            {"nodeType": "Dot", "minChar": 1747, "limChar": 1770, "startLine": 76, "startCol": 1, "endLine": 76, "endCol": 24, "children": [
+              {"nodeType": "Name", "minChar": 1747, "limChar": 1759, "startLine": 76, "startCol": 1, "endLine": 76, "endCol": 13, "children": []},
+              {"nodeType": "Name", "minChar": 1760, "limChar": 1770, "startLine": 76, "startCol": 14, "endLine": 76, "endCol": 24, "children": []}]},
+            {"nodeType": "List", "minChar": 1770, "limChar": 1778, "startLine": 76, "startCol": 24, "endLine": 76, "endCol": 32, "children": [
+              {"nodeType": "QString", "minChar": 1771, "limChar": 1777, "startLine": 76, "startCol": 25, "endLine": 76, "endCol": 31, "children": []}]}]},
+          {"nodeType": "Interface", "minChar": 1783, "limChar": 1847, "startLine": 78, "startCol": 1, "endLine": 81, "endCol": 2, "children": [
+            {"nodeType": "Name", "minChar": 1793, "limChar": 1797, "startLine": 78, "startCol": 11, "endLine": 78, "endCol": 15, "children": []},
+            {"nodeType": "List", "minChar": 1798, "limChar": 1847, "startLine": 78, "startCol": 16, "endLine": 81, "endCol": 2, "children": [
+              {"nodeType": "VarDecl", "minChar": 1805, "limChar": 1818, "startLine": 79, "startCol": 5, "endLine": 79, "endCol": 18, "children": [
+                {"nodeType": "Name", "minChar": 1805, "limChar": 1809, "startLine": 79, "startCol": 5, "endLine": 79, "endCol": 9, "children": []},
+                {"nodeType": "TypeRef", "minChar": 1811, "limChar": 1817, "startLine": 79, "startCol": 11, "endLine": 79, "endCol": 17, "children": [
+                  {"nodeType": "Name", "minChar": 1811, "limChar": 1817, "startLine": 79, "startCol": 11, "endLine": 79, "endCol": 17, "children": []}]}]},
+              {"nodeType": "VarDecl", "minChar": 1824, "limChar": 1840, "startLine": 80, "startCol": 5, "endLine": 80, "endCol": 21, "children": [
+                {"nodeType": "Name", "minChar": 1824, "limChar": 1827, "startLine": 80, "startCol": 5, "endLine": 80, "endCol": 8, "children": []},
+                {"nodeType": "TypeRef", "minChar": 1829, "limChar": 1839, "startLine": 80, "startCol": 10, "endLine": 80, "endCol": 20, "children": [
+                  {"nodeType": "FuncDecl", "minChar": 1829, "limChar": -1, "startLine": 80, "startCol": 10, "endLine": -1, "endCol": -1, "children": [
+                    {"nodeType": "TypeRef", "minChar": 1835, "limChar": 1839, "startLine": 80, "startCol": 16, "endLine": 80, "endCol": 20, "children": [
+                      {"nodeType": "Name", "minChar": 1835, "limChar": 1839, "startLine": 80, "startCol": 16, "endLine": 80, "endCol": 20, "children": []}]}]}]}]}]}]},
+          {"nodeType": "Class", "minChar": 1851, "limChar": 1933, "startLine": 83, "startCol": 1, "endLine": 87, "endCol": 2, "children": [
+            {"nodeType": "Name", "minChar": 1857, "limChar": 1863, "startLine": 83, "startCol": 7, "endLine": 83, "endCol": 13, "children": []},
+            {"nodeType": "List", "minChar": 1880, "limChar": 1933, "startLine": 83, "startCol": 30, "endLine": 87, "endCol": 2, "children": [
+              {"nodeType": "VarDecl", "minChar": 1887, "limChar": 1902, "startLine": 84, "startCol": 5, "endLine": 84, "endCol": 20, "children": [
+                {"nodeType": "Name", "minChar": 1894, "limChar": 1898, "startLine": 84, "startCol": 12, "endLine": 84, "endCol": 16, "children": []},
+                {"nodeType": "NumberLit", "minChar": 1901, "limChar": 1902, "startLine": 84, "startCol": 19, "endLine": 84, "endCol": 20, "children": []}]},
+              {"nodeType": "FuncDecl", "minChar": 1909, "limChar": 1930, "startLine": 85, "startCol": 5, "endLine": 86, "endCol": 6, "children": [
+                {"nodeType": "Name", "minChar": 1916, "limChar": 1919, "startLine": 85, "startCol": 12, "endLine": 85, "endCol": 15, "children": []},
+                {"nodeType": "List", "minChar": 1922, "limChar": 1930, "startLine": 85, "startCol": 18, "endLine": 86, "endCol": 6, "children": [
+                  {"nodeType": "EndCode", "minChar": 1930, "limChar": 1930, "startLine": 86, "startCol": 6, "endLine": 86, "endCol": 6, "children": []}]}]}]},
+            {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": []},
+            {"nodeType": "List", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": [
+              {"nodeType": "Name", "minChar": 1875, "limChar": 1879, "startLine": 83, "startCol": 25, "endLine": 83, "endCol": 29, "children": []}]}]},
+          {"nodeType": "VarDecl", "minChar": 1937, "limChar": 1960, "startLine": 89, "startCol": 1, "endLine": 89, "endCol": 24, "children": [
+            {"nodeType": "Name", "minChar": 1949, "limChar": 1959, "startLine": 89, "startCol": 13, "endLine": 89, "endCol": 23, "children": []}]},
+          {"nodeType": "Asg", "minChar": 1964, "limChar": 1979, "startLine": 91, "startCol": 1, "endLine": 91, "endCol": 16, "children": [
+            {"nodeType": "Name", "minChar": 1964, "limChar": 1974, "startLine": 91, "startCol": 1, "endLine": 91, "endCol": 11, "children": []},
+            {"nodeType": "NumberLit", "minChar": 1977, "limChar": 1978, "startLine": 91, "startCol": 14, "endLine": 91, "endCol": 15, "children": []}]}]}]}]}
+}

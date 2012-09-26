@@ -1,0 +1,10 @@
+h1 #{username}'s ImageBoard
+#boards
+    - each board in boards
+      div.board
+        br
+        div.title
+          a(href= "/user/"+username+"/"+board.title)!= board.title
+        div.description= board.description
+br
+a(href= "/user/"+username+"/newboard") Add a new board...

@@ -1,0 +1,8 @@
+{
+  "sourceText": [
+    "function "],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 9, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 10, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 9, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 10, "children": [
+        {"nodeType": "Error", "minChar": 0, "limChar": 9, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 10, "children": []}]}]}
+}

@@ -1,0 +1,1 @@
+0.ts line 3 col 6: All symbols within a 'with' block will be typed as 'any'

@@ -1,0 +1,2 @@
+0.ts line 14 col 0: Duplicate identifier 'F1'
+0.ts line 16 col 0: Overload declaration lacks definition

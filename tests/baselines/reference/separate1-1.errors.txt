@@ -1,0 +1,1 @@
+0.ts line 1 col 0: The name 'X' does not exist in the current scope

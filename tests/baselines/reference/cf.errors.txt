@@ -1,0 +1,6 @@
+0.ts line 9 col 12: unreachable code
+0.ts line 21 col 16: unreachable code
+0.ts line 32 col 12: unreachable code
+0.ts line 36 col 12: unreachable code
+0.ts line 46 col 22: unreachable code
+0.ts line 47 col 8: use of variable 'z' that is not definitely assigned

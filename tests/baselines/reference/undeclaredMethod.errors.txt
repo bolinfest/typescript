@@ -1,0 +1,1 @@
+0.ts line 11 col 2: The property 'saltbar' does not exist on value of type 'M.C'

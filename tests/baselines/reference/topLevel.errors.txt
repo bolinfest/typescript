@@ -1,0 +1,1 @@
+0.ts line 6 col 0: Class 'Point' declares interface 'IPoint' but does not implement it: Types of property 'x' of types 'Point' and 'IPoint' are incompatible

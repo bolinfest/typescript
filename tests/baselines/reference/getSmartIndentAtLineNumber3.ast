@@ -1,0 +1,21 @@
+{
+  "sourceText": [
+    "//\r\n",
+    "// Note: Do not add more tests at the end of this file, as\r\n",
+    "//       the purpose of this test is to verity smart indent\r\n",
+    "//       works for unterminated if statements at the end of a file.\r\n",
+    "//\r\n",
+    "if (true)\r\n",
+    ""],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 209, "startLine": 1, "startCol": 1, "endLine": 7, "endCol": 1, "children": [
+      {"nodeType": "List", "minChar": 198, "limChar": 209, "startLine": 6, "startCol": 1, "endLine": 7, "endCol": 1, "children": [
+        {"nodeType": "If", "minChar": 198, "limChar": 209, "startLine": 6, "startCol": 1, "endLine": 7, "endCol": 1, "children": [
+          {"nodeType": "True", "minChar": 202, "limChar": 206, "startLine": 6, "startCol": 5, "endLine": 6, "endCol": 9, "children": []},
+          {"nodeType": "Error", "minChar": 209, "limChar": 209, "startLine": 7, "startCol": 1, "endLine": 7, "endCol": 1, "children": []}]},
+        {"nodeType": "Comment", "minChar": 0, "limChar": 2, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 3, "children": []},
+        {"nodeType": "Comment", "minChar": 4, "limChar": 62, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 59, "children": []},
+        {"nodeType": "Comment", "minChar": 64, "limChar": 123, "startLine": 3, "startCol": 1, "endLine": 3, "endCol": 60, "children": []},
+        {"nodeType": "Comment", "minChar": 125, "limChar": 192, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 68, "children": []},
+        {"nodeType": "Comment", "minChar": 194, "limChar": 196, "startLine": 5, "startCol": 1, "endLine": 5, "endCol": 3, "children": []}]}]}
+}

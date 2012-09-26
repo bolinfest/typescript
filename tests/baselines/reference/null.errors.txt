@@ -1,0 +1,2 @@
+0.ts line 8 col 4: unreachable code
+0.ts line 12 col 4: unreachable code
