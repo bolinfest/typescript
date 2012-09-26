@@ -7,5 +7,5 @@ D3 visualization
 - Use of modules and interfaces
 
 === Running ===
-..\..\bin\tsc data.ts
+tsc data.ts
 start perf.html

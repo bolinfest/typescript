@@ -11,7 +11,7 @@ features of TypeScript are highlighted:
 
 
 === Running ===
-..\..\bin\tsc Driver.ts -out game.js	
+tsc Driver.ts -out game.js	
 cscript game.js
 
 For web execution use play.htm.
