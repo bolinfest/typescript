@@ -86,3 +86,10 @@ module frmConfirm {
     Mod1.meX = 1;
     iMod1.iMex = 1; 
 }
+
+// Completion after invalid character
+module testModule {
+    export var foo = 1;
+}
+@ 
+testModule.

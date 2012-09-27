@@ -177,5 +177,14 @@ describe('getMemberCompletionList', function () {
                 'iMex': 'number',
             });
         });
+
+         it("get members after invalid character", function () {
+            var namesAndTypes = memberCompletionAtPos(code, 95, 11);
+
+            verifyNumberOfMembers(namesAndTypes, 1);
+            verifyNamesAndTypes(namesAndTypes, {
+                'foo': 'number',
+            });
+        });
     });
 });

@@ -278,6 +278,7 @@ module TypeScript {
         resetComments(): void;
         lineMap: number[];
         setSourceText(newSrc: ISourceText, textMode: number): void;
+        setErrorHandle(reportError: (message: string) => void): void;
     }
 
     export class SavedTokens implements IScanner {
@@ -416,6 +417,8 @@ module TypeScript {
         public lineMap: number[];
         public setSourceText(newSrc: ISourceText, textMode: number) {
         }
+        public setErrorHandle(reportError: (message: string) => void ) { 
+        }
     }
 
     export class Scanner implements IScanner {
@@ -440,6 +443,8 @@ module TypeScript {
         public rightCurlyCount = 0;
         public commentStack: CommentToken[] = new CommentToken[];
         public saveScan: SavedTokens = null;
+
+        private reportError: (message: string) =>void;
 
         constructor () {
             this.startCol = this.col;
@@ -472,6 +477,10 @@ module TypeScript {
             this.commentStack = [];
             this.leftCurlyCount = 0;
             this.rightCurlyCount = 0;
+        }
+
+        public setErrorHandle(reportError: (message: string) => void ) { 
+            this.reportError = reportError;
         }
 
         public setSaveScan(savedTokens: SavedTokens) {
@@ -899,7 +908,7 @@ module TypeScript {
             this.tokenStart();
             this.ch = this.peekChar();
 
-            while (this.pos < this.len) {
+            start: while (this.pos < this.len) {
                 if (lexIdStartTable[this.ch]) {
                     // identifier or keyword (TODO: Unicode letters)
                     do {
@@ -1274,11 +1283,20 @@ module TypeScript {
                         }
                     //  break;
                     default:
-                        // TODO:report error
-                        return staticTokens[TokenID.EOF];
+                        // Report error
+                        this.reportScanerError("Invalid character");
+                        this.nextChar();
+
+                        continue start;
                 }
             }
             return staticTokens[TokenID.EOF];
+        }
+
+        private reportScanerError(message: string) { 
+            if (this.reportError) { 
+                this.reportError(message);
+            }
         }
     }
 
