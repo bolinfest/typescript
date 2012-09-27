@@ -4104,7 +4104,7 @@ module TypeScript {
             this.amdDependencies = [];
 
             this.scanner.resetComments();
-            this.scanner.setErrorHandle((message) =>this.reportParseError(message));
+            this.scanner.setErrorHandler((message) =>this.reportParseError(message));
             this.scanner.setSourceText(sourceText, LexMode.File);
 
             var leftCurlyCount = this.scanner.leftCurlyCount;

@@ -368,7 +368,7 @@ describe("Compiling a project", function (done) {
             , projectRoot: 'tests/projects/no module'
             , inputFiles: ['decl.ts']
             , collectedFiles: ['decl.ts']
-            , outputFiles: ['foo/bar.js']
+            , outputFiles: []
             , negative: true
             , skipRun: true
             , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/no module/decl.ts(1,24): The name \'"./foo/bar.js"\' does not exist in the current scope'

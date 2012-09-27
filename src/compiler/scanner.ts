@@ -278,7 +278,7 @@ module TypeScript {
         resetComments(): void;
         lineMap: number[];
         setSourceText(newSrc: ISourceText, textMode: number): void;
-        setErrorHandle(reportError: (message: string) => void): void;
+        setErrorHandler(reportError: (message: string) => void): void;
     }
 
     export class SavedTokens implements IScanner {
@@ -417,7 +417,7 @@ module TypeScript {
         public lineMap: number[];
         public setSourceText(newSrc: ISourceText, textMode: number) {
         }
-        public setErrorHandle(reportError: (message: string) => void ) { 
+        public setErrorHandler(reportError: (message: string) => void ) { 
         }
     }
 
@@ -479,7 +479,7 @@ module TypeScript {
             this.rightCurlyCount = 0;
         }
 
-        public setErrorHandle(reportError: (message: string) => void ) { 
+        public setErrorHandler(reportError: (message: string) => void ) { 
             this.reportError = reportError;
         }
 
@@ -1284,7 +1284,7 @@ module TypeScript {
                     //  break;
                     default:
                         // Report error
-                        this.reportScanerError("Invalid character");
+                        this.reportScannerError("Invalid character");
                         this.nextChar();
 
                         continue start;
@@ -1293,7 +1293,7 @@ module TypeScript {
             return staticTokens[TokenID.EOF];
         }
 
-        private reportScanerError(message: string) { 
+        private reportScannerError(message: string) { 
             if (this.reportError) { 
                 this.reportError(message);
             }

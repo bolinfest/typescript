@@ -15,4 +15,4 @@ class Helicopter implements Flyable { ... }
 class FlyingCar implements Drivable, Flyable { ... }
 
 === Running ===
-..\..\bin\tsc simple.ts
+tsc interfaces.ts
