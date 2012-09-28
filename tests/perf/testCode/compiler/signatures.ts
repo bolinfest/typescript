@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -15,7 +18,7 @@ module TypeScript {
                 result.hasVariableArgList = true;
             }
             result.returnType = new TypeLink();
-            if (this.returnType.type != null) {
+            if (this.returnType.type) {
                 result.returnType.type =
                     this.returnType.type.specializeType(pattern, replacement, checker, false);
             }
@@ -23,7 +26,7 @@ module TypeScript {
                 result.returnType.type = checker.anyType;
             }
 
-            if (this.parameters != null) {
+            if (this.parameters) {
                 result.parameters = [];
                 for (var i = 0, len = this.parameters.length; i < len; i++) {
                     var oldSym:ParameterSymbol = this.parameters[i];
@@ -37,7 +40,7 @@ module TypeScript {
                     paramDef.typeLink = new TypeLink();
                     result.parameters[i] = paramSym;
                     var oldType = oldSym.getType();
-                    if (oldType != null) {
+                    if (oldType) {
                         paramDef.typeLink.type = oldType.specializeType(pattern, replacement, checker, false);
                         paramSym.declAST.type = paramDef.typeLink.type;
                     }
@@ -89,7 +92,7 @@ module TypeScript {
                 }
             }
 
-            if (this.returnType.type != null) {
+            if (this.returnType.type) {
                 builder += this.returnType.type.getScopedTypeName(scope);
             }
             else {
@@ -146,7 +149,7 @@ module TypeScript {
 
         public specializeType(pattern: Type, replacement: Type, checker: TypeChecker): SignatureGroup {
             var result = new SignatureGroup();
-            if (this.signatures != null) {
+            if (this.signatures) {
                 for (var i = 0, len = this.signatures.length; i < len; i++) {
                     result.addSignature(this.signatures[i].specializeType(pattern, replacement, checker));
                 }
@@ -162,7 +165,7 @@ module TypeScript {
             var len = 0;
             
             // TODO: verify no signature pair with identical parameters
-            if ((this.signatures != null) && ((len = this.signatures.length) > 0)) {
+            if (this.signatures && ((len = this.signatures.length) > 0)) {
                 
                 for (var i = 0; i < len; i++) {
                     
@@ -172,10 +175,6 @@ module TypeScript {
                             (!hasFlag(this.signatures[i].declAST.fncFlags, FncFlags.Definition) && !hasFlag(this.signatures[j].declAST.fncFlags, FncFlags.Definition)) &&
                             checker.signaturesAreIdentical(this.signatures[i], this.signatures[j])) {
                             checker.errorReporter.simpleError(this.signatures[i].declAST, (this.signatures[i].declAST && this.signatures[i].declAST.name) ? "Signature for '" + this.signatures[i].declAST.name.text + "' is duplicated" :"Signature is duplicated");
-                        }
-
-                        if ((this.flags & SignatureFlags.IsIndexer) && !checker.typesAreIdentical(this.signatures[i].returnType.type, this.signatures[j].returnType.type)) {
-                            checker.errorReporter.simpleError(this.signatures[i].declAST, "Index signature overloads must have identical return types");
                         }
                     }
                     
@@ -200,7 +199,7 @@ module TypeScript {
             
             var len = 0;
             
-            if ((this.signatures != null) && ((len = this.signatures.length) > 0)) {
+            if (this.signatures && ((len = this.signatures.length) > 0)) {
                 
                 // first, typecheck each signature
                 for (var i = 0; i < len; i++) {

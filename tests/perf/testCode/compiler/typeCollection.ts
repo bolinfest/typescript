@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -7,7 +10,7 @@ module TypeScript {
     }
 
     function getBaseTypeLinks(bases: ASTList, baseTypeLinks: TypeLink[]) {
-        if (bases != null) {
+        if (bases) {
             var len = bases.members.length;
             if (baseTypeLinks == null) {
                 baseTypeLinks = new TypeLink[];
@@ -88,7 +91,7 @@ module TypeScript {
     function findTypeSymbolInScopeChain(name: string, scopeChain: ScopeChain): Symbol {
         var symbol = scopeChain.scope.find(name, false, true);
 
-        if (symbol == null && scopeChain.previous != null) {
+        if (symbol == null && scopeChain.previous) {
             symbol = findTypeSymbolInScopeChain(name, scopeChain.previous);
         }
 
@@ -103,7 +106,7 @@ module TypeScript {
                 var isDynamic = isQuoted(name);
 
                 var findSym = (id: string) {
-                    if (context.members != null) {
+                    if (context.members) {
                         return context.members.lookup(name);
                     }
                     else {
@@ -124,7 +127,7 @@ module TypeScript {
                 var dottedExpr = <BinaryExpression>alias;
                 var op1Sym = findSymbolFromAlias(dottedExpr.operand1, context);
 
-                if (op1Sym != null && op1Sym.getType() != null) {
+                if (op1Sym && op1Sym.getType()) {
                     symbol = findSymbolFromAlias(dottedExpr.operand2, context);
                 }
 
@@ -134,11 +137,11 @@ module TypeScript {
                 break;
         }
 
-        if (symbol != null) {
+        if (symbol) {
             var symType = symbol.getType();
             if (symType) {
                 var members = symType.members;
-                if (members != null) {
+                if (members) {
                     context.members = members.publicMembers;
                 }
             }
@@ -161,10 +164,10 @@ module TypeScript {
         var aliasedModSymbol = findSymbolFromAlias(importDecl.alias, { topLevelScope: scopeChain, members: null, tcContext: context });
         var isGlobal = context.scopeChain.container == context.checker.gloMod;
 
-        if (aliasedModSymbol != null) {
+        if (aliasedModSymbol) {
             var aliasedModType = aliasedModSymbol.getType();
 
-            if (aliasedModType != null) {
+            if (aliasedModType) {
                 modType = <ModuleType>aliasedModType;
             }
         }
@@ -174,7 +177,7 @@ module TypeScript {
 
         typeSymbol.aliasLink = importDecl;
 
-        if (context.scopeChain.moduleDecl != null) {
+        if (context.scopeChain.moduleDecl) {
             typeSymbol.declModule = context.scopeChain.moduleDecl;
         }
         typeSymbol.declAST = importDecl;
@@ -219,7 +222,7 @@ module TypeScript {
             typeSymbol = new TypeSymbol(modName, moduleDecl.minChar,
                                         context.checker.locationInfo.unitIndex, modType);
 
-            if (context.scopeChain.moduleDecl != null) {
+            if (context.scopeChain.moduleDecl) {
                 typeSymbol.declModule = context.scopeChain.moduleDecl;
             }
             typeSymbol.declAST = moduleDecl;
@@ -231,7 +234,7 @@ module TypeScript {
             modType.symbol = typeSymbol;
         }
         else {
-            if (symbol != null && symbol.declAST != null && symbol.declAST.nodeType != NodeType.Module) {
+            if (symbol && symbol.declAST && symbol.declAST.nodeType != NodeType.Module) {
                 context.checker.errorReporter.simpleError(moduleDecl, "Conflicting symbol name for module '" + modName + "'");
             }
             typeSymbol = <TypeSymbol>symbol;
@@ -266,7 +269,7 @@ module TypeScript {
             typeSymbol.expansions.push(modType);
 
         }
-        if (context.scopeChain.moduleDecl != null) {
+        if (context.scopeChain.moduleDecl) {
             context.scopeChain.moduleDecl.recordNonInterface();
         }
         // REVIEW: If multiple disparate module decls for the same module don't agree
@@ -274,7 +277,7 @@ module TypeScript {
         if (isExported) {
             typeSymbol.flags |= SymbolFlags.Exported;
         }
-        if ((context.scopeChain.moduleDecl != null) ||
+        if ((context.scopeChain.moduleDecl) ||
             (context.scopeChain.container == context.checker.gloMod)) {
             typeSymbol.flags |= SymbolFlags.ModuleMember;
         }
@@ -291,125 +294,7 @@ module TypeScript {
 
     export function preCollectClassTypes(ast: AST, parent: AST, context: TypeCollectionContext) {
         var scopeChain = context.scopeChain;
-        var classDecl = <TypeDecl>ast;
-
-        var classType: Type;
-        var instanceType: Type;
-        var typeSymbol: TypeSymbol = null;
-        var className = (<Identifier>classDecl.name).text;
-        var alreadyInScope = false;
-        var isAmbient = hasFlag(classDecl.varFlags, VarFlags.Ambient);
-        var isExported = hasFlag(classDecl.varFlags, VarFlags.Exported);
-        var isGlobal = context.scopeChain.container == context.checker.gloMod;
-        var containerMod = <TypeSymbol>scopeChain.container;
-        var foundValSymbol = false;
-
-        typeSymbol = <TypeSymbol>scopeChain.scope.findLocal(className, false, true);
-        
-        // check the value space, since an override may have been declared with the type's name
-        // REVIEW-CLASSES
-        if (typeSymbol == null) {
-            var valTypeSymbol = scopeChain.scope.findLocal(className, false, false);
-            
-            if (valTypeSymbol != null &&
-                valTypeSymbol.isType() &&
-                valTypeSymbol.declAST != null &&
-                valTypeSymbol.declAST.nodeType == NodeType.FuncDecl &&
-                (<FuncDecl>valTypeSymbol.declAST).isSignature()) {
-                
-                typeSymbol = <TypeSymbol>valTypeSymbol;
-                foundValSymbol = true;
-                
-                if (isExported) {
-                    typeSymbol.flags |= SymbolFlags.Exported;
-                }
-            
-                if (isAmbient) {
-                    typeSymbol.flags |= SymbolFlags.Ambient;
-                }                
-                
-                // the class was never entered into type space, so add it
-                context.scopeChain.scope.enter(context.scopeChain.container, ast, typeSymbol,
-                                            context.checker.errorReporter, isExported || isGlobal, true, isAmbient);                
-            }
-        }
-
-        if (typeSymbol && !foundValSymbol && (typeSymbol.declAST != classDecl) && !(<TypeDecl>typeSymbol.declAST).isOverload && !classDecl.isOverload) {
-            // we'll get the dupe error message later
-            typeSymbol = null;
-        }
-
-        if (typeSymbol == null) {
-            var valueSymbol = scopeChain.scope.findLocal(className, false, false);
-            classType = new Type();
-            classType.setHasImplementation();
-            instanceType = new Type();
-            instanceType.setHasImplementation();
-            classType.instanceType = instanceType;
-            classType.members = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
-            classType.ambientMembers = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
-            addPrototypeField(classType, classDecl, context);
-            instanceType.ambientMembers = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
-            instanceType.members = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
-            typeSymbol = new TypeSymbol(className, classDecl.minChar,
-                                        context.checker.locationInfo.unitIndex, classType);
-            typeSymbol.declAST = classDecl;
-            typeSymbol.instanceType = instanceType;
-            classType.symbol = typeSymbol;
-            instanceType.symbol = typeSymbol;
-
-            if (context.scopeChain.moduleDecl != null) {
-                context.scopeChain.moduleDecl.recordNonInterface();
-                typeSymbol.declModule = context.scopeChain.moduleDecl;
-                typeSymbol.flags |= SymbolFlags.ModuleMember;
-            }
-
-            if (isExported) {
-                typeSymbol.flags |= SymbolFlags.Exported;
-            }
-            
-            if (isAmbient) {
-                typeSymbol.flags |= SymbolFlags.Ambient;
-            }
-
-            ast.type = classType;
-
-            // class in both name spaces (type for instance type; constructor representative in value space)
-            context.scopeChain.scope.enter(context.scopeChain.container, ast, typeSymbol,
-                                            context.checker.errorReporter, isExported || isGlobal, true, isAmbient);
-
-            if (valueSymbol == null) {
-                context.scopeChain.scope.enter(context.scopeChain.container, ast, typeSymbol,
-                                            context.checker.errorReporter, isExported || isGlobal, false, isAmbient);
-            }
-        }
-        else {                                        
-            classType = typeSymbol.type;
-            
-            // If the instance type is null, a call overload was likely declared before the class constructor
-            if (classType.instanceType == null) {
-                classType.instanceType = new Type();
-                classType.instanceType.setHasImplementation();
-                classType.instanceType.members = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
-                classType.instanceType.ambientMembers = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
-                classType.instanceType.symbol = classType.symbol
-            }
-            
-            instanceType = classType.instanceType;
-            ast.type = classType;
-        }
-
-        if (!classDecl.isOverload) {
-            getBases(instanceType, classDecl);
-            pushTypeCollectionScope(typeSymbol, instanceType.members, instanceType.ambientMembers, null, null,
-                                    context, instanceType, classType, null);
-        }
-        return true;
-    }
-
-    export function preCollectES6ClassTypes(ast: AST, parent: AST, context: TypeCollectionContext) {
-        var scopeChain = context.scopeChain;
-        var classDecl = <ES6ClassDecl>ast;
+        var classDecl = <ClassDecl>ast;
 
         var classType: Type;
         var instanceType: Type;
@@ -429,9 +314,9 @@ module TypeScript {
         if (!typeSymbol) {
             var valTypeSymbol = scopeChain.scope.findLocal(className, false, false);
             
-            if (valTypeSymbol != null &&
+            if (valTypeSymbol &&
                 valTypeSymbol.isType() &&
-                valTypeSymbol.declAST != null &&
+                valTypeSymbol.declAST &&
                 valTypeSymbol.declAST.nodeType == NodeType.FuncDecl &&
                 (<FuncDecl>valTypeSymbol.declAST).isSignature()) {
                 
@@ -475,7 +360,7 @@ module TypeScript {
             classType.symbol = typeSymbol;
             instanceType.symbol = typeSymbol;
 
-            if (context.scopeChain.moduleDecl != null) {
+            if (context.scopeChain.moduleDecl) {
                 context.scopeChain.moduleDecl.recordNonInterface();
                 typeSymbol.declModule = context.scopeChain.moduleDecl;
                 typeSymbol.flags |= SymbolFlags.ModuleMember;
@@ -528,8 +413,8 @@ module TypeScript {
             createNewConstructGroupForType(classDecl.type);
         }
 
-        classType.typeFlags |= TypeFlags.IsES6Class;
-        instanceType.typeFlags |= TypeFlags.IsES6Class;
+        classType.typeFlags |= TypeFlags.IsClass;
+        instanceType.typeFlags |= TypeFlags.IsClass;
 
         getBases(instanceType, classDecl);
         pushTypeCollectionScope(typeSymbol, instanceType.members, instanceType.ambientMembers, null, null,
@@ -559,7 +444,6 @@ module TypeScript {
             // REVIEW: Shouldn't allocate another table for interface privates
             interfaceType.members = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
             interfaceType.ambientMembers = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
-            // TODO: with partial interfaces, we should merge instead of storing the first one only
             interfaceSymbol.declAST = interfaceDecl;
             interfaceSymbol.declModule = context.scopeChain.moduleDecl;
         }
@@ -573,14 +457,13 @@ module TypeScript {
         }
 
         ast.type = interfaceType;
-        // TODO: with partial interfaces, the next lines need to do a merge of some sort
         getBases(interfaceType, interfaceDecl);
 
         if (isExported) {
             interfaceSymbol.flags |= SymbolFlags.Exported;
         }
 
-        if (context.scopeChain.moduleDecl != null) {
+        if (context.scopeChain.moduleDecl) {
             interfaceSymbol.flags |= SymbolFlags.ModuleMember;
         }
 
@@ -599,7 +482,6 @@ module TypeScript {
         if (hasFlag(argDecl.varFlags, VarFlags.Public | VarFlags.Private)) {
             var field = new ValueLocation();
             var isPrivate = hasFlag(argDecl.varFlags, VarFlags.Private);
-            // TODO: visibility
             var fieldSymbol =
                 new FieldSymbol(argDecl.id.text, argDecl.minChar,
                                 context.checker.locationInfo.unitIndex,
@@ -608,6 +490,7 @@ module TypeScript {
             fieldSymbol.transferVarFlags(argDecl.varFlags);
             field.symbol = fieldSymbol;
             fieldSymbol.declAST = ast;
+            argDecl.parameterPropertySym = fieldSymbol;
 
             context.scopeChain.scope.enter(context.scopeChain.container, ast,
                                             fieldSymbol, context.checker.errorReporter, !isPrivate, false, false);
@@ -629,29 +512,29 @@ module TypeScript {
         var isPrivate = hasFlag(varDecl.varFlags, VarFlags.Private);
         var isOptional = hasFlag(varDecl.id.flags, ASTFlags.OptionalName);
 
-        if (context.scopeChain.moduleDecl != null) {
+        if (context.scopeChain.moduleDecl) {
             context.scopeChain.moduleDecl.recordNonInterface();
         }
         if (isProperty ||
             isExported ||
             (context.scopeChain.container == context.checker.gloMod) ||
-            (context.scopeChain.moduleDecl != null)) {
+            context.scopeChain.moduleDecl) {
             if (isAmbient) {
                 var existingSym =
                     <FieldSymbol>scopeChain.scope.findLocal(varDecl.id.text, false, false);
-                if (existingSym != null) {
+                if (existingSym) {
                     varDecl.sym = existingSym;
-                    return false; // early exit from case
+                    return false;
                 }
             }
 
-                // Defensive error detection...
+            // Defensive error detection...
             if (varDecl.id == null) {
                 context.checker.errorReporter.simpleError(varDecl, "Expected variable identifier at this location");
                 return false;
             }
+
             var field = new ValueLocation();
-                // TODO: visibility
             var fieldSymbol =
                 new FieldSymbol(varDecl.id.text, varDecl.minChar,
                                 context.checker.locationInfo.unitIndex,
@@ -663,14 +546,14 @@ module TypeScript {
             }
             field.symbol = fieldSymbol;
             fieldSymbol.declAST = ast;
-            if ((context.scopeChain.moduleDecl != null) ||
+            if ((context.scopeChain.moduleDecl) ||
                 (context.scopeChain.container == context.checker.gloMod)) {
                 fieldSymbol.flags |= SymbolFlags.ModuleMember;
                 fieldSymbol.declModule = context.scopeChain.moduleDecl;
             }
 
-                // if it's static, enter it into the class's member list directly
-            if (hasFlag(varDecl.varFlags, VarFlags.Property) && isStatic) {
+            // if it's static, enter it into the class's member list directly
+            if (hasFlag(varDecl.varFlags, VarFlags.Property) && isStatic && context.scopeChain.classType) {
                 if (!context.scopeChain.classType.members.publicMembers.add(varDecl.id.text, fieldSymbol)) {
                     context.checker.errorReporter.duplicateIdentifier(ast, fieldSymbol.name);
                 }
@@ -701,7 +584,7 @@ module TypeScript {
         var scopeChain = context.scopeChain;
 
         // REVIEW: This will have to change when we move to "export"
-        if (context.scopeChain.moduleDecl != null) {
+        if (context.scopeChain.moduleDecl) {
             context.scopeChain.moduleDecl.recordNonInterface();
         }
 
@@ -719,8 +602,8 @@ module TypeScript {
         var go = false;
         var foundSymbol = false; 
 
-        // If this is an ES6 constructor, the "container" is actually the class declaration
-        if (isConstructor && hasFlag(funcDecl.fncFlags, FncFlags.ES6ClassMethod)) {
+        // If this is a class constructor, the "container" is actually the class declaration
+        if (isConstructor && hasFlag(funcDecl.fncFlags, FncFlags.ClassMethod)) {
             containerSym = <TypeSymbol>containerSym.container;
             containerScope = scopeChain.previous.scope;
         }
@@ -731,8 +614,8 @@ module TypeScript {
         // That way, we'll set the type during scope assignment, and can be sure that the
         // function will be placed in the constructor-local scope
         if (!funcDecl.isConstructor &&
-            containerSym != null &&
-            containerSym.declAST != null &&
+            containerSym &&
+            containerSym.declAST &&
             containerSym.declAST.nodeType == NodeType.FuncDecl &&
             (<FuncDecl>containerSym.declAST).isConstructor &&
             !funcDecl.isMethod()) {
@@ -744,7 +627,7 @@ module TypeScript {
             var instType = context.scopeChain.thisType;                       
 
             // If the function is static, search in the class type's
-            if (nameText != null && nameText != "__missing") {
+            if (nameText && nameText != "__missing") {
                 if (isStatic) {
                     fgSym = containerSym.type.members.allMembers.lookup(nameText);
                 }
@@ -761,7 +644,7 @@ module TypeScript {
                     }
                 }
                 
-                if (fgSym != null) {
+                if (fgSym) {
                     foundSymbol = true;
                     
                     // We'll combine ambient and non-ambient funcdecls during typecheck (for contextual typing).,
@@ -804,7 +687,7 @@ module TypeScript {
             }
          
             if (funcDecl.isSpecialFn() && !isStatic) {
-                funcDecl.type = instType != null ? instType : fgSym.type; 
+                funcDecl.type = instType ? instType : fgSym.type; 
             }
             else {
                 funcDecl.type = fgSym.type;
@@ -813,13 +696,13 @@ module TypeScript {
         else {
             // declarations
             
-            if (nameText != null) {
+            if (nameText) {
                 if (isStatic) {
                     fgSym = containerSym.type.members.allMembers.lookup(nameText);
                 }
                 else {
                     // in the constructor case, we want to check the parent scope for overloads
-                    if (funcDecl.isConstructor && context.scopeChain.previous != null) {
+                    if (funcDecl.isConstructor && context.scopeChain.previous) {
                         fgSym = <TypeSymbol>context.scopeChain.previous.scope.findLocal(nameText, false, false);
                     }
                     
@@ -827,7 +710,7 @@ module TypeScript {
                         fgSym = <TypeSymbol>containerScope.findLocal(nameText, false, false);
                     }
                 }
-                if (fgSym != null) {
+                if (fgSym) {
                     foundSymbol = true;
                     
                     if (!isConstructor && fgSym.declAST.nodeType == NodeType.FuncDecl && !(<FuncDecl>fgSym.declAST).isAccessor() && !(<FuncDecl>fgSym.declAST).isSignature()) {
@@ -838,10 +721,10 @@ module TypeScript {
             }
 
             // REVIEW: Move this check into the typecheck phase?  It's only being run over properties...
-            if (fgSym != null &&
+            if (fgSym &&
                 !fgSym.isAccessor() &&
-                fgSym.type != null &&
-                fgSym.type.construct != null &&
+                fgSym.type &&
+                fgSym.type.construct &&
                 fgSym.type.construct.signatures != [] &&
                 (fgSym.type.construct.signatures[0].declAST == null ||
                     !hasFlag(fgSym.type.construct.signatures[0].declAST.fncFlags, FncFlags.Ambient)) &&
@@ -861,21 +744,21 @@ module TypeScript {
             }
 
             funcDecl.type.symbol.declAST = ast;
-            if (funcDecl.isConstructor) { // REVIEW: Remove when ES6 classes completely replace oldclass
+            if (funcDecl.isConstructor) { // REVIEW: Remove when classes completely replace oldclass
                 go = true;
             };
         }
         if (isExported) {
-            if (funcDecl.type.call != null) {
+            if (funcDecl.type.call) {
                 funcDecl.type.symbol.flags |= SymbolFlags.Exported;
             }
             
             // Accessors are set to 'exported' above
-            if (fgSym != null && !fgSym.isAccessor() && fgSym.type.call != null) {
+            if (fgSym && !fgSym.isAccessor() && fgSym.type.call) {
                 fgSym.flags |= SymbolFlags.Exported;
             }
         }
-        if ((context.scopeChain.moduleDecl != null) && (!funcDecl.isSpecialFn())) {
+        if (context.scopeChain.moduleDecl && !funcDecl.isSpecialFn()) {
             funcDecl.type.symbol.flags |= SymbolFlags.ModuleMember;
             funcDecl.type.symbol.declModule = context.scopeChain.moduleDecl;
         }
@@ -912,17 +795,14 @@ module TypeScript {
         else if (ast.nodeType == NodeType.Class) {
             go = preCollectClassTypes(ast, parent, context);
         }
-        else if (ast.nodeType == NodeType.ES6Class) {
-            go = preCollectES6ClassTypes(ast, parent, context);
-        }
         else if (ast.nodeType == NodeType.Block) {
             go = true;
         }
         else if (ast.nodeType == NodeType.Interface) {
             go = preCollectInterfaceTypes(ast, parent, context);
         }
-            // will be constructor arg because this pass only traverses
-            // constructor arg lists
+        // This will be a constructor arg because this pass only traverses
+        // constructor arg lists
         else if (ast.nodeType == NodeType.ArgDecl) {
             go = preCollectArgDeclTypes(ast, parent, context);
         }
@@ -933,7 +813,7 @@ module TypeScript {
             go = preCollectFuncDeclTypes(ast, parent, context);
         }
         else {
-            if (ast.isStatementOrExpression() && context.scopeChain.moduleDecl != null) {
+            if (ast.isStatementOrExpression() && context.scopeChain.moduleDecl) {
                 context.scopeChain.moduleDecl.recordNonInterface();
             }
         }
@@ -948,11 +828,6 @@ module TypeScript {
             popTypeCollectionScope(context);
         }
         else if (ast.nodeType == NodeType.Class) {
-            if (!(<TypeDecl>ast).isOverload) {
-                popTypeCollectionScope(context);
-            }
-        }
-        else if (ast.nodeType == NodeType.ES6Class) {
             popTypeCollectionScope(context);
         }
         else if (ast.nodeType == NodeType.Interface) {

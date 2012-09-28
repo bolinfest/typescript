@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -7,20 +10,12 @@ module TypeScript {
     export class ScopedMembers {
 
         public allMembers: IHashTable;
-
-        // get public members
         public publicMembers: IHashTable;
-
-        // get private members
         public privateMembers: IHashTable;
 
         constructor (public dualMembers: DualStringHashTable) { 
             this.allMembers = this.dualMembers;
-
-            // get public members
             this.publicMembers = this.dualMembers.primaryTable;
-
-            // get private members
             this.privateMembers = this.dualMembers.secondaryTable;
         }
 
@@ -62,7 +57,7 @@ module TypeScript {
         // restrict the search to ambient values
         public findAmbient(name: string, publicOnly: bool, typespace: bool): Symbol { return null; }
         public print(outfile: ITextWriter) {
-            if (this.container != null) {
+            if (this.container) {
                 outfile.WriteLine(this.printLabel() + " scope with container: " + this.container.name + "...");
             }
             else {
@@ -82,7 +77,7 @@ module TypeScript {
 
     function symbolCanBeUsed(sym: Symbol, publicOnly) {
         return publicOnly ? !(hasFlag(sym.flags, SymbolFlags.Private) ||
-                            (sym.declAST != null && sym.declAST.nodeType == NodeType.FuncDecl && hasFlag((<FuncDecl>sym.declAST).fncFlags, FncFlags.Private)))
+                            (sym.declAST && sym.declAST.nodeType == NodeType.FuncDecl && hasFlag((<FuncDecl>sym.declAST).fncFlags, FncFlags.Private)))
                           : true;
     }
 
@@ -103,10 +98,10 @@ module TypeScript {
         }
 
         public search(filter: ScopeSearchFilter, name: string, publicOnly: bool, typespace: bool) {
-            if (this.parents != null) {
+            if (this.parents) {
                 for (var i = 0; i < this.parents.length; i++) {
                     var sym = this.parents[i].search(filter, name, publicOnly, typespace);
-                    if (sym != null) {
+                    if (sym) {
                         if (filter.update(sym)) {
                             return sym;
                         }
@@ -118,10 +113,10 @@ module TypeScript {
 
         public getAllSymbolNames(members: bool): string[]{
             var result: string[] = [];
-            if (this.parents != null) {
+            if (this.parents) {
                 for (var i = 0; i < this.parents.length; i++) {
                     var parentResult = this.parents[i].getAllSymbolNames(members);
-                    if (parentResult != null) {
+                    if (parentResult) {
                         result = result.concat(parentResult);
                     }
                 }
@@ -131,10 +126,10 @@ module TypeScript {
 
         public getAllTypeSymbolNames(members: bool): string[]{
             var result: string[] = [];
-            if (this.parents != null) {
+            if (this.parents) {
                 for (var i = 0; i < this.parents.length; i++) {
                     var parentResult = this.parents[i].getAllTypeSymbolNames(members);
-                    if (parentResult != null) {
+                    if (parentResult) {
                         result = result.concat(parentResult);
                     }
                 }
@@ -144,10 +139,10 @@ module TypeScript {
 
         public getAllValueSymbolNames(members: bool): string[]{
             var result: string[] = [];
-            if (this.parents != null) {
+            if (this.parents) {
                 for (var i = 0; i < this.parents.length; i++) {
                     var parentResult = this.parents[i].getAllValueSymbolNames(members);
-                    if (parentResult != null) {
+                    if (parentResult) {
                         result = result.concat(parentResult);
                     }
                 }
@@ -157,7 +152,7 @@ module TypeScript {
 
         public print(outfile: ITextWriter) {
             super.print(outfile);
-            if (this.parents != null) {
+            if (this.parents) {
                 for (var i = 0; i < this.parents.length; i++) {
                     this.parents[i].print(outfile);
                 }
@@ -172,22 +167,22 @@ module TypeScript {
             if (typespace) {
                 implCache = this.typeImplCache;
             }
-            if ((implCache != null) &&
+            if (implCache &&
                 ((sym = implCache.lookup(name)) != null) &&
                 (publicOnly ? !(hasFlag(sym.flags, SymbolFlags.Private) ||
-                                        (sym.declAST != null && sym.declAST.nodeType == NodeType.FuncDecl && hasFlag((<FuncDecl>sym.declAST).fncFlags, FncFlags.Private)))
+                                        (sym.declAST && sym.declAST.nodeType == NodeType.FuncDecl && hasFlag((<FuncDecl>sym.declAST).fncFlags, FncFlags.Private)))
                                         : true)) {
                 return sym;
             }
-            if (this.parents != null) {
+            if (this.parents) {
                 for (i = 0; i < this.parents.length; i++) {
                     sym = this.parents[i].findImplementation(name, publicOnly, typespace);
-                    if (sym != null) {
+                    if (sym) {
                         break;
                     }
                 }
             }
-            if (implCache == null) {
+            if (implCache) {
                 if (typespace) {
                     this.typeImplCache = new StringHashTable();
                     implCache = this.typeImplCache;
@@ -209,17 +204,17 @@ module TypeScript {
             if (typespace) {
                 cache = this.typeCache;
             }
-            if ((cache != null) &&
+            if (cache &&
                 ((sym = cache.lookup(name)) != null) &&
                 (publicOnly ? !(hasFlag(sym.flags, SymbolFlags.Private) ||
-                                        (sym.declAST != null && sym.declAST.nodeType == NodeType.FuncDecl && hasFlag((<FuncDecl>sym.declAST).fncFlags, FncFlags.Private)))
+                                        (sym.declAST && sym.declAST.nodeType == NodeType.FuncDecl && hasFlag((<FuncDecl>sym.declAST).fncFlags, FncFlags.Private)))
                                         : true)) {
                 return sym;
             }
-            if (this.parents != null) {
+            if (this.parents) {
                 for (i = 0; i < this.parents.length; i++) {
                     sym = this.parents[i].find(name, publicOnly, typespace);
-                    if (sym != null) {
+                    if (sym) {
                         break;
                     }
                 }
@@ -245,13 +240,13 @@ module TypeScript {
             if (typespace) {
                 cache = this.typeAmbientCache;
             }
-            if ((cache != null) && ((sym = cache.lookup(name)) != null)) {
+            if (cache && ((sym = cache.lookup(name)) != null)) {
                 return sym;
             }
-            if (this.parents != null) {
+            if (this.parents) {
                 for (i = 0; i < this.parents.length; i++) {
                     sym = this.parents[i].findAmbient(name, publicOnly, typespace);
-                    if (sym != null) {
+                    if (sym) {
                         break;
                     }
                 }
@@ -301,10 +296,10 @@ module TypeScript {
 
         public getAllTypeSymbolNames(members: bool): string[]{
             var result = [];
-            if (this.ambientEnclosedTypes != null) {
+            if (this.ambientEnclosedTypes) {
                 result = result.concat(this.ambientEnclosedTypes.allMembers.getAllKeys());
             }
-            if (this.enclosedTypes != null) {
+            if (this.enclosedTypes) {
                 result = result.concat(this.enclosedTypes.allMembers.getAllKeys());
             }
             return result;
@@ -312,10 +307,10 @@ module TypeScript {
 
         public getAllValueSymbolNames(members: bool): string[]{
             var result = [];
-            if (this.ambientValueMembers != null) {
+            if (this.ambientValueMembers) {
                 result = result.concat(this.ambientValueMembers.allMembers.getAllKeys());
             }
-            if (this.valueMembers != null) {
+            if (this.valueMembers) {
                 result = result.concat(this.valueMembers.allMembers.getAllKeys());
             }
             return result;
@@ -343,13 +338,13 @@ module TypeScript {
                 ambientTable = (this.ambientValueMembers == null) ? null :
                                     publicOnly ? this.ambientValueMembers.publicMembers : this.ambientValueMembers.allMembers;
             }
-            if (ambientTable != null) {
+            if (ambientTable) {
                 var s = ambientTable.lookup(name);
-                if (s != null) { return s; }
+                if (s) { return s; }
             }
-            if (table != null) {
+            if (table) {
                 var s = table.lookup(name);
-                if (s != null) { return s; }
+                if (s) { return s; }
             }
 
             return null;
@@ -362,9 +357,9 @@ module TypeScript {
                 ambientTable = (this.ambientEnclosedTypes == null) ? null :
                                     publicOnly ? this.ambientEnclosedTypes.publicMembers : this.ambientEnclosedTypes.allMembers;
             }
-            if (ambientTable != null) {
+            if (ambientTable) {
                 var s = ambientTable.lookup(name);
-                if (s != null) { return s; }
+                if (s) { return s; }
             }
 
             return null;
@@ -372,22 +367,22 @@ module TypeScript {
 
         public print(outfile: ITextWriter) {
             super.print(outfile);
-            if (this.ambientValueMembers != null) {
+            if (this.ambientValueMembers) {
                 this.ambientValueMembers.allMembers.map(function (key, sym, context) {
                     outfile.WriteLine("  " + key);
                 }, null);
             }
-            if (this.valueMembers != null) {
+            if (this.valueMembers) {
                 this.valueMembers.allMembers.map(function (key, sym, context) {
                     outfile.WriteLine("  " + key);
                 }, null);
             }
-            if (this.ambientEnclosedTypes != null) {
+            if (this.ambientEnclosedTypes) {
                 this.ambientEnclosedTypes.allMembers.map(function (key, sym, context) {
                     outfile.WriteLine("  " + key);
                 }, null);
             }
-            if (this.enclosedTypes != null) {
+            if (this.enclosedTypes) {
                 this.enclosedTypes.allMembers.map(function (key, sym, context) {
                     outfile.WriteLine("  " + key);
                 }, null);
@@ -396,14 +391,14 @@ module TypeScript {
 
         public findImplementation(name: string, publicOnly: bool, typespace: bool): Symbol {
             var sym = this.find(name, publicOnly, typespace);
-            if (sym != null) {
+            if (sym) {
                 if (sym.kind() == SymbolKind.Type) {
                     var typeSym = <TypeSymbol>sym;
                     if (!typeSym.type.hasImplementation()) {
                         sym = null;
                     }
                 }
-                else if (sym.container != null) {
+                else if (sym.container) {
                     if (sym.container.kind() == SymbolKind.Type) {
                         var ctypeSym = <TypeSymbol>sym.container;
                         if (!ctypeSym.type.hasImplementation()) {
@@ -419,7 +414,6 @@ module TypeScript {
             return this.valueMembers.publicMembers;
         }
     }
-
 
     export class SymbolScopeBuilder extends SymbolScope {
         public container: Symbol;
@@ -443,15 +437,15 @@ module TypeScript {
 
         public getAllTypeSymbolNames(members: bool): string[]{
             var result: string[] = [];
-            if (this.ambientEnclosedTypes != null) {
+            if (this.ambientEnclosedTypes) {
                 result = result.concat(this.ambientEnclosedTypes.allMembers.getAllKeys());
             }
-            if (this.enclosedTypes != null) {
+            if (this.enclosedTypes) {
                 result = result.concat(this.enclosedTypes.allMembers.getAllKeys());
             }
-            if (!members && this.parent != null) {
+            if (!members && this.parent) {
                 var parentResult = this.parent.getAllTypeSymbolNames(members);
-                if (parentResult != null) {
+                if (parentResult) {
                     result = result.concat(parentResult);
                 }
             }
@@ -460,15 +454,15 @@ module TypeScript {
 
         public getAllValueSymbolNames(members: bool): string[]{
             var result: string[] = [];
-            if (this.ambientValueMembers != null) {
+            if (this.ambientValueMembers) {
                 result = result.concat(this.ambientValueMembers.allMembers.getAllKeys());
             }
-            if (this.valueMembers != null) {
+            if (this.valueMembers) {
                 result = result.concat(this.valueMembers.allMembers.getAllKeys());
             }
-            if (!members && this.parent != null) {
+            if (!members && this.parent) {
                 var parentResult = this.parent.getAllValueSymbolNames(members);
-                if (parentResult != null) {
+                if (parentResult) {
                     result = result.concat(parentResult);
                 }
             }
@@ -487,23 +481,23 @@ module TypeScript {
                 ambientTable = (this.ambientEnclosedTypes == null) ? null :
                                     publicOnly ? this.ambientEnclosedTypes.publicMembers : this.ambientEnclosedTypes.allMembers;
             }
-            if (ambientTable != null) {
+            if (ambientTable) {
                 if ((sym = ambientTable.lookup(name)) != null) {
                     if (filter.update(sym)) {
                         return sym;
                     }
                 }
             }
-            if (table != null) {
+            if (table) {
                 if ((sym = table.lookup(name)) != null) {
                     if (filter.update(sym)) {
                         return sym;
                     }
                 }
             }
-            if (this.parent != null) {
+            if (this.parent) {
                 sym = this.parent.search(filter, name, publicOnly, typespace);
-                if (sym != null) {
+                if (sym) {
                     if (filter.update(sym)) {
                         return sym;
                     }
@@ -514,31 +508,31 @@ module TypeScript {
 
         public print(outfile: ITextWriter) {
             super.print(outfile);
-            if (this.ambientValueMembers != null) {
+            if (this.ambientValueMembers) {
                 this.ambientValueMembers.allMembers.map(function (key, s, context) {
                     var sym = <Symbol>s;
                     outfile.WriteLine("  " + key);
                 }, null);
             }
-            if (this.valueMembers != null) {
+            if (this.valueMembers) {
                 this.valueMembers.allMembers.map(function (key, s, context) {
                     var sym = <Symbol>s;
                     outfile.WriteLine("  " + key);
                 }, null);
             }
-            if (this.ambientEnclosedTypes != null) {
+            if (this.ambientEnclosedTypes) {
                 this.ambientEnclosedTypes.allMembers.map(function (key, s, context) {
                     var sym = <Symbol>s;
                     outfile.WriteLine("  " + key);
                 }, null);
             }
-            if (this.enclosedTypes != null) {
+            if (this.enclosedTypes) {
                 this.enclosedTypes.allMembers.map(function (key, s, context) {
                     var sym = <Symbol>s;
                     outfile.WriteLine("  " + key);
                 }, null);
             }
-            if (this.parent != null) {
+            if (this.parent) {
                 this.parent.print(outfile);
             }
         }
@@ -555,13 +549,13 @@ module TypeScript {
                 ambientTable = (this.ambientEnclosedTypes == null) ? null :
                                     publicOnly ? this.ambientEnclosedTypes.publicMembers : this.ambientEnclosedTypes.allMembers;
             }
-            if ((ambientTable != null) && ((sym = ambientTable.lookup(name)) != null)) {
+            if (ambientTable && ((sym = ambientTable.lookup(name)) != null)) {
                 return sym;
             }
-            if ((table != null) && ((sym = table.lookup(name)) != null)) {
+            if (table && ((sym = table.lookup(name)) != null)) {
                 return sym;
             }
-            if (this.parent != null) {
+            if (this.parent) {
                 return this.parent.find(name, publicOnly, typespace);
             }
             return null;
@@ -575,10 +569,10 @@ module TypeScript {
                 ambientTable = (this.ambientEnclosedTypes == null) ? null :
                                     publicOnly ? this.ambientEnclosedTypes.publicMembers : this.ambientEnclosedTypes.allMembers;
             }
-            if ((ambientTable != null) && ((sym = ambientTable.lookup(name)) != null)) {
+            if (ambientTable && ((sym = ambientTable.lookup(name)) != null)) {
                 return sym;
             }
-            if (this.parent != null) {
+            if (this.parent) {
                 return this.parent.findAmbient(name, publicOnly, typespace);
             }
             return null;
@@ -596,14 +590,14 @@ module TypeScript {
                 ambientTable = (this.ambientEnclosedTypes == null) ? null :
                                     publicOnly ? this.ambientEnclosedTypes.publicMembers : this.ambientEnclosedTypes.allMembers;
             }
-            if (table != null) {
+            if (table) {
                 if ((sym = table.lookup(name)) != null) {
-                    if (sym != null) { return sym; }
+                    if (sym) { return sym; }
                 }
             }
-            if (ambientTable != null) {
+            if (ambientTable) {
                 if ((sym = ambientTable.lookup(name)) != null) {
-                    if (sym != null) { return sym; }
+                    if (sym) { return sym; }
                 }
             }
             return null;
@@ -633,13 +627,13 @@ module TypeScript {
                 }
             }
 
-            if (table != null) {
+            if (table) {
                 if (!table.add(symbol.name, symbol)) {
                     errorReporter.duplicateIdentifier(ast, symbol.name);
                 }
             }
             else {
-                CompilerDiagnostics.Alert("YYYYY");
+                CompilerDiagnostics.Alert("YYYYY");  // REVIEW: Surely we can do better than this...
             }
             symbol.container = container;
         }
@@ -668,7 +662,7 @@ module TypeScript {
         }
         public findLocal(name: string, publicOnly: bool, typespace: bool): Symbol {
             var sym = super.findLocal(name, publicOnly, typespace);
-            if (sym != null) {
+            if (sym) {
                 if (!this.filter(sym)) {
                     return null;
                 }
@@ -682,7 +676,7 @@ module TypeScript {
 
         public find(name: string, publicOnly: bool, typespace: bool): Symbol {
             var sym = super.findLocal(name, publicOnly, typespace);
-            if (sym != null) {
+            if (sym) {
                 if (!this.filter(sym)) {
                     return null;
                 }

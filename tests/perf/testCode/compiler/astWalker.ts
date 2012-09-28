@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -51,7 +54,7 @@ module TypeScript {
                 // no go only applies to children of node issuing it
                 this.options.goChildren = true;
             }
-            if (this.post != null) {
+            if (this.post) {
                 var postAst = this.post(preAst, parent, this);
                 if (postAst === undefined) {
                     postAst = preAst;
@@ -63,21 +66,6 @@ module TypeScript {
             }
         }
     }
-
-    //class WalkerWorkerNoPost extends WalkerWorker {
-    //    constructor (
-    //        public childrenWalkers: IWalkChildren[],
-    //        public pre: (ast: AST, parent: AST, options: WalkerOptions) => AST,
-    //        public options: WalkerOptions) {
-    //        super(childrenWalkers, pre, null, options);
-    //    }
-
-    //    public walk(ast: AST, parent: AST): AST {
-    //        var preAst = this.pre(ast, parent, this.options);
-    //        this.childrenWalkers[preAst.nodeType](preAst, parent, this)
-    //        return preAst;
-    //    }
-    //}
 
     export class AstWalkerFactory {
         private childrenWalkers: IAstWalkChildren[] = [];
@@ -91,9 +79,6 @@ module TypeScript {
         }
 
         public getWalker(pre: IAstWalkCallback, post?: IAstWalkCallback, options?: AstWalkOptions, state?: any): IAstWalker {
-            //if (!post && !options) {
-            //    return this.getFastWalker(ast, pre);
-            //}
             return this.getSlowWalker(pre, post, options, state);
         }
 
@@ -104,11 +89,6 @@ module TypeScript {
 
             return new AstWalker(this.childrenWalkers, pre, post, options, state);
         }
-
-        //private getFastWalker(ast: AST, pre: IVisitCallback): IWalker {
-        //    var options = new WalkerOptions();
-        //    return new WalkerWorkerNoPost(this.childrenWalkers, pre, options);
-        //}
 
         private initChildrenWalkers(): void {
             this.childrenWalkers[NodeType.None] = ChildrenWalkers.walkNone;
@@ -205,8 +185,7 @@ module TypeScript {
             this.childrenWalkers[NodeType.Catch] = ChildrenWalkers.walkCatchChildren;
             this.childrenWalkers[NodeType.List] = ChildrenWalkers.walkListChildren;
             this.childrenWalkers[NodeType.Script] = ChildrenWalkers.walkScriptChildren;
-            this.childrenWalkers[NodeType.Class] = ChildrenWalkers.walkTypeDeclChildren;
-            this.childrenWalkers[NodeType.ES6Class] = ChildrenWalkers.walkES6ClassDeclChildren;
+            this.childrenWalkers[NodeType.Class] = ChildrenWalkers.walkClassDeclChildren;
             this.childrenWalkers[NodeType.Interface] = ChildrenWalkers.walkTypeDeclChildren;
             this.childrenWalkers[NodeType.Module] = ChildrenWalkers.walkModuleDeclChildren;
             this.childrenWalkers[NodeType.Import] = ChildrenWalkers.walkImportDeclChildren;
@@ -262,34 +241,34 @@ module TypeScript {
         }
 
         export function walkUnaryExpressionChildren(preAst: UnaryExpression, parent: AST, walker: IAstWalker): void {
-            if (preAst.castTerm != null) {
+            if (preAst.castTerm) {
                 preAst.castTerm = walker.walk(preAst.castTerm, preAst);
             }
-            if (preAst.operand != null) {
+            if (preAst.operand) {
                 preAst.operand = walker.walk(preAst.operand, preAst);
             }
         }
 
         export function walkBinaryExpressionChildren(preAst: BinaryExpression, parent: AST, walker: IAstWalker): void {
             if (walker.options.reverseSiblings) {
-                if (preAst.operand2 != null) {
+                if (preAst.operand2) {
                     preAst.operand2 = walker.walk(preAst.operand2, preAst);
                 }
-                if ((preAst.operand1 != null) && (walker.options.goNextSibling)) {
+                if ((preAst.operand1) && (walker.options.goNextSibling)) {
                     preAst.operand1 = walker.walk(preAst.operand1, preAst);
                 }
             } else {
-                if (preAst.operand1 != null) {
+                if (preAst.operand1) {
                     preAst.operand1 = walker.walk(preAst.operand1, preAst);
                 }
-                if ((preAst.operand2 != null) && (walker.options.goNextSibling)) {
+                if ((preAst.operand2) && (walker.options.goNextSibling)) {
                     preAst.operand2 = walker.walk(preAst.operand2, preAst);
                 }
             }
         }
 
         export function walkTypeReferenceChildren(preAst: TypeReference, parent: AST, walker: IAstWalker): void {
-            if (preAst.term != null) {
+            if (preAst.term) {
                 preAst.term = walker.walk(preAst.term, preAst);
             }
         }
@@ -298,7 +277,7 @@ module TypeScript {
             if (!walker.options.reverseSiblings) {
                 preAst.target = walker.walk(preAst.target, preAst);
             }
-            if ((preAst.args != null) && (walker.options.goNextSibling)) {
+            if (preAst.args && (walker.options.goNextSibling)) {
                 preAst.args = <ASTList> walker.walk(preAst.args, preAst);
             }
             if ((walker.options.reverseSiblings) && (walker.options.goNextSibling)) {
@@ -307,64 +286,64 @@ module TypeScript {
         }
 
         export function walkTrinaryExpressionChildren(preAst: TrinaryExpression, parent: AST, walker: IAstWalker): void {
-            if (preAst.operand1 != null) {
+            if (preAst.operand1) {
                 preAst.operand1 = walker.walk(preAst.operand1, preAst);
             }
-            if ((preAst.operand2 != null) && (walker.options.goNextSibling)) {
+            if (preAst.operand2 && (walker.options.goNextSibling)) {
                 preAst.operand2 = walker.walk(preAst.operand2, preAst);
             }
-            if ((preAst.operand3 != null) && (walker.options.goNextSibling)) {
+            if (preAst.operand3 && (walker.options.goNextSibling)) {
                 preAst.operand3 = walker.walk(preAst.operand3, preAst);
             }
         }
 
         export function walkFuncDeclChildren(preAst: FuncDecl, parent: AST, walker: IAstWalker): void {
-            if (preAst.name != null) {
+            if (preAst.name) {
                 preAst.name = <Identifier>walker.walk(preAst.name, preAst);
             }
-            if ((preAst.args != null) && (preAst.args.members.length > 0) && (walker.options.goNextSibling)) {
+            if (preAst.args && (preAst.args.members.length > 0) && (walker.options.goNextSibling)) {
                 preAst.args = <ASTList>walker.walk(preAst.args, preAst);
             }
-            if ((preAst.returnTypeAnnotation != null) && (walker.options.goNextSibling)) {
+            if (preAst.returnTypeAnnotation && (walker.options.goNextSibling)) {
                 preAst.returnTypeAnnotation = walker.walk(preAst.returnTypeAnnotation, preAst);
             }
-            if ((preAst.bod != null) && (preAst.bod.members.length > 0) && (walker.options.goNextSibling)) {
+            if (preAst.bod && (preAst.bod.members.length > 0) && (walker.options.goNextSibling)) {
                 preAst.bod = <ASTList>walker.walk(preAst.bod, preAst);
             }
         }
 
         export function walkBoundDeclChildren(preAst: BoundDecl, parent: AST, walker: IAstWalker): void {
-            if (preAst.id != null) {
+            if (preAst.id) {
                 preAst.id = <Identifier>walker.walk(preAst.id, preAst);
             }
-            if (preAst.init != null) {
+            if (preAst.init) {
                 preAst.init = walker.walk(preAst.init, preAst);
             }
-            if ((preAst.typeExpr != null) && (walker.options.goNextSibling)) {
+            if ((preAst.typeExpr) && (walker.options.goNextSibling)) {
                 preAst.typeExpr = walker.walk(preAst.typeExpr, preAst);
             }
         }
 
         export function walkReturnStatementChildren(preAst: ReturnStatement, parent: AST, walker: IAstWalker): void {
-            if (preAst.returnExpression != null) {
+            if (preAst.returnExpression) {
                 preAst.returnExpression = walker.walk(preAst.returnExpression, preAst);
             }
         }
 
         export function walkForStatementChildren(preAst: ForStatement, parent: AST, walker: IAstWalker): void {
-            if (preAst.init != null) {
+            if (preAst.init) {
                 preAst.init = walker.walk(preAst.init, preAst);
             }
 
-            if ((preAst.cond != null) && walker.options.goNextSibling) {
+            if (preAst.cond && walker.options.goNextSibling) {
                 preAst.cond = walker.walk(preAst.cond, preAst);
             }
 
-            if ((preAst.incr != null) && walker.options.goNextSibling) {
+            if (preAst.incr && walker.options.goNextSibling) {
                 preAst.incr = walker.walk(preAst.incr, preAst);
             }
 
-            if ((preAst.body != null) && walker.options.goNextSibling) {
+            if (preAst.body && walker.options.goNextSibling) {
                 preAst.body = walker.walk(preAst.body, preAst);
             }
         }
@@ -374,106 +353,106 @@ module TypeScript {
             if (walker.options.goNextSibling) {
                 preAst.obj = walker.walk(preAst.obj, preAst);
             }
-            if ((preAst.body != null) && (walker.options.goNextSibling)) {
+            if (preAst.body && (walker.options.goNextSibling)) {
                 preAst.body = walker.walk(preAst.body, preAst);
             }
         }
 
         export function walkIfStatementChildren(preAst: IfStatement, parent: AST, walker: IAstWalker): void {
             preAst.cond = walker.walk(preAst.cond, preAst);
-            if ((preAst.thenBod != null) && (walker.options.goNextSibling)) {
+            if (preAst.thenBod && (walker.options.goNextSibling)) {
                 preAst.thenBod = walker.walk(preAst.thenBod, preAst);
             }
-            if ((preAst.elseBod != null) && (walker.options.goNextSibling)) {
+            if (preAst.elseBod && (walker.options.goNextSibling)) {
                 preAst.elseBod = walker.walk(preAst.elseBod, preAst);
             }
         }
 
         export function walkWhileStatementChildren(preAst: WhileStatement, parent: AST, walker: IAstWalker): void {
             preAst.cond = walker.walk(preAst.cond, preAst);
-            if ((preAst.body != null) && (walker.options.goNextSibling)) {
+            if (preAst.body && (walker.options.goNextSibling)) {
                 preAst.body = walker.walk(preAst.body, preAst);
             }
         }
 
         export function walkDoWhileStatementChildren(preAst: DoWhileStatement, parent: AST, walker: IAstWalker): void {
             preAst.cond = walker.walk(preAst.cond, preAst);
-            if ((preAst.body != null) && (walker.options.goNextSibling)) {
+            if (preAst.body && (walker.options.goNextSibling)) {
                 preAst.body = walker.walk(preAst.body, preAst);
             }
         }
 
         export function walkBlockChildren(preAst: Block, parent: AST, walker: IAstWalker): void {
-            if (preAst.stmts != null) {
+            if (preAst.stmts) {
                 preAst.stmts = <ASTList>walker.walk(preAst.stmts, preAst);
             }
         }
 
         export function walkCaseStatementChildren(preAst: CaseStatement, parent: AST, walker: IAstWalker): void {
-            if (preAst.expr != null) {
+            if (preAst.expr) {
                 preAst.expr = walker.walk(preAst.expr, preAst);
             }
 
-            if ((preAst.body != null) && walker.options.goNextSibling) {
+            if (preAst.body && walker.options.goNextSibling) {
                 preAst.body = <ASTList>walker.walk(preAst.body, preAst);
             }
         }
 
         export function walkSwitchStatementChildren(preAst: SwitchStatement, parent: AST, walker: IAstWalker): void {
-            if (preAst.val != null) {
+            if (preAst.val) {
                 preAst.val = walker.walk(preAst.val, preAst);
             }
 
-            if ((preAst.caseList != null) && walker.options.goNextSibling) {
+            if ((preAst.caseList) && walker.options.goNextSibling) {
                 preAst.caseList = <ASTList>walker.walk(preAst.caseList, preAst);
             }
         }
 
         export function walkTryChildren(preAst: Try, parent: AST, walker: IAstWalker): void {
-            if (preAst.body != null) {
+            if (preAst.body) {
                 preAst.body = walker.walk(preAst.body, preAst);
             }
         }
 
         export function walkTryCatchChildren(preAst: TryCatch, parent: AST, walker: IAstWalker): void {
-            if (preAst.tryNode != null) {
+            if (preAst.tryNode) {
                 preAst.tryNode = walker.walk(preAst.tryNode, preAst);
             }
 
-            if ((preAst.catchNode != null) && walker.options.goNextSibling) {
+            if ((preAst.catchNode) && walker.options.goNextSibling) {
                 preAst.catchNode = walker.walk(preAst.catchNode, preAst);
             }
         }
 
         export function walkTryFinallyChildren(preAst: TryFinally, parent: AST, walker: IAstWalker): void {
-            if (preAst.tryNode != null) {
+            if (preAst.tryNode) {
                 preAst.tryNode = walker.walk(preAst.tryNode, preAst);
             }
 
-            if ((preAst.finallyNode != null) && walker.options.goNextSibling) {
+            if (preAst.finallyNode && walker.options.goNextSibling) {
                 preAst.finallyNode = walker.walk(preAst.finallyNode, preAst);
             }
         }
 
         export function walkFinallyChildren(preAst: Finally, parent: AST, walker: IAstWalker): void {
-            if (preAst.body != null) {
+            if (preAst.body) {
                 preAst.body = walker.walk(preAst.body, preAst);
             }
         }
 
         export function walkCatchChildren(preAst: Catch, parent: AST, walker: IAstWalker): void {
-            if (preAst.param != null) {
+            if (preAst.param) {
                 preAst.param = <VarDecl>walker.walk(preAst.param, preAst);
             }
 
-            if ((preAst.body != null) && walker.options.goNextSibling) {
+            if ((preAst.body) && walker.options.goNextSibling) {
                 preAst.body = walker.walk(preAst.body, preAst);
             }
         }
 
         export function walkRecordChildren(preAst: Record, parent: AST, walker: IAstWalker): void {
             preAst.name = walker.walk(preAst.name, preAst);
-            if ((walker.options.goNextSibling) && (preAst.members != null)) {
+            if (walker.options.goNextSibling && preAst.members) {
                 preAst.members = walker.walk(preAst.members, preAst);
             }
 
@@ -483,20 +462,20 @@ module TypeScript {
             walkRecordChildren(preAst, parent, walker);
         }
 
-        export function walkES6ClassDeclChildren(preAst: ES6ClassDecl, parent: AST, walker: IAstWalker): void {
+        export function walkClassDeclChildren(preAst: ClassDecl, parent: AST, walker: IAstWalker): void {
             walkNamedTypeChildren(preAst, parent, walker);
 
-            if ((walker.options.goNextSibling) && (preAst.baseClass != null)) {
+            if (walker.options.goNextSibling && preAst.baseClass) {
                 preAst.baseClass = <ASTList>walker.walk(preAst.baseClass, preAst);
             }
 
-            if ((walker.options.goNextSibling) && (preAst.implementsList != null)) {
+            if (walker.options.goNextSibling && preAst.implementsList) {
                 preAst.implementsList = <ASTList>walker.walk(preAst.implementsList, preAst);
             }
         }
 
         export function walkScriptChildren(preAst: Script, parent: AST, walker: IAstWalker): void {
-            if (preAst.bod != null) {
+            if (preAst.bod) {
                 preAst.bod = <ASTList>walker.walk(preAst.bod, preAst);
             }
         }
@@ -505,11 +484,11 @@ module TypeScript {
             walkNamedTypeChildren(preAst, parent, walker);
 
             // walked args as part of members
-            if ((walker.options.goNextSibling) && (preAst.extendsList != null)) {
+            if (walker.options.goNextSibling && preAst.extendsList) {
                 preAst.extendsList = <ASTList>walker.walk(preAst.extendsList, preAst);
             }
 
-            if ((walker.options.goNextSibling) && (preAst.implementsList != null)) {
+            if (walker.options.goNextSibling && preAst.implementsList) {
                 preAst.implementsList = <ASTList>walker.walk(preAst.implementsList, preAst);
             }
         }
@@ -517,26 +496,26 @@ module TypeScript {
         export function walkModuleDeclChildren(preAst: ModuleDecl, parent: AST, walker: IAstWalker): void {
             walkRecordChildren(preAst, parent, walker);
 
-            if ((walker.options.goNextSibling) && (preAst.alias != null)) {
+            if (walker.options.goNextSibling && preAst.alias) {
                 preAst.alias = walker.walk(preAst.alias, preAst);
             }
         }
 
         export function walkImportDeclChildren(preAst: ImportDecl, parent: AST, walker: IAstWalker): void {
-            if (preAst.id != null) {
+            if (preAst.id) {
                 preAst.id = <Identifier>walker.walk(preAst.id, preAst);
             }
-            if (preAst.alias != null) {
+            if (preAst.alias) {
                 preAst.alias = walker.walk(preAst.alias, preAst);
             }
         }
 
         export function walkWithStatementChildren(preAst: WithStatement, parent: AST, walker: IAstWalker): void {
-            if (preAst.expr != null) {
+            if (preAst.expr) {
                 preAst.expr = walker.walk(preAst.expr, preAst);
             }
 
-            if ((preAst.body != null) && walker.options.goNextSibling) {
+            if (preAst.body && walker.options.goNextSibling) {
                 preAst.body = walker.walk(preAst.body, preAst);
             }
         }

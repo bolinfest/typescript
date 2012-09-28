@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -42,11 +45,11 @@ module TypeScript {
         if (modName.length > 4 && modName.substring(modName.length - 4, modName.length) == ".str") {
             return modName.substring(0, modName.length - 4);
         }
-        if (modName.length > 6 && modName.substring(modName.length - 5, modName.length) == ".d.ts") {
-            return modName.substring(0, modName.length - 6);
+        if (modName.length > 5 && modName.substring(modName.length - 5, modName.length) == ".d.ts") {
+            return modName.substring(0, modName.length - 5);
         }
-        if (modName.length > 4 && modName.substring(modName.length - 3, modName.length) == ".ts") {
-            return modName.substring(0, modName.length - 4);
+        if (modName.length > 3 && modName.substring(modName.length - 3, modName.length) == ".ts") {
+            return modName.substring(0, modName.length - 3);
         }
         // in case's it's a .js file
         if (modName.length > 3 && modName.substring(modName.length - 3, modName.length) == ".js") {
@@ -61,7 +64,7 @@ module TypeScript {
     }
 
     export function isTSFile(fname: string) {
-        return fname.length > 3 && fname.substring(fname.length - 4, fname.length) == ".ts"
+        return fname.length > 3 && fname.substring(fname.length - 3, fname.length) == ".ts"
     }
 
     export function isDSTRFile(fname: string) {
@@ -69,7 +72,7 @@ module TypeScript {
     }
 
     export function isDTSFile(fname: string) {
-        return fname.length > 5 && fname.substring(fname.length - 6, fname.length) == ".d.ts"
+        return fname.length > 5 && fname.substring(fname.length - 5, fname.length) == ".d.ts"
     }
 
     export function getPrettyName(modPath: string, quote?=true, treatAsFileName?=false) { 

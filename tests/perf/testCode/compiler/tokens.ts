@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -8,7 +11,6 @@ module TypeScript {
         CASE,
         CATCH,
         CLASS,
-        OLDCLASS,
         CONST,
         CONTINUE,
         DEBUGGER,
@@ -39,7 +41,6 @@ module TypeScript {
         NULL,
         PACKAGE,
         PRIVATE,
-        PROPERTY,
         PROTECTED,
         PUBLIC,
         RETURN,
@@ -198,7 +199,6 @@ module TypeScript {
     setTokenInfo(TokenID.CASE, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "case", ErrorRecoverySet.SCase);
     setTokenInfo(TokenID.CATCH, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "catch", ErrorRecoverySet.Catch);
     setTokenInfo(TokenID.CLASS, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "class", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.OLDCLASS, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "oldclass", ErrorRecoverySet.TypeScriptS);
     setTokenInfo(TokenID.CONST, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "const", ErrorRecoverySet.Var);
     setTokenInfo(TokenID.CONTINUE, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "continue", ErrorRecoverySet.Stmt);
     setTokenInfo(TokenID.DEBUGGER, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.Debugger, "debugger", ErrorRecoverySet.Stmt);
@@ -230,7 +230,6 @@ module TypeScript {
     setTokenInfo(TokenID.NULL, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "null", ErrorRecoverySet.RLit);
     setTokenInfo(TokenID.PACKAGE, Reservation.JavascriptFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "package", ErrorRecoverySet.None);
     setTokenInfo(TokenID.PRIVATE, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "private", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.PROPERTY, Reservation.TypeScript, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "property", ErrorRecoverySet.None);
     setTokenInfo(TokenID.PROTECTED, Reservation.JavascriptFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "protected", ErrorRecoverySet.None);
     setTokenInfo(TokenID.PUBLIC, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "public", ErrorRecoverySet.TypeScriptS);
     setTokenInfo(TokenID.RETURN, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "return", ErrorRecoverySet.Stmt);

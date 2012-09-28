@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -7,10 +10,8 @@ module TypeScript {
         path: string;
     }
 
-    ///
     /// This class acts as a convenience class to store path and content information in places
     /// where we need an ISourceText object
-    ///
     export class SourceUnit implements ISourceText, IResolvedFile {
         constructor(public path: string, public content: string) {
         }
@@ -72,8 +73,7 @@ module TypeScript {
                 // we only follow the second clause if the path is a non-rooted triple-slash reference path
                 (isRootedPath || !parentPath || performSearch ? referencePath : parentPath + "/" + referencePath);
 
-            // REVIEW: We'll optimize for .str files until .ts files catch on
-            // We use +=.str to make sure we don't accidentally pick up ".js" files or the like
+            // We use +=.ts to make sure we don't accidentally pick up ".js" files or the like
             if (!isSTRFile(normalizedPath) && !isTSFile(normalizedPath)) {
                 normalizedPath += ".ts";  //changePathToSTR(normalizedPath);
             }
@@ -88,7 +88,7 @@ module TypeScript {
                     try {
                         CompilerDiagnostics.debugPrint("   Reading code from " + normalizedPath);
                             
-                        // Look for the .str first - if not present, use the .ts, the .d.str and the .d.ts
+                        // Look for the .ts file first - if not present, use the .ts, the .d.str and the .d.ts
                         try {
                             resolvedFile.content = ioHost.readFile(normalizedPath);
                         }

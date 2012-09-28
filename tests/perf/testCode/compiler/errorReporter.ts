@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -11,10 +14,15 @@ module TypeScript {
         public checker: TypeChecker = null;
         public lineCol = { line: 0, col: 0 };
         public emitAsComments = true;
-        public throwOnTypeError = false;
         public hasErrors = false;
+        public pushToErrorSink = false;
+        public errorSink: string[] = [];
 
         constructor (public outfile: ITextWriter) { }
+
+        public getCapturedErrors() { return this.errorSink; }
+        public freeCapturedErrors() { this.errorSink = []; }
+        public captureError(emsg: string) { this.errorSink[this.errorSink.length] = emsg; }
 
         public setErrOut(outerr) {
             this.outfile = outerr;
@@ -29,7 +37,7 @@ module TypeScript {
         }
 
         public writePrefix(ast: AST): void {
-            if (ast != null) {
+            if (ast) {
                 this.setError(ast);
             }
             else {
@@ -40,7 +48,7 @@ module TypeScript {
         }
 
         public writePrefixFromSym(symbol: Symbol): void {
-            if ((symbol != null) && (this.checker.locationInfo.lineMap != null)) {
+            if (symbol && this.checker.locationInfo.lineMap) {
                 getSourceLineColFromMap(this.lineCol, symbol.location,
                                         this.checker.locationInfo.lineMap);
             }
@@ -52,22 +60,23 @@ module TypeScript {
         }
 
         public setError(ast: AST) {
-            if (ast != null) {
+            if (ast) {
                 ast.flags |= ASTFlags.Error;
-                if (this.checker.locationInfo.lineMap != null) {
+                if (this.checker.locationInfo.lineMap) {
                     getSourceLineColFromMap(this.lineCol, ast.minChar, this.checker.locationInfo.lineMap);
                 }
             }
         }
 
         public reportError(ast: AST, message: string) {
-            if (this.throwOnTypeError) {
-                throw new Error(message);
+            if (this.pushToErrorSink) {
+                this.captureError(message);
+                return;
             }
 
             this.hasErrors = true;
             var len = (ast.limChar - ast.minChar);
-            if (this.parser.errorRecovery && this.parser.errorCallback != null) {
+            if (this.parser.errorRecovery && this.parser.errorCallback) {
                 this.parser.errorCallback(ast.minChar, len, message, this.checker.locationInfo.unitIndex);
             }
             else {
@@ -77,12 +86,13 @@ module TypeScript {
         }
 
         public reportErrorFromSym(symbol: Symbol, message: string) {
-            if (this.throwOnTypeError) {
-                throw new Error(message);
+            if (this.pushToErrorSink) {
+                this.captureError(message);
+                return;
             }
 
             this.hasErrors = true;
-            if (this.parser.errorRecovery && this.parser.errorCallback != null) {
+            if (this.parser.errorRecovery && this.parser.errorCallback) {
                 this.parser.errorCallback(symbol.location, 1, message, this.checker.locationInfo.unitIndex);
             }
             else {
@@ -95,12 +105,6 @@ module TypeScript {
             this.reportError(ast, message);
             // Emitter errors are not recoverable, stop immediately
             throw Error("EmitError");
-        }
-
-        public interfaceDeclNotImpl(t1: Type, t2: Type) {
-            this.reportErrorFromSym(t2.symbol, "Class '" + t2.getTypeName() +
-                              "' declares interface '" + t1.getTypeName() +
-                              "' but does not implement it");
         }
 
         public duplicateIdentifier(ast: AST, name: string) {
@@ -124,10 +128,10 @@ module TypeScript {
         }
 
         public styleError(ast: AST, msg: string): void {
-            var bkThrow = this.throwOnTypeError;
-            this.throwOnTypeError = false;
+            var bkThrow = this.pushToErrorSink;
+            this.pushToErrorSink = false;
             this.reportError(ast, "STYLE: " + msg);
-            this.throwOnTypeError = bkThrow;
+            this.pushToErrorSink = bkThrow;
         }
 
         public simpleError(ast: AST, msg: string): void {
@@ -164,22 +168,22 @@ module TypeScript {
             this.simpleError(ast, "Value of type '" + targetType + "' is not indexable by type '" + indexType + "'");
         }
 
-        public incompatibleTypes(ast: AST, t1: Type, t2: Type, op: string, scope: SymbolScope) {
+        public incompatibleTypes(ast: AST, t1: Type, t2: Type, op: string, scope: SymbolScope, comparisonInfo?:TypeComparisonInfo) {
             if (!t1) {
                 t1 = this.checker.anyType;
             }
             if (!t2) {
                 t2 = this.checker.anyType;
             }
-            // TODO: re-implement reason generation
-            var reason = "";
+
+            var reason = comparisonInfo ? comparisonInfo.message : "";
             if (op) {
                 this.reportError(ast, "Operator '" + op + "' cannot be applied to types '" + t1.getScopedTypeName(scope) +
-                                  "' and '" + t2.getScopedTypeName(scope) + "'" + reason);
+                                  "' and '" + t2.getScopedTypeName(scope) + "'" + (reason ? ": " + reason : ""));
             }
             else {
                 this.reportError(ast, "Cannot convert '" + t1.getScopedTypeName(scope) +
-                                  "' to '" + t2.getScopedTypeName(scope) + "'" + reason);
+                                  "' to '" + t2.getScopedTypeName(scope) + "'" + (reason ? ": " + reason : ""));
             }
         }
 
