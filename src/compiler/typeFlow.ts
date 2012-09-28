@@ -637,7 +637,7 @@ module TypeScript {
         public booleanInterfaceType: Type = null;
 
         public currentScript: Script = null;
-        public inNewTargetTypeCheck = false;
+
         public inImportTypeCheck = false;
         public inTypeRefTypeCheck = false;
         public inArrayElementTypeCheck = false;
@@ -951,7 +951,7 @@ module TypeScript {
                                 }
                             }
 
-                            varDecl.init = this.castWithCoercion(varDecl.init, varDecl.type, applyTargetType, false);
+                            varDecl.init = this.castWithCoercion(varDecl.init, varDecl.type, applyTargetType && !this.checker.inProvisionalTypecheckMode(), false);
 
                             if (preserveScope && varDecl.init.type.containedScope == null) {
                                 varDecl.init.type.containedScope = preservedContainedScope;
@@ -1020,7 +1020,7 @@ module TypeScript {
                 }
             }
             else {
-                if ((this.inBoundPropTypeCheck || this.inSuperCall) && this.thisClassNode && this.thisClassNode.nty == NodeType.Class) {
+                if (this.thisClassNode && (this.inBoundPropTypeCheck || (this.inSuperCall && hasFlag((<ClassDecl>this.thisClassNode).varFlags, VarFlags.ClassSuperMustBeFirstCallInConstructor)))) {
                     illegalThisRef = true;
                 }
                 if (this.thisFnc.isMethod() || this.thisFnc.isConstructor || this.thisFnc.isTargetTypedAsMethod) {
@@ -1136,10 +1136,6 @@ module TypeScript {
                     identifier.type = this.anyType;
                 }
                 else {
-                    if (this.inNewTargetTypeCheck && symbol.isInferenceSymbol() && !this.checker.typeStatusIsFinished((<InferenceSymbol>symbol).typeCheckStatus)) {
-                        this.checker.errorReporter.simpleError(ast, "Symbol '" + identifier.text + "' is referenced before its declaration");
-                    }
-
                     if (optimizeModuleCodeGen && symbol && symbol.isType()) {
                         var symType = symbol.getType();
                         // Once the type has been referenced outside of a type ref position, there's
@@ -1503,7 +1499,8 @@ module TypeScript {
                 preservedContainedScope = binex.operand2.type.containedScope;
                 preserveScope = true;
             }
-            binex.operand2 = this.castWithCoercion(binex.operand2, leftType, applyTargetType, false);
+            // Do not re-write the AST in provisional typecheck mode
+            binex.operand2 = this.castWithCoercion(binex.operand2, leftType, applyTargetType && !this.checker.inProvisionalTypecheckMode(), false);
             if (preserveScope && binex.operand2.type.containedScope == null) {
                 binex.operand2.type.containedScope = preservedContainedScope;
             }
@@ -1901,7 +1898,7 @@ module TypeScript {
                 var ssb = <SymbolScopeBuilder>this.scope;
                 funcTable = ssb.valueMembers.allMembers;
             }
-            else if (funcDecl.isOverload) {
+            else if ((funcDecl.isSpecialFn() && !(funcDecl.fncFlags & FncFlags.Signature)) || funcDecl.isOverload) {
                 funcTable = funcDecl.symbols;
                 // if the function is static, we just want to use the 
                 // current scope
@@ -2303,7 +2300,6 @@ module TypeScript {
             var bases = type.extendsList;
             if (bases) {
                 var len = bases.length;
-                this.inNewTargetTypeCheck = true;
 
                 if (len > 0) {
                     type.typeFlags |= TypeFlags.HasBaseType;
@@ -2358,7 +2354,6 @@ module TypeScript {
                         break;
                     }
                 }
-                this.inNewTargetTypeCheck = false;
             }
         }
 
@@ -2366,7 +2361,7 @@ module TypeScript {
             var instanceType = implementingType.getInstanceType();
             if (instanceType.implementsList) {
                 var len = instanceType.implementsList.length;
-                this.inNewTargetTypeCheck = true;
+
                 for (var i = 0; i < len; i++) {
                     var interfaceType = instanceType.implementsList[i];
                     var comparisonInfo = new TypeComparisonInfo();
@@ -2382,7 +2377,6 @@ module TypeScript {
                         }
                     }
                 }
-                this.inNewTargetTypeCheck = false;
             }
         }
 
@@ -2490,6 +2484,8 @@ module TypeScript {
             }
 
             var prevScope = this.scope;
+            var prevInBoundPropTypeCheck = this.inBoundPropTypeCheck;
+            this.inBoundPropTypeCheck = false;
             var svClassNode = this.thisClassNode;
             this.thisClassNode = classDecl;
             var classType = classDecl.type;
@@ -2526,6 +2522,7 @@ module TypeScript {
                 }
             }
 
+            this.inBoundPropTypeCheck = prevInBoundPropTypeCheck;
             this.thisType = prevThisType;
             this.thisClassNode = svClassNode;
             this.scope = prevScope;
@@ -2641,10 +2638,12 @@ module TypeScript {
             var mod = moduleDecl.mod;
             var sym: TypeSymbol = null;
 
+            var prevInBoundPropTypeCheck = this.inBoundPropTypeCheck;
             var prevScope = this.scope;
             var prevThisType = this.thisType;
             var prevCurrentModDecl = this.checker.currentModDecl;
             this.checker.currentModDecl = moduleDecl;
+            this.inBoundPropTypeCheck = false;
 
 
             if (!this.inImportTypeCheck && prevCurrentModDecl &&
@@ -2660,6 +2659,7 @@ module TypeScript {
             this.checker.currentModDecl = prevCurrentModDecl;
             this.thisType = prevThisType;
             this.scope = prevScope;
+            this.inBoundPropTypeCheck = prevInBoundPropTypeCheck;
 
             moduleDecl.type = mod;
 

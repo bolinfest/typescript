@@ -5997,7 +5997,7 @@ var TypeScript;
                                 this.writeToOutput(delimiter);
                             }
                         } else {
-                            if(startLine && (emitNode.nodeType != TypeScript.NodeType.Interface) && (!((emitNode.nodeType == TypeScript.NodeType.VarDecl) && ((((emitNode).varFlags) & TypeScript.VarFlags.Ambient) == TypeScript.VarFlags.Ambient) && (((emitNode).init) == null))) && (emitNode.nodeType != TypeScript.NodeType.EndCode) && (emitNode.nodeType != TypeScript.NodeType.FuncDecl)) {
+                            if(startLine && (emitNode.nodeType != TypeScript.NodeType.Module) && (emitNode.nodeType != TypeScript.NodeType.Interface) && (!((emitNode.nodeType == TypeScript.NodeType.VarDecl) && ((((emitNode).varFlags) & TypeScript.VarFlags.Ambient) == TypeScript.VarFlags.Ambient) && (((emitNode).init) == null))) && (emitNode.nodeType != TypeScript.NodeType.EndCode) && (emitNode.nodeType != TypeScript.NodeType.FuncDecl)) {
                                 this.writeLineToOutput("");
                             }
                         }
@@ -6989,7 +6989,12 @@ var TypeScript;
                 this.reportParseError("Expected module name");
                 alias = new TypeScript.MissingIdentifier();
                 alias.minChar = this.scanner.startPos;
-                alias.limChar = this.scanner.startPos;
+                if(this.tok.tokenId == TypeScript.TokenID.SColon) {
+                    alias.limChar = this.scanner.startPos;
+                } else {
+                    alias.limChar = this.scanner.pos;
+                    this.tok = this.scanner.scan();
+                }
                 alias.flags |= TypeScript.ASTFlags.Error;
                 limChar = alias.limChar;
             }
@@ -9233,6 +9238,7 @@ var TypeScript;
                             ast.limChar = this.scanner.lastTokenLimChar();
                         } else {
                             ast = this.parseImportDecl(errorRecoverySet, modifiers);
+                            needTerminator = true;
                         }
                         break;
 
@@ -14032,7 +14038,9 @@ var TypeScript;
         };
         TypeChecker.prototype.cleanStartedPTO = function () {
             for(var i = 0; i < this.provisionalStartedTypecheckObjects.length; i++) {
-                this.provisionalStartedTypecheckObjects[i].typeCheckStatus = TypeScript.TypeCheckStatus.NotStarted;
+                if(this.provisionalStartedTypecheckObjects[i].typeCheckStatus == this.typingContextStack.getContextID()) {
+                    this.provisionalStartedTypecheckObjects[i].typeCheckStatus = TypeScript.TypeCheckStatus.NotStarted;
+                }
             }
             this.provisionalStartedTypecheckObjects = [];
         };
@@ -14773,14 +14781,6 @@ var TypeScript;
                                     }
                                     miss = true;
                                 }
-                                if(hadProvisionalErrors) {
-                                    cxt = this.currentContextualTypeContext;
-                                    this.typeCheckWithContextualType(null, true, true, args.members[j]);
-                                    if(!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
-                                        miss = true;
-                                    }
-                                    this.cleanStartedPTO();
-                                }
                                 this.resetProvisionalErrors();
                                 if(miss) {
                                     break;
@@ -14800,13 +14800,6 @@ var TypeScript;
                                     }
                                     miss = true;
                                 }
-                                if(hadProvisionalErrors) {
-                                    this.typeCheckWithContextualType(null, true, true, args.members[j]);
-                                    if(!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
-                                        miss = true;
-                                    }
-                                    this.cleanStartedPTO();
-                                }
                                 this.resetProvisionalErrors();
                                 if(miss) {
                                     break;
@@ -14824,13 +14817,6 @@ var TypeScript;
                                             comparisonInfo.setMessage("Could not apply type '" + memberType.getTypeName() + "' to argument " + (j + 1) + ", which is of type '" + args.members[j].type.getTypeName() + "'");
                                         }
                                         break;
-                                    }
-                                    if(hadProvisionalErrors) {
-                                        this.typeCheckWithContextualType(null, true, true, args.members[j]);
-                                        if(!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
-                                            miss = true;
-                                        }
-                                        this.cleanStartedPTO();
                                     }
                                     this.resetProvisionalErrors();
                                     if(miss) {
@@ -16586,7 +16572,6 @@ var TypeScript;
             this.numberInterfaceType = null;
             this.booleanInterfaceType = null;
             this.currentScript = null;
-            this.inNewTargetTypeCheck = false;
             this.inImportTypeCheck = false;
             this.inTypeRefTypeCheck = false;
             this.inArrayElementTypeCheck = false;
@@ -16856,7 +16841,7 @@ var TypeScript;
                                         this.checker.errorReporter.simpleError(varDecl, "Cannot assign type 'void' to variable '" + varDecl.id.text + "'");
                                     }
                                 }
-                                varDecl.init = this.castWithCoercion(varDecl.init, varDecl.type, applyTargetType, false);
+                                varDecl.init = this.castWithCoercion(varDecl.init, varDecl.type, applyTargetType && !this.checker.inProvisionalTypecheckMode(), false);
                                 if(preserveScope && varDecl.init.type.containedScope == null) {
                                     varDecl.init.type.containedScope = preservedContainedScope;
                                 }
@@ -16916,7 +16901,7 @@ var TypeScript;
                     ast.type = this.anyType;
                 }
             } else {
-                if((this.inBoundPropTypeCheck || this.inSuperCall) && this.thisClassNode && this.thisClassNode.nty == TypeScript.NodeType.Class) {
+                if(this.thisClassNode && (this.inBoundPropTypeCheck || (this.inSuperCall && TypeScript.hasFlag((this.thisClassNode).varFlags, TypeScript.VarFlags.ClassSuperMustBeFirstCallInConstructor)))) {
                     illegalThisRef = true;
                 }
                 if(this.thisFnc.isMethod() || this.thisFnc.isConstructor || this.thisFnc.isTargetTypedAsMethod) {
@@ -17011,9 +16996,6 @@ var TypeScript;
                     }
                     identifier.type = this.anyType;
                 } else {
-                    if(this.inNewTargetTypeCheck && symbol.isInferenceSymbol() && !this.checker.typeStatusIsFinished((symbol).typeCheckStatus)) {
-                        this.checker.errorReporter.simpleError(ast, "Symbol '" + identifier.text + "' is referenced before its declaration");
-                    }
                     if(TypeScript.optimizeModuleCodeGen && symbol && symbol.isType()) {
                         var symType = symbol.getType();
                         if(symType && (symbol).aliasLink && (symbol).onlyReferencedAsTypeRef) {
@@ -17321,7 +17303,7 @@ var TypeScript;
                 preservedContainedScope = binex.operand2.type.containedScope;
                 preserveScope = true;
             }
-            binex.operand2 = this.castWithCoercion(binex.operand2, leftType, applyTargetType, false);
+            binex.operand2 = this.castWithCoercion(binex.operand2, leftType, applyTargetType && !this.checker.inProvisionalTypecheckMode(), false);
             if(preserveScope && binex.operand2.type.containedScope == null) {
                 binex.operand2.type.containedScope = preservedContainedScope;
             }
@@ -17649,7 +17631,7 @@ var TypeScript;
                 var ssb = this.scope;
                 funcTable = ssb.valueMembers.allMembers;
             } else {
-                if(funcDecl.isOverload) {
+                if((funcDecl.isSpecialFn() && !(funcDecl.fncFlags & TypeScript.FncFlags.Signature)) || funcDecl.isOverload) {
                     funcTable = funcDecl.symbols;
                     if(!TypeScript.hasFlag(funcDecl.fncFlags, TypeScript.FncFlags.Static) && fnType.containedScope) {
                         this.scope = fnType.containedScope;
@@ -17944,7 +17926,6 @@ var TypeScript;
             var bases = type.extendsList;
             if(bases) {
                 var len = bases.length;
-                this.inNewTargetTypeCheck = true;
                 if(len > 0) {
                     type.typeFlags |= TypeScript.TypeFlags.HasBaseType;
                 }
@@ -17988,14 +17969,12 @@ var TypeScript;
                         }
                     }
                 }
-                this.inNewTargetTypeCheck = false;
             }
         };
         TypeFlow.prototype.checkMembersImplementInterfaces = function (implementingType) {
             var instanceType = implementingType.getInstanceType();
             if(instanceType.implementsList) {
                 var len = instanceType.implementsList.length;
-                this.inNewTargetTypeCheck = true;
                 for(var i = 0; i < len; i++) {
                     var interfaceType = instanceType.implementsList[i];
                     var comparisonInfo = new TypeScript.TypeComparisonInfo();
@@ -18008,7 +17987,6 @@ var TypeScript;
                         }
                     }
                 }
-                this.inNewTargetTypeCheck = false;
             }
         };
         TypeFlow.prototype.typeCheckBaseCalls = function (bases) {
@@ -18103,6 +18081,8 @@ var TypeScript;
                 }
             }
             var prevScope = this.scope;
+            var prevInBoundPropTypeCheck = this.inBoundPropTypeCheck;
+            this.inBoundPropTypeCheck = false;
             var svClassNode = this.thisClassNode;
             this.thisClassNode = classDecl;
             var classType = classDecl.type;
@@ -18127,6 +18107,7 @@ var TypeScript;
                     TypeScript.cloneParentConstructGroupForChildType(classDecl.type, classDecl.baseClass.members[0].type.symbol.type);
                 }
             }
+            this.inBoundPropTypeCheck = prevInBoundPropTypeCheck;
             this.thisType = prevThisType;
             this.thisClassNode = svClassNode;
             this.scope = prevScope;
@@ -18212,10 +18193,12 @@ var TypeScript;
             }
             var mod = moduleDecl.mod;
             var sym = null;
+            var prevInBoundPropTypeCheck = this.inBoundPropTypeCheck;
             var prevScope = this.scope;
             var prevThisType = this.thisType;
             var prevCurrentModDecl = this.checker.currentModDecl;
             this.checker.currentModDecl = moduleDecl;
+            this.inBoundPropTypeCheck = false;
             if(!this.inImportTypeCheck && prevCurrentModDecl && TypeScript.hasFlag(moduleDecl.modFlags, TypeScript.ModuleFlags.IsDynamic) && !TypeScript.hasFlag(moduleDecl.modFlags, TypeScript.ModuleFlags.Ambient)) {
                 this.checker.errorReporter.simpleError(moduleDecl, "Dynamic modules may not be nested within other modules");
             }
@@ -18226,6 +18209,7 @@ var TypeScript;
             this.checker.currentModDecl = prevCurrentModDecl;
             this.thisType = prevThisType;
             this.scope = prevScope;
+            this.inBoundPropTypeCheck = prevInBoundPropTypeCheck;
             moduleDecl.type = mod;
             if(sym) {
                 sym.typeCheckStatus = TypeScript.TypeCheckStatus.Finished;

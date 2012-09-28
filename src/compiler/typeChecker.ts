@@ -355,7 +355,9 @@ module TypeScript {
 
         public cleanStartedPTO() {
             for (var i = 0; i < this.provisionalStartedTypecheckObjects.length; i++) {
-                this.provisionalStartedTypecheckObjects[i].typeCheckStatus = TypeCheckStatus.NotStarted;
+                if (this.provisionalStartedTypecheckObjects[i].typeCheckStatus == this.typingContextStack.getContextID()) {
+                    this.provisionalStartedTypecheckObjects[i].typeCheckStatus = TypeCheckStatus.NotStarted;
+                }
             }
             this.provisionalStartedTypecheckObjects = [];
         }
@@ -1248,14 +1250,14 @@ module TypeScript {
                             }
 
                             // clean the type
-                            if (hadProvisionalErrors) {
-                                cxt = this.currentContextualTypeContext;
-                                this.typeCheckWithContextualType(null, true, true, args.members[j]);
-                                if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
-                                    miss = true;
-                                }
-                                this.cleanStartedPTO();
-                            }
+                            //if (hadProvisionalErrors) {
+                            //    cxt = this.currentContextualTypeContext;
+                            //    this.typeCheckWithContextualType(null, true, true, args.members[j]);
+                            //    if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
+                            //        miss = true;
+                            //    }
+                            //    this.cleanStartedPTO();
+                            //}
 
                             this.resetProvisionalErrors();
                             if (miss) {
@@ -1281,16 +1283,16 @@ module TypeScript {
                         }
 
                         // clean the type
-                        if (hadProvisionalErrors) {
-                            this.typeCheckWithContextualType(null, true, true, args.members[j]);
+                        //if (hadProvisionalErrors) {
+                        //    this.typeCheckWithContextualType(null, true, true, args.members[j]);
 
-                            // is the "cleaned" type even assignable?
-                            if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
-                                miss = true;
-                            }
+                        //    // is the "cleaned" type even assignable?
+                        //    if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
+                        //        miss = true;
+                        //    }
 
-                            this.cleanStartedPTO();
-                        }
+                        //    this.cleanStartedPTO();
+                        //}
 
                         this.resetProvisionalErrors();
                         if (miss) {
@@ -1315,14 +1317,14 @@ module TypeScript {
                         }
 
                         // clean the type
-                        if (hadProvisionalErrors) {
-                            this.typeCheckWithContextualType(null, true, true, args.members[j]);
-                            if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
-                                miss = true;
-                            }
+                        //if (hadProvisionalErrors) {
+                        //    this.typeCheckWithContextualType(null, true, true, args.members[j]);
+                        //    if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
+                        //        miss = true;
+                        //    }
 
-                            this.cleanStartedPTO();
-                        }
+                        //    this.cleanStartedPTO();
+                        //}
 
                         this.resetProvisionalErrors();
                         if (miss) {
@@ -1734,7 +1736,8 @@ module TypeScript {
 
             var comboId = (source.typeID << 16) | target.typeID;
 
-            if (comparisonCache[comboId]) {
+            // In the case of a 'false', we want to short-circuit a recursive typecheck
+            if (comparisonCache[comboId] != undefined) {
                 return true;
             }
 

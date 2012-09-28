@@ -145,9 +145,6 @@ module TypeScript {
                     context.members = members.publicMembers;
                 }
             }
-            else {
-                context.tcContext.checker.errorReporter.simpleError(alias, "Potentially circular alias reference - could not obtain type of alias");
-            }
         }
 
         return symbol;

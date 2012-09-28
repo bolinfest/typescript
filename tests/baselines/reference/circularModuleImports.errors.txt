@@ -1,4 +1,3 @@
-0.ts line 7 col 15: Potentially circular alias reference - could not obtain type of alias
 0.ts line 5 col 15: Could not resolve module alias 'A'
 0.ts line 5 col 15: A module cannot be aliased to a non-module type
 0.ts line 7 col 15: A module cannot be aliased to a non-module type

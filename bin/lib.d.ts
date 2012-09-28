@@ -76,7 +76,7 @@ declare var Object: {
 interface Function {
     apply(thisArg: any, ...argArray: any[]): any;
     call(thisArg: any, ...argArray: any[]): any;
-    bind(thisArg: any, ...argArray: any[]): Function; 
+    bind(thisArg: any, ...argArray: any[]): any; 
     prototype: any;
     length: number;
 }
