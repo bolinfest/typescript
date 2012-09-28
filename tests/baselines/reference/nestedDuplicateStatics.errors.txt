@@ -1,3 +1,0 @@
-// 0.str  line 4 col 4: Statics may only be class members
-// 0.str  line 5 col 4: Statics may only be class members
-0.str line 4 col 4: unreachable code

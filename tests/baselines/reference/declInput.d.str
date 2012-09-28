@@ -1,8 +1,0 @@
-interface bar {
-}
-declare class bar {
-    public f(): string;
-    public g();
-    public h(x?, y?, z?): void;
-}
-
