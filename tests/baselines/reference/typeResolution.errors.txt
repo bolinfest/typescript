@@ -1,4 +1,4 @@
-// 0.ts  line 94 col 17: Expected ';'
+// 0.ts  line 94 col 17: Function declarations are not permitted within interfaces, ambient modules or classes
 0.ts line 44 col 54: use of variable 'd2' that is not definitely assigned
 0.ts line 43 col 40: use of variable 'd1' that is not definitely assigned
 0.ts line 40 col 63: use of variable 'c2' that is not definitely assigned

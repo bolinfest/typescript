@@ -942,7 +942,7 @@ module TypeScript {
                 var staticFuncDecl = false;
                 var limChar = this.scanner.pos;
                 if (requiresSignature) {
-                    this.chkCurTok(TokenID.SColon, "Expected ';'", errorRecoverySet);
+                    this.chkCurTok(TokenID.SColon, this.tok.tokenId == TokenID.LCurly ? "Function declarations are not permitted within interfaces, ambient modules or classes" : "Expected ';'", errorRecoverySet);
                 }
                 else {
                     if (!wasShorthand || isAnonLambda) {
