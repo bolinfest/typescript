@@ -1,1 +1,1 @@
-// 0.ts  line 8 col 19: Expected ';'
+// 0.ts  line 8 col 19: Function declarations are not permitted within interfaces, ambient modules or classes
