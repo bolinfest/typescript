@@ -746,7 +746,8 @@ module TypeScript {
                 if (this.tok.tokenId == TokenID.Dot) {
                     var curpos = this.scanner.pos;
                     this.tok = this.scanner.scan();
-                    if ((this.tok.tokenId == TokenID.ID) || convertTokToID(this.tok, this.strictMode)) {
+                    // Don't allow reserved words if immediately after a new line and error recovery is enabled
+                    if ((this.tok.tokenId == TokenID.ID) || ((!this.errorRecovery || !this.scanner.lastTokenHadNewline()) && convertTokToID(this.tok, this.strictMode))) {
                         var op2 = new Identifier(this.tok.getText());
                         op2.minChar = this.scanner.startPos;
                         op2.limChar = this.scanner.pos;
@@ -3036,8 +3037,8 @@ module TypeScript {
                         var name: Identifier = null;
                         var curpos = this.scanner.pos;
                         this.tok = this.scanner.scan();
-                        // TODO: enable reserved words
-                        if ((this.tok.tokenId == TokenID.ID) || (!this.scanner.lastTokenHadNewline() && convertTokToIDName(this.tok))) {
+                        // Don't allow reserved words if immediately after a new line and error recovery is enabled
+                        if ((this.tok.tokenId == TokenID.ID) || ((!this.errorRecovery || !this.scanner.lastTokenHadNewline()) && convertTokToIDName(this.tok))) {
                             ast.flags |= ASTFlags.DotLHS;
                             name = this.createRef(this.tok.getText(), this.scanner.startPos);
                             name.limChar = this.scanner.pos;

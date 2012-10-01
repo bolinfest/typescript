@@ -186,5 +186,25 @@ describe('getMemberCompletionList', function () {
                 'foo': 'number',
             });
         });
+
+         it("get members of variable before keyword in named type", function () {
+            var namesAndTypes = memberCompletionAtPos(code, 102, 20);
+
+            verifyNumberOfMembers(namesAndTypes, 2);
+            verifyNamesAndTypes(namesAndTypes, {
+                'C1': 'new() => TypeModule1.C1',
+                'C2': 'new() => TypeModule1.C2'
+            });
+        });
+
+        it("get members of variable before keyword in doted expression", function () {
+            var namesAndTypes = memberCompletionAtPos(code, 108, 12);
+
+            verifyNumberOfMembers(namesAndTypes, 2);
+            verifyNamesAndTypes(namesAndTypes, {
+                'C1': 'new() => TypeModule1.C1',
+                'C2': 'new() => TypeModule1.C2'
+            });
+        });
     });
 });
