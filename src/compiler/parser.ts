@@ -617,7 +617,7 @@ module TypeScript {
                 var minChar = this.scanner.startPos;
                 var isDynamicMod = false;
 
-                if ((this.tok.tokenId == TokenID.ID) || (this.tok.tokenId == TokenID.QString) || convertTokToID(this.tok, this.strictMode)) {
+                if ((this.tok.tokenId == TokenID.ID) || (this.tok.tokenId == TokenID.QString) || (!isPrimitiveTypeToken(this.tok) && convertTokToID(this.tok, this.strictMode))) {
                     var nameText = this.tok.getText();
 
                     if (this.tok.tokenId == TokenID.QString) {
@@ -1478,7 +1478,7 @@ module TypeScript {
             // grab the class's name
             this.tok = this.scanner.scan();
             var name: Identifier = null;
-            if ((this.tok.tokenId == TokenID.ID) || convertTokToID(this.tok, this.strictMode)) {
+            if ((this.tok.tokenId == TokenID.ID) || (!isPrimitiveTypeToken(this.tok) && convertTokToID(this.tok, this.strictMode)) ) {
                 name = new Identifier(this.tok.getText());
                 name.minChar = this.scanner.startPos;
                 name.limChar = this.scanner.pos;
@@ -1941,7 +1941,7 @@ module TypeScript {
             this.tok = this.scanner.scan();
             var minChar = this.scanner.pos;
             var name: Identifier = null;
-            if ((this.tok.tokenId == TokenID.ID) || convertTokToID(this.tok, this.strictMode)) {
+            if ((this.tok.tokenId == TokenID.ID) || (!isPrimitiveTypeToken(this.tok) && convertTokToID(this.tok, this.strictMode))) {
                 name = new Identifier(this.tok.getText());
                 name.minChar = this.scanner.startPos;
                 name.limChar = this.scanner.pos;

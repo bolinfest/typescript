@@ -1381,4 +1381,16 @@ module TypeScript {
     export function getPositionFromLineColumn(script: TypeScript.Script, line: number, column: number): number {
         return script.locationInfo.lineMap[line] + (column - 1);
     }
+    
+    // Return trun if the token is a primitive type
+    export function isPrimitiveTypeToken(token: Token) {
+        switch (token.tokenId) {
+            case TokenID.ANY:
+            case TokenID.BOOL:
+            case TokenID.NUMBER:
+            case TokenID.STRING:
+                return true;
+        }
+        return false;
+    }
 }
