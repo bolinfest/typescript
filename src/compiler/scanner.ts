@@ -1382,13 +1382,24 @@ module TypeScript {
         return script.locationInfo.lineMap[line] + (column - 1);
     }
     
-    // Return trun if the token is a primitive type
+    // Return true if the token is a primitive type
     export function isPrimitiveTypeToken(token: Token) {
         switch (token.tokenId) {
             case TokenID.ANY:
             case TokenID.BOOL:
             case TokenID.NUMBER:
             case TokenID.STRING:
+                return true;
+        }
+        return false;
+    }
+
+    // Return true if the token is a primitive type
+    export function isModifier(token: Token) {
+        switch (token.tokenId) {
+            case TokenID.PUBLIC:
+            case TokenID.PRIVATE:
+            case TokenID.STATIC:
                 return true;
         }
         return false;

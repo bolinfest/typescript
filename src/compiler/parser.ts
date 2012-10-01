@@ -1081,12 +1081,21 @@ module TypeScript {
                             this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
                         }
                     }
+                    else if (this.tok.tokenId == TokenID.STATIC && isClassConstr) {
+                        this.reportParseError("Static properties can not be declared as parameter properties");
+                        this.tok = this.scanner.scan();
+                    }
 
                     if (argFlags != VarFlags.None) {
                         if (!isClassConstr) {
                             this.reportParseError("only constructor parameters can be properties");
                         }
                         this.tok = this.scanner.scan();
+
+                        if (isModifier(this.tok)) { 
+                            this.reportParseError("Multiple modifiers may not be applied to parameters");
+                            this.tok = this.scanner.scan();
+                        }
 
                         if (this.inferPropertiesFromThisAssignment && this.tok.tokenId == TokenID.THIS) {
                             if (!isClassConstr) {
