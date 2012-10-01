@@ -82,7 +82,7 @@
                   {"nodeType": "Name", "minChar": 331, "limChar": 332, "startLine": 18, "startCol": 13, "endLine": 18, "endCol": 14, "children": []},
                   {"nodeType": "Name", "minChar": 333, "limChar": 334, "startLine": 18, "startCol": 15, "endLine": 18, "endCol": 16, "children": []}]},
                 {"nodeType": "List", "minChar": 334, "limChar": 336, "startLine": 18, "startCol": 16, "endLine": 18, "endCol": 18, "children": []}]}]},
-            {"nodeType": "Name", "minChar": 341, "limChar": 343, "startLine": 20, "startCol": 1, "endLine": 20, "endCol": 3, "children": []},
+            {"nodeType": "Name", "minChar": 341, "limChar": 387, "startLine": 20, "startCol": 1, "endLine": 23, "endCol": 7, "children": []},
             {"nodeType": "Comment", "minChar": 344, "limChar": 357, "startLine": 20, "startCol": 4, "endLine": 20, "endCol": 17, "children": []}]},
           {"nodeType": "Comment", "minChar": 204, "limChar": 217, "startLine": 11, "startCol": 4, "endLine": 11, "endCol": 17, "children": []}]}]}]}
 }

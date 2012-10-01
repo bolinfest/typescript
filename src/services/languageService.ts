@@ -1073,8 +1073,11 @@ module Services {
                     enclosingScopeContext.pos - enclosingScopeContext.getScriptFragmentPosition(),
                     TypeScript.GetAstPathOptions.EdgeInclusive | TypeScript.GetAstPathOptions.DontPruneSearchBasedOnPosition);
 
+                if (this.isCompletionListBlocker(path)) { 
+                    this.logger.log("Returning an empty list because position is inside a comment");
+                }
                 // Special case for object literals
-                if (!this.isCompletionListBlocker(path) && this.isObjectLiteralMemberNameCompletion(enclosingScopeContext)) {
+                else if (this.isObjectLiteralMemberNameCompletion(enclosingScopeContext)) {
                     this.logger.log("Completion list for members of object literal");
                     return getCompletions(true);
                 }

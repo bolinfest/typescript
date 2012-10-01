@@ -3968,6 +3968,10 @@ module TypeScript {
                         ast.flags |= ASTFlags.ExplicitSemicolon;
                         break;
                     case TokenID.EOF:
+                        // Extend any incomplete statements to include EOF token. This makes sure that this node is in the path 
+                        // when completion or parameter help is requested.
+                        ast.limChar = this.scanner.pos;
+                        // Intentional fallthrough
                     case TokenID.RCurly:
                         ast.flags |= ASTFlags.AutomaticSemicolon;
                         if (this.style_requireSemi) {
