@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path="io.ts" />
 
 interface IOptions {
@@ -31,7 +34,7 @@ class OptionsParser {
 
     public options: IOptions[] = [];
 
-    constructor (property host: IIO) {
+    constructor (public host: IIO) {
     }
 
     public printUsage() {
@@ -121,8 +124,6 @@ class OptionsParser {
         this.options.push(config);
     }
 
-
-
     // Parse an arguments string
     public parseString(argString: string) {
         var position = 0;
@@ -193,7 +194,7 @@ class OptionsParser {
 
         while (position < args.length) {
             var current = consume();
-            var match = current.match(/^(--?|\/|@)(.*)/);
+            var match = current.match(/^(--?|@)(.*)/);
             var value = null;
 
             if (match) {
@@ -204,9 +205,8 @@ class OptionsParser {
                     var option = this.findOption(arg);
 
                     if (option === null) {
-                        this.host.printLine("Unknown option " + arg);
-                        this.host.printLine("");
-                        this.printUsage();
+                        this.host.printLine("Unknown option '" + arg +"'");
+                        this.host.printLine("Use the '--help' flag to see options");
                     } else {
                         if (!option.flag)
                             value = consume();

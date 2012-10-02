@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts'/>
 ///<reference path='io.ts'/>
 ///<reference path='optionsParser.ts'/>
@@ -132,7 +135,7 @@ class BatchCompiler {
                     code.content = this.ioHost.readFile(code.path);
                 }
 
-                if (code.content != null) {
+                if (code.content) {
                     if (this.compilationSettings.parseOnly) {
                         compiler.parseUnit(code.content, code.path);
                     }
@@ -147,7 +150,7 @@ class BatchCompiler {
             catch (err) {
                 compiler.errorReporter.hasErrors = true;
                 // This includes syntax errors thrown from error callback if not in recovery mode
-                if (errout != null)
+                if (errout)
                     errout.WriteLine(err.message)
                 else
                     this.ioHost.stderr.WriteLine(err.message);
@@ -203,7 +206,7 @@ class BatchCompiler {
             var unit = this.compilationEnvironment.code[i];
             
             var outputFileName: string = unit.path;
-            if (TypeScript.isTSCFile(outputFileName)) {
+            if (TypeScript.isTSFile(outputFileName)) {
                 outputFileName = outputFileName.replace(/\.ts$/, ".js");
             } else if (TypeScript.isSTRFile(outputFileName)) {
                 outputFileName = outputFileName.replace(/\.str$/, ".js");
@@ -224,18 +227,10 @@ class BatchCompiler {
         var opts = new OptionsParser(this.ioHost);
 
         opts.option('out', {
-            usage: 'File to create',
+            usage: 'Concatenate and emit output to single file',
             type: 'file',
             set: (str) => {
                 this.compilationSettings.outputOne(str);
-            }
-        });
-
-        opts.option('err', {
-            usage: 'File to send error messages to',
-            type: 'file',
-            set: (str) => {
-                this.compilationSettings.errorFileName = str;
             }
         });
 
@@ -246,7 +241,8 @@ class BatchCompiler {
                 this.compilationSettings.setStyleOptions(str);
             }
         });
-        opts.flag('map', {
+
+        opts.flag('sourcemap', {
             usage: 'Generates corresponding .map file',
             experimental: true,
             set: () => {
@@ -254,8 +250,8 @@ class BatchCompiler {
             }
         });
 
-        opts.flag('generatedeclarations', {
-            usage: 'Generates corresponding .d.str file',
+        opts.flag('declarations', {
+            usage: 'Generates corresponding .d.ts file',
             set: () => {
                 this.compilationSettings.generateDeclarationFiles = true;
             }
@@ -264,18 +260,21 @@ class BatchCompiler {
         opts.option('reference', {
             usage: 'Add a reference to the compilation',
             type: 'file',
+            experimental: true,
             set: (str) => {
                 code = new TypeScript.SourceUnit(str, null);
                 this.compilationEnvironment.residentCode.push(code);
             }
         }, 'r');
 
-        opts.flag('watch', {
-            usage: 'Watch output files',
-            set: () => {
-                this.compilationSettings.watch = true;
-            }
-        }, 'w');
+        if (this.ioHost.watchFiles) {
+            opts.flag('watch', {
+                usage: 'Watch output files',
+                set: () => {
+                    this.compilationSettings.watch = true;
+                }
+            }, 'w');
+        }
 
         opts.flag('exec', {
             usage: 'Execute the script after compilation',
@@ -286,6 +285,7 @@ class BatchCompiler {
 
         opts.flag('parse', {
             usage: 'Parse only',
+            experimental: true,
             set: () => {
                 this.compilationSettings.parseOnly = true;
             }
@@ -305,6 +305,7 @@ class BatchCompiler {
 
         opts.flag('errorrecovery', {
             usage: 'Enable error recovery',
+            experimental: true,
             set: () => {
                 this.compilationSettings.errorRecovery = true;
             }
@@ -345,6 +346,7 @@ class BatchCompiler {
 
         opts.flag('noerroronwith', {
             usage: 'Allow with statements',
+            experimental: true,
             set: () => {
                 this.compilationSettings.errorOnWith = false;
             }
@@ -352,6 +354,7 @@ class BatchCompiler {
 
         opts.flag('noresolve', {
             usage: 'Skip resolution and preprocessing',
+            experimental: true,
             set: () => {
                 this.compilationSettings.resolve = false;
                 this.compilationSettings.preprocess = false;
@@ -376,6 +379,7 @@ class BatchCompiler {
 
         opts.flag('nooptimizemodules', {
             usage: 'Do not optimize module codegen',
+            experimental: true,
             set: () => {
                 TypeScript.optimizeModuleCodeGen = false;
             }
@@ -390,7 +394,7 @@ class BatchCompiler {
 
 
         opts.flag('inferProperties', {
-            usage: 'Infer ES6 class properties from top-level assignments to \'this\'',
+            usage: 'Infer class properties from top-level assignments to \'this\'',
             experimental: true,
             set: () => {
                 this.compilationSettings.inferPropertiesFromThisAssignment = true;
@@ -398,50 +402,50 @@ class BatchCompiler {
         });
 
         opts.option('target', {
-            usage: 'Specify ES version target. "ES3", "ES5", and "ES6" are supported.',
-            type: 'module',
+            usage: 'Specify ECMAScript target version: "ES3" (default), or "ES5"',
+            type: 'VER',
             set: (type) => {
                 type = type.toLowerCase();
 
                 if (type === 'es3') {
-                    TypeScript.codeGenTarget = TypeScript.CodeGenTarget.ES3;
+                    this.compilationSettings.codeGenTarget = TypeScript.CodeGenTarget.ES3;
                 } else if (type === 'es5') {
-                    TypeScript.codeGenTarget = TypeScript.CodeGenTarget.ES5;
-                } else if (type === 'es6') {
-                    TypeScript.codeGenTarget = TypeScript.CodeGenTarget.ES6;
-                } else {
-                    this.ioHost.printLine("Unknown codegen target - using default ES3 mode");
+                    this.compilationSettings.codeGenTarget = TypeScript.CodeGenTarget.ES5;
+                }
+                else {
+                    this.ioHost.printLine("ECMAScript target version '" + type + "' not supported.  Using default 'ES3' code generation");
                 }
             }
         });
 
         opts.option('module', {
-            usage: 'Specify module codegen. "Node", "Amd", and "Local" are supported.',
-            type: 'module',
+            usage: 'Specify module code generation: "commonjs" (default) or "amd"',
+            type: 'kind',
             set: (type) => {
                 type = type.toLowerCase();
 
-                if (type === 'node') {
+                if (type === 'commonjs' || type === 'node') {
                     TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
                 } else if (type === 'amd') {
                     TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
-                } else if (type === 'local') {
-                    TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Local;
-                } else {
-                    this.ioHost.printLine("Unknown module");
+                }else {
+                    this.ioHost.printLine("Module code generation '" + type + "' not supported.  Using default 'commonjs' code generation");
                 }
             }
         });
+
+        var printedUsage = false;
 
         opts.flag('help', {
             usage: 'Print this message',
             set: (type) => {
                 opts.printUsage();
+                printedUsage = true;
             }
         }, 'h');
 
-        opts.flag('useCaseSensitiveFileName', {
-            usage: 'Use Case-Sensitive operations on file names.',
+        opts.flag('useCaseSensitiveFileResolution', {
+            usage: 'Force file resolution to be case sensitive',
             experimental: true,
             set: () => {
                 this.compilationSettings.useCaseSensitiveFileResolution = true;
@@ -465,7 +469,9 @@ class BatchCompiler {
 
         // If no source files provided to compiler - print usage information
         if (this.compilationEnvironment.code.length == (this.compilationSettings.useDefaultLib ? 1 : 0) && this.compilationEnvironment.residentCode.length == 0) {
-            opts.printUsage();
+            if (!printedUsage) {
+                opts.printUsage();
+            }
             return;
         }
 
@@ -481,25 +487,26 @@ class BatchCompiler {
             for (var iCode = 0 ; iCode < this.resolvedEnvironment.code.length; iCode++) {
                 files.push(this.resolvedEnvironment.code[iCode].path);
             }
-            var canWatch = this.ioHost.watchFiles(files, () => {
-                this.ioHost.printLine("Recompiling(" + new Date() + "): " + files);
-                
-                this.compilationEnvironment.code = [];
-                for (var i = 0; i < opts.unnamed.length; i++) {
-                    code = new TypeScript.SourceUnit(opts.unnamed[i], null);
-                    this.compilationEnvironment.code.push(code);
-                }
+            if (this.ioHost.watchFiles) {
+                this.ioHost.watchFiles(files, () => {
+                    this.ioHost.printLine("Recompiling(" + new Date() + "): " + files);
 
-                // resolve file dependencies, if requested
-                this.resolvedEnvironment = this.compilationSettings.resolve ? this.resolve() : this.compilationEnvironment;
-                
-                this.compile();
-                if(this.compilationSettings.exec) {
-                    this.run();
-                }
-                this.ioHost.printLine("");
-            });
-            if (!canWatch) {
+                    this.compilationEnvironment.code = [];
+                    for (var i = 0; i < opts.unnamed.length; i++) {
+                        code = new TypeScript.SourceUnit(opts.unnamed[i], null);
+                        this.compilationEnvironment.code.push(code);
+                    }
+
+                    // resolve file dependencies, if requested
+                    this.resolvedEnvironment = this.compilationSettings.resolve ? this.resolve() : this.compilationEnvironment;
+
+                    this.compile();
+                    if (this.compilationSettings.exec) {
+                        this.run();
+                    }
+                    this.ioHost.printLine("");
+                });
+            } else {
                 this.ioHost.printLine("Error: Current host does not support -w[atch] option");
             }
         } else {

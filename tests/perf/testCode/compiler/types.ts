@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -42,7 +45,6 @@ module TypeScript {
             return result;
         }
 
-
         static create(text: string): MemberName;
         static create(entry: MemberName, prefix: string, suffix: string): MemberName;
         static create(arg1: any, arg2?: any, arg3?: any): MemberName {
@@ -86,49 +88,6 @@ module TypeScript {
         }
     }
 
-    //export function hasNominalSubtypeRelationship(a: Type, b: Type, depth: number): bool {
-    //    if (depth > 0) {
-    //        var impls: Type[] = a.implementsList;
-    //        var exnds: Type[] = a.extendsList;
-    //        var candidates: Type[] = null;
-    //        if (impls == null && exnds == null) {
-    //            return false;
-    //        }
-    //        else if (impls != null && exnds != null) {
-    //            candidates = impls.concat(exnds);
-    //        }
-    //        else {
-    //            candidates = exnds != null ? exnds : impls;
-    //        }
-
-    //        var imp: Type = null;
-    //        var bbase: Type = null;
-    //        var impbase: Type = null;
-    //        for (var i = 0; i < candidates.length; i++) {
-    //            imp = candidates[i];
-
-    //            if (b == imp) {
-    //                //WScript.Echo("Clause 1, depth: " + depth + ", b: " + b.getTypeName() + ", imp: " + imp.getTypeName());
-    //                return true;
-    //            }
-
-    //            impbase = imp.baseClass();
-    //            bbase = b.baseClass();
-
-    //            // quickly check for a shallow parent relationship
-    //            if ((b == impbase || bbase == imp) || (bbase != null && impbase != null && bbase == impbase)) {
-    //                return true;
-    //            }
-
-    //            if (hasNominalSubtypeRelationship(imp, b, depth - 1)) {
-    //                //WScript.Echo("Clause 3, depth: " + depth + ", b: " + b.getTypeName() + ", imp: " + imp.getTypeName());
-    //                return true;
-    //            }
-    //        }
-    //    }
-    //    return false;
-    //}
-
     var currentTypeID = -1;
 
     export class Type {
@@ -150,11 +109,10 @@ module TypeScript {
         public implementsList: Type[];
         public implementsTypeLinks: TypeLink[];
 
-        // REVIEW: For diagnostic purposes
         public passTypeCreated: number = CompilerDiagnostics.analysisPass;
 
         public baseClass(): Type {
-            if ((this.extendsList != null) && (this.extendsList.length > 0)) {
+            if (this.extendsList && (this.extendsList.length > 0)) {
                 return this.extendsList[0];
             }
             else {
@@ -162,7 +120,6 @@ module TypeScript {
             }
         }
 
-        // array type
         public elementType: Type;
 
         public getArrayBase(arrInstType: Type, checker: TypeChecker): Type {
@@ -188,8 +145,8 @@ module TypeScript {
         // REVIEW: Prune
         public isClass() { return this.instanceType != null; }
         public isArray() { return this.elementType != null; }
-        public isClassInstance(): bool {
-            return ((this.symbol != null) && (this.elementType == null) && ((<TypeSymbol>this.symbol).type.isClass()));
+        public isClassInstance() {
+            return this.symbol && !this.elementType && (<TypeSymbol>this.symbol).type.isClass();
         }
 
         public getInstanceType() {
@@ -225,18 +182,17 @@ module TypeScript {
         // REVIEW: No need for this to be a method
         public callCount() {
             var total = 0;
-            if (this.call != null) {
+            if (this.call) {
                 total += this.call.signatures.length;
             }
-            if (this.construct != null) {
+            if (this.construct) {
                 total += this.construct.signatures.length;
             }
-            if (this.index != null) {
+            if (this.index) {
                 total += this.index.signatures.length;
             }
             return total;
         }
-
 
         // REVIEW: No need for this to be a method
         public getMemberTypeName(prefix: string, topLevel: bool, isElementType: bool, scope: SymbolScope): string {
@@ -246,18 +202,18 @@ module TypeScript {
 
         // REVIEW: No need for this to be a method
         public getMemberTypeNameEx(prefix: string, topLevel: bool, isElementType: bool, scope: SymbolScope): MemberName {
-            if (this.elementType != null) {
+            if (this.elementType) {
                 return MemberName.create(this.elementType.getMemberTypeNameEx(prefix, false, true, scope), "", "[]");
             }
-            else if ((this.symbol != null) && (this.symbol.name != null) && (this.symbol.name != "_anonymous") &&
+            else if (this.symbol && this.symbol.name && this.symbol.name != "_anonymous" &&
                      (((this.call == null) && (this.construct == null) && (this.index == null)) ||
                       (hasFlag(this.typeFlags, TypeFlags.BuildingName)) ||
-                      ((this.members != null) && (!this.isClass())))) {
+                      (this.members && (!this.isClass())))) {
                 var tn = this.symbol.scopeRelativeName(scope);
                 return MemberName.create(tn == "null" ? "any" : tn); // REVIEW: GROSS!!!
             }
             else {
-                if ((this.members != null) || (this.call != null) || (this.construct != null)) {
+                if (this.members || this.call || this.construct) {
                     if (hasFlag(this.typeFlags, TypeFlags.BuildingName)) {
                         return MemberName.create("this");
                     }
@@ -268,7 +224,7 @@ module TypeScript {
                     var signatureCount = 0;
                     var memCount = 0;
                     var delim = "; ";
-                    if (this.members != null) {
+                    if (this.members) {
                         this.members.allMembers.map((key, s, unused) => {
                             var sym = <Symbol>s;
                             if (!hasFlag(sym.flags, SymbolFlags.BuiltIn)) {
@@ -300,7 +256,7 @@ module TypeScript {
                     if (!shortform) {
                         allMemberNames.delim = delim;
                     }
-                    if (this.call != null) {
+                    if (this.call) {
                         signatures = this.call.toStrings(prefix, shortform, scope);
                         for (j = 0, len = signatures.length; j < len; j++) {
                             allMemberNames.add(MemberName.create(signatures[j]));
@@ -308,7 +264,7 @@ module TypeScript {
                         }
                     }
 
-                    if (this.construct != null) {
+                    if (this.construct) {
                         signatures = this.construct.toStrings("new", shortform, scope);
                         for (j = 0, len = signatures.length; j < len; j++) {
                             allMemberNames.add(MemberName.create(signatures[j]));
@@ -316,7 +272,7 @@ module TypeScript {
                         }
                     }
 
-                    if (this.index != null) {
+                    if (this.index) {
                         signatures = this.index.toStrings("", shortform, scope);
                         for (j = 0, len = signatures.length; j < len; j++) {
                             allMemberNames.add(MemberName.create(signatures[j]));
@@ -324,7 +280,6 @@ module TypeScript {
                         }
                     }
 
-                    // TODO: bases
                     if ((curlies) || ((signatureCount > 1) && topLevel)) {
                         allMemberNames.prefix = "{ ";
                         allMemberNames.suffix = "}";
@@ -346,7 +301,7 @@ module TypeScript {
 
         public checkDecl(checker: TypeChecker) {
             if (this.isClassInstance() || this.isClass()) {
-                if (this.symbol.declAST != null) {
+                if (this.symbol.declAST) {
                     checker.typeFlow.inScopeTypeCheckDecl(this.symbol.declAST);
                 }
             }
@@ -357,7 +312,7 @@ module TypeScript {
                 return null;
             }
             else if (this.isDouble()) {
-                if (flow.numberInterfaceType != null) {
+                if (flow.numberInterfaceType) {
                     return flow.numberInterfaceType.memberScope;
                 }
                 else {
@@ -365,7 +320,7 @@ module TypeScript {
                 }
             }
             else if (this.isBoolean()) {
-                if (flow.booleanInterfaceType != null) {
+                if (flow.booleanInterfaceType) {
                     return flow.booleanInterfaceType.memberScope;
                 }
                 else {
@@ -373,15 +328,15 @@ module TypeScript {
                 }
             }
             else if (this == flow.stringType) {
-                if (flow.stringInterfaceType != null) {
+                if (flow.stringInterfaceType) {
                     return flow.stringInterfaceType.memberScope;
                 }
                 else {
                     return null;
                 }
             }
-            else if (this.elementType != null) {
-                if (flow.arrayInterfaceType != null) {
+            else if (this.elementType) {
+                if (flow.arrayInterfaceType) {
                     var arrInstType = this.elementType.getArrayBase(flow.arrayInterfaceType, flow.checker);
                     return arrInstType.memberScope;
                 }
@@ -395,14 +350,11 @@ module TypeScript {
         }
 
         public isReferenceType() {
-            return (this.members != null) || (this.extendsList != null) ||
-                (this.construct != null) || (this.call != null) || (this.index != null) ||
-                (this.elementType != null);
+            return this.members || this.extendsList ||
+                this.construct || this.call || this.index ||
+                this.elementType;
         }
 
-        // this routine is narrowly focused; it is currently used only
-        // for array type specialization and is not a general substitution mechanism
-        // TODO: implement generics!
         public specializeType(pattern: Type, replacement: Type, checker: TypeChecker, membersOnly: bool): Type {
             if (pattern == this) {
                 return replacement;
@@ -412,7 +364,7 @@ module TypeScript {
                 // assume interface type without bases
                 if (this.isReferenceType()) {
                     result = new Type();
-                    if (this.members != null) {
+                    if (this.members) {
                         result.members = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
 
                         this.members.publicMembers.map((key, s, unused) => {
@@ -427,7 +379,7 @@ module TypeScript {
                             result.members.addPrivateMember(bSym.name, bSym);
                         }, null);
                     }
-                    if (this.ambientMembers != null) {
+                    if (this.ambientMembers) {
                         result.ambientMembers = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
                         this.ambientMembers.publicMembers.map((key, s, unused) => {
                             var sym = <Symbol>s;
@@ -446,21 +398,17 @@ module TypeScript {
                 }
             }
             else {
-                if (this.elementType != null) {
+                if (this.elementType) {
                     if (this.elementType == pattern) {
-                        // pattern[]
                         result = checker.makeArrayType(replacement);
                     }
                     else {
                         if (this.elementType.elementType == pattern) {
-                            // pattern[][]
-                            result =
-                                checker.makeArrayType(checker.makeArrayType(replacement));
+                            result = checker.makeArrayType(checker.makeArrayType(replacement));
                         }
                     }
                 }
-                else if (this.call != null) {
-                    // call with pattern, pattern[], or pattern[][] as parameter
+                else if (this.call) {
                     result = new Type();
                     result.call = this.call.specializeType(pattern, replacement, checker);
                 }
@@ -473,7 +421,7 @@ module TypeScript {
                 return true;
             }
             else {
-                if (this.extendsList != null) {
+                if (this.extendsList) {
                     for (var i = 0, len = this.extendsList.length; i < len; i++) {
                         if (this.extendsList[i].hasBase(baseType)) {
                             return true;
@@ -484,8 +432,7 @@ module TypeScript {
             return false;
         }
 
-        public mergeOrdered(b: Type, checker: TypeChecker): Type {
-            // only one any type
+        public mergeOrdered(b: Type, checker: TypeChecker, comparisonInfo?: TypeComparisonInfo): Type {
             if ((this == checker.anyType) || (b == checker.anyType)) {
                 return checker.anyType;
             }
@@ -510,12 +457,12 @@ module TypeScript {
             else if ((this == checker.undefinedType) && (b != checker.undefinedType)) {
                 return b;
             }
-            else if ((this.elementType != null) && (b.elementType != null)) {
+            else if (this.elementType && b.elementType) {
                 if (this.elementType == b.elementType) {
                     return this;
                 }
                 else {
-                    var mergedET = this.elementType.mergeOrdered(b.elementType, checker);
+                    var mergedET = this.elementType.mergeOrdered(b.elementType, checker, comparisonInfo);
                     if (mergedET == null) {
                         return checker.makeArrayType(checker.anyType);
                     }
@@ -524,10 +471,10 @@ module TypeScript {
                     }
                 }
             }
-            else if (checker.sourceIsSubtypeOfTarget(this, b)) {
+            else if (checker.sourceIsSubtypeOfTarget(this, b, comparisonInfo)) {
                 return b;
             }
-            else if (checker.sourceIsSubtypeOfTarget(b, this)) {
+            else if (checker.sourceIsSubtypeOfTarget(b, this, comparisonInfo)) {
                 return this;
             }
             else {
@@ -557,7 +504,7 @@ module TypeScript {
         }
 
         public isModuleType() { return true; }
-        public hasMembers() { return (this.members != null) || (this.enclosedTypes != null); }
+        public hasMembers() { return this.members != null || this.enclosedTypes != null; }
         public getAllEnclosedTypes() { return this.enclosedTypes; }
         public getAllAmbientEnclosedTypes() { return this.ambientEnclosedTypes; }
         public getPublicEnclosedTypes(): ScopedMembers { return null; }

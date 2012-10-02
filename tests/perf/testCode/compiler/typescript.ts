@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='diagnostics.ts' />
 ///<reference path='flags.ts' />
 ///<reference path='nodeTypes.ts' />
@@ -110,7 +113,7 @@ module TypeScript {
         public persistentTypeState: PersistentGlobalTypeState;
 
 
-        public emitSettings: { minWhitespace: bool; propagateConstants: bool; emitComments: bool; path: string; createFile: (path: string) =>ITextWriter; outputMany: bool;  };
+        public emitSettings: { minWhitespace: bool; propagateConstants: bool; emitComments: bool; path: string; createFile: (path: string) =>ITextWriter; outputMany: bool; };
 
         constructor (public outfile: ITextWriter, public errorOutput: ITextWriter, public logger: ILogger = new NullLogger(), public settings: CompilationSettings = defaultSettings) {
             this.errorReporter = new ErrorReporter(this.outfile);
@@ -122,6 +125,8 @@ module TypeScript {
             this.parser.style_funcInLoop = this.settings.styleSettings.funcInLoop;
             this.parser.inferPropertiesFromThisAssignment = this.settings.inferPropertiesFromThisAssignment;
             this.emitSettings = { minWhitespace: this.settings.minWhitespace, propagateConstants: this.settings.propagateConstants, emitComments: this.settings.emitComments, path: this.settings.outputFileName, createFile: null, outputMany: this.settings.outputMany };
+            
+            codeGenTarget = settings.codeGenTarget;
         }
 
         public timeFunction(funcDescription: string, func: () =>any): any {
@@ -163,7 +168,6 @@ module TypeScript {
             this.parser.errorCallback = fn;
         }
 
-        // REVIEW: Should we enable updates for resident files?
         public updateUnit(prog: string, filename: string, setRecovery: bool) {
             return this.updateSourceUnit(new StringSourceText(prog), filename, setRecovery);
         }
@@ -187,7 +191,7 @@ module TypeScript {
                     this.units[updateResult.unitIndex] = updateResult.script2.locationInfo;
                     for (var i = 0, len = updateResult.parseErrors.length; i < len; i++) {
                         var e = updateResult.parseErrors[i];
-                        if (this.parser.errorCallback != null) {
+                        if (this.parser.errorCallback) {
                             this.parser.errorCallback(e.minChar, e.limChar - e.minChar, e.message, e.unitIndex);
                         }
                     }
@@ -219,13 +223,13 @@ module TypeScript {
                             parseErrors.push(new ErrorEntry(unitIndex, minChar, minChar + charLen, message));
                         };
                         var svErrorCallback = this.parser.errorCallback;
-                        if (svErrorCallback != null)
+                        if (svErrorCallback)
                             this.parser.errorCallback = errorCapture;
 
                         var oldScript = <Script>this.scripts.members[i];
                         var newScript = this.parser.parse(sourceText, filename, i);
 
-                        if (svErrorCallback != null)
+                        if (svErrorCallback)
                             this.parser.errorCallback = svErrorCallback;
 
                         updateResult = UpdateUnitResult.unknownEdits(oldScript, newScript, parseErrors);
@@ -369,16 +373,14 @@ module TypeScript {
             });
         }
 
-        //
         // Return "true" if the incremental typecheck was successful
         // Return "false" if incremental typecheck failed, requiring a full typecheck
-        //
         public attemptIncrementalTypeCheck(updateResult: TypeScript.UpdateUnitResult): bool {
             return this.timeFunction("attemptIncrementalTypeCheck()", () => {
                 // updateResult.kind == editsInsideFunction
                 // updateResult.scope1 == old function
                 // updateResult.scope2 == new function
-                //TODO: What about typecheck errors? How do we replace the old ones with the new ones?
+                //REVIEW: What about typecheck errors? How do we replace the old ones with the new ones?
                 return false;
             });
         }
@@ -419,7 +421,7 @@ module TypeScript {
                         emitter.setSourceMappings(new TypeScript.SourceMapper(fname, outFname, outf, createFile(outFname + SourceMapper.MapFileExtension)));
                     }
                     if (this.settings.generateDeclarationFiles) {
-                        var declareFileName = isSTRFile(fname) ? changePathToDSTR(fname) : isTSFile(fname) ? changePathToDTS(fname) : changePathToDSTR(fname);
+                        var declareFileName = isSTRFile(fname) ? changePathToDSTR(fname) : isTSFile(fname) ? changePathToDTS(fname) : changePathToDTS(fname);
                         emitter.setDeclarationFile(createFile(declareFileName));
                     }
                 }
@@ -431,7 +433,7 @@ module TypeScript {
                         }
                         if (this.settings.generateDeclarationFiles) {
                             var outfname = this.settings.outputFileName;
-                            outfname = isSTRFile(outfname) ? changePathToDSTR(outfname) : isTSFile(outfname) ? changePathToDTS(outfname) : changePathToDSTR(outfname);
+                            outfname = isSTRFile(outfname) ? changePathToDSTR(outfname) : isTSFile(outfname) ? changePathToDTS(outfname) : changePathToDTS(outfname);
                             emitter.setDeclarationFile(createFile(outfname));
                         }
                     }
@@ -495,23 +497,31 @@ module TypeScript {
         constructor (private compiler: TypeScriptCompiler) {
         }
 
-        public getScopeEntries(enclosingScopeContext: EnclosingScopeContext): ScopeEntry[] {
-            var isMemberCompletion = enclosingScopeContext.isMemberCompletion;
-            var scope = enclosingScopeContext != null ?
-                            (isMemberCompletion ?
-                                this.compiler.typeFlow.findMemberScopeAt(enclosingScopeContext) :
-                                enclosingScopeContext.getScope()) :
-                            <SymbolScope>null;
+        public getScope(enclosingScopeContext: EnclosingScopeContext): SymbolScope {
+            if (enclosingScopeContext.enclosingObjectLit && enclosingScopeContext.isMemberCompletion) {
+                return enclosingScopeContext.getObjectLiteralScope();
+            }
+            else if (enclosingScopeContext.isMemberCompletion) {
+                if (enclosingScopeContext.useFullAst) {
+                    return this.compiler.typeFlow.findMemberScopeAtFullAst(enclosingScopeContext)
+                }
+                else {
+                    return this.compiler.typeFlow.findMemberScopeAt(enclosingScopeContext)
+                }
+            }
+            else {
+                return enclosingScopeContext.getScope();
+            }
+        }
 
+        public getScopeEntries(enclosingScopeContext: EnclosingScopeContext): ScopeEntry[] {
+            var scope = this.getScope(enclosingScopeContext);
             if (scope == null) {
                 return [];
             }
 
-            if (enclosingScopeContext.scopeStartAST.nodeType == NodeType.ObjectLit) {
-                scope = (<TypeSymbol>scope.container).type.memberScope;
-            }
             var inScopeNames: IHashTable = new StringHashTable();
-            var allSymbolNames: string[] = scope.getAllSymbolNames(isMemberCompletion);
+            var allSymbolNames: string[] = scope.getAllSymbolNames(enclosingScopeContext.isMemberCompletion);
 
             // there may be duplicates between the type and value tables, so batch the symbols
             // getTypeNamesForNames will prefer the entry in the value table
@@ -552,9 +562,9 @@ module TypeScript {
                     symbol = scope.find(name, publicsOnly, true/*typespace*/);
                 }
 
-                var displayThisMember = symbol && symbol.flags & SymbolFlags.Private ? symbol.container == scope.container : true;  
+                var displayThisMember = symbol && symbol.flags & SymbolFlags.Private ? symbol.container == scope.container : true;
 
-                if (symbol != null) {
+                if (symbol) {
                     // Do not add dynamic module names to the list, since they're not legal as identifiers
                     if (displayThisMember && !isQuoted(symbol.name) && !isRelative(symbol.name)) {
                         var typeName = symbol.getType().getScopedTypeName(enclosingScope);
@@ -563,7 +573,7 @@ module TypeScript {
                 }
                 else {
                     // Special case for "true" and "false"
-                    // REVIEW: Is this still necessary?
+                    // REVIEW: This may no longer be necessary?
                     if (name == "true" || name == "false") {
                         result.push(new ScopeEntry(name, "bool", this.compiler.typeChecker.booleanType.symbol));
                     }
