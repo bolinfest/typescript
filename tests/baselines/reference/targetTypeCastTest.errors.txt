@@ -1,0 +1,2 @@
+0.ts line 3 col 0: Function declared a non-void return type, but has no return expression
+0.ts line 23 col 0: Function declared a non-void return type, but has no return expression

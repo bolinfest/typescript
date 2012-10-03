@@ -15,6 +15,8 @@ declare class Point
 function Point(x, y) {
     this.x = x;
     this.y = y;
+
+    return this;
 }
 
 declare function EF1(a:number, b:number):number;

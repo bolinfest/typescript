@@ -165,6 +165,16 @@ module TypeScript {
             this.ambientGlobals = new StringHashTable();
             this.ambientGlobalTypes = new StringHashTable();
 
+            // add global types to the global scope
+            this.globalTypes.add(this.voidType.symbol.name, this.voidType.symbol);
+            this.globalTypes.add(this.booleanType.symbol.name, this.booleanType.symbol);
+            this.globalTypes.add(this.doubleType.symbol.name, this.doubleType.symbol);
+            this.globalTypes.add("number", this.doubleType.symbol);
+            this.globalTypes.add(this.stringType.symbol.name, this.stringType.symbol);
+            this.globalTypes.add(this.anyType.symbol.name, this.anyType.symbol);
+            this.globalTypes.add(this.nullType.symbol.name, this.nullType.symbol);
+            this.globalTypes.add(this.undefinedType.symbol.name, this.undefinedType.symbol);
+
             this.dualGlobalValues.secondaryTable = this.globals;
             this.dualGlobalTypes.secondaryTable = this.globalTypes;
             this.dualAmbientGlobalValues.secondaryTable = this.ambientGlobals;
@@ -326,7 +336,7 @@ module TypeScript {
         }
 
         // Unset the current contextual type without disturbing the stack, effectively "killing" the contextual typing process
-        public killTargetType() { this.currentContextualTypeContext = null; this.errorReporter.pushToErrorSink = false; }
+        public killCurrentContextualType() { this.currentContextualTypeContext = null; this.errorReporter.pushToErrorSink = false; }
         public hasTargetType() { return this.currentContextualTypeContext && this.currentContextualTypeContext.contextualType; }
         public getTargetTypeContext() { return this.currentContextualTypeContext; }
 

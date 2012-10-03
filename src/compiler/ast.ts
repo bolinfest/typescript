@@ -2036,6 +2036,10 @@ module TypeScript {
             var typeLink = getTypeLink(this, typeFlow.checker, true);
             typeFlow.checker.resolveTypeLink(typeFlow.scope, typeLink, false);
 
+            if (this.term) {
+                typeFlow.typeCheck(this.term);
+            }
+
             typeFlow.checkForVoidConstructor(typeLink.type, this);
 
             this.type = typeLink.type;

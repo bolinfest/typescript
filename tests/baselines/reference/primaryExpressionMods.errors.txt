@@ -1,2 +1,3 @@
 0.ts line 10 col 7: The name 'm' does not exist in the current scope
 0.ts line 10 col 7: The name 'm' does not exist in the current scope
+0.ts line 10 col 7: The name 'm' does not exist in the current scope

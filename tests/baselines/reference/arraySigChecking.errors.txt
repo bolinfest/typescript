@@ -1,0 +1,1 @@
+0.ts line 11 col 13: Index signatures may only take 'string' or 'number' as their parameter

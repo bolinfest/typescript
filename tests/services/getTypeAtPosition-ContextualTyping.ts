@@ -106,7 +106,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('does not contextually type a function literal to an overloaded function', function() {
             // Function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(39, 8)), '{ (n: any): number; (s1: any): number; }');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(39, 8)), '{ (n: number): number; (s1: string): number; }');
             
             // Parameter
             assert.equal(getTypeAtPosition(fileName, lineToOffset(39, 13)), 'any');
@@ -444,10 +444,10 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
     describe('in a return statement call', function() {
         it('contextually types a function literal with one parameter', function() {
             // function itself
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 65)), '(n: number) => IFoo');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 65)), '(n: any) => IFoo');
             
             // parameter 1
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 68)), 'number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 68)), 'any');
             
             // Return type
             assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 80)), 'IFoo');
@@ -663,30 +663,30 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
             assert.equal(getTypeAtPosition(fileName, lineToOffset(209, 11)), 'number');
             
             // constructor type in 'new' expression
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(212, 21)), '{ origin: Point; new(x: number,y: number): Point; }');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(214, 21)), '{ origin: Point; new(x: number,y: number): Point; }');
             
             // target type function on assignment to 'add'
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(214, 25)), '(dx: number,dy: number) => Point');            
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(216, 25)), '(dx: number,dy: number) => Point');            
             
             // target type of 'add' in object literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(221, 6)), '(dx: number,dy: number) => Point');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(223, 6)), '(dx: number,dy: number) => Point');
             
             // target type of add's 'dx' argument in object literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(221, 19)), 'number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(223, 19)), 'number');
             
             // target type of add's 'dy' argument in object literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(221, 23)), 'number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(223, 23)), 'number');
             
         });
         it('contextually types a lambda to a library function', function() {
             // type of function
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(227, 25)), '(ev: MouseEvent) => any');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(229, 25)), '(ev: MouseEvent) => any');
             
             // type of function param 'ev'
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(227, 31)), 'MouseEvent');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(229, 31)), 'MouseEvent');
             
             // type of 'ev.bubbles'
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(228, 10)), 'bool');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(230, 10)), 'bool');
         });        
     });        
 });

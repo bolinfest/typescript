@@ -21,14 +21,14 @@
 // 0.ts  line 262 col 21: Function declarations are not permitted within interfaces, ambient modules or classes
 // 0.ts  line 267 col 29: Function declarations are not permitted within interfaces, ambient modules or classes
 // 0.ts  line 272 col 0: Unexpected statement block terminator '}'
-0.ts line 61 col 4: Index signatures may only take 'string' or 'number' as their parameter
-0.ts line 63 col 4: Index signatures may take only one parameter
+0.ts line 61 col 5: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 63 col 4: Index signatures may take one and only one parameter
 0.ts line 75 col 4: Signature for 'p7' is duplicated
-0.ts line 125 col 8: Index signatures may only take 'string' or 'number' as their parameter
-0.ts line 127 col 8: Index signatures may take only one parameter
+0.ts line 125 col 9: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 127 col 8: Index signatures may take one and only one parameter
 0.ts line 139 col 8: Signature for 'p7' is duplicated
-0.ts line 204 col 8: Index signatures may only take 'string' or 'number' as their parameter
-0.ts line 206 col 8: Index signatures may take only one parameter
+0.ts line 204 col 9: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 206 col 8: Index signatures may take one and only one parameter
 0.ts line 218 col 8: Signature for 'p7' is duplicated
 0.ts line 245 col 8: Signature for 'pgF' is duplicated
 0.ts line 247 col 8: Signature for 'psF' is duplicated

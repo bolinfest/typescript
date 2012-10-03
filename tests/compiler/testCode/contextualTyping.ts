@@ -34,8 +34,8 @@ var c3t4: () => IFoo = function() { return <IFoo>({}) };
 var c3t5: (n: number) => IFoo = function(n) { return <IFoo>({}) };
 var c3t6: (n: number, s: string) => IFoo = function(n, s) { return <IFoo>({}) };
 var c3t7: {
-    (n: any): number;    
-    (s1: any): number;
+    (n: number): number;    
+    (s1: string): number;
 } = function(n) { return n; };
 
 var c3t8: (n: number, s: string) => number = function(n) { return n; };
@@ -207,6 +207,8 @@ declare class Point
 function Point(x, y) {
     this.x = x;
     this.y = y;
+
+    return this;
 }
 
 Point.origin = new Point(0, 0);

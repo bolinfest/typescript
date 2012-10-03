@@ -414,7 +414,7 @@ module TypeScript {
             this.commentStack = [];
         }
 
-        public lineMap: number[];
+        public lineMap: number[] = [];
         public setSourceText(newSrc: ISourceText, textMode: number) {
         }
         public setErrorHandler(reportError: (message: string) => void ) { 
