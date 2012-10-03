@@ -48,3 +48,11 @@ function foo(a: number, b: number): number {
 function bar(a: number, b: number): number[] {
     return [];
 }
+
+module BugFix3 {
+    declare var f: {
+        (): any;
+        (x: number): string;
+        foo: number;
+    };
+}

@@ -55,3 +55,11 @@ return 0;
 function bar(a:number, b:number) :number[]       {
 return [];
 }
+
+module BugFix3 {
+declare var f: { 
+ (): any;
+   (x: number): string;
+       foo: number;
+};
+}
