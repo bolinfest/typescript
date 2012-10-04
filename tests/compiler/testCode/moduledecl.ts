@@ -80,3 +80,58 @@ module m1 {
     export import m7 = c.a.b;
     export import m8 = c.a.b.ma;
 }
+
+module m {
+    export module m2 {
+        var a = 10;
+        export var b: number;
+    }
+
+    export module m3 {
+        export var c: number;
+    }
+}
+
+module m {
+
+    export module m25 {
+        export module m5 {
+            export var c: number;
+        }
+    }
+}
+
+module m13 {
+    export module m4 {
+        export module m2 {
+            export module m3 {
+                export var c: number;
+            }
+        }
+
+        export function f() {
+            return 20;
+        }
+    }
+}
+
+declare module m4 {
+    export var b;
+}
+
+declare module m5 {
+    export var c;
+}
+
+declare module m43 {
+    export var b = 10;
+}
+
+declare module m55 {
+    export var c = 10;
+}
+
+declare module "m3" {
+    export var b: number;
+}
+import m3 = module ("m3");

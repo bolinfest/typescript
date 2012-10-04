@@ -71,3 +71,42 @@ var m1;
     var m7 = c.a.b;
     var m8 = c.a.b.ma;
 })(m1 || (m1 = {}));
+var m;
+(function (m) {
+    (function (m2) {
+        var a = 10;
+        m2.b;
+    })(m.m2 || (m.m2 = {}));
+    var m2 = m.m2;
+    (function (m3) {
+        m3.c;
+    })(m.m3 || (m.m3 = {}));
+    var m3 = m.m3;
+})(m || (m = {}));
+var m;
+(function (m) {
+    (function (m25) {
+        (function (m5) {
+            m5.c;
+        })(m25.m5 || (m25.m5 = {}));
+        var m5 = m25.m5;
+    })(m.m25 || (m.m25 = {}));
+    var m25 = m.m25;
+})(m || (m = {}));
+var m13;
+(function (m13) {
+    (function (m4) {
+        (function (m2) {
+            (function (m3) {
+                m3.c;
+            })(m2.m3 || (m2.m3 = {}));
+            var m3 = m2.m3;
+        })(m4.m2 || (m4.m2 = {}));
+        var m2 = m4.m2;
+        function f() {
+            return 20;
+        }
+        m4.f = f;
+    })(m13.m4 || (m13.m4 = {}));
+    var m4 = m13.m4;
+})(m13 || (m13 = {}));

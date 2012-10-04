@@ -7,6 +7,7 @@
 ///<reference path='hashTable.ts' />
 ///<reference path='ast.ts' />
 ///<reference path='astWalker.ts' />
+///<reference path='astWalkerCallback.ts' />
 ///<reference path='astPath.ts' />
 ///<reference path='astLogger.ts' />
 ///<reference path='binder.ts' />
@@ -31,6 +32,7 @@
 ///<reference path='referenceResolution.ts' />
 ///<reference path='precompile.ts' />
 ///<reference path='incrementalParser.ts' />
+///<reference path='declarationsEmitter.ts' />
 
 module TypeScript {
 
@@ -395,6 +397,52 @@ module TypeScript {
             });
         }
 
+        public emitDeclarations(outputMany: bool, createFile: (path: string) => ITextWriter) {
+            if (!this.settings.generateDeclarationFiles) {
+                return;
+            }
+
+            if (this.errorReporter.hasErrors) {
+                // There were errors reported, do not generate declaration file
+                return;
+            }
+
+            var declarationsEmitter: DeclarationsEmitter = new DeclarationsEmitter(this.typeChecker, this.emitSettings);
+            var declareFile: ITextWriter = null;
+            for (var i = 0, len = this.scripts.members.length; i < len; i++) {
+                var script = <Script>this.scripts.members[i];
+
+                // If its already a declare file or is resident or does not contain body 
+                if (script.isDeclareFile || script.isResident || script.bod == null) {
+                    continue;
+                }
+
+                // Create or reuse file
+                if (outputMany) {
+                    var fname = this.units[i].filename;
+                    var declareFileName = isSTRFile(fname) ? changePathToDSTR(fname) : isTSFile(fname) ? changePathToDTS(fname) : changePathToDTS(fname);
+                    declareFile = createFile(declareFileName);
+                    declarationsEmitter.setDeclarationsFile(declareFile);
+                }
+                else if (declareFile == null) {
+                    var outfname = this.settings.outputFileName;
+                    outfname = isSTRFile(outfname) ? changePathToDSTR(outfname) : isTSFile(outfname) ? changePathToDTS(outfname) : changePathToDTS(outfname);
+                    declareFile = createFile(outfname);
+                    declarationsEmitter.setDeclarationsFile(declareFile);
+                }
+                //this.typeChecker.locationInfo = script.locationInfo;
+
+                declarationsEmitter.emitDeclarations(script);
+                if (outputMany) {
+                    declareFile.Close();
+                }
+            }
+            if (!outputMany && declareFile) {
+                declareFile.Close();
+
+            }
+        }
+
         public emit(outputMany: bool, createFile: (path: string) => ITextWriter) {
             var emitter: Emitter = null;
             this.emitSettings.createFile = createFile;
@@ -420,21 +468,12 @@ module TypeScript {
                     if (this.settings.mapSourceFiles) {
                         emitter.setSourceMappings(new TypeScript.SourceMapper(fname, outFname, outf, createFile(outFname + SourceMapper.MapFileExtension)));
                     }
-                    if (this.settings.generateDeclarationFiles) {
-                        var declareFileName = isSTRFile(fname) ? changePathToDSTR(fname) : isTSFile(fname) ? changePathToDTS(fname) : changePathToDTS(fname);
-                        emitter.setDeclarationFile(createFile(declareFileName));
-                    }
                 }
                 else {
                     if (emitter == null) {
                         emitter = new Emitter(this.typeChecker, this.outfile, this.emitSettings);
                         if (this.settings.mapSourceFiles) {
                             emitter.setSourceMappings(new TypeScript.SourceMapper(script.locationInfo.filename, this.settings.outputFileName, this.outfile, createFile(this.settings.outputFileName + SourceMapper.MapFileExtension)));
-                        }
-                        if (this.settings.generateDeclarationFiles) {
-                            var outfname = this.settings.outputFileName;
-                            outfname = isSTRFile(outfname) ? changePathToDSTR(outfname) : isTSFile(outfname) ? changePathToDTS(outfname) : changePathToDTS(outfname);
-                            emitter.setDeclarationFile(createFile(outfname));
                         }
                     }
                     else if (this.settings.mapSourceFiles) {
@@ -443,13 +482,10 @@ module TypeScript {
                 }
 
                 this.typeChecker.locationInfo = script.locationInfo;
-                emitter.emitJavascript(script, TokenID.Comma, false, emitter.canWriteDeclFile());
+                emitter.emitJavascript(script, TokenID.Comma, false);
                 if (outputMany) {
                     if (this.settings.mapSourceFiles) {
                         emitter.emitSourceMappings();
-                    }
-                    if (this.settings.generateDeclarationFiles) {
-                        emitter.declFile.Close();
                     }
                     outf.Close();
                 }
@@ -457,9 +493,6 @@ module TypeScript {
             if (!outputMany) {
                 if (this.settings.mapSourceFiles) {
                     emitter.emitSourceMappings();
-                }
-                if (this.settings.generateDeclarationFiles) {
-                    emitter.declFile.Close();
                 }
             }
         }

@@ -172,19 +172,17 @@ class BatchCompiler {
 
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
-            if (this.compilationSettings.generateDeclarationFiles && compiler.errorReporter.hasErrors) {
-                // There were errors reported, do not generate declaration file
-                this.compilationSettings.generateDeclarationFiles = false;
-            }
-
             try {
                 compiler.emit(this.compilationSettings.outputMany, this.ioHost.createFile);
             } catch (err) {
+                compiler.errorReporter.hasErrors = true;
                 // Catch emitter exceptions
                 if (err.message != "EmitError") {
                     throw err;
                 }
             }
+
+            compiler.emitDeclarations(this.compilationSettings.outputMany, this.ioHost.createFile);
         }
 
         if (outfile) {

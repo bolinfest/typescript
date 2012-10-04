@@ -38,4 +38,37 @@ module m1 {
     export import m7 = c.a.b;
     export import m8 = c.a.b.ma;
 }
+module m {
+    export module m2 {
+        export var b: number;
+    }
+    export module m3 {
+        export var c: number;
+    }
+}
+module m.m25.m5 {
+    export var c: number;
+}
+module m13.m4 {
+    export module m2.m3 {
+        export var c: number;
+    }
+    export function f(): number;
+}
+module m4 {
+    export var b;
+}
+module m5 {
+    export var c;
+}
+module m43 {
+    export var b: number;
+}
+module m55 {
+    export var c: number;
+}
+module "m3" {
+    export var b: number;
+}
+import m3 = module ("m3");
 

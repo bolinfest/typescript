@@ -509,7 +509,7 @@ module Harness {
 
         }
 
-        export function generateDeclFile(code: string): string {
+        export function generateDeclFile(code: string, verifyNoDeclFile : bool): string {
             reset();
 
             compiler.settings.generateDeclarationFiles = true;
@@ -519,7 +519,7 @@ module Harness {
 
                 var outputs = {};
 
-                compiler.emit(true, (fn: string) => {
+                compiler.emitDeclarations(true, (fn: string) => {
                     outputs[fn] = new Harness.Compiler.WriterAggregator();
                     return outputs[fn];
                 });
@@ -528,11 +528,16 @@ module Harness {
                     if (fn.indexOf('.d.ts') >= 0) {
                         var writer = <Harness.Compiler.WriterAggregator>outputs[fn];
                         writer.Close();
+                        if (verifyNoDeclFile) {
+                            throw new Error('Compilation should not produce ' + fn);
+                        }
                         return writer.lines.join('\n');
                     }
                 }
 
-                throw new Error('Compilation produced no .d.ts files');
+                if (!verifyNoDeclFile) {
+                    throw new Error('Compilation did not produced .d.ts files');
+                }
             } finally {
                 compiler.settings.generateDeclarationFiles = false;
             }
@@ -589,6 +594,7 @@ module Harness {
                 compiler.updateUnit('', i + '.ts', false/*setRecovery*/);
             }
 
+            compiler.errorReporter.hasErrors = false;
             currentUnit = 0;
         }
 
