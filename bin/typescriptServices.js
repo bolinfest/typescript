@@ -206,6 +206,7 @@ var TypeScript;
         ModuleFlags.ShouldEmitModuleDecl = 1 << 9;
         ModuleFlags.IsWholeFile = 1 << 10;
         ModuleFlags.IsDynamic = 1 << 11;
+        ModuleFlags.MustCaptureThis = 1 << 12;
     })(TypeScript.ModuleFlags || (TypeScript.ModuleFlags = {}));
     var ModuleFlags = TypeScript.ModuleFlags;
     (function (SymbolFlags) {
@@ -252,6 +253,7 @@ var TypeScript;
         VarFlags.ClassConstructorProperty = 1 << 14;
         VarFlags.ClassSuperMustBeFirstCallInConstructor = 1 << 15;
         VarFlags.Constant = 1 << 16;
+        VarFlags.MustCaptureThis = 1 << 17;
     })(TypeScript.VarFlags || (TypeScript.VarFlags = {}));
     var VarFlags = TypeScript.VarFlags;
     (function (FncFlags) {
@@ -4538,6 +4540,7 @@ var TypeScript;
             this.declIndentDelta = 0;
             this.declFile = null;
             this.declContainingAST = null;
+            this.captureThisStmtString = "var _this = this;";
         }
         Emitter.prototype.canWriteDeclFile = function () {
             return this.declFile != null;
@@ -4876,6 +4879,10 @@ var TypeScript;
                 this.writeLineToOutput("; }");
                 this.recordSourceMappingEnd(arg);
             }
+            if(funcDecl.isConstructor && ((funcDecl.classDecl).varFlags & TypeScript.VarFlags.MustCaptureThis)) {
+                this.emitIndent();
+                this.writeLineToOutput(this.captureThisStmtString);
+            }
             if(funcDecl.isConstructor && !classPropertiesMustComeAfterSuperCall) {
                 if(funcDecl.args) {
                     argsLen = funcDecl.args.members.length;
@@ -4902,7 +4909,7 @@ var TypeScript;
             }
             if(hasSelfRef) {
                 this.emitIndent();
-                this.writeLineToOutput("var _this = this;");
+                this.writeLineToOutput(this.captureThisStmtString);
             }
             if(funcDecl.variableArgList) {
                 argsLen = funcDecl.args.members.length;
@@ -5576,6 +5583,10 @@ var TypeScript;
                         this.addDeclIndentDelta();
                     }
                 }
+                if(moduleDecl.modFlags & TypeScript.ModuleFlags.MustCaptureThis) {
+                    this.emitIndent();
+                    this.writeLineToOutput(this.captureThisStmtString);
+                }
                 this.emitJavascriptList(moduleDecl.members, null, TypeScript.TokenID.SColon, true, false, false, writeDeclFile && !moduleDecl.isEnum());
                 if(!isDynamicMod || TypeScript.moduleGenTarget == TypeScript.ModuleGenTarget.Asynchronous) {
                     this.decreaseIndent();
@@ -6224,6 +6235,10 @@ var TypeScript;
                         this.writeLineToOutput("_super.apply(this, arguments);");
                         wroteProps++;
                     }
+                    if(classDecl.varFlags & TypeScript.VarFlags.MustCaptureThis) {
+                        this.emitIndent();
+                        this.writeLineToOutput(this.captureThisStmtString);
+                    }
                     var members = (this.thisClassNode.members).members;
                     for(var i = 0; i < members.length; i++) {
                         if(members[i].nodeType == TypeScript.NodeType.VarDecl) {
@@ -6342,6 +6357,9 @@ var TypeScript;
                     this.writeLineToOutput("    __.prototype = b.prototype;");
                     this.writeLineToOutput("    d.prototype = new __();");
                     this.writeLineToOutput("}");
+                }
+                if(this.checker.mustCaptureGlobalThis) {
+                    this.writeLineToOutput(this.captureThisStmtString);
                 }
             }
         };
@@ -14042,6 +14060,7 @@ var TypeScript;
             this.identicalCache = {
             };
             this.provisionalStartedTypecheckObjects = [];
+            this.mustCaptureGlobalThis = false;
             this.voidType = this.persistentState.voidType;
             this.booleanType = this.persistentState.booleanType;
             this.numberType = this.persistentState.doubleType;
@@ -17012,6 +17031,18 @@ var TypeScript;
                     }
                     if(!foundMeth && firstEncFnc) {
                         firstEncFnc.setHasSelfReference();
+                    } else {
+                        if(!foundMeth) {
+                            if(this.thisClassNode) {
+                                (this.thisClassNode).varFlags |= TypeScript.VarFlags.MustCaptureThis;
+                            } else {
+                                if(this.checker.currentModDecl) {
+                                    this.checker.currentModDecl.modFlags |= TypeScript.ModuleFlags.MustCaptureThis;
+                                } else {
+                                    this.checker.mustCaptureGlobalThis = true;
+                                }
+                            }
+                        }
                     }
                     if(foundMeth && this.thisType) {
                         ast.type = this.thisType;

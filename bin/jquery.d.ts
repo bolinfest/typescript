@@ -167,6 +167,7 @@ interface JQueryStatic {
     /****
      AJAX
     *****/
+    ajax(settings: JQueryAjaxSettings);
     ajax(url: string, settings: JQueryAjaxSettings);
 
     ajaxPrefilter(dataTypes: string, handler: (opts: any, originalOpts: any, jqXHR: JQueryXHR) => any): any;
