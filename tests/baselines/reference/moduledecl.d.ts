@@ -71,4 +71,18 @@ module "m3" {
     export var b: number;
 }
 import m3 = module ("m3");
+module exportTests {
+    export class C1_public {
+        private f2(): number;
+        public f3(): string;
+    }
+    export class C3_public {
+        private getC2_private();
+        private setC2_private(arg): void;
+        private c2;
+        public getC1_public(): C1_public;
+        public setC1_public(arg: C1_public): void;
+        public c1 : C1_public;
+    }
+}
 

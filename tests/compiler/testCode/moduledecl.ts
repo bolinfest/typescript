@@ -135,3 +135,43 @@ declare module "m3" {
     export var b: number;
 }
 import m3 = module ("m3");
+
+module exportTests {
+    export class C1_public {
+        private f2() {
+            return 30;
+        }
+
+        public f3() {
+            return "string";
+        }
+    }
+    class C2_private {
+        private f2() {
+            return 30;
+        }
+
+        public f3() {
+            return "string";
+        }
+    }
+
+    export class C3_public {
+        private getC2_private() {
+            return new C2_private();
+        }
+        private setC2_private(arg: C2_private) {
+        }
+        private get c2() {
+            return new C2_private();
+        }
+        public getC1_public() {
+            return new C1_public();
+        }
+        public setC1_public(arg: C1_public) {
+        }
+        public get c1() {
+            return new C1_public();
+        }
+    }
+}

@@ -89,7 +89,7 @@ module TypeScript {
             }
         }
 
-        private canEmitTypeAnnotationSignature(type: Type, declFlag?: DeclFlags = DeclFlags.None) {
+        private canEmitTypeAnnotationSignature(type: Type, declFlag: DeclFlags = DeclFlags.None) {
             if (type == null) {
                 return false;
             }
@@ -214,13 +214,13 @@ module TypeScript {
             return false;
         }
         
-        private emitArgDecl(argDecl: ArgDecl) {
+        private emitArgDecl(argDecl: ArgDecl, funcDecl: FuncDecl) {
             this.declFile.Write(argDecl.id.text);
             if (argDecl.isOptionalArg()) {
                 this.declFile.Write("?");
             }
             if ((argDecl.typeExpr || argDecl.type != this.checker.anyType) &&
-                this.canEmitTypeAnnotationSignature(argDecl.type)) {
+                this.canEmitTypeAnnotationSignature(argDecl.type, ToDeclFlags(funcDecl.fncFlags))) {
                 this.declFile.Write(": " + this.getTypeSignature(argDecl.type));
             }
         }
@@ -282,7 +282,7 @@ module TypeScript {
                 }
                 for (var i = 0; i < argsLen; i++) {
                     var argDecl = <ArgDecl>funcDecl.args.members[i];
-                    this.emitArgDecl(argDecl);
+                    this.emitArgDecl(argDecl, funcDecl);
                     if (i < (argsLen - 1)) {
                         this.declFile.Write(", ");
                     }
@@ -297,7 +297,7 @@ module TypeScript {
                 else {
                     this.declFile.Write("...");
                 }
-                this.emitArgDecl(lastArg);
+                this.emitArgDecl(lastArg, funcDecl);
             }
 
             if (!funcDecl.isIndexerMember()) {
@@ -308,7 +308,7 @@ module TypeScript {
 
             if (!funcDecl.isConstructor &&
                 (funcDecl.returnTypeAnnotation || funcDecl.signature.returnType.type != this.checker.anyType) &&
-                this.canEmitTypeAnnotationSignature(funcDecl.signature.returnType.type)) {
+                this.canEmitTypeAnnotationSignature(funcDecl.signature.returnType.type, ToDeclFlags(funcDecl.fncFlags))) {
                 this.declFile.Write(": " + this.getTypeSignature(funcDecl.signature.returnType.type));
             }
 
@@ -347,7 +347,13 @@ module TypeScript {
             }
 
             this.emitDeclFlags(ToDeclFlags(accessorSymbol.flags), "var");
-            this.declFile.WriteLine(funcDecl.name.text + " : " + this.getTypeSignature(accessorSymbol.getType()) + ";");
+            this.declFile.Write(funcDecl.name.text);
+            var propertyType = accessorSymbol.getType();
+            if (this.canEmitTypeAnnotationSignature(propertyType, ToDeclFlags(accessorSymbol.flags))) {
+                this.declFile.WriteLine(" : " + this.getTypeSignature(propertyType) + ";");
+            } else {
+                this.declFile.WriteLine(";");
+            }
         }
 
         private emitClassMembersFromConstructorDefinition(funcDecl: FuncDecl) {

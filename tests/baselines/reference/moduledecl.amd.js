@@ -112,4 +112,57 @@ define(["require", "exports"], function(require, exports) {
         var m4 = m13.m4;
     })(m13 || (m13 = {}));
                         
+    var exportTests;
+    (function (exportTests) {
+        var C1_public = (function () {
+            function C1_public() { }
+            C1_public.prototype.f2 = function () {
+                return 30;
+            };
+            C1_public.prototype.f3 = function () {
+                return "string";
+            };
+            return C1_public;
+        })();
+        exportTests.C1_public = C1_public;        
+        var C2_private = (function () {
+            function C2_private() { }
+            C2_private.prototype.f2 = function () {
+                return 30;
+            };
+            C2_private.prototype.f3 = function () {
+                return "string";
+            };
+            return C2_private;
+        })();        
+        var C3_public = (function () {
+            function C3_public() { }
+            C3_public.prototype.getC2_private = function () {
+                return new C2_private();
+            };
+            C3_public.prototype.setC2_private = function (arg) {
+            };
+            Object.defineProperty(C3_public.prototype, "c2", {
+                get: function () {
+                    return new C2_private();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            C3_public.prototype.getC1_public = function () {
+                return new C1_public();
+            };
+            C3_public.prototype.setC1_public = function (arg) {
+            };
+            Object.defineProperty(C3_public.prototype, "c1", {
+                get: function () {
+                    return new C1_public();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            return C3_public;
+        })();
+        exportTests.C3_public = C3_public;        
+    })(exportTests || (exportTests = {}));
 })
