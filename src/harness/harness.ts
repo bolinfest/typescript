@@ -13,6 +13,32 @@ declare var run;
 declare var IO: IIO;
 declare var __dirname; // Node-specific
 
+function switchToForwardSlashes(path: string) {
+    return path.replace(/\\/g, "/");
+}
+
+function filePath(fullPath: string) {
+    fullPath = switchToForwardSlashes(fullPath);
+    var components = fullPath.split("/");
+    var path: string[] = components.slice(0, components.length - 1);
+    return path.join("/") + "/";
+}
+
+var typescriptServiceFileName = filePath(IO.getExecutingFilePath()) + "typescriptServices.js";
+var typescriptServiceFile = IO.readFile(typescriptServiceFileName);
+if (typeof ActiveXObject === "function") {
+    eval(typescriptServiceFile);
+}
+else if (typeof require === "function") {
+    var _fs = require('fs');
+    var _path = require('path');
+    var _module = require('module');
+
+    require.main.filename = typescriptServiceFileName;
+    require.main.paths = _module._nodeModulePaths(_path.dirname(_fs.realpathSync(typescriptServiceFileName)));
+    require.main._compile(typescriptServiceFile, typescriptServiceFileName)
+}
+
 declare module process {
     export function nextTick(callback: () => any): void;
 }
