@@ -1067,6 +1067,17 @@ module TypeScript {
                     if (!foundMeth && firstEncFnc) {
                         firstEncFnc.setHasSelfReference();
                     }
+                    else if (!foundMeth) { // the lambda is bound at the top-level...
+                        if (this.thisClassNode) {
+                            (<ClassDecl>this.thisClassNode).varFlags |= VarFlags.MustCaptureThis;
+                        }
+                        else if (this.checker.currentModDecl) {
+                            this.checker.currentModDecl.modFlags |= ModuleFlags.MustCaptureThis;
+                        }
+                        else {
+                            this.checker.mustCaptureGlobalThis = true;
+                        }
+                    }
 
                     if (foundMeth && this.thisType) {
                         ast.type = this.thisType;

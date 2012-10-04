@@ -274,6 +274,8 @@ module TypeScript {
 
         public provisionalStartedTypecheckObjects: PhasedTypecheckObject[] = [];
 
+        public mustCaptureGlobalThis = false;
+
         constructor (public persistentState: PersistentGlobalTypeState) {
             this.voidType = this.persistentState.voidType;
             this.booleanType = this.persistentState.booleanType;

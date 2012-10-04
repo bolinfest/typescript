@@ -125,6 +125,7 @@ module TypeScript {
         ShouldEmitModuleDecl = 1 << 9,
         IsWholeFile = 1 << 10,
         IsDynamic = 1 << 11,
+        MustCaptureThis = 1 << 12,
     }
 
     export enum SymbolFlags {
@@ -169,6 +170,7 @@ module TypeScript {
         ClassConstructorProperty = 1 << 14,
         ClassSuperMustBeFirstCallInConstructor = 1 << 15,
         Constant = 1 << 16,
+        MustCaptureThis = 1 << 17,
     }
 
     export enum FncFlags {

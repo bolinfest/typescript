@@ -61,6 +61,7 @@ module TypeScript {
         public declIndentDelta = 0;
         public declFile: ITextWriter = null;
         public declContainingAST: AST = null;
+        public captureThisStmtString = "var _this = this;";
 
         constructor (public checker: TypeChecker, public outfile: ITextWriter, public emitOptions: IEmitOptions) { }
 
@@ -455,6 +456,12 @@ module TypeScript {
                 this.writeLineToOutput("; }")
                 this.recordSourceMappingEnd(arg);
             }
+
+            if (funcDecl.isConstructor && ((<ClassDecl>funcDecl.classDecl).varFlags & VarFlags.MustCaptureThis)) {
+                this.emitIndent();
+                this.writeLineToOutput(this.captureThisStmtString);
+            }
+
             if (funcDecl.isConstructor && !classPropertiesMustComeAfterSuperCall) {
                 if (funcDecl.args) {
                     argsLen = funcDecl.args.members.length;
@@ -483,7 +490,7 @@ module TypeScript {
             }
             if (hasSelfRef) {
                 this.emitIndent();
-                this.writeLineToOutput("var _this = this;");
+                this.writeLineToOutput(this.captureThisStmtString);
             }
             if (funcDecl.variableArgList) {
                 argsLen = funcDecl.args.members.length;
@@ -1251,6 +1258,12 @@ module TypeScript {
                         this.addDeclIndentDelta();
                     }
                 }
+
+                if (moduleDecl.modFlags & ModuleFlags.MustCaptureThis) {
+                    this.emitIndent();
+                    this.writeLineToOutput(this.captureThisStmtString);
+                }
+
                 this.emitJavascriptList(moduleDecl.members, null, TokenID.SColon, true, false, false, writeDeclFile && !moduleDecl.isEnum());
                 if (!isDynamicMod || moduleGenTarget == ModuleGenTarget.Asynchronous) {
                     this.decreaseIndent();
@@ -2046,6 +2059,11 @@ module TypeScript {
                         wroteProps++;
                     }
 
+                    if (classDecl.varFlags & VarFlags.MustCaptureThis) {
+                        this.emitIndent();
+                        this.writeLineToOutput(this.captureThisStmtString);
+                    }
+
                     var members = (<ASTList>this.thisClassNode.members).members
 
                     // output initialized properties
@@ -2179,6 +2197,9 @@ module TypeScript {
                     this.writeLineToOutput("    __.prototype = b.prototype;");
                     this.writeLineToOutput("    d.prototype = new __();");
                     this.writeLineToOutput("}");
+                }
+                if (this.checker.mustCaptureGlobalThis) {
+                    this.writeLineToOutput(this.captureThisStmtString);
                 }
             }
         }
