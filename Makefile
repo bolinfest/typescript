@@ -2,7 +2,6 @@ BIN=$(BASE)bin
 BUILT=$(BASE)built
 BUILT_LOCAL=$(BUILT)\local
 BUILT_LOCALTEST=$(BUILT)\localtest
-COMPILER_TESTCODE=$(BASE)tests\compiler\testCode
 
 HOST=$(TYPESCRIPT_HOST)
 

@@ -81,8 +81,6 @@ module TypeScript {
         public firstModAlias: string = null;
         public allSourceMappers: SourceMapper[] = [];
         public sourceMapper: SourceMapper = null;
-        public declDottedModuleName = false;
-        public declIndentDelta = 0;
         public captureThisStmtString = "var _this = this;";
 
         constructor (public checker: TypeChecker, public outfile: ITextWriter, public emitOptions: IEmitOptions) { 
@@ -96,19 +94,8 @@ module TypeScript {
 
         public increaseIndent() {
             this.emitState.indentAmt += this.indenter.indentStep;
-            if (this.declDottedModuleName) {
-                this.addDeclIndentDelta();
-            }
         }
         public decreaseIndent() { this.emitState.indentAmt -= this.indenter.indentStep; }
-
-        public addDeclIndentDelta() {
-            this.declIndentDelta += this.indenter.indentStep;
-        }
-
-        public reduceDeclIndentDelta() {
-            this.declIndentDelta -= this.indenter.indentStep;
-        }
 
         public writeToOutput(s: string) {
             this.outfile.Write(s);
@@ -150,13 +137,12 @@ module TypeScript {
             return temp;
         }
 
-        private getIndentString(declIndent? = false) {
+        private getIndentString() {
             if (this.emitOptions.minWhitespace) {
                 return "";
             }
             else {
-                var indentAmt = this.emitState.indentAmt - (declIndent ? this.declIndentDelta : 0);
-                return this.indenter.getIndent(indentAmt);
+                return this.indenter.getIndent(this.emitState.indentAmt);
             }
         }
 
@@ -595,9 +581,6 @@ module TypeScript {
 
             if (!hasFlag(moduleDecl.modFlags, ModuleFlags.Ambient)) {
                 var isDynamicMod = hasFlag(moduleDecl.modFlags, ModuleFlags.IsDynamic);
-                var oldDeclIndentDelta = this.declIndentDelta;
-                var wasDottedModuleDecl = this.declDottedModuleName;
-                var oldDeclContainingAST: AST = null;
                 var prevOutFile = this.outfile;
                 var temp = this.setContainer(EmitContainer.Module);
                 var svModuleName = this.moduleName;
@@ -671,10 +654,6 @@ module TypeScript {
                 // body - don't indent for Node
                 if (!isDynamicMod || moduleGenTarget == ModuleGenTarget.Asynchronous) {
                     this.increaseIndent();
-                    if (isDynamicMod) {
-                        // We dont emit declares for these so add the delta
-                        this.addDeclIndentDelta();
-                    }
                 }
 
                 if (moduleDecl.modFlags & ModuleFlags.MustCaptureThis) {
@@ -685,10 +664,6 @@ module TypeScript {
                 this.emitJavascriptList(moduleDecl.members, null, TokenID.SColon, true, false, false);
                 if (!isDynamicMod || moduleGenTarget == ModuleGenTarget.Asynchronous) {
                     this.decreaseIndent();
-                    if (isDynamicMod) {
-                        // We dont emit declares for these so add the delta
-                        this.reduceDeclIndentDelta();
-                    }
                 }
                 this.emitIndent();
 
