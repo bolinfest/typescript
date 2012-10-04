@@ -232,11 +232,11 @@ module TypeScript {
             
             if (!isInterfaceMember && !funcDecl.isOverload) {
                 if (funcDecl.isConstructor) {
-                    if (funcDecl.type.construct.signatures.length > 1) {
+                    if (funcDecl.type.construct && funcDecl.type.construct.signatures.length > 1) {
                         return false;
                     }
                 } else {
-                    if (funcDecl.type.call.signatures.length > 1) {
+                    if (funcDecl.type.call && funcDecl.type.call.signatures.length > 1) {
                         // This means its implementation of overload signature. do not emit
                         return false;
                     }
