@@ -990,7 +990,7 @@ module TypeScript {
             if (len && funcDecl.variableArgList) {
                 if (!signature.parameters[len - 1].parameter.typeLink.type.elementType) {
                     this.errorReporter.simpleErrorFromSym(signature.parameters[len - 1].parameter.symbol, "... parameter must have array type");
-                    signature.parameters[len - 1].parameter.typeLink.type.elementType = this.makeArrayType(signature.parameters[len - 1].parameter.typeLink.type);
+                    signature.parameters[len - 1].parameter.typeLink.type = this.makeArrayType(signature.parameters[len - 1].parameter.typeLink.type);
                 }
             }
             this.resolveTypeLink(scope, signature.returnType,
