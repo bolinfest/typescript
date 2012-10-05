@@ -2256,7 +2256,7 @@ module TypeScript {
                 }
                 var text = this.tok.getText();
                 if (this.strictMode && (text == "eval")) {
-                    this.reportParseError("can not name a variable eval in strict mode");
+                    this.reportParseError("'eval' may not name a variable in strict mode");
                 }
                 varDecl = this.makeVarDecl(new Identifier(text), this.nestingLevel);
                 varDecl.id.minChar = this.scanner.startPos;

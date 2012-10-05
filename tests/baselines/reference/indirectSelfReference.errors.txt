@@ -1,4 +1,2 @@
 0.ts line 1 col 0: Type 'a' is recursively referenced as a base class of itself
 0.ts line 2 col 0: Type 'b' is recursively referenced as a base class of itself
-0.ts line 2 col 0: Base type 'b' is referenced before its declaration
-0.ts line 1 col 0: Base type 'a' is referenced before its declaration
