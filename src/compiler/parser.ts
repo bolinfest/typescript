@@ -1108,6 +1108,11 @@ module TypeScript {
                     else if (this.tok.tokenId == TokenID.Ellipsis) {
                         sawEllipsis = true;
                         this.tok = this.scanner.scan();
+
+                        if (!(this.tok.tokenId == TokenID.ID) || convertTokToID(this.tok, this.strictMode)) {
+                            this.reportParseError("'...' parameters require both a parameter name and an array type annotation to be specified");
+                            sawEllipsis = false; // Do not treat this parameter as vararg
+                        }
                     }
 
                     var argId: Identifier = null;

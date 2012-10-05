@@ -1,0 +1,1 @@
+// 0.ts  line 1 col 15: '...' parameters require both a parameter name and an array type annotation to be specified
