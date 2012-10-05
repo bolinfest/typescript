@@ -475,6 +475,14 @@ describe("Compiling a project", function (done) {
             , outputFiles: ['consume.js', 'decl.js']
             , skipRun: true
     });
+
+    tests.push({
+        scenario: 'circular referencing - 2'
+            , projectRoot: 'tests/projects/circular referencing - 2'
+            , inputFiles: ['A.ts']
+            , collectedFiles: ['A.ts', 'B.ts', 'C.ts']
+            , outputFiles: ['A.js', 'B.js', 'C.js']
+    });
     
 
     for (var i = 0; i < tests.length; i++) {
