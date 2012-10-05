@@ -59,6 +59,10 @@ module TypeScript {
         return modName;
     }
 
+    export function getDeclareFilePath(fname: string) {
+        return isSTRFile(fname) ? changePathToDSTR(fname) : isTSFile(fname) ? changePathToDTS(fname) : changePathToDTS(fname);
+    }
+
     export function isSTRFile(fname: string) {
         return fname.length > 4 && fname.substring(fname.length - 4, fname.length) == ".str"
     }

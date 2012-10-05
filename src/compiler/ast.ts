@@ -1030,6 +1030,7 @@ module TypeScript {
 
     export class Script extends FuncDecl {
         public locationInfo: LocationInfo = null;
+        public referencedFiles: IFileReference[] = null;
         public requiresGlobal = false;
         public requiresInherits = false;
         public isResident = false;

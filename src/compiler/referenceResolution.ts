@@ -13,6 +13,7 @@ module TypeScript {
     /// This class acts as a convenience class to store path and content information in places
     /// where we need an ISourceText object
     export class SourceUnit implements ISourceText, IResolvedFile {
+        public referencedFiles: IFileReference[] = null;
         constructor(public path: string, public content: string) {
         }
 
@@ -166,6 +167,7 @@ module TypeScript {
                     var rootDir = ioHost.dirName(resolvedFile.path);
                     var sourceUnit = new SourceUnit(resolvedFile.path, resolvedFile.content);
                     var preProcessedFileInfo = preProcessFile(sourceUnit, this.environment.compilationSettings);
+                    sourceUnit.referencedFiles = preProcessedFileInfo.referencedFiles;
 
                     // resolve explicit references
                     for (var i = 0; i < preProcessedFileInfo.referencedFiles.length; i++) {

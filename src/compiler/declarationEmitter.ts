@@ -559,6 +559,12 @@ module TypeScript {
 
         public ScriptCallback(pre: bool, script: Script): bool {
             if (pre) {
+                if (this.emitOptions.outputMany) {
+                    for (var i = 0; i < script.referencedFiles.length; i++) {
+                        var declareFileName = getDeclareFilePath(script.referencedFiles[i].path);
+                        this.declFile.WriteLine('/// <reference path="' + declareFileName + '" />');
+                    }
+                }
                 this.pushDeclarationContainer(script);
             }
             else {

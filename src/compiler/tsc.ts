@@ -143,7 +143,7 @@ class BatchCompiler {
                         if (this.compilationSettings.errorRecovery) {
                             compiler.parser.setErrorRecovery(outfile, -1, -1);
                         }
-                        compiler.addUnit(code.content, code.path, addAsResident);
+                        compiler.addUnit(code.content, code.path, addAsResident, code.referencedFiles);
                     }
                 }
             }

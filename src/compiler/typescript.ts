@@ -243,13 +243,14 @@ module TypeScript {
             });
         }
 
-        public addUnit(prog: string, filename: string, keepResident? = false): Script {
-            return this.addSourceUnit(new StringSourceText(prog), filename, keepResident);
+        public addUnit(prog: string, filename: string, keepResident? = false, referencedFiles?: IFileReference[] = []): Script {
+            return this.addSourceUnit(new StringSourceText(prog), filename, keepResident, referencedFiles);
         }
 
-        public addSourceUnit(sourceText: ISourceText, filename: string, keepResident? = false): Script {
+        public addSourceUnit(sourceText: ISourceText, filename: string, keepResident:bool, referencedFiles?: IFileReference[] = []): Script {
             return this.timeFunction("addSourceUnit(" + filename + ", " + keepResident + ")", () => {
                 var script: Script = this.parser.parse(sourceText, filename, this.units.length, AllowedElements.Global);
+                script.referencedFiles = referencedFiles;
                 script.isResident = keepResident;
                 this.persistentTypeState.setCollectionMode(keepResident ? TypeCheckCollectionMode.Resident : TypeCheckCollectionMode.Transient);
                 var index = this.units.length;
@@ -420,13 +421,12 @@ module TypeScript {
                 // Create or reuse file
                 if (outputMany) {
                     var fname = this.units[i].filename;
-                    var declareFileName = isSTRFile(fname) ? changePathToDSTR(fname) : isTSFile(fname) ? changePathToDTS(fname) : changePathToDTS(fname);
+                    var declareFileName = getDeclareFilePath(fname);
                     declareFile = createFile(declareFileName);
                     declarationEmitter.setDeclarationFile(declareFile);
                 }
                 else if (declareFile == null) {
-                    var outfname = this.settings.outputFileName;
-                    outfname = isSTRFile(outfname) ? changePathToDSTR(outfname) : isTSFile(outfname) ? changePathToDTS(outfname) : changePathToDTS(outfname);
+                    var outfname = getDeclareFilePath(this.settings.outputFileName);
                     declareFile = createFile(outfname);
                     declarationEmitter.setDeclarationFile(declareFile);
                 }
