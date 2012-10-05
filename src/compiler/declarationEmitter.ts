@@ -60,9 +60,7 @@ module TypeScript {
 
         private canEmitPrePostAstSignature(declFlags: DeclFlags, astWithPrePostCallback: AST, preCallback: bool) {
             if (this.ignoreCallbackAst) {
-                if (this.ignoreCallbackAst != astWithPrePostCallback) {
-                    throw new Error("Ignore Callback AST mismatch");
-                }
+                CompilerDiagnostics.assert(this.ignoreCallbackAst != astWithPrePostCallback, "Ignore Callback AST mismatch");
                 this.ignoreCallbackAst = null;
                 return false;
             } else if (preCallback &&
@@ -156,7 +154,7 @@ module TypeScript {
                             break;
 
                         default:
-                            throw Error("Catch this unhandled type container");
+                            CompilerDiagnostics.debugPrint("Catch this unhandled type container");
                     }
                 }
             }
@@ -168,9 +166,7 @@ module TypeScript {
         }
 
         private popDeclarationContainer(ast: AST) {
-            if (ast != this.getAstDeclarationContainer()) {
-                throw new Error('Declaration container mismatch');
-            }
+            CompilerDiagnostics.assert(ast != this.getAstDeclarationContainer(), 'Declaration container mismatch');
             this.declarationContainerStack.pop();
         }
 
@@ -200,7 +196,7 @@ module TypeScript {
                     break;
 
                 default:
-                    throw Error("Unknown containing scope");
+                    CompilerDiagnostics.debugPrint("Unknown containing scope");
             }
 
             return type.getScopedTypeName(containingScope);
@@ -378,7 +374,7 @@ module TypeScript {
             var accessorSymbol = <FieldSymbol>funcDecl.accessorSymbol;
             if (accessorSymbol.getter && accessorSymbol.getter.declAST != funcDecl) {
                 // Setter is being used to emit the type info. 
-                return;
+                return false;
             }
 
             this.emitDeclFlags(ToDeclFlags(accessorSymbol.flags), "var");
@@ -496,8 +492,8 @@ module TypeScript {
                 if (memberDecl.nodeType == NodeType.VarDecl) {
                     this.emitIndent();
                     this.declFile.WriteLine((<VarDecl>memberDecl).id.text + ",");
-                } else if (memberDecl.nodeType != NodeType.Asg) {
-                    throw Error("We want to catch this");
+                } else {
+                    CompilerDiagnostics.assert(memberDecl.nodeType != NodeType.Asg, "We want to catch this");
                 }
             }
             this.indenter.decreaseIndent();
