@@ -121,31 +121,25 @@ prebuild-local:
 	copy /Y $(LSRC)\winrt.d.ts $(BUILT_LOCAL)\winrt.d.ts
 
 $(BUILT_LOCAL)\typescript.js: $(COMPILER_SOURCES)
-	$(STRC_LKG) $(COMPILER_SOURCES) -declaration -out $@
+	$(STRC_LKG) $(COMPILER_SOURCES) -out $@
         copy CopyrightNotice.txt+$@ $(BUILT_LOCAL)\temp.js /b
         copy $(BUILT_LOCAL)\temp.js $@ 
         del $(BUILT_LOCAL)\temp.js
-        copy CopyrightNotice.txt+$(BUILT_LOCAL)\typescript.d.ts $(BUILT_LOCAL)\temp.d.ts /b
-        copy $(BUILT_LOCAL)\temp.d.ts $(BUILT_LOCAL)\typescript.d.ts
-        del $(BUILT_LOCAL)\temp.d.ts
 
 $(BUILT_LOCAL)\tsc.js: $(FRONTEND_SOURCES) 
-	$(STRC_LKG) $(FRONTEND_SOURCES) -declaration -out $@
+	$(STRC_LKG) $(FRONTEND_SOURCES) -out $@
         copy CopyrightNotice.txt+$@ $(BUILT_LOCAL)\temp.js /b
         copy $(BUILT_LOCAL)\temp.js $@ 
         del $(BUILT_LOCAL)\temp.js
-        copy CopyrightNotice.txt+$(BUILT_LOCAL)\tsc.d.ts $(BUILT_LOCAL)\temp.d.ts /b
-        copy $(BUILT_LOCAL)\temp.d.ts $(BUILT_LOCAL)\tsc.d.ts
-        del $(BUILT_LOCAL)\temp.d.ts
 
 $(BUILT_LOCAL)\typescriptServices.js: $(SERVICES_SOURCES)
-	$(STRC_LKG) $(SERVICES_SOURCES) -declaration -out $@
+	$(STRC_LKG) $(SERVICES_SOURCES) -out $@
         copy CopyrightNotice.txt+ThirdPartyNoticeText.txt+$@ $(BUILT_LOCAL)\temp.js /b
         copy $(BUILT_LOCAL)\temp.js $@ 
         del $(BUILT_LOCAL)\temp.js
-        copy CopyrightNotice.txt+$(BUILT_LOCAL)\typescriptServices.d.ts $(BUILT_LOCAL)\temp.d.ts /b
-        copy $(BUILT_LOCAL)\temp.d.ts $(BUILT_LOCAL)\typescriptServices.d.ts
-        del $(BUILT_LOCAL)\temp.d.ts
+
+$(BUILT_LOCALTEST)\typescriptServices.js: $(SERVICES_SOURCES)
+	$(STRC_LOCAL) $(SERVICES_SOURCES) -declaration -out $@
 
 local: prebuild-local $(BUILT_LOCAL)\typescript.js $(BUILT_LOCAL)\tsc.js $(BUILT_LOCAL)\typescriptServices.js
 
@@ -156,14 +150,13 @@ LS_TESTS=--ls
 SERVICES_TESTS=--services
 HARNESS_TESTS=--harness
 
-unit-tests-dependencies:  $(FRONTEND_SOURCES) $(SERVICES_SOURCES) $(BUILT_LOCAL)\typescriptServices.js $(HSRC)\harness.ts $(HSRC)\diff.ts $(HSRC)\exec.ts $(HSRC)\baselining.ts $(HSRC)\dumpAST-baselining.ts $(HSRC)\external\json2.ts $(HSRC)\runner.ts
+unit-tests-dependencies:  $(FRONTEND_SOURCES) $(SERVICES_SOURCES) $(BUILT_LOCALTEST)\typescriptServices.js $(HSRC)\harness.ts $(HSRC)\diff.ts $(HSRC)\exec.ts $(HSRC)\baselining.ts $(HSRC)\dumpAST-baselining.ts $(HSRC)\external\json2.ts $(HSRC)\runner.ts
 
 # conditionally build unit test progrmams
 $(BUILT_LOCALTEST)\run.js: unit-tests-dependencies
-	$(STRC_LOCAL) -noresolve $(BUILT_LOCAL)\typescriptServices.d.ts $(CSRC)\io.ts $(HSRC)\exec.ts $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\external\json2.ts $(HSRC)\baselining.ts $(HSRC)\dumpAST-baselining.ts -out $(BUILT_LOCALTEST)\harness.js
-	$(STRC_LOCAL) -noresolve $(BUILT_LOCAL)\typescriptServices.d.ts $(CSRC)\io.ts $(HSRC)\exec.ts  $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\external\json2.ts $(HSRC)\generate.ts -out $(BUILT_LOCALTEST)\generate.js
-	$(STRC_LOCAL) -noresolve -target es5 $(BUILT_LOCAL)\typescriptServices.d.ts $(CSRC)\io.ts $(CSRC)\optionsParser.ts $(HSRC)\exec.ts  $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\baselining.ts $(HSRC)\dumpAST-baselining.ts $(HSRC)\external\json2.ts $(HSRC)\runner.ts -out $(BUILT_LOCALTEST)\run.js
-    copy /Y $(BUILT_LOCAL)\typescriptServices.js $(BUILT_LOCALTEST)
+	$(STRC_LOCAL) -noresolve $(BUILT_LOCALTEST)\typescriptServices.d.ts $(CSRC)\io.ts $(HSRC)\exec.ts $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\external\json2.ts $(HSRC)\baselining.ts $(HSRC)\dumpAST-baselining.ts -out $(BUILT_LOCALTEST)\harness.js
+	$(STRC_LOCAL) -noresolve $(BUILT_LOCALTEST)\typescriptServices.d.ts $(CSRC)\io.ts $(HSRC)\exec.ts  $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\external\json2.ts $(HSRC)\generate.ts -out $(BUILT_LOCALTEST)\generate.js
+	$(STRC_LOCAL) -noresolve -target es5 $(BUILT_LOCALTEST)\typescriptServices.d.ts $(CSRC)\io.ts $(CSRC)\optionsParser.ts $(HSRC)\exec.ts  $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\baselining.ts $(HSRC)\dumpAST-baselining.ts $(HSRC)\external\json2.ts $(HSRC)\runner.ts -out $(BUILT_LOCALTEST)\run.js
     copy /Y $(LSRC)\lib.d.ts $(BUILT_LOCALTEST)
 
 # build unit test programs
