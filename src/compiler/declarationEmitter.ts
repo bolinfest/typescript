@@ -5,11 +5,21 @@
 
 module TypeScript {
     export class DeclarationEmitter implements AstWalkerWithDetailCallback.AstWalkerDetailCallback {
-        private declFile : ITextWriter = null;
+        private declFile: ITextWriter = null;
         public indenter = new Indenter();
-        public declContainingAST: AST = null;
+        public declarationContainerStack: AST[] = [];
+        public isDottedModuleName: bool[] = [];
+        public ignoreCallbackAst: AST = null;
 
-        constructor (public checker: TypeChecker, public emitOptions: IEmitOptions) { 
+        private getAstDeclarationContainer() {
+            return this.declarationContainerStack[this.declarationContainerStack.length - 1];
+        }
+
+        private emitDottedModuleName() {
+            return (this.isDottedModuleName.length == 0) ? false : this.isDottedModuleName[this.isDottedModuleName.length - 1];
+        }
+
+        constructor (public checker: TypeChecker, public emitOptions: IEmitOptions) {
         }
 
         public setDeclarationFile(file: ITextWriter) {
@@ -33,8 +43,31 @@ module TypeScript {
             this.declFile.Write(this.getIndentString());
         }
 
-        private canEmitSignature(declFlags: DeclFlags) {
-            if (this.declContainingAST.nodeType == NodeType.Module && !hasFlag(declFlags, DeclFlags.Exported)) {
+        private canEmitSignature(declFlags: DeclFlags, useDeclarationContainerTop? : bool = true) {
+            var hasModuleContainer: bool;
+            if (useDeclarationContainerTop) {
+                hasModuleContainer = this.getAstDeclarationContainer().nodeType == NodeType.Module;
+            } else {
+                hasModuleContainer = this.declarationContainerStack[this.declarationContainerStack.length - 2].nodeType == NodeType.Module;
+            }
+
+            if (hasModuleContainer && !hasFlag(declFlags, DeclFlags.Exported)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        private canEmitPrePostAstSignature(declFlags: DeclFlags, astWithPrePostCallback: AST, preCallback: bool) {
+            if (this.ignoreCallbackAst) {
+                if (this.ignoreCallbackAst != astWithPrePostCallback) {
+                    throw new Error("Ignore Callback AST mismatch");
+                }
+                this.ignoreCallbackAst = null;
+                return false;
+            } else if (preCallback &&
+                !this.canEmitSignature(declFlags, preCallback)) {
+                this.ignoreCallbackAst = astWithPrePostCallback;
                 return false;
             }
 
@@ -130,46 +163,53 @@ module TypeScript {
             return true;
         }
 
-        private setDeclContainingAST(ast: AST) {
-            var temp = this.declContainingAST;
-            this.declContainingAST = ast;
-            return temp;
+        private pushDeclarationContainer(ast: AST) {
+            this.declarationContainerStack.push(ast);
+        }
+
+        private popDeclarationContainer(ast: AST) {
+            if (ast != this.getAstDeclarationContainer()) {
+                throw new Error('Declaration container mismatch');
+            }
+            this.declarationContainerStack.pop();
         }
 
         private getTypeSignature(type: Type) {
             var containingScope: SymbolScope = null;
-            if (this.declContainingAST) {
-                switch (this.declContainingAST.nodeType) {
-                    case NodeType.Module:
-                    case NodeType.Interface:
-                    case NodeType.FuncDecl:
-                        if (this.declContainingAST.type) {
-                            containingScope = this.declContainingAST.type.containedScope;
-                        }
-                        break;
+            var declarationContainerAst = this.getAstDeclarationContainer();
+            switch (declarationContainerAst.nodeType) {
+                case NodeType.Module:
+                case NodeType.Interface:
+                case NodeType.FuncDecl:
+                    if (declarationContainerAst.type) {
+                        containingScope = declarationContainerAst.type.containedScope;
+                    }
+                    break;
 
-                    case NodeType.Script:
-                        var script = <Script>this.declContainingAST;
-                        if (script.bod) {
-                            containingScope = script.bod.enclosingScope;
-                        }
-                        break;
+                case NodeType.Script:
+                    var script = <Script>declarationContainerAst;
+                    if (script.bod) {
+                        containingScope = script.bod.enclosingScope;
+                    }
+                    break;
 
-                    case NodeType.Class:
-                        if (this.declContainingAST.type) {
-                            containingScope = this.declContainingAST.type.instanceType.containedScope;
-                        }
-                        break;
+                case NodeType.Class:
+                    if (declarationContainerAst.type) {
+                        containingScope = declarationContainerAst.type.instanceType.containedScope;
+                    }
+                    break;
 
-                    default:
-                        throw Error("Unknown containing scope");
-                }
+                default:
+                    throw Error("Unknown containing scope");
             }
+
             return type.getScopedTypeName(containingScope);
         }
 
-        public VarDeclCallback(pre: bool, varDecl: VarDecl, interfaceMember?: bool = false) : bool {
+        public VarDeclCallback(pre: bool, varDecl: VarDecl): bool {
             if (pre && this.canEmitSignature(ToDeclFlags(varDecl.varFlags))) {
+
+                var interfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
                 if (!interfaceMember) {
                     this.emitDeclFlags(ToDeclFlags(varDecl.varFlags), "var");
                     this.declFile.Write(varDecl.id.text);
@@ -203,7 +243,7 @@ module TypeScript {
             }
             return false;
         }
-        
+
         private emitArgDecl(argDecl: ArgDecl, funcDecl: FuncDecl) {
             this.declFile.Write(argDecl.id.text);
             if (argDecl.isOptionalArg()) {
@@ -215,11 +255,16 @@ module TypeScript {
             }
         }
 
-        public FuncDeclCallback(pre: bool, funcDecl: FuncDecl, isInterfaceMember?: bool = false) : bool {
+        public FuncDeclCallback(pre: bool, funcDecl: FuncDecl): bool {
             if (!pre) {
                 return false;
             }
-            
+
+            if (funcDecl.isAccessor()) {
+                return this.emitPropertyAccessorSignature(funcDecl);
+            }
+
+            var isInterfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
             if (!isInterfaceMember && !funcDecl.isOverload) {
                 if (funcDecl.isConstructor) {
                     if (funcDecl.type.construct && funcDecl.type.construct.signatures.length > 1) {
@@ -344,6 +389,8 @@ module TypeScript {
             } else {
                 this.declFile.WriteLine(";");
             }
+
+            return false;
         }
 
         private emitClassMembersFromConstructorDefinition(funcDecl: FuncDecl) {
@@ -365,54 +412,41 @@ module TypeScript {
             }
         }
 
-        public ClassCallback(pre: bool, classDecl: ClassDecl) : bool {
-            if (!pre || !this.canEmitSignature(ToDeclFlags(classDecl.varFlags))) {
+        public ClassCallback(pre: bool, classDecl: ClassDecl): bool {
+            if (!this.canEmitPrePostAstSignature(ToDeclFlags(classDecl.varFlags), classDecl, pre)) {
                 return false;
             }
 
-            var className = classDecl.name.text;
-            this.emitDeclFlags(ToDeclFlags(classDecl.varFlags), "class");
-            this.declFile.Write(className);
-            this.emitBaseList(classDecl.baseClass, "extends");
-            this.emitBaseList(classDecl.implementsList, "implements");
-            this.declFile.WriteLine(" {");
+            if (pre) {
+                var className = classDecl.name.text;
+                this.emitDeclFlags(ToDeclFlags(classDecl.varFlags), "class");
+                this.declFile.Write(className);
+                this.emitBaseList(classDecl.baseClass, "extends");
+                this.emitBaseList(classDecl.implementsList, "implements");
+                this.declFile.WriteLine(" {");
 
-            var oldDeclContainingAST = this.setDeclContainingAST(classDecl);
-            this.indenter.increaseIndent();
-            if (classDecl.constructorDecl) {
-                this.emitClassMembersFromConstructorDefinition(classDecl.constructorDecl);
+                this.pushDeclarationContainer(classDecl);
+                this.indenter.increaseIndent();
+                if (classDecl.constructorDecl) {
+                    this.emitClassMembersFromConstructorDefinition(classDecl.constructorDecl);
+                }
+            } else {
+                this.indenter.decreaseIndent();
+                this.popDeclarationContainer(classDecl);
+
+                this.emitIndent();
+                this.declFile.WriteLine("}");
             }
 
-            var membersLen = classDecl.definitionMembers.members.length;
-            for (var j = 0; j < membersLen; j++) {
-                var memberDecl: AST = classDecl.definitionMembers.members[j];
-                if (memberDecl.nodeType == NodeType.FuncDecl) {
-                    var fn = <FuncDecl>memberDecl;
-                    if (!fn.isAccessor()) {
-                        this.FuncDeclCallback(true, fn);
-                    } else {
-                        this.emitPropertyAccessorSignature(fn);
-                    }
-                }
-                else if (memberDecl.nodeType == NodeType.VarDecl) {
-                    this.VarDeclCallback(true, <VarDecl>memberDecl);
-                }
-                else {
-                    throw Error("We want to catch this");
-                }
-            }
-            this.indenter.decreaseIndent();
-            this.setDeclContainingAST(oldDeclContainingAST);
-
-            this.emitIndent();
-            this.declFile.WriteLine("}");
-            
-            return false;
+            return true;
         }
 
-        public InterfaceCallback(pre: bool, interfaceDecl: TypeDecl) : bool {
-            if (pre && this.canEmitSignature(ToDeclFlags(interfaceDecl.varFlags))) {
-                
+        public InterfaceCallback(pre: bool, interfaceDecl: TypeDecl): bool {
+            if (!this.canEmitPrePostAstSignature(ToDeclFlags(interfaceDecl.varFlags), interfaceDecl, pre)) {
+                return false;
+            }
+
+            if (pre) {
                 var interfaceName = interfaceDecl.name.text;
                 this.emitDeclFlags(ToDeclFlags(interfaceDecl.varFlags), "interface");
                 this.declFile.Write(interfaceName);
@@ -420,38 +454,22 @@ module TypeScript {
                 this.declFile.WriteLine(" {");
 
                 this.indenter.increaseIndent();
-                var oldDeclContainingAST = this.setDeclContainingAST(interfaceDecl);
-                var typeMemberList = <ASTList>interfaceDecl.members;
-                for (var i = 0; i < typeMemberList.members.length; i++) {
-                    var typeMember = typeMemberList.members[i];
-                    switch (typeMember.nodeType) {
-                        case NodeType.FuncDecl:
-                            this.FuncDeclCallback(true, <FuncDecl>typeMember, true);
-                            break;
-
-                        case NodeType.VarDecl:
-                            this.VarDeclCallback(true, <VarDecl>typeMember, true);
-                            break;
-
-                        default:
-                            throw Error("Not allowed");
-
-                    }
-                }
-                this.setDeclContainingAST(oldDeclContainingAST);
+                this.pushDeclarationContainer(interfaceDecl);
+            } else {
                 this.indenter.decreaseIndent();
+                this.popDeclarationContainer(interfaceDecl);
 
                 this.emitIndent();
                 this.declFile.WriteLine("}");
             }
 
-            return false;
+            return true;
         }
 
-        public ImportCallback(pre: bool, importDecl: ImportDecl) : bool {
+        public ImportCallback(pre: bool, importDecl: ImportDecl): bool {
             if (pre && this.canEmitSignature(ToDeclFlags(importDecl.varFlags))) {
                 this.emitDeclFlags(ToDeclFlags(importDecl.varFlags), "import");
-                
+
                 this.declFile.Write(importDecl.id.text + " = ");
                 if (importDecl.isDynamicImport) {
                     this.declFile.WriteLine("module (" + importDecl.getAliasName() + ");");
@@ -487,90 +505,64 @@ module TypeScript {
             this.emitIndent();
             this.declFile.WriteLine("}");
 
-            return true;
+            return false;
         }
 
-        public ModuleCallback(pre: bool, moduleDecl: ModuleDecl, isDottedModuleName? : bool = false) : bool {
-            if (!pre) {
-                return false;
-            }
-
+        public ModuleCallback(pre: bool, moduleDecl: ModuleDecl): bool {
             if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsWholeFile)) {
                 return true;
             }
 
             if (moduleDecl.isEnum()) {
-                this.emitEnumSignature(moduleDecl);
-            } else {
-                if (!this.canEmitSignature(ToDeclFlags(moduleDecl.modFlags))) {
-                    return false;
+                if (pre) {
+                    this.emitEnumSignature(moduleDecl);
                 }
+                return false;
+            }
 
-                if (isDottedModuleName) {
+            if (!this.canEmitPrePostAstSignature(ToDeclFlags(moduleDecl.modFlags), moduleDecl, pre)) {
+                return false;
+            }
+
+            if (pre) {
+                if (this.emitDottedModuleName()) {
                     this.declFile.Write(".");
                 } else {
                     this.emitDeclFlags(ToDeclFlags(moduleDecl.modFlags), "module");
                 }
                 this.declFile.Write(moduleDecl.name.text);
 
-                if (moduleDecl.members.members.length == 1 &&
+                var isCurrentModuleDotted = (moduleDecl.members.members.length == 1 &&
                     moduleDecl.members.members[0].nodeType == NodeType.Module &&
                     !(<ModuleDecl>moduleDecl.members.members[0]).isEnum() &&
-                    hasFlag((<ModuleDecl>moduleDecl.members.members[0]).modFlags, ModuleFlags.Exported)) {
-                    this.ModuleCallback(true, <ModuleDecl>moduleDecl.members.members[0], true);
-                }
-                else {
-                    var oldDeclContainingAST = this.setDeclContainingAST(moduleDecl);
+                    hasFlag((<ModuleDecl>moduleDecl.members.members[0]).modFlags, ModuleFlags.Exported));
+
+                this.isDottedModuleName.push(isCurrentModuleDotted);
+                this.pushDeclarationContainer(moduleDecl);
+
+                if (!isCurrentModuleDotted) {
                     this.declFile.WriteLine(" {");
                     this.indenter.increaseIndent();
-                    var membersLen = moduleDecl.members.members.length;
-                    for (var j = 0; j < membersLen; j++) {
-                        var memberDecl: AST = moduleDecl.members.members[j];
-                        switch (memberDecl.nodeType) {
-                            case NodeType.VarDecl:
-                                this.VarDeclCallback(true, <VarDecl>memberDecl);
-                                break;
-
-                            case NodeType.FuncDecl:
-                                this.FuncDeclCallback(true, <FuncDecl>memberDecl);
-                                break;
-
-                            case NodeType.Class:
-                                this.ClassCallback(true, <ClassDecl>memberDecl);
-                                break;
-
-                            case NodeType.Interface:
-                                this.InterfaceCallback(true, <TypeDecl>memberDecl);
-                                break;
-
-                            case NodeType.Module:
-                                this.ModuleCallback(true, <ModuleDecl>memberDecl);
-                                break;
-
-                            case NodeType.Import:
-                                this.ImportCallback(true, <ImportDecl>memberDecl);
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
+                }
+            } else {
+                if (!this.emitDottedModuleName()) {
                     this.indenter.decreaseIndent();
                     this.emitIndent();
                     this.declFile.WriteLine("}");
-                    this.setDeclContainingAST(oldDeclContainingAST);
                 }
+                this.popDeclarationContainer(moduleDecl);
+                this.isDottedModuleName.pop();
             }
 
-            return false;
+            return true;
         }
 
-        public ScriptCallback(pre: bool, script: Script) : bool {
+        public ScriptCallback(pre: bool, script: Script): bool {
             if (pre) {
-                this.setDeclContainingAST(script);
+                this.pushDeclarationContainer(script);
             }
             else {
-                this.setDeclContainingAST(null);
+                this.popDeclarationContainer(script);
             }
             return true;
         }
