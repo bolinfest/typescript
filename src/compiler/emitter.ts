@@ -17,7 +17,6 @@ module TypeScript {
     }
 
     export class EmitState {
-        public indentAmt: number;
         public column: number;
         public line: number;
         public pretty: bool;
@@ -25,7 +24,6 @@ module TypeScript {
         public container: EmitContainer;
 
         constructor () {
-            this.indentAmt = 0;
             this.column = 0;
             this.line = 0;
             this.pretty = false;
@@ -44,28 +42,30 @@ module TypeScript {
     }
 
     export class Indenter {
-        public indentStep = 4;
-        public indentStrings: string[] = [];
+        static indentStep : number = 4;
+        static indentStepString : string = "    ";
+        static indentStrings: string[] = [];
+        public indentAmt: number = 0;
 
-        public getIndent(indentAmt: number) {
-            var indentString = this.indentStrings[indentAmt];
+        public increaseIndent() {
+            this.indentAmt += Indenter.indentStep;
+        }
+
+        public decreaseIndent() {
+            this.indentAmt -= Indenter.indentStep;
+        }
+
+        public getIndent() {
+            var indentString = Indenter.indentStrings[this.indentAmt];
             if (indentString === undefined) {
                 indentString = "";
-                for (var i = 0; i < indentAmt; i++) {
-                    indentString += " ";
+                for (var i = 0; i < this.indentAmt; i = i + Indenter.indentStep) {
+                    indentString += Indenter.indentStepString;
                 }
-                this.indentStrings[indentAmt] = indentString;
+                Indenter.indentStrings[this.indentAmt] = indentString;
             }
             return indentString;
         }
-    }
-
-    var globalIndenter : Indenter = null;
-    export function GetGlobalIndenter() {
-        if (globalIndenter == null) {
-            globalIndenter = new Indenter();
-        }
-        return globalIndenter;
     }
 
     export class Emitter {
@@ -75,7 +75,7 @@ module TypeScript {
         public moduleDeclList: ModuleDecl[] = [];
         public moduleName = "";
         public emitState = new EmitState();
-        public indenter: Indenter;
+        public indenter = new Indenter();
         public ambientModule = false;
         public modAliasId: string = null;
         public firstModAlias: string = null;
@@ -84,18 +84,12 @@ module TypeScript {
         public captureThisStmtString = "var _this = this;";
 
         constructor (public checker: TypeChecker, public outfile: ITextWriter, public emitOptions: IEmitOptions) { 
-            this.indenter = GetGlobalIndenter();
         }
 
         public setSourceMappings(mapper: SourceMapper) {
             this.allSourceMappers.push(mapper);
             this.sourceMapper = mapper;
         }
-
-        public increaseIndent() {
-            this.emitState.indentAmt += this.indenter.indentStep;
-        }
-        public decreaseIndent() { this.emitState.indentAmt -= this.indenter.indentStep; }
 
         public writeToOutput(s: string) {
             this.outfile.Write(s);
@@ -142,7 +136,7 @@ module TypeScript {
                 return "";
             }
             else {
-                return this.indenter.getIndent(this.emitState.indentAmt);
+                return this.indenter.getIndent();
             }
         }
 
@@ -207,11 +201,11 @@ module TypeScript {
         // TODO: emit accessor pattern
         public emitObjectLiteral(content: ASTList) {
             this.writeLineToOutput("{");
-            this.increaseIndent();
+            this.indenter.increaseIndent();
             var inObjectLiteral = this.setInObjectLiteral(true);
             this.emitJavascriptList(content, ",", TokenID.Comma, true, false, false);
             this.setInObjectLiteral(inObjectLiteral);
-            this.decreaseIndent();
+            this.indenter.decreaseIndent();
             this.emitIndent();
             this.writeToOutput("}");
         }
@@ -220,9 +214,9 @@ module TypeScript {
             this.writeToOutput("[");
             if (content) {
                 this.writeLineToOutput("");
-                this.increaseIndent();
+                this.indenter.increaseIndent();
                 this.emitJavascriptList(content, ", ", TokenID.Comma, true, false, false);
-                this.decreaseIndent();
+                this.indenter.decreaseIndent();
                 this.emitIndent();
             }
             this.writeToOutput("]");
@@ -282,13 +276,13 @@ module TypeScript {
                     this.writeToOutput(")");
                 }
                 else {
-                    this.decreaseIndent();
-                    this.decreaseIndent();
+                    this.indenter.decreaseIndent();
+                    this.indenter.decreaseIndent();
                     var constructorCall = new ASTList();
                     constructorCall.members[0] = callNode;
                     this.emitConstructorCalls(constructorCall, this.thisClassNode);
-                    this.increaseIndent();
-                    this.increaseIndent();
+                    this.indenter.increaseIndent();
+                    this.indenter.increaseIndent();
                 }
             }
         }
@@ -410,7 +404,7 @@ module TypeScript {
             }
             this.writeLineToOutput(") {");
 
-            this.increaseIndent();
+            this.indenter.increaseIndent();
 
             // set default args first
             for (i = 0; i < defaultArgs.length; i++) {
@@ -476,10 +470,10 @@ module TypeScript {
                 this.emitIndent();
                 this.writeLineToOutput("for (var _i = 0; _i < (arguments.length - " + (argsLen - 1) +
                                   "); _i++) {");
-                this.increaseIndent();
+                this.indenter.increaseIndent();
                 this.emitIndent();
                 this.writeLineToOutput(lastArg.id.text + "[_i] = arguments[_i + " + (argsLen - 1) + "];");
-                this.decreaseIndent();
+                this.indenter.decreaseIndent();
                 this.emitIndent();
                 this.writeLineToOutput("}");
             }
@@ -504,7 +498,7 @@ module TypeScript {
 
             this.emitBareJavascriptStatements(funcDecl.bod, classPropertiesMustComeAfterSuperCall);
 
-            this.decreaseIndent();
+            this.indenter.decreaseIndent();
             this.emitIndent();
             this.writeToOutput("}");
             if (!isProtoMember &&
@@ -520,7 +514,7 @@ module TypeScript {
                 this.emitIndent();
                 var funcName = funcDecl.getNameText();
                 this.writeLineToOutput("(function (" + funcName + ") {");
-                this.increaseIndent();
+                this.indenter.increaseIndent();
 
                 var len = 0;
                 var i = 0;
@@ -556,7 +550,7 @@ module TypeScript {
                     this.recordSourceMappingEnd(funcDecl.statics);
                 }
 
-                this.decreaseIndent();
+                this.indenter.decreaseIndent();
                 this.emitIndent();
                 var printProto = isProtoMember && this.thisClassNode;
                 var prefix = printProto ? this.thisClassNode.name.text + ".prototype." : "";
@@ -653,7 +647,7 @@ module TypeScript {
 
                 // body - don't indent for Node
                 if (!isDynamicMod || moduleGenTarget == ModuleGenTarget.Asynchronous) {
-                    this.increaseIndent();
+                    this.indenter.increaseIndent();
                 }
 
                 if (moduleDecl.modFlags & ModuleFlags.MustCaptureThis) {
@@ -663,7 +657,7 @@ module TypeScript {
 
                 this.emitJavascriptList(moduleDecl.members, null, TokenID.SColon, true, false, false);
                 if (!isDynamicMod || moduleGenTarget == ModuleGenTarget.Asynchronous) {
-                    this.decreaseIndent();
+                    this.indenter.decreaseIndent();
                 }
                 this.emitIndent();
 
@@ -1024,12 +1018,12 @@ module TypeScript {
                         this.recordSourceMappingStart(stmts);
                         if (!hasOnlyBlockStatement) {
                             this.writeLineToOutput(" {");
-                            this.increaseIndent();
+                            this.indenter.increaseIndent();
                         }
                         this.emitJavascriptList(stmts, null, TokenID.SColon, true, false, false);
                         if (!hasOnlyBlockStatement) {
                             this.writeLineToOutput("");
-                            this.decreaseIndent();
+                            this.indenter.decreaseIndent();
                             this.emitIndent();
                             this.writeToOutput("}");
                         }
@@ -1210,7 +1204,7 @@ module TypeScript {
 
             var parenthesize = false;
             // REVIEW: simplify rules for indenting
-            if (startLine && (this.emitState.indentAmt > 0) && (ast.nodeType != NodeType.List) &&
+            if (startLine && (this.indenter.indentAmt > 0) && (ast.nodeType != NodeType.List) &&
                 (ast.nodeType != NodeType.Block)) {
                 if ((ast.nodeType != NodeType.Interface) &&
                     (!((ast.nodeType == NodeType.VarDecl) &&
@@ -1244,7 +1238,7 @@ module TypeScript {
                 this.emitIndent();
                 this.recordSourceMappingStart(funcDecl);
                 this.writeLineToOutput("Object.defineProperty(" + className + (isProto ? ".prototype, \"" : ", \"") + funcDecl.name.text + "\"" + ", {");
-                this.increaseIndent();
+                this.indenter.increaseIndent();
 
                 if (accessorSymbol.getter) {
                     var getter: FuncDecl = <FuncDecl>accessorSymbol.getter.declAST;
@@ -1268,7 +1262,7 @@ module TypeScript {
                 this.writeLineToOutput("enumerable: true,");
                 this.emitIndent();
                 this.writeLineToOutput("configurable: true");
-                this.decreaseIndent();
+                this.indenter.decreaseIndent();
                 this.emitIndent();
                 this.writeLineToOutput("});");
                 this.recordSourceMappingEnd(funcDecl);
@@ -1367,7 +1361,7 @@ module TypeScript {
                     this.writeLineToOutput(" = (function () {");
                 }
 
-                this.increaseIndent();
+                this.indenter.increaseIndent();
 
                 if (baseClass) {
                     baseNameDecl = classDecl.extendsList.members[0];
@@ -1399,7 +1393,7 @@ module TypeScript {
 
                     this.recordSourceMappingStart(classDecl);
                     // default constructor
-                    this.increaseIndent();
+                    this.indenter.increaseIndent();
                     this.writeToOutput("function " + classDecl.name.text + "() {");
                     if (baseClass) {
                         this.writeLineToOutput("");
@@ -1429,13 +1423,13 @@ module TypeScript {
                     }
                     if (wroteProps) {
                         this.writeLineToOutput("");
-                        this.decreaseIndent();
+                        this.indenter.decreaseIndent();
                         this.emitIndent();
                         this.writeLineToOutput("}");
                     }
                     else {
                         this.writeLineToOutput(" }");
-                        this.decreaseIndent();
+                        this.indenter.decreaseIndent();
                     }
                     this.recordSourceMappingEnd(classDecl);
                 }
@@ -1493,7 +1487,7 @@ module TypeScript {
                 this.recordSourceMappingStart(classDecl);
                 this.writeLineToOutput("return " + className + ";");
                 this.recordSourceMappingEnd(classDecl);
-                this.decreaseIndent();
+                this.indenter.decreaseIndent();
                 this.emitIndent();
                 this.writeToOutput("})(");
                 if (baseClass)

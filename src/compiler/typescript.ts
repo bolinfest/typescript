@@ -32,7 +32,7 @@
 ///<reference path='referenceResolution.ts' />
 ///<reference path='precompile.ts' />
 ///<reference path='incrementalParser.ts' />
-///<reference path='declarationsEmitter.ts' />
+///<reference path='declarationEmitter.ts' />
 
 module TypeScript {
 
@@ -397,7 +397,7 @@ module TypeScript {
             });
         }
 
-        public emitDeclarations(outputMany: bool, createFile: (path: string) => ITextWriter) {
+        public emitDeclarationFile(outputMany: bool, createFile: (path: string) => ITextWriter) {
             if (!this.settings.generateDeclarationFiles) {
                 return;
             }
@@ -407,7 +407,7 @@ module TypeScript {
                 return;
             }
 
-            var declarationsEmitter: DeclarationsEmitter = new DeclarationsEmitter(this.typeChecker, this.emitSettings);
+            var declarationEmitter: DeclarationEmitter = new DeclarationEmitter(this.typeChecker, this.emitSettings);
             var declareFile: ITextWriter = null;
             for (var i = 0, len = this.scripts.members.length; i < len; i++) {
                 var script = <Script>this.scripts.members[i];
@@ -422,17 +422,16 @@ module TypeScript {
                     var fname = this.units[i].filename;
                     var declareFileName = isSTRFile(fname) ? changePathToDSTR(fname) : isTSFile(fname) ? changePathToDTS(fname) : changePathToDTS(fname);
                     declareFile = createFile(declareFileName);
-                    declarationsEmitter.setDeclarationsFile(declareFile);
+                    declarationEmitter.setDeclarationFile(declareFile);
                 }
                 else if (declareFile == null) {
                     var outfname = this.settings.outputFileName;
                     outfname = isSTRFile(outfname) ? changePathToDSTR(outfname) : isTSFile(outfname) ? changePathToDTS(outfname) : changePathToDTS(outfname);
                     declareFile = createFile(outfname);
-                    declarationsEmitter.setDeclarationsFile(declareFile);
+                    declarationEmitter.setDeclarationFile(declareFile);
                 }
-                //this.typeChecker.locationInfo = script.locationInfo;
 
-                declarationsEmitter.emitDeclarations(script);
+                declarationEmitter.emitDeclarations(script);
                 if (outputMany) {
                     declareFile.Close();
                 }

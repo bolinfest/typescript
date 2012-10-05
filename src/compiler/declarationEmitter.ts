@@ -4,17 +4,15 @@
 ///<reference path='typescript.ts' />
 
 module TypeScript {
-    export class DeclarationsEmitter implements AstWalkerWithDetailCallback.AstWalkerDetailCallback {
+    export class DeclarationEmitter implements AstWalkerWithDetailCallback.AstWalkerDetailCallback {
         private declFile : ITextWriter = null;
-        public indentAmt: number = 0;
-        public indenter: Indenter;
+        public indenter = new Indenter();
         public declContainingAST: AST = null;
 
         constructor (public checker: TypeChecker, public emitOptions: IEmitOptions) { 
-            this.indenter = GetGlobalIndenter();
         }
 
-        public setDeclarationsFile(file: ITextWriter) {
+        public setDeclarationFile(file: ITextWriter) {
             this.declFile = file;
         }
 
@@ -22,20 +20,12 @@ module TypeScript {
             AstWalkerWithDetailCallback.walk(script, this);
         }
 
-        private increaseIndent() {
-            this.indentAmt += this.indenter.indentStep;
-        }
-
-        private decreaseIndent() {
-            this.indentAmt -= this.indenter.indentStep;
-        }
-
         private getIndentString(declIndent? = false) {
             if (this.emitOptions.minWhitespace) {
                 return "";
             }
             else {
-                return this.indenter.getIndent(this.indentAmt);
+                return this.indenter.getIndent();
             }
         }
 
@@ -388,7 +378,7 @@ module TypeScript {
             this.declFile.WriteLine(" {");
 
             var oldDeclContainingAST = this.setDeclContainingAST(classDecl);
-            this.increaseIndent();
+            this.indenter.increaseIndent();
             if (classDecl.constructorDecl) {
                 this.emitClassMembersFromConstructorDefinition(classDecl.constructorDecl);
             }
@@ -411,7 +401,7 @@ module TypeScript {
                     throw Error("We want to catch this");
                 }
             }
-            this.decreaseIndent();
+            this.indenter.decreaseIndent();
             this.setDeclContainingAST(oldDeclContainingAST);
 
             this.emitIndent();
@@ -429,7 +419,7 @@ module TypeScript {
                 this.emitBaseList(interfaceDecl.extendsList, "extends");
                 this.declFile.WriteLine(" {");
 
-                this.increaseIndent();
+                this.indenter.increaseIndent();
                 var oldDeclContainingAST = this.setDeclContainingAST(interfaceDecl);
                 var typeMemberList = <ASTList>interfaceDecl.members;
                 for (var i = 0; i < typeMemberList.members.length; i++) {
@@ -449,7 +439,7 @@ module TypeScript {
                     }
                 }
                 this.setDeclContainingAST(oldDeclContainingAST);
-                this.decreaseIndent();
+                this.indenter.decreaseIndent();
 
                 this.emitIndent();
                 this.declFile.WriteLine("}");
@@ -481,7 +471,7 @@ module TypeScript {
             this.emitDeclFlags(ToDeclFlags(moduleDecl.modFlags), "enum");
             this.declFile.WriteLine(moduleDecl.name.text + " {");
 
-            this.increaseIndent();
+            this.indenter.increaseIndent();
             var membersLen = moduleDecl.members.members.length;
             for (var j = 1; j < membersLen; j++) {
                 var memberDecl: AST = moduleDecl.members.members[j];
@@ -492,7 +482,7 @@ module TypeScript {
                     throw Error("We want to catch this");
                 }
             }
-            this.decreaseIndent();
+            this.indenter.decreaseIndent();
 
             this.emitIndent();
             this.declFile.WriteLine("}");
@@ -523,7 +513,6 @@ module TypeScript {
                 }
                 this.declFile.Write(moduleDecl.name.text);
 
-
                 if (moduleDecl.members.members.length == 1 &&
                     moduleDecl.members.members[0].nodeType == NodeType.Module &&
                     !(<ModuleDecl>moduleDecl.members.members[0]).isEnum() &&
@@ -533,7 +522,7 @@ module TypeScript {
                 else {
                     var oldDeclContainingAST = this.setDeclContainingAST(moduleDecl);
                     this.declFile.WriteLine(" {");
-                    this.increaseIndent();
+                    this.indenter.increaseIndent();
                     var membersLen = moduleDecl.members.members.length;
                     for (var j = 0; j < membersLen; j++) {
                         var memberDecl: AST = moduleDecl.members.members[j];
@@ -566,7 +555,7 @@ module TypeScript {
                                 break;
                         }
                     }
-                    this.decreaseIndent();
+                    this.indenter.decreaseIndent();
                     this.emitIndent();
                     this.declFile.WriteLine("}");
                     this.setDeclContainingAST(oldDeclContainingAST);

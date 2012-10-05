@@ -51,7 +51,7 @@ COMPILER_SOURCES_BASE= \
   $(CSRC)\base64.ts \
   $(CSRC)\sourceMapping.ts \
   $(CSRC)\emitter.ts \
-  $(CSRC)\declarationsEmitter.ts \
+  $(CSRC)\declarationEmitter.ts \
   $(CSRC)\precompile.ts \
   $(CSRC)\incrementalParser.ts \
   $(CSRC)\pathUtils.ts \

@@ -1301,14 +1301,14 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
             if (this.visible) {
                 emitter.writeLineToOutput(" {");
-                emitter.increaseIndent();
+                emitter.indenter.increaseIndent();
             }
             var temp = emitter.setInObjectLiteral(false);
             if (this.stmts) {
                 emitter.emitJavascriptList(this.stmts, null, TokenID.SColon, true, false, false);
             }
             if (this.visible) {
-                emitter.decreaseIndent();
+                emitter.indenter.decreaseIndent();
                 emitter.emitIndent();
                 emitter.writeToOutput("}");
             }
@@ -1891,14 +1891,14 @@ module TypeScript {
             emitter.writeToOutput("switch(");
             emitter.emitJavascript(this.val, TokenID.ID, false);
             emitter.writeLineToOutput(") {");
-            emitter.increaseIndent();
+            emitter.indenter.increaseIndent();
             var casesLen = this.caseList.members.length;
             for (var i = 0; i < casesLen; i++) {
                 var caseExpr = this.caseList.members[i];
                 emitter.emitJavascript(caseExpr, TokenID.CASE, true);
                 emitter.writeLineToOutput("");
             }
-            emitter.decreaseIndent();
+            emitter.indenter.decreaseIndent();
             emitter.emitIndent();
             emitter.writeToOutput("}");
             emitter.setInObjectLiteral(temp);

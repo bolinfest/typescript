@@ -182,7 +182,7 @@ class BatchCompiler {
                 }
             }
 
-            compiler.emitDeclarations(this.compilationSettings.outputMany, this.ioHost.createFile);
+            compiler.emitDeclarationFile(this.compilationSettings.outputMany, this.ioHost.createFile);
         }
 
         if (outfile) {
@@ -248,7 +248,7 @@ class BatchCompiler {
             }
         });
 
-        opts.flag('declarations', {
+        opts.flag('declaration', {
             usage: 'Generates corresponding .d.ts file',
             set: () => {
                 this.compilationSettings.generateDeclarationFiles = true;
