@@ -121,7 +121,7 @@ prebuild-local:
 	copy /Y $(LSRC)\winrt.d.ts $(BUILT_LOCAL)\winrt.d.ts
 
 $(BUILT_LOCAL)\typescript.js: $(COMPILER_SOURCES)
-	$(STRC_LKG) $(COMPILER_SOURCES) -declarations -out $@
+	$(STRC_LKG) $(COMPILER_SOURCES) -declaration -out $@
         copy CopyrightNotice.txt+$@ $(BUILT_LOCAL)\temp.js /b
         copy $(BUILT_LOCAL)\temp.js $@ 
         del $(BUILT_LOCAL)\temp.js
@@ -130,7 +130,7 @@ $(BUILT_LOCAL)\typescript.js: $(COMPILER_SOURCES)
         del $(BUILT_LOCAL)\temp.d.ts
 
 $(BUILT_LOCAL)\tsc.js: $(FRONTEND_SOURCES) 
-	$(STRC_LKG) $(FRONTEND_SOURCES) -declarations -out $@
+	$(STRC_LKG) $(FRONTEND_SOURCES) -declaration -out $@
         copy CopyrightNotice.txt+$@ $(BUILT_LOCAL)\temp.js /b
         copy $(BUILT_LOCAL)\temp.js $@ 
         del $(BUILT_LOCAL)\temp.js
@@ -139,7 +139,7 @@ $(BUILT_LOCAL)\tsc.js: $(FRONTEND_SOURCES)
         del $(BUILT_LOCAL)\temp.d.ts
 
 $(BUILT_LOCAL)\typescriptServices.js: $(SERVICES_SOURCES)
-	$(STRC_LKG) $(SERVICES_SOURCES) -declarations -out $@
+	$(STRC_LKG) $(SERVICES_SOURCES) -declaration -out $@
         copy CopyrightNotice.txt+ThirdPartyNoticeText.txt+$@ $(BUILT_LOCAL)\temp.js /b
         copy $(BUILT_LOCAL)\temp.js $@ 
         del $(BUILT_LOCAL)\temp.js
