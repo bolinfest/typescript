@@ -19,4 +19,5 @@ var withRestParamsVar: (a: string,myRestParameter: number[]) => number[];
 function overload1(n: number): string;
 function overload1(s: string): string;
 var withOverloadSignature: { (n: number): string; (s: string): string; };
+function f(n: () => void): void;
 

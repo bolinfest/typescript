@@ -46,3 +46,4 @@ function overload1(ns: any) {
 }
 var withOverloadSignature = overload1;
 
+function f(n: () => void) { }

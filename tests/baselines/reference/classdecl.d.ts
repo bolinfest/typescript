@@ -5,11 +5,11 @@ class a {
     public pv;
     public d : number;
     static p2 : { x: number; y: number; };
-    static d2(): void;
-    static p3 : string;
+    static d2();
+    static p3;
     private pv3;
-    private foo(n: number): string;
-    private foo(s: string): string;
+    private foo(n);
+    private foo(s);
 }
 class b extends a {
 }

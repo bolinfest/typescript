@@ -41,3 +41,5 @@ function overload1(ns) {
     return ns.toString();
 }
 var withOverloadSignature = overload1;
+function f(n) {
+}
