@@ -7,3 +7,5 @@
 0.ts line 29 col 8: property 'b' of exported interface has or is using private type'C2_private'
 0.ts line 32 col 11: exported interface's function parameter 'a1' has or is using private type'C2_private'
 0.ts line 34 col 14: exported interface's function's return type has or is using private type 'C2_private'
+0.ts line 104 col 42: exported interface 'm3_C4_public' extends private interface 'm3_i_private'
+0.ts line 109 col 43: exported interface 'm3_C6_public' extends private interface 'm3_i_private'

@@ -1904,6 +1904,28 @@ module TypeScript {
             return null;
         }
 
+        // Check if declSymbol can satisfy baselist privacy
+        private typeCheckBaseListPrivacy(bases: ASTList, declSymbol: Symbol, extendsList: bool) {
+            if (bases) {
+                var basesLen = bases.members.length;
+                for (var i = 0; i < basesLen; i++) {
+                    var baseType = bases.members[i].type;
+                    if (baseType == this.checker.anyType) {
+                        // This type is coming from external module so it has to be exported.
+                        continue;
+                    }
+
+                    var baseSymbol = baseType.symbol;
+                    this.typeCheckSymbolPrivacy(baseSymbol, declSymbol, (typeName: string) {
+                        var declTypeString = (declSymbol.declAST.nodeType == NodeType.Interface) ? "interface" : "class";
+                        var baseListTypeString = extendsList ? "extends" : "implements";
+                        var baseTypeString = (baseSymbol.declAST.nodeType == NodeType.Interface) ? "interface" : "class";
+                        this.checker.errorReporter.simpleError(bases.members[i], "exported " + declTypeString + " '" + declSymbol.name + "' " + baseListTypeString + " private " + baseTypeString + " '" + typeName + "'");
+                    });
+                }
+            }
+        }
+
         // Checks if the privacy is satisfied by typeSymbol that is used in the declaration inside container
         private typeCheckSymbolPrivacy(typeSymbol: TypeSymbol, declSymbol: Symbol, errorCallback: (typeName: string) =>void ) {
             // Type is visible type, so this can be used by anyone.
@@ -2730,6 +2752,9 @@ module TypeScript {
             var classType = classDecl.type;
             this.typeCheckBases(classType.instanceType);
 
+            this.typeCheckBaseListPrivacy(classDecl.extendsList, typeSymbol, true);
+            this.typeCheckBaseListPrivacy(classDecl.implementsList, typeSymbol, false);
+
             var prevThisType = this.thisType;
             this.thisType = classType.instanceType;
             this.scope = classType.instanceType.containedScope;
@@ -2784,6 +2809,7 @@ module TypeScript {
             // overloads will be typechecked inline by the members
             //this.typeCheckOverloadSignatures(interfaceDecl.type, interfaceDecl);
             this.typeCheckBases(interfaceDecl.type);
+            this.typeCheckBaseListPrivacy(interfaceDecl.extendsList, interfaceDecl.type.symbol, true);
             this.typeCheck(interfaceDecl.members);
             this.checkBaseTypeMemberInheritance(interfaceDecl.type, interfaceDecl);
 

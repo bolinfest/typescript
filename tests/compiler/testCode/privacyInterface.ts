@@ -191,3 +191,74 @@ interface C8_private {
     f4(): C6_private;
 
 }
+
+export module m3 {
+    export interface m3_i_public {
+        f1(): number;
+    }
+
+    interface m3_i_private {
+        f2(): string;
+    }
+
+    interface m3_C1_private extends m3_i_public {
+    }
+    interface m3_C2_private extends m3_i_private {
+    }
+    export interface m3_C3_public extends m3_i_public {
+    }
+    export interface m3_C4_public extends m3_i_private {
+    }
+
+    interface m3_C5_private extends m3_i_private, m3_i_public {
+    }
+    export interface m3_C6_public extends  m3_i_private, m3_i_public {
+    }
+}
+
+
+module m4 {
+    export interface m4_i_public {
+        f1(): number;
+    }
+
+    interface m4_i_private {
+        f2(): string;
+    }
+
+    interface m4_C1_private extends m4_i_public {
+    }
+    interface m4_C2_private extends m4_i_private {
+    }
+    export interface m4_C3_public extends m4_i_public {
+    }
+    export interface m4_C4_public extends m4_i_private {
+    }
+
+    interface m4_C5_private extends m4_i_private, m4_i_public {
+    }
+    export interface m4_C6_public extends  m4_i_private, m4_i_public {
+    }
+}
+
+export interface glo_i_public {
+    f1(): number;
+}
+
+interface glo_i_private {
+    f2(): string;
+}
+
+interface glo_C1_private extends glo_i_public {
+}
+interface glo_C2_private extends glo_i_private {
+}
+export interface glo_C3_public extends glo_i_public {
+}
+export interface glo_C4_public extends glo_i_private {
+}
+
+interface glo_C5_private extends glo_i_private, glo_i_public {
+}
+export interface glo_C6_public extends  glo_i_private, glo_i_public {
+}

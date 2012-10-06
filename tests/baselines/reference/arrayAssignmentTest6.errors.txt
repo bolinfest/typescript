@@ -1,3 +1,4 @@
+0.ts line 14 col 32: exported class 'Bug' implements private interface 'IMode'
 0.ts line 15 col 37: public function parameter 'tokens' has or is using private type'IToken'
 0.ts line 15 col 74: public function's return type has or is using private type 'ILineTokens'
 0.ts line 16 col 12: public function's return type has or is using private type 'ILineTokens'

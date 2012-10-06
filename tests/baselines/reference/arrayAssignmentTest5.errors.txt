@@ -1,3 +1,4 @@
+0.ts line 20 col 32: exported class 'Bug' implements private interface 'IMode'
 0.ts line 21 col 36: public function parameter 'state' has or is using private type'IState'
 0.ts line 23 col 38: Cannot convert 'IToken[]' to 'IStateToken[]': Type 'IToken' is missing property 'state' from type 'IStateToken'
 0.ts line 25 col 23: Supplied parameters do not match any signature of call target

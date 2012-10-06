@@ -1,0 +1,5 @@
+0.ts line 22 col 38: exported class 'm1_C4_public' extends private class 'm1_c_private'
+0.ts line 31 col 41: exported class 'm1_C8_public' implements private interface 'm1_i_private'
+0.ts line 38 col 63: exported class 'm1_C11_public' implements private interface 'm1_i_private'
+0.ts line 40 col 39: exported class 'm1_C12_public' extends private class 'm1_c_private'
+0.ts line 40 col 64: exported class 'm1_C12_public' implements private interface 'm1_i_private'

@@ -18,6 +18,9 @@ var m1;
                 enumerable: true,
                 configurable: true
             });
+            C2.prototype.f55 = function () {
+                return "Hello world";
+            };
             return C2;
         })();
         m2.C2 = C2;        
@@ -59,6 +62,14 @@ var C2 = (function () {
 var m2;
 (function (m2) {
     (function (m3) {
+        var c_pr = (function () {
+            function c_pr() { }
+            c_pr.prototype.f1 = function () {
+                return "Hello";
+            };
+            return c_pr;
+        })();
+        m3.c_pr = c_pr;        
         var m4;
         (function (m4) {
             var C = (function () {

@@ -37,4 +37,4 @@ define(["require", "exports"], function(require, exports) {
         function C6_private() { }
         return C6_private;
     })();    
-})
+        })

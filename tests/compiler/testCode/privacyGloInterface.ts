@@ -85,3 +85,34 @@ interface C7_public {
     f1(a1: C5_public);
     f3(): C5_public;
 }
+
+module m3 {
+    export interface m3_i_public {
+        f1(): number;
+    }
+
+    interface m3_i_private {
+        f2(): string;
+    }
+
+    interface m3_C1_private extends m3_i_public {
+    }
+    interface m3_C2_private extends m3_i_private {
+    }
+    export interface m3_C3_public extends m3_i_public {
+    }
+    export interface m3_C4_public extends m3_i_private {
+    }
+
+    interface m3_C5_private extends m3_i_private, m3_i_public {
+    }
+    export interface m3_C6_public extends  m3_i_private, m3_i_public {
+    }
+}
+
+interface glo_i_public {
+    f1(): number;
+}
+
+interface glo_C3_public extends glo_i_public {
+}
