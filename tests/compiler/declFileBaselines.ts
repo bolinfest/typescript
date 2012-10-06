@@ -14,7 +14,7 @@ function checkNoDeclFile(filename: string) {
 
 checkNoDeclFile('tests\\compiler\\testCode\\giant.ts');
 checkNoDeclFile('tests\\compiler\\testCode\\declInput.ts');
-checkDeclOutput('tests\\compiler\\testCode\\declInput-2.ts');
+checkNoDeclFile('tests\\compiler\\testCode\\declInput-2.ts');
 checkDeclOutput('tests\\compiler\\testCode\\vardecl.ts');
 checkDeclOutput('tests\\compiler\\testCode\\funcdecl.ts');
 checkDeclOutput('tests\\compiler\\testCode\\classdecl.ts');

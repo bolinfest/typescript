@@ -1,0 +1,1 @@
+0.ts line 8 col 22: exported function parameter 'y' has or is using private type'Y'

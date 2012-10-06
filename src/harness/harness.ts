@@ -979,7 +979,7 @@ module Harness {
         (e?: Error): void;
     }
 
-    class Runnable {
+    export class Runnable {
         constructor (public description: string, public block: any) { }
 
         // The current stack of Runnable objects

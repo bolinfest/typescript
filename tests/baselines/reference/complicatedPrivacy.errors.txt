@@ -1,0 +1,14 @@
+// 0.ts  line 10 col 26: Property getters may not take any arguments
+// 0.ts  line 19 col 37: Expected ';'
+// 0.ts  line 37 col 4: Expected ';'
+0.ts line 4 col 27: exported function parameter 'c1' has or is using private type'C1'
+0.ts line 11 col 16: public getter's return type has or is using private type 'C1'
+0.ts line 14 col 26: public setter parameter 'arg1' has or is using private type'C1'
+0.ts line 19 col 23: exported function parameter 'arg1' has or is using private type'C1'
+0.ts line 22 col 26: exported function's return type has or is using private type 'C1'
+0.ts line 25 col 8: exported function's return type has or is using private type 'C1'
+0.ts line 30 col 5: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 28 col 23: exported function parameter 'arg1' has or is using private type'C1'
+0.ts line 35 col 23: exported function parameter 'arg2' has or is using private type'C1'
+0.ts line 35 col 23: exported function parameter 'arg2' has or is using private type'C1'
+0.ts line 55 col 4: exported variable 'v2' has or is using private type'C1'
