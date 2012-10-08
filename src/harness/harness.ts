@@ -415,7 +415,7 @@ module Harness {
                 testCode += 'var __test1__val__ = __test1__.__val__;\n';
 
                 testCode += 'module __test2__ {\n';
-                testCode += '    ' + other.code + ';\n';
+                testCode += '    export ' + other.code + ';\n';
                 testCode += '    export var __val__ = ' + other.identifier + ';\n';
                 testCode += '}\n';
                 testCode += 'var __test2__val__ = __test2__.__val__;\n';
