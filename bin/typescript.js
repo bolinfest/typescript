@@ -1896,6 +1896,7 @@ var TypeScript;
         function Script(vars, scopes) {
                 _super.call(this, new Identifier("script"), null, false, null, vars, scopes, null, TypeScript.NodeType.Script);
             this.locationInfo = null;
+            this.referencedFiles = [];
             this.requiresGlobal = false;
             this.requiresInherits = false;
             this.isResident = false;
@@ -6420,7 +6421,7 @@ var TypeScript;
                     this.writeLineToOutput("    function __() { this.constructor = d; }");
                     this.writeLineToOutput("    __.prototype = b.prototype;");
                     this.writeLineToOutput("    d.prototype = new __();");
-                    this.writeLineToOutput("}");
+                    this.writeLineToOutput("};");
                 }
                 if(this.checker.mustCaptureGlobalThis) {
                     this.writeLineToOutput(this.captureThisStmtString);
@@ -8462,7 +8463,7 @@ var TypeScript;
                 }
                 var text = this.tok.getText();
                 if(this.strictMode && (text == "eval")) {
-                    this.reportParseError("can not name a variable eval in strict mode");
+                    this.reportParseError("'eval' may not name a variable in strict mode");
                 }
                 varDecl = this.makeVarDecl(new TypeScript.Identifier(text), this.nestingLevel);
                 varDecl.id.minChar = this.scanner.startPos;
@@ -18123,10 +18124,6 @@ var TypeScript;
                         type.typeFlags |= TypeScript.TypeFlags.HasBaseTypeOfObject;
                     }
                     if(base.isClassInstance()) {
-                        if(type.isClassInstance() && !this.checker.typeStatusIsFinished(base.symbol.typeCheckStatus) && base.symbol.declAST) {
-                            this.checker.errorReporter.simpleErrorFromSym(base.symbol, "Base type '" + base.symbol.name + "' is referenced before its declaration");
-                            this.typeCheck(base.symbol.declAST);
-                        }
                         if(this.currentScript) {
                             this.currentScript.requiresInherits = true;
                         }
@@ -19672,6 +19669,10 @@ var TypeScript;
         return modName;
     }
     TypeScript.trimModName = trimModName;
+    function getDeclareFilePath(fname) {
+        return isSTRFile(fname) ? changePathToDSTR(fname) : isTSFile(fname) ? changePathToDTS(fname) : changePathToDTS(fname);
+    }
+    TypeScript.getDeclareFilePath = getDeclareFilePath;
     function isSTRFile(fname) {
         return fname.length > 4 && fname.substring(fname.length - 4, fname.length) == ".str";
     }
@@ -19788,6 +19789,7 @@ var TypeScript;
         function SourceUnit(path, content) {
             this.path = path;
             this.content = content;
+            this.referencedFiles = null;
         }
         SourceUnit.prototype.getText = function (start, end) {
             return this.content.substring(start, end);
@@ -19896,6 +19898,7 @@ var TypeScript;
                     var rootDir = ioHost.dirName(resolvedFile.path);
                     var sourceUnit = new SourceUnit(resolvedFile.path, resolvedFile.content);
                     var preProcessedFileInfo = TypeScript.preProcessFile(sourceUnit, this.environment.compilationSettings);
+                    sourceUnit.referencedFiles = preProcessedFileInfo.referencedFiles;
                     for(var i = 0; i < preProcessedFileInfo.referencedFiles.length; i++) {
                         var referencedFile = preProcessedFileInfo.referencedFiles[i];
                         var normalizedPath = TypeScript.isRooted(referencedFile.path) ? referencedFile.path : rootDir + "/" + referencedFile.path;
@@ -20402,8 +20405,16 @@ var TypeScript;
             this.emitOptions = emitOptions;
             this.declFile = null;
             this.indenter = new TypeScript.Indenter();
-            this.declContainingAST = null;
+            this.declarationContainerStack = [];
+            this.isDottedModuleName = [];
+            this.ignoreCallbackAst = null;
         }
+        DeclarationEmitter.prototype.getAstDeclarationContainer = function () {
+            return this.declarationContainerStack[this.declarationContainerStack.length - 1];
+        };
+        DeclarationEmitter.prototype.emitDottedModuleName = function () {
+            return (this.isDottedModuleName.length == 0) ? false : this.isDottedModuleName[this.isDottedModuleName.length - 1];
+        };
         DeclarationEmitter.prototype.setDeclarationFile = function (file) {
             this.declFile = file;
         };
@@ -20421,9 +20432,29 @@ var TypeScript;
         DeclarationEmitter.prototype.emitIndent = function () {
             this.declFile.Write(this.getIndentString());
         };
-        DeclarationEmitter.prototype.canEmitSignature = function (declFlags) {
-            if(this.declContainingAST.nodeType == TypeScript.NodeType.Module && !TypeScript.hasFlag(declFlags, TypeScript.DeclFlags.Exported)) {
+        DeclarationEmitter.prototype.canEmitSignature = function (declFlags, useDeclarationContainerTop) {
+            if (typeof useDeclarationContainerTop === "undefined") { useDeclarationContainerTop = true; }
+            var hasModuleContainer;
+            if(useDeclarationContainerTop) {
+                hasModuleContainer = this.getAstDeclarationContainer().nodeType == TypeScript.NodeType.Module;
+            } else {
+                hasModuleContainer = this.declarationContainerStack[this.declarationContainerStack.length - 2].nodeType == TypeScript.NodeType.Module;
+            }
+            if(hasModuleContainer && !TypeScript.hasFlag(declFlags, TypeScript.DeclFlags.Exported)) {
                 return false;
+            }
+            return true;
+        };
+        DeclarationEmitter.prototype.canEmitPrePostAstSignature = function (declFlags, astWithPrePostCallback, preCallback) {
+            if(this.ignoreCallbackAst) {
+                TypeScript.CompilerDiagnostics.assert(this.ignoreCallbackAst != astWithPrePostCallback, "Ignore Callback AST mismatch");
+                this.ignoreCallbackAst = null;
+                return false;
+            } else {
+                if(preCallback && !this.canEmitSignature(declFlags, preCallback)) {
+                    this.ignoreCallbackAst = astWithPrePostCallback;
+                    return false;
+                }
             }
             return true;
         };
@@ -20501,7 +20532,7 @@ var TypeScript;
 
                         }
                         default: {
-                            throw Error("Catch this unhandled type container");
+                            TypeScript.CompilerDiagnostics.debugPrint("Catch this unhandled type container");
 
                         }
                     }
@@ -20509,50 +20540,51 @@ var TypeScript;
             }
             return true;
         };
-        DeclarationEmitter.prototype.setDeclContainingAST = function (ast) {
-            var temp = this.declContainingAST;
-            this.declContainingAST = ast;
-            return temp;
+        DeclarationEmitter.prototype.pushDeclarationContainer = function (ast) {
+            this.declarationContainerStack.push(ast);
+        };
+        DeclarationEmitter.prototype.popDeclarationContainer = function (ast) {
+            TypeScript.CompilerDiagnostics.assert(ast != this.getAstDeclarationContainer(), 'Declaration container mismatch');
+            this.declarationContainerStack.pop();
         };
         DeclarationEmitter.prototype.getTypeSignature = function (type) {
             var containingScope = null;
-            if(this.declContainingAST) {
-                switch(this.declContainingAST.nodeType) {
-                    case TypeScript.NodeType.Module:
-                    case TypeScript.NodeType.Interface:
-                    case TypeScript.NodeType.FuncDecl: {
-                        if(this.declContainingAST.type) {
-                            containingScope = this.declContainingAST.type.containedScope;
-                        }
-                        break;
-
+            var declarationContainerAst = this.getAstDeclarationContainer();
+            switch(declarationContainerAst.nodeType) {
+                case TypeScript.NodeType.Module:
+                case TypeScript.NodeType.Interface:
+                case TypeScript.NodeType.FuncDecl: {
+                    if(declarationContainerAst.type) {
+                        containingScope = declarationContainerAst.type.containedScope;
                     }
-                    case TypeScript.NodeType.Script: {
-                        var script = this.declContainingAST;
-                        if(script.bod) {
-                            containingScope = script.bod.enclosingScope;
-                        }
-                        break;
+                    break;
 
+                }
+                case TypeScript.NodeType.Script: {
+                    var script = declarationContainerAst;
+                    if(script.bod) {
+                        containingScope = script.bod.enclosingScope;
                     }
-                    case TypeScript.NodeType.Class: {
-                        if(this.declContainingAST.type) {
-                            containingScope = this.declContainingAST.type.instanceType.containedScope;
-                        }
-                        break;
+                    break;
 
+                }
+                case TypeScript.NodeType.Class: {
+                    if(declarationContainerAst.type) {
+                        containingScope = declarationContainerAst.type.instanceType.containedScope;
                     }
-                    default: {
-                        throw Error("Unknown containing scope");
+                    break;
 
-                    }
+                }
+                default: {
+                    TypeScript.CompilerDiagnostics.debugPrint("Unknown containing scope");
+
                 }
             }
             return type.getScopedTypeName(containingScope);
         };
-        DeclarationEmitter.prototype.VarDeclCallback = function (pre, varDecl, interfaceMember) {
-            if (typeof interfaceMember === "undefined") { interfaceMember = false; }
+        DeclarationEmitter.prototype.VarDeclCallback = function (pre, varDecl) {
             if(pre && this.canEmitSignature(TypeScript.ToDeclFlags(varDecl.varFlags))) {
+                var interfaceMember = (this.getAstDeclarationContainer().nodeType == TypeScript.NodeType.Interface);
                 if(!interfaceMember) {
                     this.emitDeclFlags(TypeScript.ToDeclFlags(varDecl.varFlags), "var");
                     this.declFile.Write(varDecl.id.text);
@@ -20592,11 +20624,14 @@ var TypeScript;
                 this.declFile.Write(": " + this.getTypeSignature(argDecl.type));
             }
         };
-        DeclarationEmitter.prototype.FuncDeclCallback = function (pre, funcDecl, isInterfaceMember) {
-            if (typeof isInterfaceMember === "undefined") { isInterfaceMember = false; }
+        DeclarationEmitter.prototype.FuncDeclCallback = function (pre, funcDecl) {
             if(!pre) {
                 return false;
             }
+            if(funcDecl.isAccessor()) {
+                return this.emitPropertyAccessorSignature(funcDecl);
+            }
+            var isInterfaceMember = (this.getAstDeclarationContainer().nodeType == TypeScript.NodeType.Interface);
             if(!isInterfaceMember && !funcDecl.isOverload) {
                 if(funcDecl.isConstructor) {
                     if(funcDecl.type.construct && funcDecl.type.construct.signatures.length > 1) {
@@ -20694,7 +20729,7 @@ var TypeScript;
         DeclarationEmitter.prototype.emitPropertyAccessorSignature = function (funcDecl) {
             var accessorSymbol = funcDecl.accessorSymbol;
             if(accessorSymbol.getter && accessorSymbol.getter.declAST != funcDecl) {
-                return;
+                return false;
             }
             this.emitDeclFlags(TypeScript.ToDeclFlags(accessorSymbol.flags), "var");
             this.declFile.Write(funcDecl.name.text);
@@ -20704,6 +20739,7 @@ var TypeScript;
             } else {
                 this.declFile.WriteLine(";");
             }
+            return false;
         };
         DeclarationEmitter.prototype.emitClassMembersFromConstructorDefinition = function (funcDecl) {
             if(funcDecl.args) {
@@ -20727,79 +20763,48 @@ var TypeScript;
             }
         };
         DeclarationEmitter.prototype.ClassCallback = function (pre, classDecl) {
-            if(!pre || !this.canEmitSignature(TypeScript.ToDeclFlags(classDecl.varFlags))) {
+            if(!this.canEmitPrePostAstSignature(TypeScript.ToDeclFlags(classDecl.varFlags), classDecl, pre)) {
                 return false;
             }
-            var className = classDecl.name.text;
-            this.emitDeclFlags(TypeScript.ToDeclFlags(classDecl.varFlags), "class");
-            this.declFile.Write(className);
-            this.emitBaseList(classDecl.baseClass, "extends");
-            this.emitBaseList(classDecl.implementsList, "implements");
-            this.declFile.WriteLine(" {");
-            var oldDeclContainingAST = this.setDeclContainingAST(classDecl);
-            this.indenter.increaseIndent();
-            if(classDecl.constructorDecl) {
-                this.emitClassMembersFromConstructorDefinition(classDecl.constructorDecl);
-            }
-            var membersLen = classDecl.definitionMembers.members.length;
-            for(var j = 0; j < membersLen; j++) {
-                var memberDecl = classDecl.definitionMembers.members[j];
-                if(memberDecl.nodeType == TypeScript.NodeType.FuncDecl) {
-                    var fn = memberDecl;
-                    if(!fn.isAccessor()) {
-                        this.FuncDeclCallback(true, fn);
-                    } else {
-                        this.emitPropertyAccessorSignature(fn);
-                    }
-                } else {
-                    if(memberDecl.nodeType == TypeScript.NodeType.VarDecl) {
-                        this.VarDeclCallback(true, memberDecl);
-                    } else {
-                        throw Error("We want to catch this");
-                    }
+            if(pre) {
+                var className = classDecl.name.text;
+                this.emitDeclFlags(TypeScript.ToDeclFlags(classDecl.varFlags), "class");
+                this.declFile.Write(className);
+                this.emitBaseList(classDecl.baseClass, "extends");
+                this.emitBaseList(classDecl.implementsList, "implements");
+                this.declFile.WriteLine(" {");
+                this.pushDeclarationContainer(classDecl);
+                this.indenter.increaseIndent();
+                if(classDecl.constructorDecl) {
+                    this.emitClassMembersFromConstructorDefinition(classDecl.constructorDecl);
                 }
+            } else {
+                this.indenter.decreaseIndent();
+                this.popDeclarationContainer(classDecl);
+                this.emitIndent();
+                this.declFile.WriteLine("}");
             }
-            this.indenter.decreaseIndent();
-            this.setDeclContainingAST(oldDeclContainingAST);
-            this.emitIndent();
-            this.declFile.WriteLine("}");
-            return false;
+            return true;
         };
         DeclarationEmitter.prototype.InterfaceCallback = function (pre, interfaceDecl) {
-            if(pre && this.canEmitSignature(TypeScript.ToDeclFlags(interfaceDecl.varFlags))) {
+            if(!this.canEmitPrePostAstSignature(TypeScript.ToDeclFlags(interfaceDecl.varFlags), interfaceDecl, pre)) {
+                return false;
+            }
+            if(pre) {
                 var interfaceName = interfaceDecl.name.text;
                 this.emitDeclFlags(TypeScript.ToDeclFlags(interfaceDecl.varFlags), "interface");
                 this.declFile.Write(interfaceName);
                 this.emitBaseList(interfaceDecl.extendsList, "extends");
                 this.declFile.WriteLine(" {");
                 this.indenter.increaseIndent();
-                var oldDeclContainingAST = this.setDeclContainingAST(interfaceDecl);
-                var typeMemberList = interfaceDecl.members;
-                for(var i = 0; i < typeMemberList.members.length; i++) {
-                    var typeMember = typeMemberList.members[i];
-                    switch(typeMember.nodeType) {
-                        case TypeScript.NodeType.FuncDecl: {
-                            this.FuncDeclCallback(true, typeMember, true);
-                            break;
-
-                        }
-                        case TypeScript.NodeType.VarDecl: {
-                            this.VarDeclCallback(true, typeMember, true);
-                            break;
-
-                        }
-                        default: {
-                            throw Error("Not allowed");
-
-                        }
-                    }
-                }
-                this.setDeclContainingAST(oldDeclContainingAST);
+                this.pushDeclarationContainer(interfaceDecl);
+            } else {
                 this.indenter.decreaseIndent();
+                this.popDeclarationContainer(interfaceDecl);
                 this.emitIndent();
                 this.declFile.WriteLine("}");
             }
-            return false;
+            return true;
         };
         DeclarationEmitter.prototype.ImportCallback = function (pre, importDecl) {
             if(pre && this.canEmitSignature(TypeScript.ToDeclFlags(importDecl.varFlags))) {
@@ -20827,95 +20832,63 @@ var TypeScript;
                     this.emitIndent();
                     this.declFile.WriteLine((memberDecl).id.text + ",");
                 } else {
-                    if(memberDecl.nodeType != TypeScript.NodeType.Asg) {
-                        throw Error("We want to catch this");
-                    }
+                    TypeScript.CompilerDiagnostics.assert(memberDecl.nodeType != TypeScript.NodeType.Asg, "We want to catch this");
                 }
             }
             this.indenter.decreaseIndent();
             this.emitIndent();
             this.declFile.WriteLine("}");
-            return true;
+            return false;
         };
-        DeclarationEmitter.prototype.ModuleCallback = function (pre, moduleDecl, isDottedModuleName) {
-            if (typeof isDottedModuleName === "undefined") { isDottedModuleName = false; }
-            if(!pre) {
-                return false;
-            }
+        DeclarationEmitter.prototype.ModuleCallback = function (pre, moduleDecl) {
             if(TypeScript.hasFlag(moduleDecl.modFlags, TypeScript.ModuleFlags.IsWholeFile)) {
                 return true;
             }
             if(moduleDecl.isEnum()) {
-                this.emitEnumSignature(moduleDecl);
-            } else {
-                if(!this.canEmitSignature(TypeScript.ToDeclFlags(moduleDecl.modFlags))) {
-                    return false;
+                if(pre) {
+                    this.emitEnumSignature(moduleDecl);
                 }
-                if(isDottedModuleName) {
+                return false;
+            }
+            if(!this.canEmitPrePostAstSignature(TypeScript.ToDeclFlags(moduleDecl.modFlags), moduleDecl, pre)) {
+                return false;
+            }
+            if(pre) {
+                if(this.emitDottedModuleName()) {
                     this.declFile.Write(".");
                 } else {
                     this.emitDeclFlags(TypeScript.ToDeclFlags(moduleDecl.modFlags), "module");
                 }
                 this.declFile.Write(moduleDecl.name.text);
-                if(moduleDecl.members.members.length == 1 && moduleDecl.members.members[0].nodeType == TypeScript.NodeType.Module && !(moduleDecl.members.members[0]).isEnum() && TypeScript.hasFlag((moduleDecl.members.members[0]).modFlags, TypeScript.ModuleFlags.Exported)) {
-                    this.ModuleCallback(true, moduleDecl.members.members[0], true);
-                } else {
-                    var oldDeclContainingAST = this.setDeclContainingAST(moduleDecl);
+                var isCurrentModuleDotted = (moduleDecl.members.members.length == 1 && moduleDecl.members.members[0].nodeType == TypeScript.NodeType.Module && !(moduleDecl.members.members[0]).isEnum() && TypeScript.hasFlag((moduleDecl.members.members[0]).modFlags, TypeScript.ModuleFlags.Exported));
+                this.isDottedModuleName.push(isCurrentModuleDotted);
+                this.pushDeclarationContainer(moduleDecl);
+                if(!isCurrentModuleDotted) {
                     this.declFile.WriteLine(" {");
                     this.indenter.increaseIndent();
-                    var membersLen = moduleDecl.members.members.length;
-                    for(var j = 0; j < membersLen; j++) {
-                        var memberDecl = moduleDecl.members.members[j];
-                        switch(memberDecl.nodeType) {
-                            case TypeScript.NodeType.VarDecl: {
-                                this.VarDeclCallback(true, memberDecl);
-                                break;
-
-                            }
-                            case TypeScript.NodeType.FuncDecl: {
-                                this.FuncDeclCallback(true, memberDecl);
-                                break;
-
-                            }
-                            case TypeScript.NodeType.Class: {
-                                this.ClassCallback(true, memberDecl);
-                                break;
-
-                            }
-                            case TypeScript.NodeType.Interface: {
-                                this.InterfaceCallback(true, memberDecl);
-                                break;
-
-                            }
-                            case TypeScript.NodeType.Module: {
-                                this.ModuleCallback(true, memberDecl);
-                                break;
-
-                            }
-                            case TypeScript.NodeType.Import: {
-                                this.ImportCallback(true, memberDecl);
-                                break;
-
-                            }
-                            default: {
-                                break;
-
-                            }
-                        }
-                    }
+                }
+            } else {
+                if(!this.emitDottedModuleName()) {
                     this.indenter.decreaseIndent();
                     this.emitIndent();
                     this.declFile.WriteLine("}");
-                    this.setDeclContainingAST(oldDeclContainingAST);
                 }
+                this.popDeclarationContainer(moduleDecl);
+                this.isDottedModuleName.pop();
             }
-            return false;
+            return true;
         };
         DeclarationEmitter.prototype.ScriptCallback = function (pre, script) {
             if(pre) {
-                this.setDeclContainingAST(script);
+                if(this.emitOptions.outputMany) {
+                    for(var i = 0; i < script.referencedFiles.length; i++) {
+                        var declareFileName = TypeScript.getDeclareFilePath(script.referencedFiles[i].path);
+                        this.declFile.WriteLine('/// <reference path="' + declareFileName + '" />');
+                    }
+                }
+                this.pushDeclarationContainer(script);
             } else {
-                this.setDeclContainingAST(null);
+                this.popDeclarationContainer(script);
             }
             return true;
         };
@@ -21127,15 +21100,17 @@ var TypeScript;
                 throw new Error("Unknown file \"" + filename + "\"");
             });
         };
-        TypeScriptCompiler.prototype.addUnit = function (prog, filename, keepResident) {
+        TypeScriptCompiler.prototype.addUnit = function (prog, filename, keepResident, referencedFiles) {
             if (typeof keepResident === "undefined") { keepResident = false; }
-            return this.addSourceUnit(new TypeScript.StringSourceText(prog), filename, keepResident);
+            if (typeof referencedFiles === "undefined") { referencedFiles = []; }
+            return this.addSourceUnit(new TypeScript.StringSourceText(prog), filename, keepResident, referencedFiles);
         };
-        TypeScriptCompiler.prototype.addSourceUnit = function (sourceText, filename, keepResident) {
-            if (typeof keepResident === "undefined") { keepResident = false; }
+        TypeScriptCompiler.prototype.addSourceUnit = function (sourceText, filename, keepResident, referencedFiles) {
+            if (typeof referencedFiles === "undefined") { referencedFiles = []; }
             var _this = this;
             return this.timeFunction("addSourceUnit(" + filename + ", " + keepResident + ")", function () {
                 var script = _this.parser.parse(sourceText, filename, _this.units.length, TypeScript.AllowedElements.Global);
+                script.referencedFiles = referencedFiles;
                 script.isResident = keepResident;
                 _this.persistentTypeState.setCollectionMode(keepResident ? TypeScript.TypeCheckCollectionMode.Resident : TypeScript.TypeCheckCollectionMode.Transient);
                 var index = _this.units.length;
@@ -21292,13 +21267,12 @@ var TypeScript;
                 }
                 if(outputMany) {
                     var fname = this.units[i].filename;
-                    var declareFileName = TypeScript.isSTRFile(fname) ? TypeScript.changePathToDSTR(fname) : TypeScript.isTSFile(fname) ? TypeScript.changePathToDTS(fname) : TypeScript.changePathToDTS(fname);
+                    var declareFileName = TypeScript.getDeclareFilePath(fname);
                     declareFile = createFile(declareFileName);
                     declarationEmitter.setDeclarationFile(declareFile);
                 } else {
                     if(declareFile == null) {
-                        var outfname = this.settings.outputFileName;
-                        outfname = TypeScript.isSTRFile(outfname) ? TypeScript.changePathToDSTR(outfname) : TypeScript.isTSFile(outfname) ? TypeScript.changePathToDTS(outfname) : TypeScript.changePathToDTS(outfname);
+                        var outfname = TypeScript.getDeclareFilePath(this.settings.outputFileName);
                         declareFile = createFile(outfname);
                         declarationEmitter.setDeclarationFile(declareFile);
                     }

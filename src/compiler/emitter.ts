@@ -1512,16 +1512,14 @@ module TypeScript {
         }
 
         public emitPrologue(reqInherits: bool) {
-            // TODO: emit only if inheritence used in unit
             if (!this.prologueEmitted) {
                 if (reqInherits) {
                     this.prologueEmitted = true;
                     this.writeLineToOutput("var __extends = this.__extends || function (d, b) {");
-                    //this.writeLineToOutput("    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];");
                     this.writeLineToOutput("    function __() { this.constructor = d; }");
                     this.writeLineToOutput("    __.prototype = b.prototype;");
                     this.writeLineToOutput("    d.prototype = new __();");
-                    this.writeLineToOutput("}");
+                    this.writeLineToOutput("};");
                 }
                 if (this.checker.mustCaptureGlobalThis) {
                     this.writeLineToOutput(this.captureThisStmtString);

@@ -2342,12 +2342,6 @@ module TypeScript {
                     }
 
                     if (base.isClassInstance()) {
-                        if (type.isClassInstance() &&
-                            !this.checker.typeStatusIsFinished(base.symbol.typeCheckStatus) &&
-                            base.symbol.declAST) {
-                            this.checker.errorReporter.simpleErrorFromSym(base.symbol, "Base type '" + base.symbol.name + "' is referenced before its declaration");
-                            this.typeCheck(base.symbol.declAST);
-                        }
                         if (this.currentScript) {
                             this.currentScript.requiresInherits = true;
                         }
