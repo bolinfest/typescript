@@ -21,3 +21,4 @@ checkDeclOutput('tests\\compiler\\testCode\\classdecl.ts');
 checkDeclOutput('tests\\compiler\\testCode\\interfacedecl.ts');
 checkDeclOutput('tests\\compiler\\testCode\\moduledecl.ts');
 checkDeclOutput('tests\\compiler\\testCode\\interfaceOnly.ts');
+checkDeclOutput('tests\\compiler\\testCode\\withExportDecl.ts');

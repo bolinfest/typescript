@@ -220,7 +220,7 @@ module TypeScript {
                     this.typeFlags |= TypeFlags.BuildingName;
                     var builder = "";
                     var allMemberNames = new MemberNameArray();
-                    var curlies = isElementType;
+                    var curlies = isElementType || this.index != null;
                     var signatureCount = 0;
                     var memCount = 0;
                     var delim = "; ";
@@ -236,15 +236,7 @@ module TypeScript {
                                 }
                                 allMemberNames.add(MemberName.create(typeName));
                                 memCount++;
-                                if (sym.kind() == SymbolKind.Type) {
-                                    var memberType = (<TypeSymbol>sym).type;
-                                    if (memberType.callCount() > 1) {
-                                        curlies = true;
-                                    }
-                                }
-                                else {
-                                    curlies = true;
-                                }
+                                curlies = true;
                             }
                         }, null);
                     }
@@ -252,7 +244,7 @@ module TypeScript {
                     var signatures: string[];
                     var j: number;
                     var len = 0;
-                    var shortform = (memCount == 0) && (this.callCount() == 1) && topLevel;
+                    var shortform = !curlies && this.callCount() == 1 && topLevel;
                     if (!shortform) {
                         allMemberNames.delim = delim;
                     }
