@@ -20,4 +20,7 @@ function overload1(n: number): string;
 function overload1(s: string): string;
 var withOverloadSignature: { (n: number): string; (s: string): string; };
 function f(n: () => void): void;
+module m2 {
+    export function foo(n: () => void): void;
+}
 

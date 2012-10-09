@@ -522,5 +522,9 @@ module TypeScript {
             }
             return true;
         }
+
+        public DefaultCallback(pre: bool, ast: AST): bool {
+            return !hasFlag(ast.flags, ASTFlags.IsStatement);
+        }
     }
 }
