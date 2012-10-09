@@ -216,7 +216,7 @@ module TypeScript {
             }
 
             var isInterfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
-            if (!isInterfaceMember && !funcDecl.isOverload) {
+            if (!isInterfaceMember && funcDecl.bod) {
                 if (funcDecl.isConstructor) {
                     if (funcDecl.type.construct && funcDecl.type.construct.signatures.length > 1) {
                         return false;

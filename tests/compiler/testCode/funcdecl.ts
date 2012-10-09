@@ -59,3 +59,9 @@ m2.foo(() =>  {
     var b = 30;
     return b;
 });
+
+
+declare function fooAmbient(n: number): string;
+
+declare function overloadAmbient(n: number): string;
+declare function overloadAmbient(s: string): string;
