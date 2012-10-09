@@ -53,3 +53,6 @@ m2.foo(function () {
     var b = 30;
     return b;
 });
+var f2 = function () {
+    return "string";
+};

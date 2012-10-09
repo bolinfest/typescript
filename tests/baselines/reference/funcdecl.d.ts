@@ -26,4 +26,5 @@ module m2 {
 function fooAmbient(n: number): string;
 function overloadAmbient(n: number): string;
 function overloadAmbient(s: string): string;
+var f2: () => string;
 

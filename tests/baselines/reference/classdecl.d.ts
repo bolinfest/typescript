@@ -9,7 +9,6 @@ class a {
     static p3;
     private pv3;
     private foo(n);
-    private foo(s);
 }
 class b extends a {
 }
@@ -39,6 +38,12 @@ class aAmbient {
     static d2();
     static p3;
     private pv3;
+    private foo(s);
+}
+class d {
+    private foo(n);
+}
+class e {
     private foo(s);
 }
 

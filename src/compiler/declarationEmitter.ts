@@ -216,7 +216,7 @@ module TypeScript {
             }
 
             var isInterfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
-            if (!isInterfaceMember && funcDecl.bod) {
+            if (funcDecl.bod) {
                 if (funcDecl.isConstructor) {
                     if (funcDecl.type.construct && funcDecl.type.construct.signatures.length > 1) {
                         return false;
@@ -226,6 +226,18 @@ module TypeScript {
                         // This means its implementation of overload signature. do not emit
                         return false;
                     }
+                }
+            } else if (!isInterfaceMember && hasFlag(funcDecl.fncFlags, FncFlags.Private) && funcDecl.type.call && funcDecl.type.call.signatures.length > 1) {
+                // Print only first overload of private function
+                var signatures = funcDecl.type.call.signatures;
+                var firstSignature = signatures[0].declAST;
+                if (firstSignature.bod) {
+                    // Its a implementation, use next one
+                    firstSignature = signatures[1].declAST;
+                }
+
+                if (firstSignature != funcDecl) {
+                    return false;
                 }
             }
 

@@ -65,3 +65,7 @@ declare function fooAmbient(n: number): string;
 
 declare function overloadAmbient(n: number): string;
 declare function overloadAmbient(s: string): string;
+
+var f2 = () => {
+    return "string";
+}
