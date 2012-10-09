@@ -22,8 +22,11 @@ describe('Output of sourcemap matches the baseline', function () {
             cc.recreate();
             cc.compiler.addUnit(IO.readFile(filename), filename);
             cc.compiler.settings.mapSourceFiles = true;
-            cc.compiler.emit(true, IO.createFile);
+            var oldOutputMany = cc.compiler.settings.outputMany;
+            cc.compiler.settings.outputMany = true;
+            cc.compiler.emit(IO.createFile);
             cc.compiler.settings.mapSourceFiles = false;
+            cc.compiler.settings.outputMany = oldOutputMany;
             cc.recreate(); // In case we are the last test, we need the compiler to be in a clean state for other tests
 
             // The compiler has now produced a .js file (which we want to delete)

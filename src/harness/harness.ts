@@ -539,13 +539,15 @@ module Harness {
             reset();
 
             compiler.settings.generateDeclarationFiles = true;
+            var oldOutputMany = compiler.settings.outputMany;
             try {
                 addUnit(code);
                 compiler.reTypeCheck();
 
                 var outputs = {};
 
-                compiler.emitDeclarationFile(true, (fn: string) => {
+                compiler.settings.outputMany = true;
+                compiler.emitDeclarationFile((fn: string) => {
                     outputs[fn] = new Harness.Compiler.WriterAggregator();
                     return outputs[fn];
                 });
@@ -566,6 +568,7 @@ module Harness {
                 }
             } finally {
                 compiler.settings.generateDeclarationFiles = false;
+                compiler.settings.outputMany = oldOutputMany;
             }
 
             return '';

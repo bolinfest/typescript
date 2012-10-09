@@ -398,7 +398,7 @@ module TypeScript {
             });
         }
 
-        public emitDeclarationFile(outputMany: bool, createFile: (path: string) => ITextWriter) {
+        public emitDeclarationFile(createFile: (path: string) => ITextWriter) {
             if (!this.settings.generateDeclarationFiles) {
                 return;
             }
@@ -419,7 +419,7 @@ module TypeScript {
                 }
 
                 // Create or reuse file
-                if (outputMany) {
+                if (this.emitSettings.outputMany) {
                     var fname = this.units[i].filename;
                     var declareFileName = getDeclareFilePath(fname);
                     declareFile = createFile(declareFileName);
@@ -432,17 +432,16 @@ module TypeScript {
                 }
 
                 declarationEmitter.emitDeclarations(script);
-                if (outputMany) {
+                if (this.emitSettings.outputMany) {
                     declareFile.Close();
                 }
             }
-            if (!outputMany && declareFile) {
+            if (!this.emitSettings.outputMany && declareFile) {
                 declareFile.Close();
-
             }
         }
 
-        public emit(outputMany: bool, createFile: (path: string) => ITextWriter) {
+        public emit(createFile: (path: string) => ITextWriter) {
             var emitter: Emitter = null;
             this.emitSettings.createFile = createFile;
             for (var i = 0, len = this.scripts.members.length; i < len; i++) {
@@ -454,7 +453,7 @@ module TypeScript {
 
 
                 var outf = this.outfile;
-                if (outputMany) {
+                if (this.emitSettings.outputMany) {
                     var fname = this.units[i].filename;
                     var splitFname = fname.split(".");
                     splitFname.pop();
@@ -482,14 +481,14 @@ module TypeScript {
 
                 this.typeChecker.locationInfo = script.locationInfo;
                 emitter.emitJavascript(script, TokenID.Comma, false);
-                if (outputMany) {
+                if (this.emitSettings.outputMany) {
                     if (this.settings.mapSourceFiles) {
                         emitter.emitSourceMappings();
                     }
                     outf.Close();
                 }
             }
-            if (!outputMany) {
+            if (!this.emitSettings.outputMany) {
                 if (this.settings.mapSourceFiles) {
                     emitter.emitSourceMappings();
                 }

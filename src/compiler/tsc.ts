@@ -179,7 +179,7 @@ class BatchCompiler {
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
             try {
-                compiler.emit(this.compilationSettings.outputMany, this.ioHost.createFile);
+                compiler.emit(this.ioHost.createFile);
             } catch (err) {
                 compiler.errorReporter.hasErrors = true;
                 // Catch emitter exceptions
@@ -188,7 +188,7 @@ class BatchCompiler {
                 }
             }
 
-            compiler.emitDeclarationFile(this.compilationSettings.outputMany, this.ioHost.createFile);
+            compiler.emitDeclarationFile(this.ioHost.createFile);
         }
 
         if (outfile) {

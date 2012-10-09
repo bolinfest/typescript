@@ -10,6 +10,7 @@ module TypeScript {
         public declarationContainerStack: AST[] = [];
         public isDottedModuleName: bool[] = [];
         public ignoreCallbackAst: AST = null;
+        private singleDeclFile: ITextWriter = null;
 
         private getAstDeclarationContainer() {
             return this.declarationContainerStack[this.declarationContainerStack.length - 1];
@@ -460,6 +461,21 @@ module TypeScript {
 
         public ModuleCallback(pre: bool, moduleDecl: ModuleDecl): bool {
             if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsWholeFile)) {
+                // Dynamic modules and we are going to outputing single file, we need to change the declFile
+                if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsDynamic) && !this.emitOptions.outputMany) {
+                    if (pre) {
+                        this.singleDeclFile = this.declFile;
+                        CompilerDiagnostics.assert(this.indenter.indentAmt == 0, "Indent has to be 0 when outputing new file");
+                        // Create new file
+                        var declareFileName = getDeclareFilePath(stripQuotes(moduleDecl.name.sym.name));
+                        this.declFile = this.emitOptions.createFile(declareFileName);
+                    } else {
+                        CompilerDiagnostics.assert(this.singleDeclFile != this.declFile, "singleDeclFile cannot be null as we are going to revert back to it");
+                        CompilerDiagnostics.assert(this.indenter.indentAmt == 0, "Indent has to be 0 when outputing new file");
+                        this.declFile.Close();
+                        this.declFile = this.singleDeclFile;
+                    }
+                }
                 return true;
             }
 
