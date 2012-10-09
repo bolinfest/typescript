@@ -1,5 +1,5 @@
-﻿/// <reference path='..\..\harness\harness.ts'/>
-/// <reference path="..\..\services\formatting\formatting.ts"/>
+﻿/// <reference path='..\..\src\harness\harness.ts'/>
+/// <reference path="..\..\src\services\formatting\formatting.ts"/>
 
 interface DocumentTestJson {
     input: string;
@@ -28,7 +28,7 @@ function markupCodeForHtml(code: string) {
 // This function is a modified copy of getFormattingEditsForRange from \src\services\languageService.ts.
 // Please keep these roughly in sync.
 function getFormattingEditsForRange(ast: Services.ScriptSyntaxAST, minChar: number, limChar: number, ruleNames: string[]) {
-    var logger = new Tools.NullLogger();
+    var logger = new TypeScript.NullLogger();
     var formatRuleProvider = new Formatting.RulesProvider(logger);
     if (ruleNames.length > 0) {
         var rules = new Formatting.Rules();

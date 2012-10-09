@@ -6,7 +6,7 @@
 ///<reference path='..\services\typescriptServices.ts' />
 ///<reference path='diff.ts'/>
 
-declare var assert: Harness.IAssert;
+declare var assert: Harness.Assert;
 declare var it;
 declare var describe;
 declare var run;
@@ -41,6 +41,7 @@ else if (typeof require === "function") {
 
 declare module process {
     export function nextTick(callback: () => any): void;
+    export function on(event: string, listener: Function);
 }
 
 module Harness {
@@ -200,7 +201,7 @@ module Harness {
             public beforeEach() { };
             public after() { };
             public afterEach() { };
-            public results: { [x:string]: Dataset; } = <{ [x:string]: Dataset; }>{};
+            public results: { [x: string]: Dataset; } = <{ [x: string]: Dataset; }>{};
 
             public addTimingFor(name: string, timing: number) {
                 this.results[name] = this.results[name] || new Dataset();
@@ -535,7 +536,7 @@ module Harness {
 
         }
 
-        export function generateDeclFile(code: string, verifyNoDeclFile : bool): string {
+        export function generateDeclFile(code: string, verifyNoDeclFile: bool): string {
             reset();
 
             compiler.settings.generateDeclarationFiles = true;
@@ -693,8 +694,8 @@ module Harness {
             this.content = prefix + middle + suffix;
 
             // Store edit range + new length of script
-            this.editRanges.push({ 
-                length: this.content.length, 
+            this.editRanges.push({
+                length: this.content.length,
                 editRange: new TypeScript.ScriptEditRange(minChar, limChar, (limChar - minChar) + newText.length)
             });
 
@@ -759,7 +760,7 @@ module Harness {
             this.addScript(name, content, isResident);
         }
 
-        public editScript(name: string, minChar: number, limChar:number, newText:string) {
+        public editScript(name: string, minChar: number, limChar: number, newText: string) {
             for (var i = 0; i < this.scripts.length; i++) {
                 if (this.scripts[i].name == name) {
                     this.scripts[i].editContent(minChar, limChar, newText);
@@ -767,7 +768,7 @@ module Harness {
                 }
             }
 
-            throw new Error("No script with name '" + name +"'");
+            throw new Error("No script with name '" + name + "'");
         }
 
         public getScriptContent(scriptIndex: number): string {
@@ -861,11 +862,12 @@ module Harness {
         //
         public lineColToPosition(fileName: string, line: number, col: number): number {
             var script = this.ls.languageService.getScriptAST(fileName);
+            Assert
             assert.notNull(script);
-            assert(line >= 1);
-            assert(col >= 1);
-            assert(line < script.locationInfo.lineMap.length);
-
+            assert.is(line >= 1);
+            assert.is(col >= 1);
+            assert.is(line < script.locationInfo.lineMap.length);
+            
             return TypeScript.getPositionFromLineColumn(script, line, col);
         }
 
@@ -877,9 +879,9 @@ module Harness {
             assert.notNull(script);
 
             var result = TypeScript.getLineColumnFromPosition(script, position);
-
-            assert(result.line >= 1);
-            assert(result.col >= 1);
+            
+            assert.is(result.line >= 1);
+            assert.is(result.col >= 1);
             return result;
         }
 
@@ -1210,7 +1212,7 @@ module Harness {
 
 
     // Describe/it definitions
-    export function describe(description: string, block: () => any) {
+    export function describe(description: string, block: () => any, flags?: { }) {
         var newScenario = new Scenario(description, block);
 
         if (Runnable.currentStack.length === 0) {
@@ -1236,121 +1238,110 @@ module Harness {
 
     export var setCollateralRoot = CollateralReader.setRoot;
 
-    export interface IAssert {
-        (result: bool, msg?: string): void;
-        equal(left: any, right: any): void;
-        notEqual(left: any, right: any): void;
-        notNull(result: any): void;
-        noDiff(left: string, right: string): void;
-        compilerWarning(result: Compiler.CompilerResult, line: number, column: number, desc: string): void;
-        arrayContains(left: any[], right: any[]): void;
-        arrayContainsOnce(arr: any[], filter: (item: any) =>bool): void;
-        arrayLengthIs(arr: any[], length: number);
-    }
-
-    export var assert: IAssert = <any>function (result: bool, msg?: string): void {
-        if (!result)
-            throw new Error(msg ? msg : "Expected true, got false.");
-    }
-
-    assert.arrayLengthIs = <any>function (arr: any[], length: number) {
-        if (arr.length != length) {
-            var actual = '';
-            arr.forEach(n => actual = actual + '\n      ' + n.toString());
-            throw new Error('Expected array to have ' + length + ' elements. Actual elements were:' + actual);
+    export module Assert {
+        export function is(result: bool, msg?: string) {
+            if (!result)
+                throw new Error(msg ? msg : "Expected true, got false.");
         }
-    }
 
-    assert.equal = function (left, right) {
-        if (left !== right) {
-            throw new Error("Expected " + left + " to equal " + right);
+        export function arrayLengthIs(arr: any[], length: number) {
+            if (arr.length != length) {
+                var actual = '';
+                arr.forEach(n => actual = actual + '\n      ' + n.toString());
+                throw new Error('Expected array to have ' + length + ' elements. Actual elements were:' + actual);
+            }
         }
-    }
 
-    assert.notEqual = function (left, right) {
-        if (left === right) {
-            throw new Error("Expected " + left + " to *not* equal " + right);
+        export function equal(left, right) {
+            if (left !== right) {
+                throw new Error("Expected " + left + " to equal " + right);
+            }
         }
-    }
 
-    assert.notNull = function (result) {
-        if (result === null) {
-            throw new Error("Expected " + result + " to *not* be null");
+        export function notEqual(left, right) {
+            if (left === right) {
+                throw new Error("Expected " + left + " to *not* equal " + right);
+            }
         }
-    }
 
-    assert.compilerWarning = function (result: Compiler.CompilerResult, line: number, column: number, desc: string) {
-        if (!result.isErrorAt(line, column, desc)) {
-            var actual = '';
-            result.errors.forEach(err => {
-                actual = actual + '\n     ' + err.toString();
-            });
-            throw new Error("Expected compiler warning at (" + line + ", " + column + "): " + desc + "\nActual errors follow: " + actual);
+        export function notNull(result) {
+            if (result === null) {
+                throw new Error("Expected " + result + " to *not* be null");
+            }
         }
-    }
 
-    assert.noDiff = function (text1, text2) {
-        text1 = text1.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n");
-        text2 = text2.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n");
+        export function compilerWarning(result: Compiler.CompilerResult, line: number, column: number, desc: string) {
+            if (!result.isErrorAt(line, column, desc)) {
+                var actual = '';
+                result.errors.forEach(err => {
+                    actual = actual + '\n     ' + err.toString();
+                });
+                throw new Error("Expected compiler warning at (" + line + ", " + column + "): " + desc + "\nActual errors follow: " + actual);
+            }
+        }
 
-        if (text1 !== text2) {
-            var errorString = "";
-            var text1Lines = text1.split(/\n/);
-            var text2Lines = text2.split(/\n/);
-            for (var i = 0; i < text1Lines.length; i++) {
-                if (text1Lines[i] !== text2Lines[i]) {
-                    errorString += "Difference at line " + (i + 1) + ":\n";
-                    errorString += "                  Left File: " + text1Lines[i] + "\n";
-                    errorString += "                 Right File: " + text2Lines[i] + "\n\n";
+        export function noDiff(text1, text2) {
+            text1 = text1.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n");
+            text2 = text2.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n");
+
+            if (text1 !== text2) {
+                var errorString = "";
+                var text1Lines = text1.split(/\n/);
+                var text2Lines = text2.split(/\n/);
+                for (var i = 0; i < text1Lines.length; i++) {
+                    if (text1Lines[i] !== text2Lines[i]) {
+                        errorString += "Difference at line " + (i + 1) + ":\n";
+                        errorString += "                  Left File: " + text1Lines[i] + "\n";
+                        errorString += "                 Right File: " + text2Lines[i] + "\n\n";
+                    }
+                }
+                throw new Error(errorString);
+            }
+        }
+
+        export function arrayContains(arr, contains) {
+            var found;
+
+            for (var i = 0; i < contains.length; i++) {
+                found = false;
+
+                for (var j = 0; j < arr.length; j++) {
+                    if (arr[j] === contains[i]) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                    throw new Error("Expected array to contain \"" + contains[i] + "\"");
+            }
+        }
+
+        export function arrayContainsOnce(arr: any[], filter: (item: any) =>bool) {
+            var foundCount = 0;
+
+            for (var i = 0; i < arr.length; i++) {
+                if (filter(arr[i])) {
+                    foundCount++;
                 }
             }
-            throw new Error(errorString);
+
+            if (foundCount !== 1)
+                throw new Error("Expected array to match element only once (instead of " + foundCount + " time(s))");
         }
     }
-
-    assert.arrayContains = function (arr, contains) {
-        var found;
-
-        for (var i = 0; i < contains.length; i++) {
-            found = false;
-
-            for (var j = 0; j < arr.length; j++) {
-                if (arr[j] === contains[i]) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-                throw new Error("Expected array to contain \"" + contains[i] + "\"");
-        }
-    }
-
-    assert.arrayContainsOnce = function (arr: any[], filter: (item: any) =>bool) {
-        var foundCount = 0;
-
-        for (var i = 0; i < arr.length; i++) {
-            if (filter(arr[i])) {
-                foundCount++;
-            }
-        }
-
-        if (foundCount !== 1)
-            throw new Error("Expected array to match element only once (instead of " + foundCount + " time(s))");
-    }
-
 
     // Runs TypeScript or Javascript code.
     export module Runner {
         export function runCollateral(path: string, callback: (error: Error, result: any) => void ) {
             runString(CollateralReader.read(path), path.match(/[^\\]*$/)[0], callback);
         }
-        
+
         export function runJSString(code: string, callback: (error: Error, result: any) => void ) {
             // List of names that get overriden by various test code we eval
-            var dangerNames:any = ['Array'];
+            var dangerNames: any = ['Array'];
 
-            var globalBackup:any = {};
+            var globalBackup: any = {};
             var n: string = null;
             for (n in dangerNames) {
                 globalBackup[dangerNames[n]] = global[dangerNames[n]];
@@ -1470,7 +1461,7 @@ module Harness {
                         actual = '<no content>';
                     }
 
-                    var expected = '<no content>'; 
+                    var expected = '<no content>';
                     if (IO.fileExists(refFilename)) {
                         expected = IO.readFile(refFilename);
                     }
@@ -1507,5 +1498,5 @@ module Harness {
     global.describe = describe;
     global.run = run;
     global.it = it;
-    global.assert = assert;
+    global.assert = Harness.Assert;
 }

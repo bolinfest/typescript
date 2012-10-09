@@ -16,7 +16,7 @@ describe('getDefinitionPositionAtPosition', function() {
     var ls = typescriptLS.getLanguageService();
     
     function lineToOffset(line: number, col = 0, sFile?) {
-        var script: Tools.Script;
+        var script: TypeScript.Script;
         if (sFile) {
             if (sFile === 1){
                 script = ls.languageService.getScriptAST(fileName);

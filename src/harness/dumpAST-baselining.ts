@@ -108,25 +108,25 @@ module DumpAST {
         var minChar = ast.minChar;
 
         if (minChar < 0) {
-            assert(minChar === -1, "file \"" + fileName + "\": " + "The only valid nagative value for minChar is '-1'");
+            assert.is(minChar === -1, "file \"" + fileName + "\": " + "The only valid nagative value for minChar is '-1'");
         }
-        assert(minChar <= maxLimChar, "file \"" + fileName + "\": " + "minChar value " + minChar + " is greater than the length of the source file " + maxLimChar);
+        assert.is(minChar <= maxLimChar, "file \"" + fileName + "\": " + "minChar value " + minChar + " is greater than the length of the source file " + maxLimChar);
 
         var limChar = ast.limChar;
         if (limChar < 0) {
-            assert(limChar === -1, "file \"" + fileName + "\": " + "The only valid nagative value for limChar is '-1'");
+            assert.is(limChar === -1, "file \"" + fileName + "\": " + "The only valid nagative value for limChar is '-1'");
         }
-        assert(limChar <= maxLimChar, "file \"" + fileName + "\": " + "limChar value " + limChar + " is greater than the length of the source file " + maxLimChar);
+        assert.is(limChar <= maxLimChar, "file \"" + fileName + "\": " + "limChar value " + limChar + " is greater than the length of the source file " + maxLimChar);
 
         if (minChar < 0) {
-            assert(limChar < 0, "file \"" + fileName + "\": " + "minChar value is '-1' but limChar value '" + limChar + "' is not");
+            assert.is(limChar < 0, "file \"" + fileName + "\": " + "minChar value is '-1' but limChar value '" + limChar + "' is not");
         }
 
         if (limChar < 0) {
-            assert(minChar < 0, "file \"" + fileName + "\": " + "limChar value is '-1' but minChar value '" + minChar + "' is not");
+            assert.is(minChar < 0, "file \"" + fileName + "\": " + "limChar value is '-1' but minChar value '" + minChar + "' is not");
         }
 
-        assert(minChar <= limChar, "file \"" + fileName + "\": " + "minChar value " + minChar + " is greater the limChar value " + limChar);
+        assert.is(minChar <= limChar, "file \"" + fileName + "\": " + "minChar value " + minChar + " is greater the limChar value " + limChar);
     }
 
     function getBaselineFileName(fileName: string): string {

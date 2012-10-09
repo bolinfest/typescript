@@ -40,12 +40,12 @@ describe('getCompletionsAtPosition', function () {
 
         var lineMap = script.locationInfo.lineMap;
 
-        assert(line >= 1);
-        assert(col >= 1);
-        assert(line < lineMap.length);
+        assert.is(line >= 1);
+        assert.is(col >= 1);
+        assert.is(line < lineMap.length);
         var offset = lineMap[line] + (col - 1);
 
-        assert(offset < script.limChar);
+        assert.is(offset < script.limChar);
         return offset;
     }
 

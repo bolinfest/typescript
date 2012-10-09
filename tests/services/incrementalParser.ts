@@ -25,7 +25,7 @@ module IncrementalParserTest {
         public assertBailout(fileName, startLine, startCol, endLine, endCol, newText) {
             this.initFileName(fileName);
             var result = this.applyIncrementalParser(startLine, startCol, endLine, endCol, newText);
-            assert(result == null, "Incremental parser should have bailed out");
+            assert.is(result == null, "Incremental parser should have bailed out");
         }
 
         private applyIncrementalParser(startLine, startCol, endLine, endCol, newText): TypeScript.UpdateUnitResult {

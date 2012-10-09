@@ -19,7 +19,7 @@ describe('getSmartIndentAtLineNumber', function() {
     // line is 1-based
     //
     function getSmartIndent(fileName: string, line: number): number {
-        assert(line >= 1);
+        assert.is(line >= 1);
         var options = new Services.EditorOptions();
         return ls.languageService.getSmartIndentAtLineNumber(fileName, line - 1, options);
     }

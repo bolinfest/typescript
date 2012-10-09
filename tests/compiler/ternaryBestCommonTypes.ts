@@ -11,9 +11,9 @@ describe('Ternary expressions have the correct types', function () {
     typeFactory.isOfType('false ? "foo" : "bar"', 'string');
     typeFactory.isOfType('false ? null : undefined', 'any');
     
-    Harness.assert.equal(typeFactory.get('var x = true ? {x:5} : null;', 'x').type, '{ x: number; }');
-    Harness.assert.equal(typeFactory.get('var x = [{x:5}, null]', 'x').type, '{ x: number; }[]');
-    Harness.assert.equal(typeFactory.get('function f() { if (true) { return { x: 5 }; } else { return null; } }', 'f').type, '() => { x: number; }');
+    assert.equal(typeFactory.get('var x = true ? {x:5} : null;', 'x').type, '{ x: number; }');
+    assert.equal(typeFactory.get('var x = [{x:5}, null]', 'x').type, '{ x: number; }[]');
+    assert.equal(typeFactory.get('function f() { if (true) { return { x: 5 }; } else { return null; } }', 'f').type, '() => { x: number; }');
 
 });
 

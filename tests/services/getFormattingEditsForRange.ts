@@ -59,7 +59,7 @@ describe('getFormattingEditsForRange', function() {
             //TODO: this is to force generation of implicit module in AST
             var svGenTarget = TypeScript.moduleGenTarget;
             try {
-                TypeScript..moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
+                TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
                 getFormattingEditsForRange('implicitModule');
             }
             finally {

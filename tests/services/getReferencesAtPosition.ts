@@ -17,7 +17,7 @@ describe('getReferencesAtPosition', function() {
 
     // Returns the offset corresponding to the line + column given
     function lineToOffset(line: number, col = 0, fileName?: string = fileName1) {
-        var script: Tools.Script = ls.languageService.getScriptAST(fileName);
+        var script: TypeScript.Script = ls.languageService.getScriptAST(fileName);
         return script.locationInfo.lineMap[line] + col;
     }
 

@@ -21,23 +21,23 @@ describe('getCompletionsAtPositionObjectLiterals', function () {
 
     function assertIsMemberCompletions(result: Services.CompletionInfo) {
         assert.notNull(result);
-        assert(result.isMemberCompletion, "isMemberCompletion should be set");
-        assert(!result.maybeInaccurate, "CompletionInfo should be accurate");
-        assert(result.entries.length == 2, "Completion should contain only 2 members of object literal");
+        assert.is(result.isMemberCompletion, "isMemberCompletion should be set");
+        assert.is(!result.maybeInaccurate, "CompletionInfo should be accurate");
+        assert.is(result.entries.length == 2, "Completion should contain only 2 members of object literal");
         assert.arrayContainsOnce(result.entries, (x: Services.CompletionEntry) => x.name == "x1" && x.type == "number");
         assert.arrayContainsOnce(result.entries, (x: Services.CompletionEntry) => x.name == "y1" && x.type == "number");
     }
 
     function assertIsGlobalCompletions(result: Services.CompletionInfo) {
         assert.notNull(result);
-        assert(!result.isMemberCompletion, "isMemberCompletion should be not be set");
-        assert(!result.maybeInaccurate, "CompletionInfo should be accurate");
-        assert(result.entries.length >= 10, "Completion should be global completion set");
+        assert.is(!result.isMemberCompletion, "isMemberCompletion should be not be set");
+        assert.is(!result.maybeInaccurate, "CompletionInfo should be accurate");
+        assert.is(result.entries.length >= 10, "Completion should be global completion set");
     }
 
     function assertIsNoCompletions(result: Services.CompletionInfo) {
         assert.notNull(result);
-        assert(result.entries.length == 0, "Completion should be empty (i.e. no completion)");
+        assert.is(result.entries.length == 0, "Completion should be empty (i.e. no completion)");
     }
 
     describe("test cases for completion list inside object literals", function () {
