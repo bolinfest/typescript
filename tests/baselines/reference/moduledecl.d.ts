@@ -5,8 +5,10 @@ module b.a {
 module c.a.b {
     export import ma = a;
 }
-import d = a;
-import e = b.a;
+module mImport {
+    export import d1 = a;
+    export import e1 = b.a;
+}
 module m0 {
 }
 module m1 {
@@ -70,7 +72,9 @@ module m55 {
 module "m3" {
     export var b: number;
 }
-import m3 = module ("m3");
+module mQImport {
+    export import _m3 = module ("m3");
+}
 module exportTests {
     export class C1_public {
         private f2();

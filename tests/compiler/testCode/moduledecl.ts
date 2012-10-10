@@ -8,8 +8,12 @@ module c.a.b {
     export import ma = a;
 }
 
-import d = a;
-import e = b.a;
+module mImport {
+    import d = a;
+    import e = b.a;
+    export import d1 = a;
+    export import e1 = b.a;
+}
 
 module m0 {
     function f1() {
@@ -134,7 +138,10 @@ declare module m55 {
 declare module "m3" {
     export var b: number;
 }
-import m3 = module ("m3");
+module mQImport {
+    import m3 = module ("m3");
+    export import _m3 = module("m3");
+}
 
 module exportTests {
     export class C1_public {

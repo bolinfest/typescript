@@ -475,20 +475,27 @@ module TypeScript {
             if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsWholeFile)) {
                 // This is dynamic modules and we are going to outputing single file, 
                 // we need to change the declFile because dynamic modules are always emitted to their corresponding .d.ts
-                if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsDynamic) && !this.emitOptions.outputMany) {
+                if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsDynamic)) {
                     if (pre) {
-                        this.singleDeclFile = this.declFile;
-                        CompilerDiagnostics.assert(this.indenter.indentAmt == 0, "Indent has to be 0 when outputing new file");
-                        // Create new file
-                        var declareFileName = getDeclareFilePath(stripQuotes(moduleDecl.name.sym.name));
-                        this.declFile = this.emitOptions.createFile(declareFileName);
+                        if (!this.emitOptions.outputMany) {
+                            this.singleDeclFile = this.declFile;
+                            CompilerDiagnostics.assert(this.indenter.indentAmt == 0, "Indent has to be 0 when outputing new file");
+                            // Create new file
+                            var declareFileName = getDeclareFilePath(stripQuotes(moduleDecl.name.sym.name));
+                            this.declFile = this.emitOptions.createFile(declareFileName);
+                        }
+                        this.pushDeclarationContainer(moduleDecl);
                     } else {
-                        CompilerDiagnostics.assert(this.singleDeclFile != this.declFile, "singleDeclFile cannot be null as we are going to revert back to it");
-                        CompilerDiagnostics.assert(this.indenter.indentAmt == 0, "Indent has to be 0 when outputing new file");
-                        this.declFile.Close();
-                        this.declFile = this.singleDeclFile;
+                        if (!this.emitOptions.outputMany) {
+                            CompilerDiagnostics.assert(this.singleDeclFile != this.declFile, "singleDeclFile cannot be null as we are going to revert back to it");
+                            CompilerDiagnostics.assert(this.indenter.indentAmt == 0, "Indent has to be 0 when outputing new file");
+                            this.declFile.Close();
+                            this.declFile = this.singleDeclFile;
+                        }
+                        this.popDeclarationContainer(moduleDecl);
                     }
                 }
+
                 return true;
             }
 
