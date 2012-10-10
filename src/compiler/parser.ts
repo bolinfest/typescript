@@ -4080,7 +4080,7 @@ module TypeScript {
                     if (directivePrologue) {
                         if (stmt.nodeType == NodeType.QString) {
                             var qstring = <StringLiteral>stmt;
-                            if (qstring.text == "use strict") {
+                            if (qstring.text == "\"use strict\"") {
                                 stmts.flags |= ASTFlags.StrictMode;
                                 this.strictMode = true;
                             }
