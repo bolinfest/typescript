@@ -115,7 +115,7 @@ describe('Compiling samples', function() {
         var HttpServer = loadSample("node\\HttpServer.ts");
         var lib = loadSample("node\\node.d.ts");
         
-        Harness.Compiler.addUnit(lib);
+        Harness.Compiler.addUnit(lib, false, true);
         Harness.Compiler.addUnit(HttpServer);
 
         Harness.Compiler.compileUnits(function (result) {
@@ -130,7 +130,7 @@ describe('Compiling samples', function() {
         var HttpServer = loadSample("node\\TcpServer.ts");
         var lib = loadSample("node\\node.d.ts");
         
-        Harness.Compiler.addUnit(lib);
+        Harness.Compiler.addUnit(lib, false, true);
         Harness.Compiler.addUnit(HttpServer);
 
         Harness.Compiler.compileUnits(function (result) {

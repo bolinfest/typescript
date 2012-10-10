@@ -1092,8 +1092,7 @@ module TypeScript {
             if (this.emitRequired()) {
                 emitter.emitParensAndCommentsInPlace(this, true);
                 emitter.recordSourceMappingStart(this);
-                emitter.emitPrologue(this.requiresInherits);
-                emitter.emitJavascriptList(this.bod, null, TokenID.SColon, true, false, false);
+                emitter.emitJavascriptList(this.bod, null, TokenID.SColon, true, false, false, true, this.requiresInherits);
                 emitter.recordSourceMappingEnd(this);
                 emitter.emitParensAndCommentsInPlace(this, false);
             }

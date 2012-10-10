@@ -1,0 +1,4 @@
+0.ts line 24 col 4: exported module 'm1_im2_public' imports non exported module 'm1_M2_private'
+0.ts line 26 col 4: exported module 'm1_im4_public' imports non exported module "m1_M4_private"
+0.ts line 79 col 0: exported module 'glo_iglo_public' imports non exported module 'glo_M2_private'
+0.ts line 81 col 0: exported module 'glo_im4_public' imports non exported module "glo_M4_private"

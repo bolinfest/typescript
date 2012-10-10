@@ -139,6 +139,27 @@ module TypeScript {
             return builder;
         }
 
+        public isExternallyVisible(checker: TypeChecker) {
+            // Global module is not hidden
+            if (this == checker.gloMod) {
+                return true;
+            }
+
+            // private symbol
+            if (hasFlag(this.flags, SymbolFlags.Private)) {
+                return false;
+            }
+
+            // If the current container is not exported
+            // If its in global - it is visible, otherwise it isn't
+            if (!hasFlag(this.flags, SymbolFlags.Exported)) {
+                return this.container == checker.gloMod;
+            }
+
+            // It is visible if its container is visible too
+            return this.container.isExternallyVisible(checker);
+        }
+
         public visible(scope: SymbolScope, checker: TypeChecker) {
             if (checker == null || this.container == checker.gloMod) {
                 return true;
@@ -235,6 +256,34 @@ module TypeScript {
 
         public kind(): SymbolKind {
             throw new Error("please implement in derived class");
+        }
+
+        public getInterfaceDeclFromSymbol(checker: TypeChecker) {
+            if (this.declAST != null) {
+                if (this.declAST.nodeType == NodeType.Interface) {
+                    return <TypeDecl>this.declAST;
+                } else if (this.container != null && this.container != checker.gloMod && this.container.declAST.nodeType == NodeType.Interface) {
+                    return <TypeDecl>this.container.declAST;
+                }
+            }
+
+            return null;
+        }
+
+        public getVarDeclFromSymbol() {
+            if (this.declAST != null && this.declAST.nodeType == NodeType.VarDecl) {
+                return <VarDecl>this.declAST;
+            }
+
+            return null;
+        }
+
+        public getImportDeclFromSymbol() {
+            if (this.declAST != null && this.declAST.nodeType == NodeType.Import) {
+                return <ImportDecl>this.declAST;
+            }
+
+            return null;
         }
     }
 

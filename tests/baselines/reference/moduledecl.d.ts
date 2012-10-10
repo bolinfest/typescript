@@ -5,8 +5,10 @@ module b.a {
 module c.a.b {
     export import ma = a;
 }
-import d = a;
-import e = b.a;
+module mImport {
+    export import d1 = a;
+    export import e1 = b.a;
+}
 module m0 {
 }
 module m1 {
@@ -16,7 +18,7 @@ module m1 {
         public n;
         public n2: number;
         private n3;
-        private n4: string;
+        private n4;
         public a: () => string;
         private b;
         static s1;
@@ -70,15 +72,17 @@ module m55 {
 module "m3" {
     export var b: number;
 }
-import m3 = module ("m3");
+module mQImport {
+    export import _m3 = module ("m3");
+}
 module exportTests {
     export class C1_public {
-        private f2(): number;
+        private f2();
         public f3(): string;
     }
     export class C3_public {
         private getC2_private();
-        private setC2_private(arg): void;
+        private setC2_private(arg);
         private c2;
         public getC1_public(): C1_public;
         public setC1_public(arg: C1_public): void;

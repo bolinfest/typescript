@@ -922,10 +922,10 @@ declare module "crypto" {
     export interface Credentials { context?: any; }
     export function createCredentials(details: CredentialDetails): Credentials;
     export function createHash(algorithm: string): Hash;
+    export function createHmac(algorithm: string, key: string): Hmac;
     interface Hash {
         update(data: any, input_encoding?: string): void;
-        digest(encoding?: string): void;
-        createHmac(algorithm: string, key: string): Hmac;
+        digest(encoding?: string): string;
     }
     interface Hmac {
         update(data: any): void;

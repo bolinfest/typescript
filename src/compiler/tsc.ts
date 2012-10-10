@@ -133,6 +133,12 @@ class BatchCompiler {
 
                 if (!this.compilationSettings.resolve) {
                     code.content = this.ioHost.readFile(code.path);
+                    // If declaration files are going to be emitted, 
+                    // preprocess the file contents and add in referenced files as well
+                    if (this.compilationSettings.generateDeclarationFiles) {
+                        TypeScript.CompilerDiagnostics.assert(code.referencedFiles == null, "With no resolve option, referenced files need to null");
+                        code.referencedFiles = TypeScript.getReferencedFiles(code);
+                    }
                 }
 
                 if (code.content) {
@@ -173,7 +179,7 @@ class BatchCompiler {
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
             try {
-                compiler.emit(this.compilationSettings.outputMany, this.ioHost.createFile);
+                compiler.emit(this.ioHost.createFile);
             } catch (err) {
                 compiler.errorReporter.hasErrors = true;
                 // Catch emitter exceptions
@@ -182,7 +188,7 @@ class BatchCompiler {
                 }
             }
 
-            compiler.emitDeclarationFile(this.compilationSettings.outputMany, this.ioHost.createFile);
+            compiler.emitDeclarationFile(this.ioHost.createFile);
         }
 
         if (outfile) {

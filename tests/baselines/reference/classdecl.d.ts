@@ -5,11 +5,10 @@ class a {
     public pv;
     public d : number;
     static p2 : { x: number; y: number; };
-    static d2(): void;
-    static p3 : string;
+    static d2();
+    static p3;
     private pv3;
-    private foo(n: number): string;
-    private foo(s: string): string;
+    private foo(n);
 }
 class b extends a {
 }
@@ -28,5 +27,23 @@ module m2.m3 {
 class c extends m1.b {
 }
 class ib2 implements m1.ib {
+}
+class aAmbient {
+    constructor (n: number);
+    constructor (s: string);
+    public pgF(): void;
+    public pv;
+    public d: number;
+    static p2: { x: number; y: number; };
+    static d2();
+    static p3;
+    private pv3;
+    private foo(s);
+}
+class d {
+    private foo(n);
+}
+class e {
+    private foo(s);
 }
 

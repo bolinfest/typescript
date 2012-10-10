@@ -416,7 +416,7 @@ module Harness {
                 testCode += 'var __test1__val__ = __test1__.__val__;\n';
 
                 testCode += 'module __test2__ {\n';
-                testCode += '    ' + other.code + ';\n';
+                testCode += '    export ' + other.code + ';\n';
                 testCode += '    export var __val__ = ' + other.identifier + ';\n';
                 testCode += '}\n';
                 testCode += 'var __test2__val__ = __test2__.__val__;\n';
@@ -540,13 +540,15 @@ module Harness {
             reset();
 
             compiler.settings.generateDeclarationFiles = true;
+            var oldOutputMany = compiler.settings.outputMany;
             try {
                 addUnit(code);
                 compiler.reTypeCheck();
 
                 var outputs = {};
 
-                compiler.emitDeclarationFile(true, (fn: string) => {
+                compiler.settings.outputMany = true;
+                compiler.emitDeclarationFile((fn: string) => {
                     outputs[fn] = new Harness.Compiler.WriterAggregator();
                     return outputs[fn];
                 });
@@ -567,6 +569,7 @@ module Harness {
                 }
             } finally {
                 compiler.settings.generateDeclarationFiles = false;
+                compiler.settings.outputMany = oldOutputMany;
             }
 
             return '';
@@ -981,7 +984,7 @@ module Harness {
         (e?: Error): void;
     }
 
-    class Runnable {
+    export class Runnable {
         constructor (public description: string, public block: any) { }
 
         // The current stack of Runnable objects

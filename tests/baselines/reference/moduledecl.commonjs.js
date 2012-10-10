@@ -17,8 +17,13 @@ var c;
     })(c.a || (c.a = {}));
     var a = c.a;
 })(c || (c = {}));
-var d = a;
-var e = b.a;
+var mImport;
+(function (mImport) {
+    var d = a;
+    var e = b.a;
+    var d1 = a;
+    var e1 = b.a;
+})(mImport || (mImport = {}));
 var m0;
 (function (m0) {
     function f1() {
@@ -110,7 +115,6 @@ var m13;
     })(m13.m4 || (m13.m4 = {}));
     var m4 = m13.m4;
 })(m13 || (m13 = {}));
-
 var exportTests;
 (function (exportTests) {
     var C1_public = (function () {

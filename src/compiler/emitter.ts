@@ -1105,21 +1105,31 @@ module TypeScript {
             SourceMapper.EmitSourceMapping(this.allSourceMappers);
         }
 
-        public emitJavascriptList(ast: AST, delimiter: string, tokenId: TokenID, startLine: bool, onlyStatics: bool, emitClassPropertiesAfterSuperCall: bool) {
+        public emitJavascriptList(ast: AST, delimiter: string, tokenId: TokenID, startLine: bool, onlyStatics: bool, emitClassPropertiesAfterSuperCall: bool, emitPrologue? = false, requiresInherit?: bool) {
             if (ast == null) {
                 return;
             }
             else if (ast.nodeType != NodeType.List) {
+                this.emitPrologue(emitPrologue);
                 this.emitJavascript(ast, tokenId, startLine);
             }
             else {
                 var list = <ASTList>ast;
-                if (list.members.length == 0)
+                if (list.members.length == 0) {
                     return;
+                }
 
                 this.emitParensAndCommentsInPlace(ast, true);
                 var len = list.members.length;
                 for (var i = 0; i < len; i++) {
+                    if (emitPrologue) {
+                        // If the list has Strict mode flags, emit prologue after first statement
+                        // otherwise emit before first statement
+                        if (i == 1 || !hasFlag(list.flags, ASTFlags.StrictMode)) {
+                            this.emitPrologue(requiresInherit);
+                            emitPrologue = false;
+                        }
+                    }
 
                     // In some circumstances, class property initializers must be emitted immediately after the 'super' constructor
                     // call which, in these cases, must be the first statement in the constructor body

@@ -189,7 +189,12 @@ module TypeScript {
         }
     }
 
-    export function preProcessFile(sourceText: ISourceText, options=new CompilationSettings()): IPreProcessedFileInfo {
+    export function getReferencedFiles(sourceText: ISourceText): IFileReference[] {
+        var preProcessInfo = preProcessFile(sourceText, null, false);
+        return preProcessInfo.referencedFiles;
+    }
+
+    export function preProcessFile(sourceText: ISourceText, options=new CompilationSettings(), readImportFiles? = true): IPreProcessedFileInfo {
         var scanner = new Scanner();
         scanner.resetComments();
         scanner.setSourceText(sourceText, LexMode.File);
@@ -209,7 +214,7 @@ module TypeScript {
 
         while (tok.tokenId != TokenID.EOF) {
 
-            if (tok.tokenId == TokenID.IMPORT) {
+            if (readImportFiles && tok.tokenId == TokenID.IMPORT) {
 
                 tok = scanner.scan();
 
@@ -262,13 +267,15 @@ module TypeScript {
                     referencedFiles.push(referencedCode);
                 }
 
-                getStyleSettings(comment.getText(), settings.styleSettings);
+                if (settings) {
+                    getStyleSettings(comment.getText(), settings.styleSettings);
 
-                // is it a lib file?
-                var isNoLibRegex = /^(\/\/\/\s*<reference\s+no-default-lib=)('|")(.+?)\2\s*\/>/gim;
-                var isNoLibMatch: any = isNoLibRegex.exec(comment.getText());
-                if (isNoLibMatch) {
-                    isLibFile = (isNoLibMatch[3] == "true");
+                    // is it a lib file?
+                    var isNoLibRegex = /^(\/\/\/\s*<reference\s+no-default-lib=)('|")(.+?)\2\s*\/>/gim;
+                    var isNoLibMatch: any = isNoLibRegex.exec(comment.getText());
+                    if (isNoLibMatch) {
+                        isLibFile = (isNoLibMatch[3] == "true");
+                    }
                 }
             }
         }

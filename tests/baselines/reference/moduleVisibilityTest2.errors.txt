@@ -1,7 +1,9 @@
 0.ts line 61 col 13: The symbol 'I' is not visible at this point
+0.ts line 37 col 28: exported class 'C' implements private interface 'I'
 0.ts line 57 col 16: The name 'x' does not exist in the current scope
 0.ts line 58 col 20: The property 'E' does not exist on value of type 'M'
 0.ts line 61 col 13: The symbol 'I' is not visible at this point
 0.ts line 61 col 20: The symbol 'I' is not visible at this point
+0.ts line 61 col 0: exported variable 'cprime' has or is using private type 'I'
 0.ts line 64 col 10: The property 'x' does not exist on value of type 'M'
 0.ts line 65 col 14: The property 'E' does not exist on value of type 'M'
