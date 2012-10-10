@@ -277,6 +277,14 @@ module TypeScript {
 
             return null;
         }
+
+        public getImportDeclFromSymbol() {
+            if (this.declAST != null && this.declAST.nodeType == NodeType.Import) {
+                return <ImportDecl>this.declAST;
+            }
+
+            return null;
+        }
     }
 
     export class ValueLocation {

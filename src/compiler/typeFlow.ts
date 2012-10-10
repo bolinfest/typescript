@@ -996,12 +996,12 @@ module TypeScript {
         private varPrivacyErrorReporter(varDecl: BoundDecl, typeName: string) {
             if (hasFlag(varDecl.varFlags, VarFlags.Public)) {
                 if (varDecl.sym.container.declAST.nodeType == NodeType.Interface) {
-                    this.checker.errorReporter.simpleError(varDecl, "property '" + varDecl.sym.name + "' of exported interface has or is using private type'" + typeName + "'");
+                    this.checker.errorReporter.simpleError(varDecl, "property '" + varDecl.sym.name + "' of exported interface has or is using private type '" + typeName + "'");
                 } else {
-                    this.checker.errorReporter.simpleError(varDecl, "public member '" + varDecl.sym.name + "' of exported class has or is using private type'" + typeName + "'");
+                    this.checker.errorReporter.simpleError(varDecl, "public member '" + varDecl.sym.name + "' of exported class has or is using private type '" + typeName + "'");
                 }
             } else {
-                this.checker.errorReporter.simpleError(varDecl, "exported variable '" + varDecl.sym.name + "' has or is using private type'" + typeName + "'");
+                this.checker.errorReporter.simpleError(varDecl, "exported variable '" + varDecl.sym.name + "' has or is using private type '" + typeName + "'");
             }
         }
 
@@ -1911,6 +1911,15 @@ module TypeScript {
                     // Its a member from class so check visibility of its container
                     checkVisibilitySymbol = declSymbol.container;
                 }
+            } 
+
+            var importDecl = declSymbol.getImportDeclFromSymbol();
+            if (importDecl) {
+                if (!hasFlag(importDecl.varFlags, VarFlags.Exported)) {
+                    return;
+                }
+                
+                checkVisibilitySymbol = declSymbol.container;
             }
 
             // If the container is visible from global scrope it is error
@@ -1986,19 +1995,19 @@ module TypeScript {
             var isContainerInterface = funcDecl.type.symbol.getInterfaceDeclFromSymbol(this.checker) != null;
             if (!isContainerInterface) {
                 if (funcDecl.isConstructor) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported class's constructor parameter '" + paramSymbol.name + "' has or is using private type'" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported class's constructor parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 } else if (isSetter) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], (isPublicFunc ? "public" : "exported") + " setter parameter '" + paramSymbol.name + "' has or is using private type'" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], (isPublicFunc ? "public" : "exported") + " setter parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 } else if (!isGetter) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], (isPublicFunc ? "public" : "exported") + " function parameter '" + paramSymbol.name + "' has or is using private type'" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], (isPublicFunc ? "public" : "exported") + " function parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 }
             } else {
                 if (funcDecl.isConstructMember()) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported interface's constructor parameter '" + paramSymbol.name + "' has or is using private type'" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported interface's constructor parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 } else if (funcDecl.isCallMember()) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported interface's call parameter '" + paramSymbol.name + "' has or is using private type'" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported interface's call parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 } else if (!funcDecl.isIndexerMember()) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported interface's function parameter '" + paramSymbol.name + "' has or is using private type'" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported interface's function parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 }
             }
         }
@@ -2844,6 +2853,14 @@ module TypeScript {
                 if (mod.symbol && mod.symbol.declAST) {
                     (<ModuleDecl>mod.symbol.declAST).modFlags &= ~ModuleFlags.ShouldEmitModuleDecl;
                 }
+
+                this.checkSymbolPrivacy(mod.symbol, importDecl.id.sym, (typeName: string) => {
+                    var quotes = "";
+                    if (!isQuoted(mod.symbol.name)) {
+                        quotes = "'";
+                    }
+                    this.checker.errorReporter.simpleError(importDecl, "exported module '" + importDecl.id.sym.name + "' imports non exported module " + quotes + mod.symbol.name + quotes);
+                });
                 //importDecl.id.sym = sym;
                 // REVIEW: Uncomment when you can toggle module codegen targets from the language service
                 //else if (typeFlow.checker.currentModDecl == null && 
