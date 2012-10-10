@@ -473,7 +473,8 @@ module TypeScript {
 
         public ModuleCallback(pre: bool, moduleDecl: ModuleDecl): bool {
             if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsWholeFile)) {
-                // Dynamic modules and we are going to outputing single file, we need to change the declFile
+                // This is dynamic modules and we are going to outputing single file, 
+                // we need to change the declFile because dynamic modules are always emitted to their corresponding .d.ts
                 if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsDynamic) && !this.emitOptions.outputMany) {
                     if (pre) {
                         this.singleDeclFile = this.declFile;
