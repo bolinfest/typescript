@@ -44,15 +44,19 @@ module TypeScript {
             this.declFile.Write(this.getIndentString());
         }
 
-        private canEmitSignature(declFlags: DeclFlags, useDeclarationContainerTop? : bool = true) {
-            var hasModuleContainer: bool;
+        private canEmitSignature(declFlags: DeclFlags, canEmitGlobalAmbientDecl?: bool = true, useDeclarationContainerTop? : bool = true) {
+            var container: AST;
             if (useDeclarationContainerTop) {
-                hasModuleContainer = this.getAstDeclarationContainer().nodeType == NodeType.Module;
+                container = this.getAstDeclarationContainer();
             } else {
-                hasModuleContainer = this.declarationContainerStack[this.declarationContainerStack.length - 2].nodeType == NodeType.Module;
+                container = this.declarationContainerStack[this.declarationContainerStack.length - 2];
             }
 
-            if (hasModuleContainer && !hasFlag(declFlags, DeclFlags.Exported)) {
+            if (container.nodeType == NodeType.Module && !hasFlag(declFlags, DeclFlags.Exported)) {
+                return false;
+            }
+
+            if (!canEmitGlobalAmbientDecl && container.nodeType == NodeType.Script && hasFlag(declFlags, DeclFlags.Ambient)) {
                 return false;
             }
 
@@ -65,7 +69,7 @@ module TypeScript {
                 this.ignoreCallbackAst = null;
                 return false;
             } else if (preCallback &&
-                !this.canEmitSignature(declFlags, preCallback)) {
+                !this.canEmitSignature(declFlags, true, preCallback)) {
                 this.ignoreCallbackAst = astWithPrePostCallback;
                 return false;
             }
@@ -161,8 +165,7 @@ module TypeScript {
         }
 
         public VarDeclCallback(pre: bool, varDecl: VarDecl): bool {
-            if (pre && this.canEmitSignature(ToDeclFlags(varDecl.varFlags))) {
-
+            if (pre && this.canEmitSignature(ToDeclFlags(varDecl.varFlags), false)) {
                 var interfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
                 if (!interfaceMember) {
                     this.emitDeclFlags(ToDeclFlags(varDecl.varFlags), "var");
@@ -244,7 +247,7 @@ module TypeScript {
                 }
             }
 
-            if (!this.canEmitSignature(ToDeclFlags(funcDecl.fncFlags))) {
+            if (!this.canEmitSignature(ToDeclFlags(funcDecl.fncFlags), false)) {
                 return false;
             }
 
