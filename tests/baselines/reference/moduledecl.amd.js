@@ -168,3 +168,17 @@ var exportTests;
     })();
     exportTests.C3_public = C3_public;    
 })(exportTests || (exportTests = {}));
+function foo() {
+    return mAmbient.foo();
+}
+var cVar = new mAmbient.C();
+var aVar = mAmbient.aVar;
+var bB;
+var eVar;
+function m3foo() {
+    return mAmbient.m3.foo();
+}
+var m3cVar = new mAmbient.m3.C();
+var m3aVar = mAmbient.m3.aVar;
+var m3bB;
+var m3eVar;

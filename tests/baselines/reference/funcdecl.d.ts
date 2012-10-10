@@ -21,10 +21,7 @@ function overload1(s: string): string;
 var withOverloadSignature: { (n: number): string; (s: string): string; };
 function f(n: () => void): void;
 module m2 {
-    export function foo(n: () => void): void;
+    function foo(n: () => void): void;
 }
-function fooAmbient(n: number): string;
-function overloadAmbient(n: number): string;
-function overloadAmbient(s: string): string;
 var f2: () => string;
 
