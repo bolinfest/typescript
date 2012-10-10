@@ -709,7 +709,7 @@ module TypeScript {
                 if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
                     moduleDecl.modFlags |= ModuleFlags.Ambient;
                 }
-                if (hasFlag(modifiers, Modifiers.Exported)) {
+                if (this.parsingDeclareFile || svAmbient || hasFlag(modifiers, Modifiers.Exported)) {
                     moduleDecl.modFlags |= ModuleFlags.Exported;
                 }
                 if (isDynamicMod) {
@@ -723,7 +723,6 @@ module TypeScript {
                 this.topLevel = svTopLevel;
                 moduleDecl.leftCurlyCount = this.scanner.leftCurlyCount - leftCurlyCount;
                 moduleDecl.rightCurlyCount = this.scanner.rightCurlyCount - rightCurlyCount;
-
                 return moduleDecl;
             }
 
@@ -1993,7 +1992,7 @@ module TypeScript {
             if (hasFlag(modifiers, Modifiers.Public)) {
                 interfaceDecl.varFlags |= VarFlags.Public;
             }
-            if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Exported)) {
+            if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Exported)) {
                 interfaceDecl.varFlags |= VarFlags.Exported;
             }
 
@@ -3271,6 +3270,9 @@ module TypeScript {
                                 needTerminator = true;
                             }
                             ast = fnOrVar;
+                            if (this.parsingDeclareFile || this.ambientModule && ast.nodeType == NodeType.FuncDecl) {
+                                (<FuncDecl>ast).fncFlags |= FncFlags.Exported;
+                            }
                         }
                         else {
                             ast = this.parseFncDecl(errorRecoverySet, true, false, false, null, false, false, isAmbient(), modifiers, null);
@@ -3922,10 +3924,10 @@ module TypeScript {
                         ast = this.parseEnumDecl(errorRecoverySet, modifiers);
                         ast.minChar = minChar;
                         ast.limChar = this.scanner.lastTokenLimChar();
-                        if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
+                        if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Ambient)) {
                             (<ModuleDecl>ast).modFlags |= ModuleFlags.Ambient;
                         }
-                        if (hasFlag(modifiers, Modifiers.Exported)) {
+                        if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Exported)) {
                             (<ModuleDecl>ast).modFlags |= ModuleFlags.Exported;
                         }
                         break;

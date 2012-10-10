@@ -182,3 +182,58 @@ module exportTests {
         }
     }
 }
+
+declare module mAmbient {
+    class C {
+        public myProp: number;
+    }
+
+    function foo() : C;
+    var aVar: C;
+    interface B {
+        x: number;
+        y: C;
+    }
+    enum e {
+        x,
+        y,
+        z
+    }
+
+    module m3 {
+        class C {
+            public myProp: number;
+        }
+
+        function foo(): C;
+        var aVar: C;
+        interface B {
+            x: number;
+            y: C;
+        }
+        enum e {
+            x,
+            y,
+            z
+        }
+    }
+}
+
+function foo() {
+    return mAmbient.foo();
+}
+
+var cVar = new mAmbient.C();
+var aVar = mAmbient.aVar;
+var bB: mAmbient.B;
+var eVar: mAmbient.e;
+
+function m3foo() {
+    return mAmbient.m3.foo();
+}
+
+var m3cVar = new mAmbient.m3.C();
+var m3aVar = mAmbient.m3.aVar;
+var m3bB: mAmbient.m3.B;
+var m3eVar: mAmbient.m3.e;
+
