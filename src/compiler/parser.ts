@@ -811,8 +811,19 @@ module TypeScript {
                                                       primId);
                     }
 
+                    case TokenID.NULL:
+                        this.reportParseError("'null' is not allowed in a type reference position");
+                        // fall through to the identifier case for error recovery
+
                     case TokenID.ID:
-                        var ident = this.createRef(this.tok.getText(), minChar);
+
+                        var text = this.tok.getText();
+
+                        if (text == "undefined") {
+                            this.reportParseError("'undefined' is not allowed in a type reference position");
+                        }
+
+                        var ident = this.createRef(text, minChar);
                         ident.limChar = this.scanner.pos;
                         return this.parseNamedType(errorRecoverySet, minChar,
                                               ident, true);

@@ -1,0 +1,10 @@
+// 0.ts  line 1 col 7: 'null' is not allowed in a type reference position
+// 0.ts  line 2 col 7: 'undefined' is not allowed in a type reference position
+// 0.ts  line 4 col 14: 'null' is not allowed in a type reference position
+// 0.ts  line 5 col 14: 'undefined' is not allowed in a type reference position
+// 0.ts  line 6 col 14: 'null' is not allowed in a type reference position
+// 0.ts  line 7 col 14: 'undefined' is not allowed in a type reference position
+// 0.ts  line 10 col 3: 'null' is not allowed in a type reference position
+// 0.ts  line 14 col 3: 'undefined' is not allowed in a type reference position
+// 0.ts  line 18 col 12: 'null' is not allowed in a type reference position
+// 0.ts  line 19 col 12: 'undefined' is not allowed in a type reference position
