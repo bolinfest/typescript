@@ -412,7 +412,7 @@ module TypeScript {
             return false;
         }
 
-        public mergeOrdered(b: Type, checker: TypeChecker, comparisonInfo?: TypeComparisonInfo): Type {
+        public mergeOrdered(b: Type, checker: TypeChecker, acceptVoid: bool, comparisonInfo?: TypeComparisonInfo): Type {
             if ((this == checker.anyType) || (b == checker.anyType)) {
                 return checker.anyType;
             }
@@ -425,10 +425,10 @@ module TypeScript {
             else if ((this == checker.nullType) && (b != checker.nullType)) {
                 return b;
             }
-            else if ((b == checker.voidType) && this != checker.voidType) {
+            else if (acceptVoid && (b == checker.voidType) && this != checker.voidType) {
                 return this;
             }
-            else if ((this == checker.voidType) && (b != checker.voidType)) {
+            else if (acceptVoid && (this == checker.voidType) && (b != checker.voidType)) {
                 return b;
             }
             else if ((b == checker.undefinedType) && this != checker.undefinedType) {
@@ -442,7 +442,7 @@ module TypeScript {
                     return this;
                 }
                 else {
-                    var mergedET = this.elementType.mergeOrdered(b.elementType, checker, comparisonInfo);
+                    var mergedET = this.elementType.mergeOrdered(b.elementType, checker, acceptVoid, comparisonInfo);
                     if (mergedET == null) {
                         return checker.makeArrayType(checker.anyType);
                     }

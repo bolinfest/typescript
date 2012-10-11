@@ -1195,7 +1195,7 @@ module TypeScript {
                         setTypeAtIndex: (index: number, type: Type) => { }, // no contextual typing here, so no need to do anything
                         getTypeAtIndex: (index: number) => { return index ? Q.signature.returnType.type : best.signature.returnType.type; } // we only want the "second" type - the "first" is skipped
                     }
-                    var bct = this.findBestCommonType(best.signature.returnType.type, null, collection);
+                    var bct = this.findBestCommonType(best.signature.returnType.type, null, collection, false);
                     ambiguous = !bct;
                 }
                 else {
@@ -1482,14 +1482,14 @@ module TypeScript {
             return t == this.undefinedType || t == this.nullType;
         }
 
-        public findBestCommonType(initialType: Type, targetType: Type, collection: ITypeCollection, comparisonInfo?: TypeComparisonInfo) {
+        public findBestCommonType(initialType: Type, targetType: Type, collection: ITypeCollection, acceptVoid:bool, comparisonInfo?: TypeComparisonInfo) {
             var i = 0;
             var len = collection.getLength();
             var nlastChecked = 0;
             var bestCommonType = initialType;
 
             if (targetType) {
-                bestCommonType = bestCommonType ? bestCommonType.mergeOrdered(targetType, this) : targetType;
+                bestCommonType = bestCommonType ? bestCommonType.mergeOrdered(targetType, this, acceptVoid) : targetType;
             }
 
             // it's important that we set the convergence type here, and not in the loop,
@@ -1505,7 +1505,7 @@ module TypeScript {
                         continue;
                     }
 
-                    if (convergenceType && (bestCommonType = convergenceType.mergeOrdered(collection.getTypeAtIndex(i), this, comparisonInfo))) {
+                    if (convergenceType && (bestCommonType = convergenceType.mergeOrdered(collection.getTypeAtIndex(i), this, acceptVoid, comparisonInfo))) {
                         convergenceType = bestCommonType;
                     }
 
@@ -1528,7 +1528,7 @@ module TypeScript {
                 }
             }
 
-            return bestCommonType;
+            return acceptVoid ? bestCommonType : (bestCommonType == this.voidType ? null : bestCommonType);
         }
 
         // Type Identity
@@ -1863,9 +1863,10 @@ module TypeScript {
                     nProp = source.memberScope.find(mPropKeys[iMProp], false, false);
 
                     // methods do not have the "arguments" field
-                    if (mProp.kind() == SymbolKind.Variable && (<VariableSymbol>mProp).variable.typeLink.ast &&
-                        (<VariableSymbol>mProp).variable.typeLink.ast.nodeType == NodeType.Name &&
-                        (<Identifier>(<VariableSymbol>mProp).variable.typeLink.ast).text == "IArguments") {
+                    if (mProp.name == "arguments" &&
+                        this.typeFlow.iargumentsInterfaceType &&
+                        mProp.kind() == SymbolKind.Variable &&
+                        (<VariableSymbol>mProp).variable.typeLink.type == this.typeFlow.iargumentsInterfaceType) {
                         continue;
                     }
 

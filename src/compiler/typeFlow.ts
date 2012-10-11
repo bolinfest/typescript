@@ -635,6 +635,7 @@ module TypeScript {
         public functionInterfaceType: Type = null;
         public numberInterfaceType: Type = null;
         public booleanInterfaceType: Type = null;
+        public iargumentsInterfaceType: Type = null;
 
         public currentScript: Script = null;
 
@@ -1716,8 +1717,14 @@ module TypeScript {
                     var theArgSym = new VariableSymbol("arguments", vars.minChar,
                                                      this.checker.locationInfo.unitIndex,
                                                      argLoc);
-                    argLoc.typeLink.ast = new Identifier("IArguments");
-                    this.checker.resolveTypeLink(scope, argLoc.typeLink, false);
+
+                    // if the user is using a custom lib.d.ts where IArguments has not been defined
+                    // (or they're compiling with the --nolib option), use 'any' as the argument type
+                    if (!this.iargumentsInterfaceType) {
+                        var argumentsSym = scope.find("IArguments", false, true);
+                        this.iargumentsInterfaceType = argumentsSym ? argumentsSym.getType() : this.anyType;
+                    }
+                    argLoc.typeLink.type = this.iargumentsInterfaceType;
                     table.add("arguments", theArgSym);
                 }
             }
@@ -2462,7 +2469,7 @@ module TypeScript {
                 }
 
                 var bestCommonReturnType = funcDecl.returnStatementsWithExpressions[0].type;
-                bestCommonReturnType = this.checker.findBestCommonType(bestCommonReturnType, null, collection);
+                bestCommonReturnType = this.checker.findBestCommonType(bestCommonReturnType, null, collection, true);
 
                 if (bestCommonReturnType) {
                     signature.returnType.type = this.checker.widenType(bestCommonReturnType);
@@ -3172,7 +3179,7 @@ module TypeScript {
                     getTypeAtIndex: (index: number) => { return elements.members[index].type; }
                 }
 
-                elementType = this.checker.findBestCommonType(elementType, targetElementType, collection, comparisonInfo);
+                elementType = this.checker.findBestCommonType(elementType, targetElementType, collection, false, comparisonInfo);
 
                 // if the array type is the undefined type, we should widen it to any
                 // if it's of the null type, only widen it if it's not in a nested array element, so as not to 
