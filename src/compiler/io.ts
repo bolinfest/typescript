@@ -9,7 +9,7 @@ interface IResolvedFile {
 interface IIO {
     readFile(path: string): string;
     writeFile(path: string, contents: string): void;
-    createFile(path: string): ITextWriter;
+    createFile(path: string, useUTF8?: bool): ITextWriter;
     deleteFile(path: string): void;
     dir(path: string, re?: RegExp, options?: { recursive?: bool; }): string[];
     fileExists(path: string): bool;
@@ -22,6 +22,7 @@ interface IIO {
     printLine(str: string): void;
     arguments: string[];
     stderr: ITextWriter;
+    stdout: ITextWriter;
     watchFiles(files: string[], callback: () => void ): bool;
     run(source: string, filename: string): void;
     getExecutingFilePath(): string;
@@ -59,6 +60,19 @@ var IO = (function() {
     // Depends on WSCript and FileSystemObject
     function getWindowsScriptHostIO(): IIO {
         var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var streamObjectPool = [];
+
+        function getStreamObject(): any { 
+            if (streamObjectPool.length > 0) {
+                return streamObjectPool.pop();
+            }  else {
+                return new ActiveXObject("ADODB.Stream");
+            }
+        }
+
+        function releaseStreamObject(obj: any) { 
+            streamObjectPool.push(obj);
+        }
 
         var args = [];
         for (var i = 0; i < WScript.Arguments.length; i++) {
@@ -68,22 +82,21 @@ var IO = (function() {
         return {
             readFile: function(path) {
                 try {
-                    var file = fso.OpenTextFile(path);
-                    var bomChar = !file.AtEndOfStream ? file.Read(2) : '';
-                    var str = bomChar;
+                    var streamObj = getStreamObject();
+                    streamObj.Open();
+                    streamObj.Type = 2; // Text data
+                    streamObj.Charset = 'x-ansi'; // Assume we are reading ansi text
+                    streamObj.LoadFromFile(path);
+                    var bomChar = streamObj.ReadText(2); // Read the BOM char
+                    streamObj.Position = 0; // Position has to be at 0 before changing the encoding
                     if ((bomChar.charCodeAt(0) == 0xFE && bomChar.charCodeAt(1) == 0xFF)
                         || (bomChar.charCodeAt(0) == 0xFF && bomChar.charCodeAt(1) == 0xFE)) {
-                        // Reopen the file as unicode
-                        file.close();
-                        file = fso.OpenTextFile(path, 1 /* IOMode.ForReading */, false /* Create */, -1 /* Format.TristateUseUnicode */);
-                        str = '';
-                    }
-
-                    // ReadAll will helpfully throw an error if this is a 0-byte file
-                    if (!file.AtEndOfStream) {
-                        str += file.ReadAll();
-                    }
-                    file.close();
+                        streamObj.Charset = 'unicode';
+                    } else if (bomChar.charCodeAt(0) == 0xEF && bomChar.charCodeAt(1) == 0xBB) {                        streamObj.Charset = 'utf-8';                     }
+                    // Read the whole file
+                    var str = streamObj.ReadText(-1 /* read from the current position to EOS */);
+                    streamObj.Close();
+                    releaseStreamObject(streamObj);
                     return <string>str;
                 }
                 catch (err) {
@@ -92,7 +105,7 @@ var IO = (function() {
             },
 
             writeFile: function(path, contents) {
-                var file = fso.OpenTextFile(path, 2, true);
+                var file = this.createFile(path);
                 file.Write(contents);
                 file.Close();
             },
@@ -141,9 +154,20 @@ var IO = (function() {
                 }
             },
 
-            createFile: function(path) {
+            createFile: function (path, useUTF8?) {
                 try {
-                    return fso.CreateTextFile(path, true, false);
+                    var streamObj = getStreamObject();
+                    streamObj.Charset = useUTF8 ? 'utf-8' : 'x-ansi';
+                    streamObj.Open();
+                    return {
+                        Write: function (str) { streamObj.WriteText(str, 0); },
+                        WriteLine: function (str) { streamObj.WriteText(str, 1); },
+                        Close: function () {
+                            streamObj.SaveToFile(path, 2);
+                            streamObj.Close();
+                            releaseStreamObject(streamObj);
+                        }
+                    };
                 } catch (ex) {
                     WScript.StdErr.WriteLine("Couldn't write to file '" + path + "'");
                     throw ex;
@@ -201,6 +225,7 @@ var IO = (function() {
 
             arguments: <string[]>args,
             stderr: WScript.StdErr,
+            stdout: WScript.StdOut,
             watchFiles: null,
             run: function(source, filename) {
                 eval(source);
@@ -270,7 +295,7 @@ var IO = (function() {
             fileExists: function(path): bool {
                 return _fs.existsSync(path);
             },
-            createFile: function(path) {
+            createFile: function(path, useUTF8?) {
                 function mkdirRecursiveSync(path) {
                     var stats = _fs.statSync(path);
                     if (stats.isFile()) {
@@ -359,6 +384,11 @@ var IO = (function() {
             stderr: {
                 Write: function(str) { process.stderr.write(str); },
                 WriteLine: function(str) { process.stderr.write(str + '\n'); },
+                Close: function() { }
+            },
+            stdout: {
+                Write: function(str) { process.stdout.write(str); },
+                WriteLine: function(str) { process.stdout.write(str + '\n'); },
                 Close: function() { }
             },
             watchFiles: function(files, callback) {

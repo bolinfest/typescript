@@ -458,7 +458,7 @@ module TypeScript {
             var top = this.entry.useDef.top;
             top.map((index) => {
                 var ast = <Identifier>useDefContext.uses[<number>index];
-                er.simpleError(ast, "use of variable '" + ast.text + "' that is not definitely assigned");
+                er.simpleError(ast, "use of variable '" + ast.actualText + "' that is not definitely assigned");
             });
         }
 
@@ -947,7 +947,7 @@ module TypeScript {
                                 preservedContainedScope = varDecl.init.type.containedScope;
                                 preserveScope = true;
                                 if (varDecl.init.type == this.voidType) {
-                                    this.checker.errorReporter.simpleError(varDecl, "Cannot assign type 'void' to variable '" + varDecl.id.text + "'");
+                                    this.checker.errorReporter.simpleError(varDecl, "Cannot assign type 'void' to variable '" + varDecl.id.actualText + "'");
                                 }
                             }
 
@@ -960,7 +960,7 @@ module TypeScript {
                         else {
                             varDecl.type = this.checker.widenType(varDecl.init.type);
                             if (varDecl.type == this.voidType) {
-                                this.checker.errorReporter.simpleError(varDecl, "Cannot assign type 'void' to variable '" + varDecl.id.text + "'");
+                                this.checker.errorReporter.simpleError(varDecl, "Cannot assign type 'void' to variable '" + varDecl.id.actualText + "'");
                                 varDecl.type = this.anyType;
                             }
                         }
@@ -1437,10 +1437,10 @@ module TypeScript {
                 if (!symbol || (!symbol.visible(leftScope, this.checker))) {
                     binex.type = this.anyType;
                     if (symbol == null) {
-                        this.checker.errorReporter.simpleError(propertyName, "The property '" + propertyName.text + "' does not exist on value of type '" + leftType.getScopedTypeName(this.scope) + "'");
+                        this.checker.errorReporter.simpleError(propertyName, "The property '" + propertyName.actualText + "' does not exist on value of type '" + leftType.getScopedTypeName(this.scope) + "'");
                     }
                     else {
-                        this.checker.errorReporter.simpleError(binex, "The property '" + propertyName.text + " on type '" + leftType.getScopedTypeName(this.scope) + "' is not visible");
+                        this.checker.errorReporter.simpleError(binex, "The property '" + propertyName.actualText + " on type '" + leftType.getScopedTypeName(this.scope) + "' is not visible");
                     }
                 }
                 else {
@@ -2403,7 +2403,7 @@ module TypeScript {
                         if (dup) {
                             if (checkUnique) {
                                 this.checker.errorReporter.simpleError(classDecl,
-                                                                  "duplicate member name in bases for " + classDecl.name.text + ": " + type.symbol.name + " and " + dup.container.name + " both contain member with name " + sym.name);
+                                                                  "duplicate member name in bases for " + classDecl.name.actualText + ": " + type.symbol.name + " and " + dup.container.name + " both contain member with name " + sym.name);
                             }
                         }
                         else {
@@ -2591,7 +2591,7 @@ module TypeScript {
             mod = <ModuleType>importDecl.alias.type;
 
             if (mod == null) {
-                this.checker.errorReporter.simpleError(importDecl.alias, "Could not resolve module alias '" + importDecl.id.text + "'");
+                this.checker.errorReporter.simpleError(importDecl.alias, "Could not resolve module alias '" + importDecl.id.actualText + "'");
                 mod = <ModuleType>this.checker.anyType;
                 (<TypeSymbol>importDecl.id.sym).type = mod;
             }

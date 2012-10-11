@@ -563,13 +563,13 @@ module Harness {
             }
             scripts.push(addUnit(code));
             compiler.reTypeCheck();
-            compiler.emitToOutfile();
+            compiler.emitToOutfile(stdout);
 
             callback(new CompilerResult(stdout.lines, stderr.lines, scripts));
         }
 
         export function recreate() {
-            compiler = new TypeScript.TypeScriptCompiler(stdout, stderr);
+            compiler = new TypeScript.TypeScriptCompiler(stderr);
             compiler.parser.errorRecovery = true;
             compiler.settings.codeGenTarget = TypeScript.CodeGenTarget.ES5;
             compiler.settings.controlFlow = true;
@@ -614,7 +614,7 @@ module Harness {
 
         export function compileUnits(callback: (res: Compiler.CompilerResult) => void ) {
             compiler.reTypeCheck();
-            compiler.emitToOutfile();
+            compiler.emitToOutfile(stdout);
 
             callback(new CompilerResult(stdout.lines, stderr.lines, []));
         }

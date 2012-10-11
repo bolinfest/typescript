@@ -133,6 +133,29 @@ module TypeScript {
         public treeViewLabel() {
             return (<any>NodeType)._map[this.nodeType];
         }
+
+        public static getResolvedIdentifierName(name: string): string {
+            if (!name) return "";
+
+            var resolved = "";
+            var start = 0;
+            var i = 0;
+            while(i <= name.length - 6) {
+                // Look for escape sequence \uxxxx
+                if (name.charAt(i) == '\\' && name.charAt(i+1) == 'u') {
+                    var charCode = parseInt(name.substr(i + 2, 4), 16);
+                    resolved += name.substr(start, i - start);
+                    resolved += String.fromCharCode(charCode);
+                    i += 6;
+                    start = i;
+                    continue;
+                } 
+                i++;
+            }
+            // Append remaining string
+            resolved += name.substring(start);
+            return resolved;
+        }
     }
 
     export class IncompleteAST extends AST {
@@ -204,21 +227,41 @@ module TypeScript {
     export class Identifier extends AST {
         public sym: Symbol = null;
         public cloId = -1;
+        public text: string;
 
-        constructor (public text: string) {
+        // 'actualText' is the text that the user has entered for the identifier. the text might include any Unicode escape sequences (e.g.: \u0041 for 'A').
+        // 'text', however, contains the resolved value of any escape sequences in the actual text; so in the previous example, actualText = '\u0041', text = 'A'.
+        //
+        // For purposes of finding a symbol, use text, as this will allow you to match all variations of the variable text.
+        // For full-fidelity translation of the user input, such as emitting, use the actualText field.
+        // 
+        // Note: 
+        //    To change text, and to avoid running into a situation where 'actualText' does not match 'text', always use setText.
+        constructor (public actualText: string, public hasEscapeSequence?: bool) {
             super(NodeType.Name);
+            this.setText(actualText, hasEscapeSequence);
+        }
+
+        public setText(actualText: string, hasEscapeSequence?: bool) {
+            this.actualText = actualText;
+            if (hasEscapeSequence) {
+                this.text = AST.getResolvedIdentifierName(actualText);
+            }
+            else {
+                this.text = actualText;
+            }
         }
 
         public isMissing() { return false; }
         public isLeaf() { return true; }
 
         public treeViewLabel() {
-            return "id: " + this.text;
+            return "id: " + this.actualText;
         }
 
         public printLabel() {
-            if (this.text) {
-                return "id: " + this.text;
+            if (this.actualText) {
+                return "id: " + this.actualText;
             }
             else {
                 return "name node";
@@ -233,6 +276,9 @@ module TypeScript {
             emitter.emitJavascriptName(this, true);
         }
 
+        public static fromToken(token: Token): Identifier {
+            return new Identifier(token.getText(), (<IdentifierToken>token).hasEscapeSequence);
+        }
     }
 
     export class MissingIdentifier extends Identifier {
@@ -251,7 +297,7 @@ module TypeScript {
             super(NodeType.Label);
         }
 
-        public printLabel() { return this.id.text + ":"; }
+        public printLabel() { return this.id.actualText + ":"; }
 
         public typeCheck(typeFlow: TypeFlow) {
             this.type = typeFlow.voidType;
@@ -261,7 +307,7 @@ module TypeScript {
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            emitter.writeLineToOutput(this.id.text + ":");
+            emitter.writeLineToOutput(this.id.actualText + ":");
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -768,8 +814,8 @@ module TypeScript {
 
                 emitter.recordSourceMappingStart(this);
                 emitter.emitParensAndCommentsInPlace(this, true);
-                emitter.writeToOutput("var " + this.id.text + " = ");
-                emitter.modAliasId = this.id.text;
+                emitter.writeToOutput("var " + this.id.actualText + " = ");
+                emitter.modAliasId = this.id.actualText;
                 emitter.firstModAlias = this.firstAliasedModToString();
                 emitter.emitJavascript(this.alias, TokenID.Tilde, false, writeDeclFile);
                 // the dynamic import case will insert the semi-colon automatically
@@ -790,7 +836,7 @@ module TypeScript {
 
         public getAliasName(aliasAST?: AST = this.alias) {
             if (aliasAST.nodeType == NodeType.Name) {
-                return (<Identifier>aliasAST).text;
+                return (<Identifier>aliasAST).actualText;
             } else {
                 var dotExpr = <BinaryExpression>aliasAST;
                 return this.getAliasName(dotExpr.operand1) + "." + this.getAliasName(dotExpr.operand2);
@@ -799,12 +845,12 @@ module TypeScript {
 
         public firstAliasedModToString() {
             if (this.alias.nodeType == NodeType.Name) {
-                return (<Identifier>this.alias).text;
+                return (<Identifier>this.alias).actualText;
             }
             else {
                 var dotExpr = <BinaryExpression>this.alias;
                 var firstMod = <Identifier>dotExpr.operand1;
-                return firstMod.text;
+                return firstMod.actualText;
             }
         }
     }
@@ -849,7 +895,7 @@ module TypeScript {
         }
 
         public treeViewLabel() {
-            return "var " + this.id.text;
+            return "var " + this.id.actualText;
         }
     }
 
@@ -863,7 +909,7 @@ module TypeScript {
         public isOptionalArg() { return this.isOptional || this.init; }
 
         public treeViewLabel() {
-            return "arg: " + this.id.text;
+            return "arg: " + this.id.actualText;
         }
 
         public parameterPropertySym: FieldSymbol = null;
@@ -871,7 +917,7 @@ module TypeScript {
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            emitter.writeToOutput(this.id.text);
+            emitter.writeToOutput(this.id.actualText);
             if (writeDeclFile) {
                 emitter.emitArgDecl(this);
             }
@@ -984,7 +1030,7 @@ module TypeScript {
 
         public getNameText() {
             if (this.name) {
-                return this.name.text;
+                return this.name.actualText;
             }
             else {
                 return this.hint;
@@ -1016,7 +1062,7 @@ module TypeScript {
                 return "funcExpr";
             }
             else {
-                return "func: " + this.name.text
+                return "func: " + this.name.actualText
             }
         }
 
@@ -1047,6 +1093,9 @@ module TypeScript {
         public rightCurlyCount = 0;
         public vars: ASTList;
         public scopes: ASTList;
+        // Remember if the script contains Unicode chars, that is needed when generating code for this script object to decide the output file correct encoding.
+        public containsUnicodeChar = false;
+        public containsUnicodeCharInComment = false;
 
         constructor (vars: ASTList, scopes: ASTList) {
             super(new Identifier("script"), null, false, null, vars, scopes, null, NodeType.Script);
@@ -1132,6 +1181,9 @@ module TypeScript {
         public vars: ASTList;
         public name: Identifier;
         public scopes: ASTList;
+        // Remember if the module contains Unicode chars, that is needed for dynamic module as we will generate a file for each.
+        public containsUnicodeChar = false;
+        public containsUnicodeCharInComment = false;
 
         constructor (name: Identifier, members: ASTList, vars: ASTList, scopes: ASTList) {
             super(NodeType.Module, name, members);
@@ -1141,7 +1193,7 @@ module TypeScript {
             this.name = name;
             this.scopes = scopes;
 
-            this.prettyName = this.name.text;
+            this.prettyName = this.name.actualText;
         }
 
         public isExported() { return hasFlag(this.modFlags, ModuleFlags.Exported); }
@@ -1687,15 +1739,15 @@ module TypeScript {
                                 var binex = <BinaryExpression>target;
                                 if ((binex.operand1.nodeType == NodeType.Name) &&
                                     (this.obj.nodeType == NodeType.Name) &&
-                                    ((<Identifier>binex.operand1).text == (<Identifier>this.obj).text)) {
+                                    ((<Identifier>binex.operand1).actualText == (<Identifier>this.obj).actualText)) {
                                     var prop = <Identifier>binex.operand2;
-                                    if (prop.text == "hasOwnProperty") {
+                                    if (prop.actualText == "hasOwnProperty") {
                                         var args = (<CallExpression>cond).args;
                                         if ((args !== null) && (args.members.length == 1)) {
                                             var arg = args.members[0];
                                             if ((arg.nodeType == NodeType.Name) &&
                                                  (this.lval.nodeType == NodeType.Name)) {
-                                                if (((<Identifier>this.lval).text) == (<Identifier>arg).text) {
+                                                if (((<Identifier>this.lval).actualText) == (<Identifier>arg).actualText) {
                                                     return true;
                                                 }
                                             }

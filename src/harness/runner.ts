@@ -166,7 +166,7 @@ class JSONLogger extends Harness.Logger {
 function runTests(tests: string[]) {
     var outfile = new Harness.Compiler.WriterAggregator()
       , outerr = new Harness.Compiler.WriterAggregator()
-      , compiler = <TypeScript.TypeScriptCompiler>new TypeScript.TypeScriptCompiler(outfile, outerr)
+      , compiler = <TypeScript.TypeScriptCompiler>new TypeScript.TypeScriptCompiler(outerr)
       , code;
 
     compiler.parser.errorRecovery = true;
@@ -182,7 +182,7 @@ function runTests(tests: string[]) {
     }
 
     compiler.typeCheck();
-    compiler.emitToOutfile();
+    compiler.emitToOutfile(outfile);
 
     code = outfile.lines.join("\n") + ";";
 

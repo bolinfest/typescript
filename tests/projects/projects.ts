@@ -100,7 +100,7 @@ class HarnessBatch {
         var _self = this;
         this.errout.reset();
 
-        compiler = new TypeScript.TypeScriptCompiler(outfile, outfile, new TypeScript.NullLogger(), this.compilationSettings);
+        compiler = new TypeScript.TypeScriptCompiler(outfile, new TypeScript.NullLogger(), this.compilationSettings);
         compiler.setErrorOutput(this.errout);
 
         if (this.compilationSettings.emitComments) {

@@ -95,7 +95,6 @@ module TypeScript {
         public codeGenTarget = CodeGenTarget.ES3;
         public moduleGenTarget = ModuleGenTarget.Synchronous;
         public outputFileName: string = "";
-        public errorFileName: string = "";
         public mapSourceFiles = false;
         public generateDeclarationFiles = false;
 

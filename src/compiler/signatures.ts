@@ -174,7 +174,7 @@ module TypeScript {
                         if (this.signatures[i].declAST && this.signatures[j].declAST &&
                             (!hasFlag(this.signatures[i].declAST.fncFlags, FncFlags.Definition) && !hasFlag(this.signatures[j].declAST.fncFlags, FncFlags.Definition)) &&
                             checker.signaturesAreIdentical(this.signatures[i], this.signatures[j])) {
-                            checker.errorReporter.simpleError(this.signatures[i].declAST, (this.signatures[i].declAST && this.signatures[i].declAST.name) ? "Signature for '" + this.signatures[i].declAST.name.text + "' is duplicated" :"Signature is duplicated");
+                            checker.errorReporter.simpleError(this.signatures[i].declAST, (this.signatures[i].declAST && this.signatures[i].declAST.name) ? "Signature for '" + this.signatures[i].declAST.name.actualText + "' is duplicated" :"Signature is duplicated");
                         }
                     }
                     

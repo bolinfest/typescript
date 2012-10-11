@@ -679,7 +679,7 @@ module TypeScript {
                     fgSym = context.checker.createFunctionSignature(funcDecl, containerSym, containerScope, fgSym, false).declAST.type.symbol;
                 }
                 else {
-                    context.checker.errorReporter.simpleError(funcDecl, "Function or method '" + funcDecl.name.text + "' already declared as a property");
+                    context.checker.errorReporter.simpleError(funcDecl, "Function or method '" + funcDecl.name.actualText + "' already declared as a property");
                 }
             }
          
@@ -730,7 +730,7 @@ module TypeScript {
             }
 
             if (fgSym && !(fgSym.kind() == SymbolKind.Type) && funcDecl.isMethod() && !funcDecl.isAccessor() && !funcDecl.isConstructor) {
-                context.checker.errorReporter.simpleError(funcDecl, "Function or method '" + funcDecl.name.text + "' already declared as a property");
+                context.checker.errorReporter.simpleError(funcDecl, "Function or method '" + funcDecl.name.actualText + "' already declared as a property");
                 fgSym.type = context.checker.anyType;
             }
             var sig = context.checker.createFunctionSignature(funcDecl, containerSym, containerScope, fgSym, !foundSymbol);

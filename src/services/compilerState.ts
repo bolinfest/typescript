@@ -408,7 +408,7 @@ module Services {
             this.compilationSettings = new TypeScript.CompilationSettings();
             
             Services.copyDataObject(this.compilationSettings, this.getHostCompilationSettings());
-            this.compiler = new TypeScript.TypeScriptCompiler(outfile, outerr, this.logger, this.compilationSettings);
+            this.compiler = new TypeScript.TypeScriptCompiler(outerr, this.logger, this.compilationSettings);
             this.scriptMap = new ScriptMap();
             this.unitIndexMap = [];
             this.errorCollector = new CompilerErrorCollector(this.logger);
@@ -578,7 +578,7 @@ module Services {
             var incrementalTypeCheckSuccessful = false;
             var singleEdit = getSingleFunctionEdit(updateResults);
             if (fileAdded === false && singleEdit !== null) {
-                this.logger.log("Attempting incremental type check because there was a single edit to the function \"" + (<TypeScript.FuncDecl>singleEdit.scope1).name.text + "\"");
+                this.logger.log("Attempting incremental type check because there was a single edit to the function \"" + (<TypeScript.FuncDecl>singleEdit.scope1).name.actualText + "\"");
                 incrementalTypeCheckSuccessful = this.attemptIncrementalTypeCheck(singleEdit);
             }
 

@@ -887,7 +887,7 @@ module TypeScript {
                     var identifier = <Identifier>lhs;
                     var symbol = scope.find(identifier.text, false, true);
                     if (symbol == null) {
-                        this.errorReporter.unresolvedSymbol(identifier, identifier.text);
+                        this.errorReporter.unresolvedSymbol(identifier, identifier.actualText);
                     }
                     else if (symbol.isType()) {
 
@@ -914,7 +914,7 @@ module TypeScript {
                             }
                         }
                         if (!symbol.visible(scope, this)) {
-                            this.errorReporter.simpleError(lhs, "The symbol '" + identifier.text + "' is not visible at this point");
+                            this.errorReporter.simpleError(lhs, "The symbol '" + identifier.actualText + "' is not visible at this point");
                         }
                         lhsType = symbol.getType();
 
@@ -941,7 +941,7 @@ module TypeScript {
                     }
                     else {
                         if (!resultType.symbol.visible(scope, this)) {
-                            this.errorReporter.simpleError(lhs, "The symbol '" + (<Identifier>rhs).text + "' is not visible at this point");
+                            this.errorReporter.simpleError(lhs, "The symbol '" + (<Identifier>rhs).actualText + "' is not visible at this point");
                         }
                     }
                     rhsIdentifier.sym = resultType.symbol;
@@ -1014,11 +1014,11 @@ module TypeScript {
                                 var symbol = scope.find(identifier.text, false, true);
                                 if (symbol == null) {
                                     typeLink.type = this.anyType;
-                                    this.errorReporter.unresolvedSymbol(identifier, identifier.text);
+                                    this.errorReporter.unresolvedSymbol(identifier, identifier.actualText);
                                 }
                                 else if (symbol.isType()) {
                                     if (!symbol.visible(scope, this)) {
-                                        this.errorReporter.simpleError(ast, "The symbol '" + identifier.text + "' is not visible at this point");
+                                        this.errorReporter.simpleError(ast, "The symbol '" + identifier.actualText + "' is not visible at this point");
                                     }
                                     identifier.sym = symbol;
                                     typeLink.type = symbol.getType();

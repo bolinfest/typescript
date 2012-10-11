@@ -233,7 +233,7 @@ module TypeScript {
 
             var funcScope = null;
             var outerFnc: FuncDecl = context.scopeChain.fnc;
-            var nameText = funcDecl.name ? funcDecl.name.text : null;
+            var nameText = funcDecl.name ? funcDecl.name.actualText : null;
             var fgSym: TypeSymbol = null;
 
             if (isStatic) {

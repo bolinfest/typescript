@@ -1,0 +1,4 @@
+// 0.ts  line 2 col 4: Invalid identifier character
+// 0.ts  line 2 col 4: Expected identifier in variable declaration
+// 0.ts  line 2 col 10: Expected ';'
+0.ts line 2 col 10: The name 'a' does not exist in the current scope
