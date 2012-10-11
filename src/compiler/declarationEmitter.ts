@@ -406,7 +406,8 @@ module TypeScript {
             if (funcDecl.args) {
                 var argsLen = funcDecl.args.members.length; if (funcDecl.variableArgList) { argsLen--; }
                 for (var i = 0; i < argsLen; i++) {
-                    var argDecl = <ArgDecl>funcDecl.args.members[i]; if (hasFlag(argDecl.varFlags, VarFlags.Property)) {
+                    var argDecl = <ArgDecl>funcDecl.args.members[i];
+                    if (hasFlag(argDecl.varFlags, VarFlags.Property)) {
                         this.emitDeclFlags(ToDeclFlags(argDecl.varFlags), "var");
                         this.declFile.Write(argDecl.id.text);
 

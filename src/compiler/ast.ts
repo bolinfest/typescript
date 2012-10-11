@@ -1344,14 +1344,14 @@ module TypeScript {
 
     export class Block extends Statement {
 
-        constructor (public stmts: ASTList, public visible: bool) {
+        constructor (public stmts: ASTList, public isStatementBlock: bool) {
             super(NodeType.Block);
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            if (this.visible) {
+            if (this.isStatementBlock) {
                 emitter.writeLineToOutput(" {");
                 emitter.indenter.increaseIndent();
             }
@@ -1359,7 +1359,7 @@ module TypeScript {
             if (this.stmts) {
                 emitter.emitJavascriptList(this.stmts, null, TokenID.SColon, true, false, false);
             }
-            if (this.visible) {
+            if (this.isStatementBlock) {
                 emitter.indenter.decreaseIndent();
                 emitter.emitIndent();
                 emitter.writeToOutput("}");

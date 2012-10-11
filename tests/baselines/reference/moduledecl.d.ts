@@ -67,10 +67,10 @@ module m5 {
     var c;
 }
 module m43 {
-    var b: number;
+    var b;
 }
 module m55 {
-    var c: number;
+    var c;
 }
 module "m3" {
     var b: number;

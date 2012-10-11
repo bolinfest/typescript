@@ -2269,10 +2269,10 @@ module TypeScript {
                 if (hasFlag(modifiers, Modifiers.Readonly)) {
                     varDecl.varFlags |= VarFlags.Readonly;
                 }
-                if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
+                if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Ambient)) {
                     varDecl.varFlags |= VarFlags.Ambient;
                 }
-                if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Exported)) {
+                if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Exported)) {
                     varDecl.varFlags |= VarFlags.Exported;
                 }
                 varDecl.minChar = minChar;
@@ -3506,9 +3506,6 @@ module TypeScript {
                             ast = new Block(<ASTList>declAst, false);
                         }
                         needTerminator = true;
-                        if (this.parsingDeclareFile || this.ambientModule && ast.nodeType == NodeType.VarDecl) {
-                            (<VarDecl>ast).varFlags |= VarFlags.Exported;
-                        }
                         break;
                     case TokenID.STATIC:
 
@@ -4033,8 +4030,8 @@ module TypeScript {
         public okAmbientModuleMember(ast: AST) {
             var nt = ast.nodeType;
             return (nt == NodeType.Class) || (nt == NodeType.Import) || (nt == NodeType.Interface) || (nt == NodeType.Module) ||
-                (nt == NodeType.Empty) ||
-                ((nt == NodeType.VarDecl) && (hasFlag((<VarDecl>ast).varFlags, VarFlags.Property) || hasFlag((<VarDecl>ast).varFlags, VarFlags.Exported))) ||
+                (nt == NodeType.Empty) || (nt == NodeType.VarDecl) || 
+                ((nt == NodeType.Block) && !(<Block>ast).isStatementBlock) ||
                 ((nt == NodeType.FuncDecl) && ((<FuncDecl>ast).isMethod()));
         }
 
