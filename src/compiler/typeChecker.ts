@@ -1545,6 +1545,10 @@ module TypeScript {
                 return false;
             }
 
+            if (t1.isClass() || t1.isClassInstance()) {
+                return false;
+            }
+
             var comboId = (t2.typeID << 16) | t1.typeID;
 
             if (this.identicalCache[comboId]) {
