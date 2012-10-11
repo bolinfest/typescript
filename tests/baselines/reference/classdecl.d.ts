@@ -4,7 +4,10 @@ class a {
     public pgF(): void;
     public pv;
     public d : number;
-    static p2 : { x: number; y: number; };
+    static p2 : {
+        x: number;
+        y: number;
+    };
     static d2();
     static p3;
     private pv3;
@@ -34,7 +37,10 @@ class aAmbient {
     public pgF(): void;
     public pv;
     public d: number;
-    static p2: { x: number; y: number; };
+    static p2: {
+        x: number;
+        y: number;
+    };
     static d2();
     static p3;
     private pv3;

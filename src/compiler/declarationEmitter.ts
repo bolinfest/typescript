@@ -44,7 +44,7 @@ module TypeScript {
             this.declFile.Write(this.getIndentString());
         }
 
-        private canEmitSignature(declFlags: DeclFlags, canEmitGlobalAmbientDecl?: bool = true, useDeclarationContainerTop? : bool = true) {
+        private canEmitSignature(declFlags: DeclFlags, canEmitGlobalAmbientDecl?: bool = true, useDeclarationContainerTop?: bool = true) {
             var container: AST;
             if (useDeclarationContainerTop) {
                 container = this.getAstDeclarationContainer();
@@ -92,7 +92,7 @@ module TypeScript {
             // Emit export only for global export statements. The container for this would be dynamic module which is whole file
             var container = this.getAstDeclarationContainer();
             if (container.nodeType == NodeType.Module &&
-                hasFlag((<ModuleDecl>container).modFlags, ModuleFlags.IsWholeFile) && 
+                hasFlag((<ModuleDecl>container).modFlags, ModuleFlags.IsWholeFile) &&
                 hasFlag(declFlags, DeclFlags.Exported)) {
                 this.declFile.Write("export ");
             }
@@ -132,7 +132,47 @@ module TypeScript {
             this.declarationContainerStack.pop();
         }
 
-        private getTypeSignature(type: Type) {
+        private emitTypeNamesMember(memberName: MemberName, emitIndent? : bool = false) {
+            if (memberName.prefix == "{ ") {
+                if (emitIndent) {
+                    this.emitIndent();
+                }
+                this.declFile.WriteLine("{");
+                this.indenter.increaseIndent();
+                emitIndent = true;
+            } else if (memberName.prefix != "") {
+                if (emitIndent) {
+                    this.emitIndent();
+                }
+                this.declFile.Write(memberName.prefix);
+                emitIndent = false;
+            }
+
+            if (memberName.isString()) {
+                if (emitIndent) {
+                    this.emitIndent();
+                }
+                this.declFile.Write((<MemberNameString>memberName).text);
+            } else {
+                var ar = <MemberNameArray>memberName;
+                for (var index = 0; index < ar.entries.length; index++) {
+                    this.emitTypeNamesMember(ar.entries[index], emitIndent);
+                    if (ar.delim == "; ") {
+                        this.declFile.WriteLine(";");
+                    }
+                }
+            }
+
+            if (memberName.suffix == "}") {
+                this.indenter.decreaseIndent();
+                this.emitIndent();
+                this.declFile.Write(memberName.suffix);
+            } else {
+                this.declFile.Write(memberName.suffix);
+            }
+        }
+
+        private emitTypeSignature(type: Type) {
             var containingScope: SymbolScope = null;
             var declarationContainerAst = this.getAstDeclarationContainer();
             switch (declarationContainerAst.nodeType) {
@@ -161,7 +201,8 @@ module TypeScript {
                     CompilerDiagnostics.debugPrint("Unknown containing scope");
             }
 
-            return type.getScopedTypeName(containingScope);
+            var typeNameMembers = type.getScopedTypeNameEx(containingScope);
+            this.emitTypeNamesMember(typeNameMembers);
         }
 
         public VarDeclCallback(pre: bool, varDecl: VarDecl): bool {
@@ -191,12 +232,10 @@ module TypeScript {
                 }
 
                 if (type && this.canEmitTypeAnnotationSignature(ToDeclFlags(varDecl.varFlags))) {
-                    var typeName = this.getTypeSignature(type);
-                    this.declFile.WriteLine(": " + typeName + ";");
+                    this.declFile.Write(": ");
+                    this.emitTypeSignature(type);
                 }
-                else {
-                    this.declFile.WriteLine(";");
-                }
+                this.declFile.WriteLine(";");
             }
             return false;
         }
@@ -208,7 +247,8 @@ module TypeScript {
             }
             if ((argDecl.typeExpr || argDecl.type != this.checker.anyType) &&
                 this.canEmitTypeAnnotationSignature(ToDeclFlags(funcDecl.fncFlags))) {
-                this.declFile.Write(": " + this.getTypeSignature(argDecl.type));
+                this.declFile.Write(": ");
+                this.emitTypeSignature(argDecl.type);
             }
         }
 
@@ -313,7 +353,8 @@ module TypeScript {
             if (!funcDecl.isConstructor &&
                 (funcDecl.returnTypeAnnotation || funcDecl.signature.returnType.type != this.checker.anyType) &&
                 this.canEmitTypeAnnotationSignature(ToDeclFlags(funcDecl.fncFlags))) {
-                this.declFile.Write(": " + this.getTypeSignature(funcDecl.signature.returnType.type));
+                this.declFile.Write(": ");
+                this.emitTypeSignature(funcDecl.signature.returnType.type);
             }
 
             if (funcDecl.hasStaticDeclarations()) {
@@ -334,11 +375,10 @@ module TypeScript {
                     var baseExpr = bases.members[i];
                     var baseSymbol = baseExpr.type.symbol;
                     var baseType = baseExpr.type;
-                    var baseName = this.getTypeSignature(baseType);
                     if (i > 0) {
                         this.declFile.Write(", ");
                     }
-                    this.declFile.Write(baseName);
+                    this.emitTypeSignature(baseType);
                 }
             }
         }
@@ -354,10 +394,10 @@ module TypeScript {
             this.declFile.Write(funcDecl.name.text);
             var propertyType = accessorSymbol.getType();
             if (this.canEmitTypeAnnotationSignature(ToDeclFlags(accessorSymbol.flags))) {
-                this.declFile.WriteLine(" : " + this.getTypeSignature(propertyType) + ";");
-            } else {
-                this.declFile.WriteLine(";");
+                this.declFile.Write(" : ");
+                this.emitTypeSignature(propertyType);
             }
+            this.declFile.WriteLine(";");
 
             return false;
         }
@@ -371,11 +411,10 @@ module TypeScript {
                         this.declFile.Write(argDecl.id.text);
 
                         if (argDecl.typeExpr && this.canEmitTypeAnnotationSignature(ToDeclFlags(argDecl.varFlags))) {
-                            var typeName = this.getTypeSignature(argDecl.type);
-                            this.declFile.WriteLine(": " + typeName + ";");
-                        } else {
-                            this.declFile.WriteLine(";");
+                            this.declFile.Write(": ");
+                            this.emitTypeSignature(argDecl.type);
                         }
+                        this.declFile.WriteLine(";");
                     }
                 }
             }
