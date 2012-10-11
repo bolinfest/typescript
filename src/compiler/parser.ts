@@ -811,22 +811,13 @@ module TypeScript {
                                                       primId);
                     }
 
-                    case TokenID.NULL:
-                        this.reportParseError("'null' is not allowed in a type reference position");
-                        // fall through to the identifier case for error recovery
-
                     case TokenID.ID:
 
-                        var text = this.tok.getText();
-
-                        if (text == "undefined") {
-                            this.reportParseError("'undefined' is not allowed in a type reference position");
-                        }
-
-                        var ident = this.createRef(text, minChar);
+                        var ident = this.createRef(this.tok.getText(), minChar);
                         ident.limChar = this.scanner.pos;
                         return this.parseNamedType(errorRecoverySet, minChar,
                                               ident, true);
+
                     case TokenID.LCurly:
                         this.tok = this.scanner.scan();
                         var members = new ASTList();
