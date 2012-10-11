@@ -1722,7 +1722,14 @@ module TypeScript {
                     // (or they're compiling with the --nolib option), use 'any' as the argument type
                     if (!this.iargumentsInterfaceType) {
                         var argumentsSym = scope.find("IArguments", false, true);
-                        this.iargumentsInterfaceType = argumentsSym ? argumentsSym.getType() : this.anyType;
+
+                        if (argumentsSym) {
+                            argumentsSym.flags |= SymbolFlags.CompilerGenerated;
+                            this.iargumentsInterfaceType = argumentsSym.getType();
+                        }
+                        else {
+                            this.iargumentsInterfaceType = this.anyType;
+                        }
                     }
                     argLoc.typeLink.type = this.iargumentsInterfaceType;
                     table.add("arguments", theArgSym);

@@ -149,6 +149,7 @@ module TypeScript {
         Optional = 1 << 16,
         RecursivelyReferenced = 1 << 17,
         Bound = 1 << 18,
+        CompilerGenerated = 1 << 19,
     }
 
     export enum VarFlags {

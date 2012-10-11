@@ -1865,6 +1865,7 @@ module TypeScript {
                     // methods do not have the "arguments" field
                     if (mProp.name == "arguments" &&
                         this.typeFlow.iargumentsInterfaceType &&
+                        (this.typeFlow.iargumentsInterfaceType.symbol.flags & SymbolFlags.CompilerGenerated) &&
                         mProp.kind() == SymbolKind.Variable &&
                         (<VariableSymbol>mProp).variable.typeLink.type == this.typeFlow.iargumentsInterfaceType) {
                         continue;
