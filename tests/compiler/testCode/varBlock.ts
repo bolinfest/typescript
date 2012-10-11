@@ -14,4 +14,6 @@ declare module m3 {
 
 declare var b = 10;
 
+declare var a2, b2, c2;
+
 

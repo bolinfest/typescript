@@ -1354,6 +1354,8 @@ module TypeScript {
             if (this.isStatementBlock) {
                 emitter.writeLineToOutput(" {");
                 emitter.indenter.increaseIndent();
+            } else {
+                emitter.setInVarBlock(this.stmts.members.length);
             }
             var temp = emitter.setInObjectLiteral(false);
             if (this.stmts) {
@@ -1820,7 +1822,8 @@ module TypeScript {
                     emitter.emitJavascript(this.init, TokenID.FOR, false);
                 }
                 else {
-                    emitter.emitForVarList(<ASTList>this.init);
+                    emitter.setInVarBlock((<ASTList>this.init).members.length); 
+                    emitter.emitJavascriptList(this.init, null, TokenID.FOR, false, false, false);
                 }
             }
             emitter.writeToOutput("; ");

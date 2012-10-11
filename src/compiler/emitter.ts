@@ -82,6 +82,7 @@ module TypeScript {
         public allSourceMappers: SourceMapper[] = [];
         public sourceMapper: SourceMapper = null;
         public captureThisStmtString = "var _this = this;";
+        private varListCount: number = 0; 
 
         constructor (public checker: TypeChecker, public outfile: ITextWriter, public emitOptions: IEmitOptions) { 
         }
@@ -117,6 +118,10 @@ module TypeScript {
                 this.emitState.column = 0
                 this.emitState.line++;
             }
+        }
+
+        public setInVarBlock(count: number) {
+            this.varListCount = count;
         }
 
         public setInObjectLiteral(val: bool): bool {
@@ -807,24 +812,30 @@ module TypeScript {
             }
         }
 
-        public emitForVarList(varDeclList: ASTList) {
-            if (varDeclList) {
-                this.recordSourceMappingStart(varDeclList);
-                var len = varDeclList.members.length;
-                for (var i = 0; i < len; i++) {
-                    var varDecl = <VarDecl>varDeclList.members[i];
-                    this.emitJavascriptVarDecl(varDecl, (i == 0) ? TokenID.FOR : TokenID.LParen);
-                    if (i < (len - 1)) {
-                        this.writeToOutput(", ");
-                    }
-                }
-                this.recordSourceMappingEnd(varDeclList);
+        // Emits "var " if it is allowed
+        private emitVarDeclVar() {
+            // If it is var list of form var a, b, c = emit it only if count > 0 - which will be when emitting first var
+            // If it is var list of form  var a = varList count will be 0
+            if (this.varListCount >= 0) {
+                this.writeToOutput("var ");
+                this.varListCount = -this.varListCount;
+            }
+            return true;
+        }
+
+        private onEmitVar() {
+            if (this.varListCount > 0) {
+                this.varListCount--;
+            }
+            else if (this.varListCount < 0) {
+                this.varListCount++;
             }
         }
 
         public emitJavascriptVarDecl(varDecl: VarDecl, tokenId: TokenID) {
             if ((varDecl.varFlags & VarFlags.Ambient) == VarFlags.Ambient) {
                 this.emitAmbientVarDecl(varDecl);
+                this.onEmitVar();
             }
             else {
                 var sym = varDecl.sym;
@@ -848,7 +859,7 @@ module TypeScript {
                     else if (type.hasImplementation()) {
                         // module
                         if (!hasFlag(sym.flags, SymbolFlags.Exported) && (sym.container == this.checker.gloMod || !hasFlag(sym.flags, SymbolFlags.Property))) {
-                            this.writeToOutput("var ");
+                            this.emitVarDeclVar();
                         }
                         else if (hasFlag(varDecl.varFlags, VarFlags.LocalStatic)) {
                             this.writeToOutput(".");
@@ -869,14 +880,14 @@ module TypeScript {
                                 this.writeToOutput("this.");
                             }
                             else {
-                                this.writeToOutput("var ");
+                                this.emitVarDeclVar();
                             }
                         }
                     }
                 }
                 else {
                     if (tokenId != TokenID.LParen) {
-                        this.writeToOutput("var ");
+                        this.emitVarDeclVar();
                     }
                 }
                 this.recordSourceMappingStart(varDecl.id);
@@ -891,8 +902,13 @@ module TypeScript {
                     this.writeToOutputTrimmable(" = ");
                     this.writeToOutput(this.defaultValue(varDecl.type));
                 }
-                if ((tokenId != TokenID.FOR) && (tokenId != TokenID.LParen)) {
-                    this.writeToOutputTrimmable(";");
+                this.onEmitVar();
+                if ((tokenId != TokenID.LParen)) {
+                    if (this.varListCount < 0) {
+                        this.writeToOutput(", ");
+                    } else if (tokenId != TokenID.FOR) {
+                        this.writeToOutputTrimmable(";");
+                    }
                 }
                 this.recordSourceMappingEnd(varDecl);
                 this.emitParensAndCommentsInPlace(varDecl, false);
@@ -1198,7 +1214,8 @@ module TypeScript {
                              (emitNode.nodeType != NodeType.Interface) &&
                              (!((emitNode.nodeType == NodeType.VarDecl) &&
                                 ((((<VarDecl>emitNode).varFlags) & VarFlags.Ambient) == VarFlags.Ambient) &&
-                                (((<VarDecl>emitNode).init) == null))) &&
+                                (((<VarDecl>emitNode).init) == null)) && this.varListCount >= 0) &&
+                             (emitNode.nodeType != NodeType.Block || (<Block>emitNode).isStatementBlock) &&
                              (emitNode.nodeType != NodeType.EndCode) &&
                              (emitNode.nodeType != NodeType.FuncDecl)) {
                         this.writeLineToOutput("");
@@ -1221,7 +1238,7 @@ module TypeScript {
                 if ((ast.nodeType != NodeType.Interface) &&
                     (!((ast.nodeType == NodeType.VarDecl) &&
                        ((((<VarDecl>ast).varFlags) & VarFlags.Ambient) == VarFlags.Ambient) &&
-                       (((<VarDecl>ast).init) == null))) &&
+                       (((<VarDecl>ast).init) == null)) && this.varListCount >= 0) &&
                     (ast.nodeType != NodeType.EndCode) &&
                     ((ast.nodeType != NodeType.FuncDecl) ||
                      (this.emitState.container != EmitContainer.Constructor))) {
