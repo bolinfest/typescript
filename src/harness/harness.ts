@@ -28,15 +28,11 @@ var typescriptServiceFileName = filePath(IO.getExecutingFilePath()) + "typescrip
 var typescriptServiceFile = IO.readFile(typescriptServiceFileName);
 if (typeof ActiveXObject === "function") {
     eval(typescriptServiceFile);
-}
-else if (typeof require === "function") {
-    var _fs = require('fs');
-    var _path = require('path');
-    var _module = require('module');
-
-    require.main.filename = typescriptServiceFileName;
-    require.main.paths = _module._nodeModulePaths(_path.dirname(_fs.realpathSync(typescriptServiceFileName)));
-    require.main._compile(typescriptServiceFile, typescriptServiceFileName);
+} else if (typeof require === "function") {
+    var vm = require('vm');
+    vm.runInThisContext(typescriptServiceFile, 'typescriptServices.js');
+} else {
+    throw new Error('Unknown context');
 }
 
 declare module process {
