@@ -10,25 +10,22 @@ describe('Compiling samples', function() {
         var src = loadSample("d3\\data.ts");
         var types = loadSample("d3\\d3types.ts");
         
-        Harness.Compiler.addUnit(src);
-        Harness.Compiler.addUnit(types);
-
         Harness.Compiler.compileUnits(function(result) {
             assert.equal(result.errors.length, 0);
+        }, function () { 
+            Harness.Compiler.addUnit(src);
+            Harness.Compiler.addUnit(types);
         });
-        
-        Harness.Compiler.recreate(); // cleanup
     });
 
     // greeter
     it('compiles greeter without error', function() {
+
         var src = loadSample("greeter\\greeter.ts");
         Harness.Compiler.compileString(src, 'greeter.ts', function(result) {          
             assert.equal(result.errors.length, 0);
         });
-
-        Harness.Compiler.recreate(); // cleanup
-        Harness.Compiler.reset(); // cleanup
+       
     });
     
     // imageboard
@@ -51,23 +48,18 @@ describe('Compiling samples', function() {
             WScript.Echo(result.errors);
             assert.equal(result.errors.length, 0);
         });
-
-        Harness.Compiler.recreate(); // cleanup
-        Harness.Compiler.reset(); // cleanup*/
+        */
     });
 
     // interfaces
     it('compiles the interfaces sample without error', function () {
         var interfaces = loadSample("interfaces\\interfaces.ts");
 
-        Harness.Compiler.addUnit(interfaces);
-
         Harness.Compiler.compileUnits(function (result) {
             assert.equal(result.errors.length, 0);
+        }, function () {
+            Harness.Compiler.addUnit(interfaces);
         });
-
-        Harness.Compiler.recreate(); // cleanup
-        Harness.Compiler.reset(); // cleanup
     });
 
     // jquery
@@ -75,15 +67,12 @@ describe('Compiling samples', function() {
         var scroller = loadSample("jquery\\parallax.ts");
         var lib = loadSample("jquery\\jquery.d.ts");
 
-        Harness.Compiler.addUnit(lib);
-        Harness.Compiler.addUnit(scroller);
-
         Harness.Compiler.compileUnits(function (result) {
             assert.equal(result.errors.length, 0);
+        }, function () { 
+            Harness.Compiler.addUnit(lib, false, true);
+            Harness.Compiler.addUnit(scroller);
         });
-
-        Harness.Compiler.recreate(); // cleanup
-        Harness.Compiler.reset(); // cleanup
     });
 
     // mankala
@@ -95,19 +84,16 @@ describe('Compiling samples', function() {
         var geometry = loadSample("mankala\\Geometry.ts");
         var position = loadSample("mankala\\Position.ts");
         
-        Harness.Compiler.addUnit(base);
-        Harness.Compiler.addUnit(driver);
-        Harness.Compiler.addUnit(features);
-        Harness.Compiler.addUnit(game);
-        Harness.Compiler.addUnit(geometry);
-        Harness.Compiler.addUnit(position);
-        
-        
         Harness.Compiler.compileUnits(function(result) {
             assert.arrayLengthIs(result.errors, 0);
+        }, function () { 
+            Harness.Compiler.addUnit(base);
+            Harness.Compiler.addUnit(driver);
+            Harness.Compiler.addUnit(features);
+            Harness.Compiler.addUnit(game);
+            Harness.Compiler.addUnit(geometry);
+            Harness.Compiler.addUnit(position);
         });
-        
-        Harness.Compiler.recreate(); // cleanup
     });
 
     // node
@@ -115,59 +101,51 @@ describe('Compiling samples', function() {
         var HttpServer = loadSample("node\\HttpServer.ts");
         var lib = loadSample("node\\node.d.ts");
         
-        Harness.Compiler.addUnit(lib, false, true);
-        Harness.Compiler.addUnit(HttpServer);
-
         Harness.Compiler.compileUnits(function (result) {
             assert.equal(result.errors.length, 0);
+        }, function () { 
+            Harness.Compiler.addUnit(lib, false, true);
+            Harness.Compiler.addUnit(HttpServer);
         });
-
-        Harness.Compiler.recreate(); // cleanup
-        Harness.Compiler.reset(); // cleanup
     });
 
     it('compiles the node sample-2 without error', function () {
         var HttpServer = loadSample("node\\TcpServer.ts");
         var lib = loadSample("node\\node.d.ts");
         
-        Harness.Compiler.addUnit(lib, false, true);
-        Harness.Compiler.addUnit(HttpServer);
-
         Harness.Compiler.compileUnits(function (result) {
             assert.equal(result.errors.length, 0);
+        }, function () { 
+            Harness.Compiler.addUnit(lib, false, true);
+            Harness.Compiler.addUnit(HttpServer);
         });
-
-        Harness.Compiler.recreate(); // cleanup
-        Harness.Compiler.reset(); // cleanup
     });
 
     // raytracer
     it('compiles raytracer without error', function() {
-        var src = loadSample("raytracer\\raytracer.ts");
-        Harness.Compiler.compileString(src, 'raytracer.ts', function(result) {
+        var src = "..//samples//raytracer//raytracer.ts";
+
+        Harness.Compiler.compileUnit(src, function(result) {
             assert.equal(result.errors.length, 0);
-        });
-        Harness.Compiler.recreate(); // cleanup
+        });    
     });
 
     // simple
     it('compiles simple without error', function() {
-        var src = loadSample("simple\\animals.ts");
+        var src =  "..//samples//simple//animals.ts";
         
-        Harness.Compiler.compileString(src, 'animals.ts', function(result) {
+        Harness.Compiler.compileUnit(src, function(result) {
             assert.equal(result.errors.length, 0);
         });
-        Harness.Compiler.recreate(); // cleanup
     });
 
     // todomvc
     it('compiles the todo mvc sample without error', function() {
-        var src = loadSample("todomvc\\js\\todos.ts");
+        var src =  "..//samples//todomvc//js//todos.ts";
         
-        Harness.Compiler.compileString(src, 'animals.ts', function(result) {
+        Harness.Compiler.compileUnit(src, function(result) {
             assert.equal(result.errors.length, 0);
         });
-        Harness.Compiler.recreate(); // cleanup
     });
 
     // warship
@@ -176,16 +154,13 @@ describe('Compiling samples', function() {
         var lib = loadSample("warship\\jquery.d.ts");
         var uilib = loadSample("warship\\jqueryui.d.ts");
 
-        Harness.Compiler.addUnit(lib);
-        Harness.Compiler.addUnit(uilib);
-        Harness.Compiler.addUnit(src);
-
         Harness.Compiler.compileUnits(function (result) {
             assert.equal(result.errors.length, 0);
+        }, function () { 
+            Harness.Compiler.addUnit(lib);
+            Harness.Compiler.addUnit(uilib);
+            Harness.Compiler.addUnit(src);
         });
-
-        Harness.Compiler.recreate(); // cleanup
-        Harness.Compiler.reset(); // cleanup
     });
 
     // win8
@@ -201,17 +176,16 @@ describe('Compiling samples', function() {
           , loadSample("win8\\encyclopedia\\Encyclopedia\\js\\win.ts")
         ]
         
-        Harness.Compiler.addUnit(IO.readFile(Harness.userSpecifiedroot + "typings\\winrt.d.ts"), true, true);
-        Harness.Compiler.addUnit(IO.readFile(Harness.userSpecifiedroot + "typings\\winjs.d.ts"), true, true);
-          
-        for (var i = 0; i < units.length; i++) {
-            Harness.Compiler.addUnit(units[i], true);
-        }
-
         Harness.Compiler.compileUnits(function(result) {
             assert.equal(result.errors.length, 0);
+        }, function () { 
+            Harness.Compiler.addUnit(IO.readFile(Harness.userSpecifiedroot + "typings\\winrt.d.ts"), true, true);
+            Harness.Compiler.addUnit(IO.readFile(Harness.userSpecifiedroot + "typings\\winjs.d.ts"), true, true);
+
+            for (var i = 0; i < units.length; i++) {
+                Harness.Compiler.addUnit(units[i], true);
+            }
         });
         
-        Harness.Compiler.recreate(); // cleanup
     });
 });

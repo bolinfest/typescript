@@ -9,20 +9,24 @@ function checkTestCodeOutput(filename: string) {
         var errorDescriptionAsync = '';
         var errorDescriptionLocal = '';
         
-        TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
-        Harness.Compiler.compileCollateral('compiler\\testCode\\' + filename, function (result) {
+        //TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
+        Harness.Compiler.compileUnit('compiler\\testCode\\' + filename, function (result) {
             for (var i = 0; i < result.errors.length; i++) {
                 errorDescriptionLocal += result.errors[i].file + ' line ' + result.errors[i].line + ' col ' + result.errors[i].column + ': ' + result.errors[i].message + '\r\n';
             }
             jsOutputSync = result.code;
+        }, function () { 
+            TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
         });
 
-        TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
-        Harness.Compiler.compileCollateral('compiler\\testCode\\' + filename, function (result) {
+        
+        Harness.Compiler.compileUnit('compiler\\testCode\\' + filename, function (result) {
             for (var i = 0; i < result.errors.length; i++) {
                 errorDescriptionAsync += result.errors[i].file + ' line ' + result.errors[i].line + ' col ' + result.errors[i].column + ': ' + result.errors[i].message + '\r\n';
             }
             jsOutputAsync = result.code;
+        }, function () {
+            TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
         });
 
         Harness.Baseline.runBaseline('Correct errors for ' + filename + ' (local)', filename.replace(/\.ts/, '.errors.txt'), () => {

@@ -1,5 +1,5 @@
-﻿///<reference path='..\..\compiler\typescript.ts' />
-///<reference path='..\..\harness\harness.ts' />
+﻿///<reference path='..\..\src\compiler\typescript.ts' />
+///<reference path='..\..\src\harness\harness.ts' />
 
 describe('Compiling tests\\compiler\\scopeTests.ts', function() {
     it("Scope check inside a public method inside public method", function() {

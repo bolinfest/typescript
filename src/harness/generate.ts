@@ -30,7 +30,7 @@ module CollateralGenerator {
         }
         
         var testCase      = "describe('Compiling " + path.replace(/\\/g, "\\\\") + "', function() {\n";
-        testCase         += "    Harness.Compiler.compileCollateral('compiler\\\\testCode\\\\" + fileName + "." + fileExt + "', function(result) {\n";
+        testCase         += "    Harness.Helper.readFile('tests\\\\compiler\\\\testCode\\\\" + fileName + "." + fileExt + "', function(result) {\n";
             
         Harness.Compiler.compileString(fileContents, path, function(result) {
             testCase     += "        it('has " + result.errors.length + " compile errors', function() {\n";
@@ -47,7 +47,7 @@ module CollateralGenerator {
                 testCase += "        it('compiles properly against the baseline', function() {\n";
                 if(result.code.indexOf("\n") > -1) {
                     codeBaseline = result.code;
-                    testCase += "            assert.noDiff(result.code, Harness.CollateralReader.read('compiler\\\\baselines\\\\" + fileName + ".js'));\n";
+                    testCase += "            assert.noDiff(result.code, Harness.Helper.readFile('tests\\\\compiler\\\\baselines\\\\" + fileName + ".js'));\n";
                 } else {
                     testCase += "            assert.noDiff(result.code, '" + result.code + "');\n";
                 }

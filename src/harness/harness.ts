@@ -30,13 +30,10 @@ if (typeof ActiveXObject === "function") {
     eval(typescriptServiceFile);
 }
 else if (typeof require === "function") {
-    var _fs = require('fs');
-    var _path = require('path');
-    var _module = require('module');
-
-    require.main.filename = typescriptServiceFileName;
-    require.main.paths = _module._nodeModulePaths(_path.dirname(_fs.realpathSync(typescriptServiceFileName)));
-    require.main._compile(typescriptServiceFile, typescriptServiceFileName)
+    var vm = require('vm');
+    vm.runInThisContext(typescriptServiceFile, 'typescriptServices.js');
+} else {
+    throw new Error('Unknown context');
 }
 
 declare module process {
@@ -45,8 +42,9 @@ declare module process {
 }
 
 module Harness {
-    var global = <any>Function("return this").call(null);
+    // Settings 
     export var userSpecifiedroot = "";
+    var global = <any>Function("return this").call(null);
 
     export interface ITestMetadata {
         id: string;
@@ -60,14 +58,127 @@ module Harness {
             trials: number[];
         };
     }
-
     export interface IScenarioMetadata {
         id: string;
         desc: string;
         pass: bool;
     }
 
-    // Logger compatible with the Glue loggers.
+    // Assert functions
+    export module Assert {
+        export function is(result: bool, msg?: string) {
+            if (!result)
+                throw new Error(msg ? msg : "Expected true, got false.");
+        }
+
+        export function arrayLengthIs(arr: any[], length: number) {
+            if (arr.length != length) {
+                var actual = '';
+                arr.forEach(n => actual = actual + '\n      ' + n.toString());
+                throw new Error('Expected array to have ' + length + ' elements. Actual elements were:' + actual);
+            }
+        }
+
+        export function equal(left, right) {
+            if (left !== right) {
+                throw new Error("Expected " + left + " to equal " + right);
+            }
+        }
+
+        export function notEqual(left, right) {
+            if (left === right) {
+                throw new Error("Expected " + left + " to *not* equal " + right);
+            }
+        }
+
+        export function notNull(result) {
+            if (result === null) {
+                throw new Error("Expected " + result + " to *not* be null");
+            }
+        }
+
+        export function compilerWarning(result: Compiler.CompilerResult, line: number, column: number, desc: string) {
+            if (!result.isErrorAt(line, column, desc)) {
+                var actual = '';
+                result.errors.forEach(err => {
+                    actual = actual + '\n     ' + err.toString();
+                });
+                throw new Error("Expected compiler warning at (" + line + ", " + column + "): " + desc + "\nActual errors follow: " + actual);
+            }
+        }
+
+        export function noDiff(text1, text2) {
+            text1 = text1.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n");
+            text2 = text2.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n");
+
+            if (text1 !== text2) {
+                var errorString = "";
+                var text1Lines = text1.split(/\n/);
+                var text2Lines = text2.split(/\n/);
+                for (var i = 0; i < text1Lines.length; i++) {
+                    if (text1Lines[i] !== text2Lines[i]) {
+                        errorString += "Difference at line " + (i + 1) + ":\n";
+                        errorString += "                  Left File: " + text1Lines[i] + "\n";
+                        errorString += "                 Right File: " + text2Lines[i] + "\n\n";
+                    }
+                }
+                throw new Error(errorString);
+            }
+        }
+
+        export function arrayContains(arr, contains) {
+            var found;
+
+            for (var i = 0; i < contains.length; i++) {
+                found = false;
+
+                for (var j = 0; j < arr.length; j++) {
+                    if (arr[j] === contains[i]) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                    throw new Error("Expected array to contain \"" + contains[i] + "\"");
+            }
+        }
+
+        export function arrayContainsOnce(arr: any[], filter: (item: any) =>bool) {
+            var foundCount = 0;
+
+            for (var i = 0; i < arr.length; i++) {
+                if (filter(arr[i])) {
+                    foundCount++;
+                }
+            }
+
+            if (foundCount !== 1)
+                throw new Error("Expected array to match element only once (instead of " + foundCount + " time(s))");
+        }
+    }
+
+    // Helper functions
+    export module Helper {
+        // Decide env
+        export function getHost() {
+            if (typeof ActiveXObject === "function") {
+                return "WScript";
+            }
+            else if (typeof require === "function") {
+                return "Node";
+            }
+            else {
+                return null;
+            }
+        }
+        // Reads a file under tests
+        export function readFile(path: string) {
+            return IO.readFile(Harness.userSpecifiedroot + "tests//" + path);
+        }
+    }
+
+    // Logger
     export interface ILogger {
         start: (fileName?: string, priority?: number) => void;
         end: (fileName?: string) => void;
@@ -80,7 +191,6 @@ module Harness {
         comment: (comment: string) => void;
         verify: (test: ITestMetadata, passed: bool, actual: any, expected: any, message: string) => void;
     }
-
     export class Logger implements ILogger {
         public start(fileName?: string, priority?: number) { }
         public end(fileName?: string) { }
@@ -94,6 +204,235 @@ module Harness {
         public verify(test: ITestMetadata, passed: bool, actual: any, expected: any, message: string) { }
     }
 
+    // Logger-related functions
+    var loggers: ILogger[] = [];
+    export function registerLogger(logger: ILogger) {
+        loggers.push(logger);
+    }
+    export function emitLog(field: string, ... params: any[]) {
+        for (var i = 0; i < loggers.length; i++) {
+            if (typeof loggers[i][field] === 'function') {
+                loggers[i][field].apply(loggers[i], params);
+            }
+        }
+    }
+
+    // BDD Framework
+    export interface IDone {
+        (e?: Error): void;
+    }
+    export class Runnable {
+        constructor (public description: string, public block: any) { }
+
+        // The current stack of Runnable objects
+        static currentStack: Runnable[] = [];
+
+        // The error, if any, that occurred when running 'block'
+        public error: Error = null;
+
+        // Whether or not this object has any failures (including in its descendants)
+        public passed = null;
+
+        // A list of all our child Runnables
+        public children: Runnable[] = [];
+
+        public addChild(child: Runnable): void {
+            this.children.push(child);
+        }
+
+        // Call function fn, which may take a done function and may possibly execute
+        // asynchronously, calling done when finished. Returns true or false depending
+        // on whether the function was asynchronous or not.
+        public call(fn: (done?: IDone) => void , done: IDone) {
+            var isAsync = true;
+
+            try {
+                if (fn.length === 0) {
+                    // No async.
+                    fn();
+                    done();
+
+                    return false;
+                } else {
+                    // Possibly async
+
+                    Runnable.pushGlobalErrorHandler(done);
+
+                    fn(function () {
+                        isAsync = false; // If we execute synchronously, this will get called before the return below.
+                        Runnable.popGlobalErrorHandler();
+                        done();
+                    });
+
+                    return isAsync;
+                }
+
+            } catch (e) {
+                done(e);
+
+                return false;
+            }
+        }
+
+        public run(done: IDone) { };
+
+        public runBlock(done: IDone) {
+            return this.call(this.block, done);
+        }
+
+        public runChild(index: number, done: IDone) {
+            return this.call(<any>((done) => this.children[index].run(done)), done);
+        }
+
+        static errorHandlerStack: { (e: Error): void; }[] = [];
+
+        static pushGlobalErrorHandler(done: IDone) {
+            errorHandlerStack.push(function (e) {
+                done(e);
+            });
+        }
+
+        static popGlobalErrorHandler() {
+            errorHandlerStack.pop();
+        }
+
+        static handleError(e: Error) {
+            if (errorHandlerStack.length === 0) {
+                IO.printLine('Global error: ' + e);
+            } else {
+                errorHandlerStack[errorHandlerStack.length - 1](e);
+            }
+        }
+    }
+    export class TestCase extends Runnable {
+        public description: string;
+        public block;
+
+        constructor (description: string, block: any) {
+            super(description, block);
+            this.description = description;
+            this.block = block;
+        }
+
+        public addChild(child: Runnable): void {
+            throw new Error("Testcases may not be nested inside other testcases");
+        }
+
+        // Run the test case block and fail the test if it raised an error.
+        // If no error is raised, the test passes.
+        public run(done: IDone) {
+            var that = this;
+
+            Runnable.currentStack.push(this);
+
+            emitLog('testStart', { desc: this.description });
+
+            if (this.block) {
+                var async = this.runBlock(<any>function (e) {
+                    if (e) {
+                        that.passed = false;
+                        that.error = e;
+                        emitLog('error', { desc: this.description, pass: false }, e);
+                    } else {
+                        that.passed = true;
+
+                        emitLog('pass', { desc: this.description, pass: true });
+                    }
+
+                    Runnable.currentStack.pop();
+
+                    done()
+                });
+            }
+
+        }
+    }
+    export class Scenario extends Runnable {
+        public description: string;
+        public block;
+
+        constructor (description: string, block: any) {
+            super(description, block);
+            this.description = description;
+            this.block = block;
+        }
+
+        // Run the block, and if the block doesn't raise an error, run the children.
+        public run(done: IDone) {
+            var that = this;
+
+            Runnable.currentStack.push(this);
+
+            emitLog('scenarioStart', { desc: this.description });
+
+            var async = this.runBlock(<any>function (e) {
+                Runnable.currentStack.pop();
+                if (e) {
+                    that.passed = false;
+                    that.error = e;
+                    emitLog('scenarioEnd', { desc: this.description, pass: false }, e);
+                    done();
+                } else {
+                    that.passed = true; // so far so good.
+                    that.runChildren(done);
+                }
+            });
+        }
+
+        // Run the children of the scenario (other scenarios and test cases). If any fail,
+        // set this scenario to failed. Synchronous tests will run synchronously without
+        // adding stack frames.
+        public runChildren(done: IDone, index = 0) {
+            var that = this;
+            var async = false;
+
+            for (; index < this.children.length; index++) {
+                async = this.runChild(index, <any>function (e) {
+                    that.passed = that.passed && that.children[index].passed;
+
+                    if (async)
+                        that.runChildren(done, index + 1);
+                });
+
+                if (async)
+                    return;
+            }
+
+            emitLog('scenarioEnd', { desc: this.description, pass: this.passed });
+
+            done();
+        }
+    }
+    export class Run extends Runnable {
+        constructor () {
+            super('Test Run', null);
+        }
+
+        public run() {
+            emitLog('start');
+            this.runChildren();
+        }
+
+        public runChildren(index = 0) {
+            var async = false;
+            var that = this;
+
+            for (; index < this.children.length; index++) {
+                async = this.runChild(index, <any>function (e) {
+                    if (async)
+                        that.runChildren(index + 1);
+                });
+
+                if (async)
+                    return;
+            }
+
+            Perf.runBenchmarks();
+            emitLog('end');
+        }
+    }
+
+    // Performance test
     export module Perf {
         export module Clock {
             export var now: () => number;
@@ -320,7 +659,7 @@ module Harness {
         export var compiler: TypeScript.TypeScriptCompiler;
         recreate();
 
-
+        // Types
         export class Type {
             constructor (public type, public code, public identifier) { }
 
@@ -450,7 +789,6 @@ module Harness {
                 }
             }
         }
-
         export class TypeFactory {
             public any: Type;
             public number: Type;
@@ -491,6 +829,46 @@ module Harness {
                     assert.equal(actualType.type, expectedType);
                 });
             }
+        }
+
+        // Generate Decl File
+        export function generateDeclFile(code: string, verifyNoDeclFile: bool): string {
+            reset();
+
+            compiler.settings.generateDeclarationFiles = true;
+            var oldOutputMany = compiler.settings.outputMany;
+            try {
+                addUnit(code);
+                compiler.reTypeCheck();
+
+                var outputs = {};
+
+                compiler.settings.outputMany = true;
+                compiler.emitDeclarationFile((fn: string) => {
+                    outputs[fn] = new Harness.Compiler.WriterAggregator();
+                    return outputs[fn];
+                });
+
+                for (var fn in outputs) {
+                    if (fn.indexOf('.d.ts') >= 0) {
+                        var writer = <Harness.Compiler.WriterAggregator>outputs[fn];
+                        writer.Close();
+                        if (verifyNoDeclFile) {
+                            throw new Error('Compilation should not produce ' + fn);
+                        }
+                        return writer.lines.join('\n');
+                    }
+                }
+
+                if (!verifyNoDeclFile) {
+                    throw new Error('Compilation did not produced .d.ts files');
+                }
+            } finally {
+                compiler.settings.generateDeclarationFiles = false;
+                compiler.settings.outputMany = oldOutputMany;
+            }
+
+            return '';
         }
 
         // Contains the code and errors of a compilation and some helper methods to check its status.
@@ -536,73 +914,6 @@ module Harness {
 
         }
 
-        export function generateDeclFile(code: string, verifyNoDeclFile: bool): string {
-            reset();
-
-            compiler.settings.generateDeclarationFiles = true;
-            var oldOutputMany = compiler.settings.outputMany;
-            try {
-                addUnit(code);
-                compiler.reTypeCheck();
-
-                var outputs = {};
-
-                compiler.settings.outputMany = true;
-                compiler.emitDeclarationFile((fn: string) => {
-                    outputs[fn] = new Harness.Compiler.WriterAggregator();
-                    return outputs[fn];
-                });
-
-                for (var fn in outputs) {
-                    if (fn.indexOf('.d.ts') >= 0) {
-                        var writer = <Harness.Compiler.WriterAggregator>outputs[fn];
-                        writer.Close();
-                        if (verifyNoDeclFile) {
-                            throw new Error('Compilation should not produce ' + fn);
-                        }
-                        return writer.lines.join('\n');
-                    }
-                }
-
-                if (!verifyNoDeclFile) {
-                    throw new Error('Compilation did not produced .d.ts files');
-                }
-            } finally {
-                compiler.settings.generateDeclarationFiles = false;
-                compiler.settings.outputMany = oldOutputMany;
-            }
-
-            return '';
-        }
-
-        export function compileCollateral(path: string, callback: (res: CompilerResult) => void ) {
-            compileString(CollateralReader.read(path), path.match(/[^\\]*$/)[0], callback);
-        }
-
-        export function compileString(code: string, unitName: string, callback: (res: Compiler.CompilerResult) => void , refreshUnitsForLSTests? = false) {
-            var scripts: TypeScript.Script[] = [];
-
-            // TODO: How to overload?
-            if (typeof unitName === 'function') {
-                callback = <(res: CompilerResult) => void >(<any>unitName);
-                unitName = 'test.ts';
-            }
-
-            reset();
-
-            // Some command-line tests may pollute the global namespace, which could interfere with
-            // with language service testing.
-            // In the case of LS tests, make sure that we refresh the first unit, and not try to update it
-            if (refreshUnitsForLSTests) {
-                maxUnit = 0;
-            }
-            scripts.push(addUnit(code));
-            compiler.reTypeCheck();
-            compiler.emitToOutfile();
-
-            callback(new CompilerResult(stdout.lines, stderr.lines, scripts));
-        }
-
         export function recreate() {
             compiler = new TypeScript.TypeScriptCompiler(stdout, stderr);
             compiler.parser.errorRecovery = true;
@@ -615,7 +926,6 @@ module Harness {
             currentUnit = 0;
             maxUnit = 0;
         }
-
         export function reset() {
             stdout.reset();
             stderr.reset();
@@ -648,29 +958,47 @@ module Harness {
             return script;
         }
 
-        export function compileUnits(callback: (res: Compiler.CompilerResult) => void ) {
+        export function compileUnit(path: string, callback: (res: CompilerResult) => void , settingsCallback?: () => void ) {
+            if (settingsCallback) {
+                settingsCallback();
+            }
+            compileString(Helper.readFile(path), path.match(/[^\\]*$/)[0], callback);
+        }
+        export function compileUnits(callback: (res: Compiler.CompilerResult) => void, settingsCallback?: () => void ) {
+            reset();
+            if (settingsCallback) {
+                settingsCallback();
+            } 
+            
             compiler.reTypeCheck();
             compiler.emitToOutfile();
 
             callback(new CompilerResult(stdout.lines, stderr.lines, []));
+            reset();
+            recreate();
         }
+        export function compileString(code: string, unitName: string, callback: (res: Compiler.CompilerResult) => void , refreshUnitsForLSTests? = false) {
+            var scripts: TypeScript.Script[] = [];
 
-    }
+            // TODO: How to overload?
+            if (typeof unitName === 'function') {
+                callback = <(res: CompilerResult) => void >(<any>unitName);
+                unitName = 'test.ts';
+            }
 
-    // Reads collateral relative to the collateral root.
-    export module CollateralReader {
-        export var root = "tests\\";
+            reset();
 
-        export function setRoot(newRoot: string) {
-            // Normalize root path to end in back slash
-            if (newRoot[newRoot.length - 1] !== '\\')
-                newRoot += '\\';
+            // Some command-line tests may pollute the global namespace, which could interfere with
+            // with language service testing.
+            // In the case of LS tests, make sure that we refresh the first unit, and not try to update it
+            if (refreshUnitsForLSTests) {
+                maxUnit = 0;
+            }
+            scripts.push(addUnit(code));
+            compiler.reTypeCheck();
+            compiler.emitToOutfile();
 
-            root = newRoot;
-        }
-
-        export function read(path: string) {
-            return IO.readFile(Harness.userSpecifiedroot + root + path);
+            callback(new CompilerResult(stdout.lines, stderr.lines, scripts));
         }
     }
 
@@ -743,7 +1071,7 @@ module Harness {
         }
 
         public addFile(name: string, isResident = false) {
-            var code: string = Harness.CollateralReader.read(name);
+            var code: string = Helper.readFile(name);
             this.addScript(name, code, isResident);
         }
 
@@ -865,12 +1193,11 @@ module Harness {
         //
         public lineColToPosition(fileName: string, line: number, col: number): number {
             var script = this.ls.languageService.getScriptAST(fileName);
-            Assert
             assert.notNull(script);
             assert.is(line >= 1);
             assert.is(col >= 1);
             assert.is(line < script.locationInfo.lineMap.length);
-            
+
             return TypeScript.getPositionFromLineColumn(script, line, col);
         }
 
@@ -882,7 +1209,7 @@ module Harness {
             assert.notNull(script);
 
             var result = TypeScript.getLineColumnFromPosition(script, position);
-            
+
             assert.is(result.line >= 1);
             assert.is(result.col >= 1);
             return result;
@@ -893,9 +1220,9 @@ module Harness {
         // "baselineFileName"
         //
         public checkEdits(sourceFileName: string, baselineFileName: string, edits: Services.TextEdit[]) {
-            var script = Harness.CollateralReader.read(sourceFileName);
+            var script = Helper.readFile(sourceFileName);
             var formattedScript = this.applyEdits(script, edits);
-            var baseline = Harness.CollateralReader.read(baselineFileName);
+            var baseline = Helper.readFile(baselineFileName);
 
             assert.noDiff(formattedScript, baseline);
             assert.equal(formattedScript, baseline);
@@ -980,242 +1307,8 @@ module Harness {
 
     }
 
-    interface IDone {
-        (e?: Error): void;
-    }
-
-    export class Runnable {
-        constructor (public description: string, public block: any) { }
-
-        // The current stack of Runnable objects
-        static currentStack: Runnable[] = [];
-
-        // The error, if any, that occurred when running 'block'
-        public error: Error = null;
-
-        // Whether or not this object has any failures (including in its descendants)
-        public passed = null;
-
-        // A list of all our child Runnables
-        public children: Runnable[] = [];
-
-        public addChild(child: Runnable): void {
-            this.children.push(child);
-        }
-
-        // Call function fn, which may take a done function and may possibly execute
-        // asynchronously, calling done when finished. Returns true or false depending
-        // on whether the function was asynchronous or not.
-        public call(fn: (done?: IDone) => void , done: IDone) {
-            var isAsync = true;
-
-            try {
-                if (fn.length === 0) {
-                    // No async.
-                    fn();
-                    done();
-
-                    return false;
-                } else {
-                    // Possibly async
-
-                    Runnable.pushGlobalErrorHandler(done);
-
-                    fn(function () {
-                        isAsync = false; // If we execute synchronously, this will get called before the return below.
-                        Runnable.popGlobalErrorHandler();
-                        done();
-                    });
-
-                    return isAsync;
-                }
-
-            } catch (e) {
-                done(e);
-
-                return false;
-            }
-        }
-
-        public run(done: IDone) { };
-
-        public runBlock(done: IDone) {
-            return this.call(this.block, done);
-        }
-
-        public runChild(index: number, done: IDone) {
-            return this.call(<any>((done) => this.children[index].run(done)), done);
-        }
-
-        static errorHandlerStack: { (e: Error): void; }[] = [];
-
-        static pushGlobalErrorHandler(done: IDone) {
-            errorHandlerStack.push(function (e) {
-                done(e);
-            });
-        }
-
-        static popGlobalErrorHandler() {
-            errorHandlerStack.pop();
-        }
-
-        static handleError(e: Error) {
-            if (errorHandlerStack.length === 0) {
-                IO.printLine('Global error: ' + e);
-            } else {
-                errorHandlerStack[errorHandlerStack.length - 1](e);
-            }
-        }
-    }
-
-    export class TestCase extends Runnable {
-        public description: string;
-        public block;
-
-        constructor (description: string, block: any) {
-            super(description, block);
-            this.description = description;
-            this.block = block;
-        }
-
-        public addChild(child: Runnable): void {
-            throw new Error("Testcases may not be nested inside other testcases");
-        }
-
-        // Run the test case block and fail the test if it raised an error.
-        // If no error is raised, the test passes.
-        public run(done: IDone) {
-            var that = this;
-
-            Runnable.currentStack.push(this);
-
-            emitLog('testStart', { desc: this.description });
-
-            if (this.block) {
-                var async = this.runBlock(<any>function (e) {
-                    if (e) {
-                        that.passed = false;
-                        that.error = e;
-                        emitLog('error', { desc: this.description, pass: false }, e);
-                    } else {
-                        that.passed = true;
-
-                        emitLog('pass', { desc: this.description, pass: true });
-                    }
-
-                    Runnable.currentStack.pop();
-
-                    done()
-                });
-            }
-
-        }
-    }
-
-    export class Scenario extends Runnable {
-        public description: string;
-        public block;
-
-        constructor (description: string, block: any) {
-            super(description, block);
-            this.description = description;
-            this.block = block;
-        }
-
-        // Run the block, and if the block doesn't raise an error, run the children.
-        public run(done: IDone) {
-            var that = this;
-
-            Runnable.currentStack.push(this);
-
-            emitLog('scenarioStart', { desc: this.description });
-
-            var async = this.runBlock(<any>function (e) {
-                Runnable.currentStack.pop();
-                if (e) {
-                    that.passed = false;
-                    that.error = e;
-                    emitLog('scenarioEnd', { desc: this.description, pass: false }, e);
-                    done();
-                } else {
-                    that.passed = true; // so far so good.
-                    that.runChildren(done);
-                }
-            });
-        }
-
-        // Run the children of the scenario (other scenarios and test cases). If any fail,
-        // set this scenario to failed. Synchronous tests will run synchronously without
-        // adding stack frames.
-        public runChildren(done: IDone, index = 0) {
-            var that = this;
-            var async = false;
-
-            for (; index < this.children.length; index++) {
-                async = this.runChild(index, <any>function (e) {
-                    that.passed = that.passed && that.children[index].passed;
-
-                    if (async)
-                        that.runChildren(done, index + 1);
-                });
-
-                if (async)
-                    return;
-            }
-
-            emitLog('scenarioEnd', { desc: this.description, pass: this.passed });
-
-            done();
-        }
-    }
-
-    export class Run extends Runnable {
-        constructor () {
-            super('Test Run', null);
-        }
-
-        public run() {
-            emitLog('start');
-            this.runChildren();
-        }
-
-        public runChildren(index = 0) {
-            var async = false;
-            var that = this;
-
-            for (; index < this.children.length; index++) {
-                async = this.runChild(index, <any>function (e) {
-                    if (async)
-                        that.runChildren(index + 1);
-                });
-
-                if (async)
-                    return;
-            }
-
-            Perf.runBenchmarks();
-            emitLog('end');
-        }
-    }
-
-    // Logger-related functions
-    var loggers: ILogger[] = [];
-
-    export function registerLogger(logger: ILogger) {
-        loggers.push(logger);
-    }
-
-    function emitLog(field: string, ... params: any[]) {
-        for (var i = 0; i < loggers.length; i++) {
-            if (typeof loggers[i][field] === 'function') {
-                loggers[i][field].apply(loggers[i], params);
-            }
-        }
-    }
-
-
     // Describe/it definitions
-    export function describe(description: string, block: () => any, flags?: { }) {
+    export function describe(description: string, block: () => any) {
         var newScenario = new Scenario(description, block);
 
         if (Runnable.currentStack.length === 0) {
@@ -1224,7 +1317,6 @@ module Harness {
 
         Runnable.currentStack[Runnable.currentStack.length - 1].addChild(newScenario);
     }
-
     export function it(description: string, block: () => void ) {
         var testCase = new TestCase(description, block);
         Runnable.currentStack[Runnable.currentStack.length - 1].addChild(testCase);
@@ -1239,105 +1331,10 @@ module Harness {
         currentRun.run();
     }
 
-    export var setCollateralRoot = CollateralReader.setRoot;
-
-    export module Assert {
-        export function is(result: bool, msg?: string) {
-            if (!result)
-                throw new Error(msg ? msg : "Expected true, got false.");
-        }
-
-        export function arrayLengthIs(arr: any[], length: number) {
-            if (arr.length != length) {
-                var actual = '';
-                arr.forEach(n => actual = actual + '\n      ' + n.toString());
-                throw new Error('Expected array to have ' + length + ' elements. Actual elements were:' + actual);
-            }
-        }
-
-        export function equal(left, right) {
-            if (left !== right) {
-                throw new Error("Expected " + left + " to equal " + right);
-            }
-        }
-
-        export function notEqual(left, right) {
-            if (left === right) {
-                throw new Error("Expected " + left + " to *not* equal " + right);
-            }
-        }
-
-        export function notNull(result) {
-            if (result === null) {
-                throw new Error("Expected " + result + " to *not* be null");
-            }
-        }
-
-        export function compilerWarning(result: Compiler.CompilerResult, line: number, column: number, desc: string) {
-            if (!result.isErrorAt(line, column, desc)) {
-                var actual = '';
-                result.errors.forEach(err => {
-                    actual = actual + '\n     ' + err.toString();
-                });
-                throw new Error("Expected compiler warning at (" + line + ", " + column + "): " + desc + "\nActual errors follow: " + actual);
-            }
-        }
-
-        export function noDiff(text1, text2) {
-            text1 = text1.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n");
-            text2 = text2.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n");
-
-            if (text1 !== text2) {
-                var errorString = "";
-                var text1Lines = text1.split(/\n/);
-                var text2Lines = text2.split(/\n/);
-                for (var i = 0; i < text1Lines.length; i++) {
-                    if (text1Lines[i] !== text2Lines[i]) {
-                        errorString += "Difference at line " + (i + 1) + ":\n";
-                        errorString += "                  Left File: " + text1Lines[i] + "\n";
-                        errorString += "                 Right File: " + text2Lines[i] + "\n\n";
-                    }
-                }
-                throw new Error(errorString);
-            }
-        }
-
-        export function arrayContains(arr, contains) {
-            var found;
-
-            for (var i = 0; i < contains.length; i++) {
-                found = false;
-
-                for (var j = 0; j < arr.length; j++) {
-                    if (arr[j] === contains[i]) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found)
-                    throw new Error("Expected array to contain \"" + contains[i] + "\"");
-            }
-        }
-
-        export function arrayContainsOnce(arr: any[], filter: (item: any) =>bool) {
-            var foundCount = 0;
-
-            for (var i = 0; i < arr.length; i++) {
-                if (filter(arr[i])) {
-                    foundCount++;
-                }
-            }
-
-            if (foundCount !== 1)
-                throw new Error("Expected array to match element only once (instead of " + foundCount + " time(s))");
-        }
-    }
-
     // Runs TypeScript or Javascript code.
     export module Runner {
         export function runCollateral(path: string, callback: (error: Error, result: any) => void ) {
-            runString(CollateralReader.read(path), path.match(/[^\\]*$/)[0], callback);
+            runString(Helper.readFile(path), path.match(/[^\\]*$/)[0], callback);
         }
 
         export function runJSString(code: string, callback: (error: Error, result: any) => void ) {

@@ -22,11 +22,11 @@ module DumpAST {
     }
 
     function getOutputPath() {
-        return Harness.userSpecifiedroot + Harness.CollateralReader.root + 'services/dumpAST/baselines';
+        return Harness.userSpecifiedroot + 'tests/services/dumpAST/baselines';
     }
 
     function getInputPath() {
-        return Harness.userSpecifiedroot + Harness.CollateralReader.root + 'services/testCode';
+        return Harness.userSpecifiedroot + 'tests/services/testCode';
     }
 
     function getExistingTestCodeFileNames(): string[] {

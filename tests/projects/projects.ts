@@ -275,8 +275,8 @@ describe("Compiling a project", function (done) {
 
             if (spec.baselineCheck) {
                 it("checks baseline", function () {
-                    assert.noDiff(Harness.CollateralReader.read(spec.path + spec.outputFiles[0] + ""),
-                         Harness.CollateralReader.read(spec.path + spec.baselineFiles[0] + ".node"));
+                    assert.noDiff(Harness.Helper.readFile(spec.path + spec.outputFiles[0] + ""),
+                         Harness.Helper.readFile(spec.path + spec.baselineFiles[0] + ".node"));
                 });
             }
         });
@@ -321,8 +321,8 @@ describe("Compiling a project", function (done) {
 
             if (spec.baselineCheck) {
                 it("checks baseline", function () {
-                    assert.noDiff(Harness.CollateralReader.read(spec.path + spec.outputFiles[0] + ""),
-                         Harness.CollateralReader.read(spec.path + spec.baselineFiles[0] + ".amd"));
+                    assert.noDiff(Harness.Helper.readFile(spec.path + spec.outputFiles[0] + ""),
+                         Harness.Helper.readFile(spec.path + spec.baselineFiles[0] + ".amd"));
                 });
             }
         });

@@ -2,7 +2,7 @@
 ///<reference path='..\..\src\harness\harness.ts' />
 
 describe('getMemberCompletionList', function () {
-    var code: string = Harness.CollateralReader.read('ls/testCode/memberlist.ts');
+    var code: string = Harness.Helper.readFile('ls/testCode/memberlist.ts');
     var script: TypeScript.Script = null;
     var ls: TypeScript.TypeScriptCompiler = null;
 
