@@ -1305,7 +1305,7 @@ module TypeScript {
             var leftType = binex.operand1.type;
             var rightType = binex.operand2.type;
 
-            if (assignment && (!this.astIsWriteable(binex))) {
+            if (assignment && (!this.astIsWriteable(binex.operand1))) {
                 this.checker.errorReporter.valueCannotBeModified(binex);
             }
 
@@ -1369,6 +1369,7 @@ module TypeScript {
                                                             binex.printLabel(), this.scope);
                 }
             }
+
             return binex;
         }
 

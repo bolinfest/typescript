@@ -36,7 +36,7 @@ else if (typeof require === "function") {
 
     require.main.filename = typescriptServiceFileName;
     require.main.paths = _module._nodeModulePaths(_path.dirname(_fs.realpathSync(typescriptServiceFileName)));
-    require.main._compile(typescriptServiceFile, typescriptServiceFileName)
+    require.main._compile(typescriptServiceFile, typescriptServiceFileName);
 }
 
 declare module process {

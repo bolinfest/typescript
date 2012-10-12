@@ -18,9 +18,6 @@ module TypeScript {
             for (var i = 0; i < len; i++) {
                 var baseExpr = bases.members[i];
                 var name = baseExpr;
-                if (name.nodeType == NodeType.Call) {
-                    name = (<CallExpression>name).target;
-                }
                 var typeLink = new TypeLink();
                 typeLink.ast = name;
                 baseTypeLinks[baseTypeLinks.length] = typeLink;

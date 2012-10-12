@@ -1,0 +1,15 @@
+0.ts line 3 col 0: The left-hand side of an assignment expression must be a variable, property or indexer
+0.ts line 4 col 0: The left-hand side of an assignment expression must be a variable, property or indexer
+0.ts line 4 col 0: Operator '+=' cannot be applied to types 'new() => f' and 'number'
+0.ts line 5 col 0: The left-hand side of an assignment expression must be a variable, property or indexer
+0.ts line 5 col 0: Operator '-=' cannot be applied to types 'new() => f' and 'number'
+0.ts line 6 col 0: The left-hand side of an assignment expression must be a variable, property or indexer
+0.ts line 6 col 0: Operator '*=' cannot be applied to types 'new() => f' and 'number'
+0.ts line 7 col 0: The left-hand side of an assignment expression must be a variable, property or indexer
+0.ts line 7 col 0: Operator '/=' cannot be applied to types 'new() => f' and 'number'
+0.ts line 8 col 0: The left-hand side of an assignment expression must be a variable, property or indexer
+0.ts line 8 col 0: Operator '%=' cannot be applied to types 'new() => f' and 'number'
+0.ts line 9 col 0: The left-hand side of an assignment expression must be a variable, property or indexer
+0.ts line 9 col 0: Operator '&=' cannot be applied to types 'new() => f' and 'number'
+0.ts line 10 col 0: The left-hand side of an assignment expression must be a variable, property or indexer
+0.ts line 10 col 0: Operator '|=' cannot be applied to types 'new() => f' and 'number'

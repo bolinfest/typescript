@@ -1442,12 +1442,9 @@ module TypeScript {
                     if (isClass) {
                         this.reportParseError("Base classes may only be initialized via a 'super' call within the constructor body");
                     }
-                    var baseArgs = this.parseArgList(errorRecoverySet | ErrorRecoverySet.RParen);
-                    var callNode = new CallExpression(NodeType.Call, baseName, baseArgs);
-                    // advance past RParen
-                    this.tok = this.scanner.scan();
-                    callNode.limChar = this.scanner.pos;
-                    currentList.append(callNode);
+                    else {
+                        this.reportParseError("Interfaces may not be extended with a call expression");
+                    }
                 }
                 else {
                     currentList.append(baseName);
