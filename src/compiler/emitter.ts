@@ -37,7 +37,7 @@ module TypeScript {
         propagateConstants: bool;
         emitComments: bool;
         path: string;
-        createFile: (path: string) =>ITextWriter;
+        createFile: (path: string, useUTF8?: bool) =>ITextWriter;
         outputMany: bool;
     }
 
@@ -82,6 +82,7 @@ module TypeScript {
         public allSourceMappers: SourceMapper[] = [];
         public sourceMapper: SourceMapper = null;
         public captureThisStmtString = "var _this = this;";
+        private varListCount: number = 0; 
 
         constructor (public checker: TypeChecker, public outfile: ITextWriter, public emitOptions: IEmitOptions) { 
         }
@@ -117,6 +118,10 @@ module TypeScript {
                 this.emitState.column = 0
                 this.emitState.line++;
             }
+        }
+
+        public setInVarBlock(count: number) {
+            this.varListCount = count;
         }
 
         public setInObjectLiteral(val: bool): bool {
@@ -250,7 +255,7 @@ module TypeScript {
                             var numLit = <NumberLiteral>boundDecl.init;
                             this.writeToOutput(numLit.value.toString());
                             var comment = " /* ";
-                            comment += propertyName.text;
+                            comment += propertyName.actualText;
                             comment += " */ ";
                             this.writeToOutput(comment);
                             return true;
@@ -338,7 +343,7 @@ module TypeScript {
                     if (baseExpr.type && (baseExpr.type.isClassInstance())) {
                         // parameterless constructor call;
                         this.emitIndent();
-                        this.writeToOutput(classDecl.name.text + "._super.constructor");
+                        this.writeToOutput(classDecl.name.actualText + "._super.constructor");
                         //emitJavascript(baseExpr,TokenID.LParen,false);
                         this.writeToOutput(".call(this)");
                     }
@@ -411,9 +416,9 @@ module TypeScript {
                 var arg = defaultArgs[i];
                 this.emitIndent();
                 this.recordSourceMappingStart(arg);
-                this.writeToOutput("if (typeof " + arg.id.text + " === \"undefined\") { ");//
+                this.writeToOutput("if (typeof " + arg.id.actualText + " === \"undefined\") { ");//
                 this.recordSourceMappingStart(arg.id);
-                this.writeToOutput(arg.id.text);
+                this.writeToOutput(arg.id.actualText);
                 this.recordSourceMappingEnd(arg.id);
                 this.writeToOutput(" = ");
                 this.emitJavascript(arg.init, TokenID.LParen, false);
@@ -435,11 +440,11 @@ module TypeScript {
                             this.emitIndent();
                             this.recordSourceMappingStart(arg);
                             this.recordSourceMappingStart(arg.id);
-                            this.writeToOutput("this." + arg.id.text);
+                            this.writeToOutput("this." + arg.id.actualText);
                             this.recordSourceMappingEnd(arg.id);
                             this.writeToOutput(" = ");
                             this.recordSourceMappingStart(arg.id);
-                            this.writeToOutput(arg.id.text);
+                            this.writeToOutput(arg.id.actualText);
                             this.recordSourceMappingEnd(arg.id);
                             this.writeLineToOutput(";");
                             this.recordSourceMappingEnd(arg);
@@ -463,7 +468,7 @@ module TypeScript {
                 this.recordSourceMappingStart(lastArg);
                 this.writeToOutput("var ");
                 this.recordSourceMappingStart(lastArg.id);
-                this.writeToOutput(lastArg.id.text);
+                this.writeToOutput(lastArg.id.actualText);
                 this.recordSourceMappingEnd(lastArg.id);
                 this.writeLineToOutput(" = [];");
                 this.recordSourceMappingEnd(lastArg);
@@ -472,7 +477,8 @@ module TypeScript {
                                   "); _i++) {");
                 this.indenter.increaseIndent();
                 this.emitIndent();
-                this.writeLineToOutput(lastArg.id.text + "[_i] = arguments[_i + " + (argsLen - 1) + "];");
+
+                this.writeLineToOutput(lastArg.id.actualText + "[_i] = arguments[_i + " + (argsLen - 1) + "];");
                 this.indenter.decreaseIndent();
                 this.emitIndent();
                 this.writeLineToOutput("}");
@@ -528,10 +534,10 @@ module TypeScript {
                     }
                     this.emitIndent();
                     if (innerFunc.isAccessor()) {
-                        this.emitPropertyAccessor(innerFunc, funcDecl.name.text, false);
+                        this.emitPropertyAccessor(innerFunc, funcDecl.name.actualText, false);
                     }
                     else {
-                        this.writeToOutput(funcName + "." + innerFunc.name.text + " = ");
+                        this.writeToOutput(funcName + "." + innerFunc.name.actualText + " = ");
                         this.emitInnerFunction(innerFunc, (innerFunc.name && !innerFunc.name.isMissing()), false,
                                          null, innerFunc.hasSelfReference(), null);
                     }
@@ -553,7 +559,7 @@ module TypeScript {
                 this.indenter.decreaseIndent();
                 this.emitIndent();
                 var printProto = isProtoMember && this.thisClassNode;
-                var prefix = printProto ? this.thisClassNode.name.text + ".prototype." : "";
+                var prefix = printProto ? this.thisClassNode.name.actualText + ".prototype." : "";
                 this.writeLineToOutput("})(" + prefix + funcName + ");")
             }
             this.recordSourceMappingEnd(funcDecl);
@@ -565,12 +571,12 @@ module TypeScript {
         }
 
         public emitJavascriptModule(moduleDecl: ModuleDecl) {
-            var modName = moduleDecl.name.text;
+            var modName = moduleDecl.name.actualText;
             if (isTSFile(modName)) {
-                moduleDecl.name.text = modName.substring(0, modName.length - 3);
+                moduleDecl.name.setText(modName.substring(0, modName.length - 3));
             }
             else if (isSTRFile(modName)) {
-                moduleDecl.name.text = modName.substring(0, modName.length - 4);
+                moduleDecl.name.setText(modName.substring(0, modName.length - 4));
             }
 
             if (!hasFlag(moduleDecl.modFlags, ModuleFlags.Ambient)) {
@@ -581,17 +587,18 @@ module TypeScript {
                 var isExported = hasFlag(moduleDecl.modFlags, ModuleFlags.Exported);
                 this.moduleDeclList[this.moduleDeclList.length] = moduleDecl;
 
-                this.moduleName = moduleDecl.name.text;
+                this.moduleName = moduleDecl.name.actualText;
 
                 this.recordSourceMappingStart(moduleDecl);
                 // prologue
                 if (isDynamicMod) {
                     // create the new outfile for this module
-                    var modFilePath = stripQuotes(trimModName(moduleDecl.name.text)) + ".js";
+                    var modFilePath = stripQuotes(trimModName(moduleDecl.name.actualText)) + ".js";
 
                     if (this.emitOptions.createFile) {
                         if (modFilePath != this.emitOptions.path) {
-                            this.outfile = this.emitOptions.createFile(modFilePath);
+                            var useUTF8InOutputfile = moduleDecl.containsUnicodeChar || (this.emitOptions.emitComments && moduleDecl.containsUnicodeCharInComment);
+                            this.outfile = this.emitOptions.createFile(modFilePath, useUTF8InOutputfile);
                         } else if (!this.emitOptions.outputMany) {
                             // If we are emitting single file then its path cannot collide with module output
                             this.checker.errorReporter.emitterError(moduleDecl, "Module emit collides with emitted script: " + modFilePath);
@@ -617,7 +624,7 @@ module TypeScript {
                                     importList += ", ";
                                 }
 
-                                importList += "__" + importStatement.id.text + "__";
+                                importList += "__" + importStatement.id.actualText + "__";
                                 dependencyList += importStatement.firstAliasedModToString();
                             }
                         }
@@ -768,12 +775,12 @@ module TypeScript {
                 if (hasFlag(funcDecl.fncFlags, FncFlags.Static)) {
                     if (this.thisClassNode) {
                         if (funcDecl.isAccessor()) {
-                            this.emitPropertyAccessor(funcDecl, this.thisClassNode.name.text, false);
+                            this.emitPropertyAccessor(funcDecl, this.thisClassNode.name.actualText, false);
                         }
                         else {
                             this.emitIndent();
                             this.recordSourceMappingStart(funcDecl);
-                            this.writeLineToOutput(this.thisClassNode.name.text + "." + funcName +
+                            this.writeLineToOutput(this.thisClassNode.name.actualText + "." + funcName +
                                           " = " + funcName + ";");
                             this.recordSourceMappingEnd(funcDecl);
                         }
@@ -795,7 +802,7 @@ module TypeScript {
                 this.emitParensAndCommentsInPlace(varDecl, true);
                 this.recordSourceMappingStart(varDecl);
                 this.recordSourceMappingStart(varDecl.id);
-                this.writeToOutput(varDecl.id.text);
+                this.writeToOutput(varDecl.id.actualText);
                 this.recordSourceMappingEnd(varDecl.id);
                 this.writeToOutput(" = ");
                 this.emitJavascript(varDecl.init, TokenID.Comma, false);
@@ -805,24 +812,30 @@ module TypeScript {
             }
         }
 
-        public emitForVarList(varDeclList: ASTList) {
-            if (varDeclList) {
-                this.recordSourceMappingStart(varDeclList);
-                var len = varDeclList.members.length;
-                for (var i = 0; i < len; i++) {
-                    var varDecl = <VarDecl>varDeclList.members[i];
-                    this.emitJavascriptVarDecl(varDecl, (i == 0) ? TokenID.FOR : TokenID.LParen);
-                    if (i < (len - 1)) {
-                        this.writeToOutput(", ");
-                    }
-                }
-                this.recordSourceMappingEnd(varDeclList);
+        // Emits "var " if it is allowed
+        private emitVarDeclVar() {
+            // If it is var list of form var a, b, c = emit it only if count > 0 - which will be when emitting first var
+            // If it is var list of form  var a = varList count will be 0
+            if (this.varListCount >= 0) {
+                this.writeToOutput("var ");
+                this.varListCount = -this.varListCount;
+            }
+            return true;
+        }
+
+        private onEmitVar() {
+            if (this.varListCount > 0) {
+                this.varListCount--;
+            }
+            else if (this.varListCount < 0) {
+                this.varListCount++;
             }
         }
 
         public emitJavascriptVarDecl(varDecl: VarDecl, tokenId: TokenID) {
             if ((varDecl.varFlags & VarFlags.Ambient) == VarFlags.Ambient) {
                 this.emitAmbientVarDecl(varDecl);
+                this.onEmitVar();
             }
             else {
                 var sym = varDecl.sym;
@@ -846,7 +859,7 @@ module TypeScript {
                     else if (type.hasImplementation()) {
                         // module
                         if (!hasFlag(sym.flags, SymbolFlags.Exported) && (sym.container == this.checker.gloMod || !hasFlag(sym.flags, SymbolFlags.Property))) {
-                            this.writeToOutput("var ");
+                            this.emitVarDeclVar();
                         }
                         else if (hasFlag(varDecl.varFlags, VarFlags.LocalStatic)) {
                             this.writeToOutput(".");
@@ -867,18 +880,18 @@ module TypeScript {
                                 this.writeToOutput("this.");
                             }
                             else {
-                                this.writeToOutput("var ");
+                                this.emitVarDeclVar();
                             }
                         }
                     }
                 }
                 else {
                     if (tokenId != TokenID.LParen) {
-                        this.writeToOutput("var ");
+                        this.emitVarDeclVar();
                     }
                 }
                 this.recordSourceMappingStart(varDecl.id);
-                this.writeToOutput(varDecl.id.text);
+                this.writeToOutput(varDecl.id.actualText);
                 this.recordSourceMappingEnd(varDecl.id);
                 if (hasInitializer) {
                     this.writeToOutputTrimmable(" = ");
@@ -889,8 +902,13 @@ module TypeScript {
                     this.writeToOutputTrimmable(" = ");
                     this.writeToOutput(this.defaultValue(varDecl.type));
                 }
-                if ((tokenId != TokenID.FOR) && (tokenId != TokenID.LParen)) {
-                    this.writeToOutputTrimmable(";");
+                this.onEmitVar();
+                if ((tokenId != TokenID.LParen)) {
+                    if (this.varListCount < 0) {
+                        this.writeToOutput(", ");
+                    } else if (tokenId != TokenID.FOR) {
+                        this.writeToOutputTrimmable(";");
+                    }
                 }
                 this.recordSourceMappingEnd(varDecl);
                 this.emitParensAndCommentsInPlace(varDecl, false);
@@ -992,7 +1010,7 @@ module TypeScript {
                         this.writeLineToOutput("__" + this.modAliasId + "__;");
                     }
                     else {
-                        var modPath = name.text;//(<ModuleDecl>moduleDecl.mod.symbol.declAST).name.text;
+                        var modPath = name.actualText;//(<ModuleDecl>moduleDecl.mod.symbol.declAST).name.actualText;
                         var isAmbient = moduleDecl.mod.symbol.declAST && hasFlag((<ModuleDecl>moduleDecl.mod.symbol.declAST).modFlags, ModuleFlags.Ambient);
                         modPath = isAmbient ? modPath : this.firstModAlias ? this.firstModAlias : quoteBaseName(modPath);
                         modPath = isAmbient ? modPath : (!isRelative(stripQuotes(modPath)) ? quoteStr("./" + stripQuotes(modPath)) : modPath);
@@ -1000,7 +1018,7 @@ module TypeScript {
                     }
                 }
                 else {
-                    this.writeToOutput(name.text);
+                    this.writeToOutput(name.actualText);
                 }
             }
             this.recordSourceMappingEnd(name);
@@ -1146,11 +1164,11 @@ module TypeScript {
                                     this.emitIndent();
                                     this.recordSourceMappingStart(arg);
                                     this.recordSourceMappingStart(arg.id);
-                                    this.writeToOutput("this." + arg.id.text);
+                                    this.writeToOutput("this." + arg.id.actualText);
                                     this.recordSourceMappingEnd(arg.id);
                                     this.writeToOutput(" = ");
                                     this.recordSourceMappingStart(arg.id);
-                                    this.writeToOutput(arg.id.text);
+                                    this.writeToOutput(arg.id.actualText);
                                     this.recordSourceMappingEnd(arg.id);
                                     this.writeLineToOutput(";");
                                     this.recordSourceMappingEnd(arg);
@@ -1196,7 +1214,8 @@ module TypeScript {
                              (emitNode.nodeType != NodeType.Interface) &&
                              (!((emitNode.nodeType == NodeType.VarDecl) &&
                                 ((((<VarDecl>emitNode).varFlags) & VarFlags.Ambient) == VarFlags.Ambient) &&
-                                (((<VarDecl>emitNode).init) == null))) &&
+                                (((<VarDecl>emitNode).init) == null)) && this.varListCount >= 0) &&
+                             (emitNode.nodeType != NodeType.Block || (<Block>emitNode).isStatementBlock) &&
                              (emitNode.nodeType != NodeType.EndCode) &&
                              (emitNode.nodeType != NodeType.FuncDecl)) {
                         this.writeLineToOutput("");
@@ -1219,7 +1238,7 @@ module TypeScript {
                 if ((ast.nodeType != NodeType.Interface) &&
                     (!((ast.nodeType == NodeType.VarDecl) &&
                        ((((<VarDecl>ast).varFlags) & VarFlags.Ambient) == VarFlags.Ambient) &&
-                       (((<VarDecl>ast).init) == null))) &&
+                       (((<VarDecl>ast).init) == null)) && this.varListCount >= 0) &&
                     (ast.nodeType != NodeType.EndCode) &&
                     ((ast.nodeType != NodeType.FuncDecl) ||
                      (this.emitState.container != EmitContainer.Constructor))) {
@@ -1247,7 +1266,7 @@ module TypeScript {
                 var accessorSymbol = <FieldSymbol>funcDecl.accessorSymbol;
                 this.emitIndent();
                 this.recordSourceMappingStart(funcDecl);
-                this.writeLineToOutput("Object.defineProperty(" + className + (isProto ? ".prototype, \"" : ", \"") + funcDecl.name.text + "\"" + ", {");
+                this.writeLineToOutput("Object.defineProperty(" + className + (isProto ? ".prototype, \"" : ", \"") + funcDecl.name.actualText + "\"" + ", {");
                 this.indenter.increaseIndent();
 
                 if (accessorSymbol.getter) {
@@ -1303,7 +1322,7 @@ module TypeScript {
                     this.emitIndent();
                     this.recordSourceMappingStart(varDecl);
                     this.recordSourceMappingStart(varDecl.id);
-                    this.writeToOutput(className + ".prototype." + varDecl.id.text);
+                    this.writeToOutput(className + ".prototype." + varDecl.id.actualText);
                     this.recordSourceMappingEnd(varDecl.id);
                     this.writeToOutput(" = ");
                     this.emitJavascript(varDecl.init, TokenID.Asg, false);
@@ -1342,7 +1361,7 @@ module TypeScript {
                 var svClassNode = this.thisClassNode;
                 var i = 0;
                 this.thisClassNode = classDecl;
-                var className = classDecl.name.text;
+                var className = classDecl.name.actualText;
                 this.emitParensAndCommentsInPlace(classDecl, true);
                 var temp = this.setContainer(EmitContainer.Class);
 
@@ -1404,7 +1423,7 @@ module TypeScript {
                     this.recordSourceMappingStart(classDecl);
                     // default constructor
                     this.indenter.increaseIndent();
-                    this.writeToOutput("function " + classDecl.name.text + "() {");
+                    this.writeToOutput("function " + classDecl.name.actualText + "() {");
                     if (baseClass) {
                         this.writeLineToOutput("");
                         this.emitIndent();
@@ -1458,12 +1477,12 @@ module TypeScript {
                             }
                             else { // static functions
                                 if (fn.isAccessor()) {
-                                    this.emitPropertyAccessor(fn, this.thisClassNode.name.text, false);
+                                    this.emitPropertyAccessor(fn, this.thisClassNode.name.actualText, false);
                                 }
                                 else {
                                     this.emitIndent();
                                     this.recordSourceMappingStart(fn)
-                                    this.writeToOutput(classDecl.name.text + "." + fn.name.text + " = ");
+                                    this.writeToOutput(classDecl.name.actualText + "." + fn.name.actualText + " = ");
                                     this.emitInnerFunction(fn, (fn.name && !fn.name.isMissing()), false,
                                             null, fn.hasSelfReference(), null);
                                     this.recordSourceMappingEnd(fn)
@@ -1476,7 +1495,7 @@ module TypeScript {
                         if (hasFlag(varDecl.varFlags, VarFlags.Static)) {
                             this.emitIndent();
                             this.recordSourceMappingStart(varDecl);
-                            this.writeToOutput(classDecl.name.text + "." + varDecl.id.text + " = ");
+                            this.writeToOutput(classDecl.name.actualText + "." + varDecl.id.actualText + " = ");
                             if (varDecl.init) {
                                 this.emitJavascript(varDecl.init, TokenID.Asg, false);
                                 this.writeLineToOutput(";");

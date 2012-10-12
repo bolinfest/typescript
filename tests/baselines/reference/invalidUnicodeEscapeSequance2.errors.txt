@@ -1,0 +1,4 @@
+// 0.ts  line 1 col 4: Invalid unicode escape sequence
+// 0.ts  line 1 col 4: Expected identifier in variable declaration
+// 0.ts  line 1 col 9: Expected ';'
+0.ts line 1 col 9: The name 'xxxx' does not exist in the current scope

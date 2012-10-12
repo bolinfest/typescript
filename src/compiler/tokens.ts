@@ -373,22 +373,27 @@ module TypeScript {
     }
 
     export class StringToken extends Token {
-        public tokenId: TokenID;
-        constructor (tokenId: TokenID, public value: string) {
-            super(tokenId);
-            this.tokenId = tokenId;
+        constructor (public value: string) {
+            super(TokenID.QString);
         }
         public getText(): string {
             return this.value;
         }
 
         public classification(): TokenClass {
-            if (this.tokenId == TokenID.ID) {
-                return TokenClass.Identifier;
-            }
-            else {
-                return TokenClass.Literal;
-            }
+            return TokenClass.Literal;
+        }
+    }
+
+    export class IdentifierToken extends Token {
+        constructor (public value: string, public hasEscapeSequence : bool) {
+            super(TokenID.ID);
+        }
+        public getText(): string {
+            return this.value;
+        }
+        public classification(): TokenClass {
+            return TokenClass.Identifier;
         }
     }
 

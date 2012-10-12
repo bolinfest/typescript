@@ -18,9 +18,6 @@ module TypeScript {
             for (var i = 0; i < len; i++) {
                 var baseExpr = bases.members[i];
                 var name = baseExpr;
-                if (name.nodeType == NodeType.Call) {
-                    name = (<CallExpression>name).target;
-                }
                 var typeLink = new TypeLink();
                 typeLink.ast = name;
                 baseTypeLinks[baseTypeLinks.length] = typeLink;
@@ -679,7 +676,7 @@ module TypeScript {
                     fgSym = context.checker.createFunctionSignature(funcDecl, containerSym, containerScope, fgSym, false).declAST.type.symbol;
                 }
                 else {
-                    context.checker.errorReporter.simpleError(funcDecl, "Function or method '" + funcDecl.name.text + "' already declared as a property");
+                    context.checker.errorReporter.simpleError(funcDecl, "Function or method '" + funcDecl.name.actualText + "' already declared as a property");
                 }
             }
          
@@ -730,7 +727,7 @@ module TypeScript {
             }
 
             if (fgSym && !(fgSym.kind() == SymbolKind.Type) && funcDecl.isMethod() && !funcDecl.isAccessor() && !funcDecl.isConstructor) {
-                context.checker.errorReporter.simpleError(funcDecl, "Function or method '" + funcDecl.name.text + "' already declared as a property");
+                context.checker.errorReporter.simpleError(funcDecl, "Function or method '" + funcDecl.name.actualText + "' already declared as a property");
                 fgSym.type = context.checker.anyType;
             }
             var sig = context.checker.createFunctionSignature(funcDecl, containerSym, containerScope, fgSym, !foundSymbol);
@@ -751,7 +748,7 @@ module TypeScript {
             }
             
             // Accessors are set to 'exported' above
-            if (fgSym && !fgSym.isAccessor() && fgSym.type.call) {
+            if (fgSym && !fgSym.isAccessor() && fgSym.kind() == SymbolKind.Type && fgSym.type.call) {
                 fgSym.flags |= SymbolFlags.Exported;
             }
         }

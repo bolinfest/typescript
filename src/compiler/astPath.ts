@@ -425,7 +425,7 @@ module TypeScript {
         public isSynthesizedBlock(): bool {
             return this.count() >= 1 &&
                 this.asts[this.top - 0].nodeType === TypeScript.NodeType.Block &&
-                (<TypeScript.Block>this.asts[this.top - 0]).visible === false;
+                (<TypeScript.Block>this.asts[this.top - 0]).isStatementBlock === false;
         }
     }
 

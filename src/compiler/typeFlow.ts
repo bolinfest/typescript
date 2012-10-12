@@ -458,7 +458,7 @@ module TypeScript {
             var top = this.entry.useDef.top;
             top.map((index) => {
                 var ast = <Identifier>useDefContext.uses[<number>index];
-                er.simpleError(ast, "use of variable '" + ast.text + "' that is not definitely assigned");
+                er.simpleError(ast, "use of variable '" + ast.actualText + "' that is not definitely assigned");
             });
         }
 
@@ -635,6 +635,7 @@ module TypeScript {
         public functionInterfaceType: Type = null;
         public numberInterfaceType: Type = null;
         public booleanInterfaceType: Type = null;
+        public iargumentsInterfaceType: Type = null;
 
         public currentScript: Script = null;
 
@@ -914,10 +915,6 @@ module TypeScript {
                     }
 
                     if (varDecl.init) {
-                        if (hasFlag(varDecl.varFlags, VarFlags.Ambient)) {
-                            this.checker.errorReporter.simpleError(varDecl, "Ambient variable can not have an initializer");
-                        }
-
                         // if the bound decl is a function-local static, we need to set the
                         // encapsulating scope to the function's member scope
                         var isLocalStatic = hasFlag(varDecl.varFlags, VarFlags.LocalStatic);
@@ -947,7 +944,7 @@ module TypeScript {
                                 preservedContainedScope = varDecl.init.type.containedScope;
                                 preserveScope = true;
                                 if (varDecl.init.type == this.voidType) {
-                                    this.checker.errorReporter.simpleError(varDecl, "Cannot assign type 'void' to variable '" + varDecl.id.text + "'");
+                                    this.checker.errorReporter.simpleError(varDecl, "Cannot assign type 'void' to variable '" + varDecl.id.actualText + "'");
                                 }
                             }
 
@@ -960,7 +957,7 @@ module TypeScript {
                         else {
                             varDecl.type = this.checker.widenType(varDecl.init.type);
                             if (varDecl.type == this.voidType) {
-                                this.checker.errorReporter.simpleError(varDecl, "Cannot assign type 'void' to variable '" + varDecl.id.text + "'");
+                                this.checker.errorReporter.simpleError(varDecl, "Cannot assign type 'void' to variable '" + varDecl.id.actualText + "'");
                                 varDecl.type = this.anyType;
                             }
                         }
@@ -1308,7 +1305,7 @@ module TypeScript {
             var leftType = binex.operand1.type;
             var rightType = binex.operand2.type;
 
-            if (assignment && (!this.astIsWriteable(binex))) {
+            if (assignment && (!this.astIsWriteable(binex.operand1))) {
                 this.checker.errorReporter.valueCannotBeModified(binex);
             }
 
@@ -1372,6 +1369,7 @@ module TypeScript {
                                                             binex.printLabel(), this.scope);
                 }
             }
+
             return binex;
         }
 
@@ -1466,10 +1464,10 @@ module TypeScript {
                     binex.type = this.anyType;
 
                     if (symbol == null) {
-                        this.checker.errorReporter.simpleError(propertyName, "The property '" + propertyName.text + "' does not exist on value of type '" + leftType.getScopedTypeName(this.scope) + "'");
+                        this.checker.errorReporter.simpleError(propertyName, "The property '" + propertyName.actualText + "' does not exist on value of type '" + leftType.getScopedTypeName(this.scope) + "'");
                     }
                     else if (!this.inTypeRefTypeCheck) {  // if it's a dotted type reference, we'll catch the visibility error during binding
-                        this.checker.errorReporter.simpleError(binex, "The property '" + propertyName.text + " on type '" + leftType.getScopedTypeName(this.scope) + "' is not visible");
+                        this.checker.errorReporter.simpleError(binex, "The property '" + propertyName.actualText + " on type '" + leftType.getScopedTypeName(this.scope) + "' is not visible");
                     }
                 }
                 else {
@@ -1716,8 +1714,21 @@ module TypeScript {
                     var theArgSym = new VariableSymbol("arguments", vars.minChar,
                                                      this.checker.locationInfo.unitIndex,
                                                      argLoc);
-                    argLoc.typeLink.ast = new Identifier("IArguments");
-                    this.checker.resolveTypeLink(scope, argLoc.typeLink, false);
+
+                    // if the user is using a custom lib.d.ts where IArguments has not been defined
+                    // (or they're compiling with the --nolib option), use 'any' as the argument type
+                    if (!this.iargumentsInterfaceType) {
+                        var argumentsSym = scope.find("IArguments", false, true);
+
+                        if (argumentsSym) {
+                            argumentsSym.flags |= SymbolFlags.CompilerGenerated;
+                            this.iargumentsInterfaceType = argumentsSym.getType();
+                        }
+                        else {
+                            this.iargumentsInterfaceType = this.anyType;
+                        }
+                    }
+                    argLoc.typeLink.type = this.iargumentsInterfaceType;
                     table.add("arguments", theArgSym);
                 }
             }
@@ -2462,7 +2473,7 @@ module TypeScript {
                 }
 
                 var bestCommonReturnType = funcDecl.returnStatementsWithExpressions[0].type;
-                bestCommonReturnType = this.checker.findBestCommonType(bestCommonReturnType, null, collection);
+                bestCommonReturnType = this.checker.findBestCommonType(bestCommonReturnType, null, collection, true);
 
                 if (bestCommonReturnType) {
                     signature.returnType.type = this.checker.widenType(bestCommonReturnType);
@@ -2640,7 +2651,7 @@ module TypeScript {
                         if (dup) {
                             if (checkUnique) {
                                 this.checker.errorReporter.simpleError(classDecl,
-                                                                  "duplicate member name in bases for " + classDecl.name.text + ": " + type.symbol.name + " and " + dup.container.name + " both contain member with name " + sym.name);
+                                                                  "duplicate member name in bases for " + classDecl.name.actualText + ": " + type.symbol.name + " and " + dup.container.name + " both contain member with name " + sym.name);
                             }
                         }
                         else {
@@ -2832,7 +2843,7 @@ module TypeScript {
             mod = <ModuleType>importDecl.alias.type;
 
             if (mod == null) {
-                this.checker.errorReporter.simpleError(importDecl.alias, "Could not resolve module alias '" + importDecl.id.text + "'");
+                this.checker.errorReporter.simpleError(importDecl.alias, "Could not resolve module alias '" + importDecl.id.actualText + "'");
                 mod = <ModuleType>this.checker.anyType;
                 (<TypeSymbol>importDecl.id.sym).type = mod;
             }
@@ -3172,7 +3183,7 @@ module TypeScript {
                     getTypeAtIndex: (index: number) => { return elements.members[index].type; }
                 }
 
-                elementType = this.checker.findBestCommonType(elementType, targetElementType, collection, comparisonInfo);
+                elementType = this.checker.findBestCommonType(elementType, targetElementType, collection, false, comparisonInfo);
 
                 // if the array type is the undefined type, we should widen it to any
                 // if it's of the null type, only widen it if it's not in a nested array element, so as not to 

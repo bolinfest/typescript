@@ -1801,7 +1801,7 @@ module Services {
                 switch (ast.nodeType) {
                     case TypeScript.NodeType.Interface: {
                         var typeDecl = <TypeScript.TypeDecl>ast;
-                        item = addItem(parent, typeDecl, typeDecl.name.text, ScriptElementKind.interfaceElement);
+                        item = addItem(parent, typeDecl, typeDecl.name.actualText, ScriptElementKind.interfaceElement);
                         context.containerASTs.push(ast);
                         context.containerSymbols.push(typeDecl.type.symbol);
                         context.containerKinds.push("interface");
@@ -1810,7 +1810,7 @@ module Services {
 
                     case TypeScript.NodeType.Class: {
                         var classDecl = <TypeScript.ClassDecl>ast;
-                        item = addItem(parent, classDecl, classDecl.name.text, ScriptElementKind.classElement);
+                        item = addItem(parent, classDecl, classDecl.name.actualText, ScriptElementKind.classElement);
                         context.containerASTs.push(ast);
                         context.containerSymbols.push(classDecl.type.symbol);
                         context.containerKinds.push("class");
@@ -1821,7 +1821,7 @@ module Services {
                         var moduleDecl = <TypeScript.ModuleDecl>ast;
                         var isEnum = moduleDecl.isEnum();
                         var kind = isEnum ? ScriptElementKind.enumElement : ScriptElementKind.moduleElement;
-                        item = addItem(parent, moduleDecl, moduleDecl.name.text, kind);
+                        item = addItem(parent, moduleDecl, moduleDecl.name.actualText, kind);
                         context.containerASTs.push(ast);
                         context.containerSymbols.push(moduleDecl.mod.symbol);
                         context.containerKinds.push(kind);
@@ -1832,10 +1832,10 @@ module Services {
                         var varDecl = <TypeScript.VarDecl>ast;
                         if (varDecl.id !== null) {
                             if (varDecl.isProperty()) {
-                                item = addItem(parent, varDecl, varDecl.id.text, ScriptElementKind.memberVariableElement);
+                                item = addItem(parent, varDecl, varDecl.id.actualText, ScriptElementKind.memberVariableElement);
                             }
                             else if (context.path.isChildOfScript() || context.path.isChildOfModule()) {
-                                item = addItem(parent, varDecl, varDecl.id.text, ScriptElementKind.variableElement);
+                                item = addItem(parent, varDecl, varDecl.id.actualText, ScriptElementKind.variableElement);
                             }
                         }
                     }
@@ -1848,7 +1848,7 @@ module Services {
                         if (argDecl.id !== null) {
                             if (context.path.isArgumentOfClassConstructor()) {
                                 if (argDecl.isProperty()) {
-                                    item = addItem(parent, argDecl, argDecl.id.text, ScriptElementKind.memberVariableElement);
+                                    item = addItem(parent, argDecl, argDecl.id.actualText, ScriptElementKind.memberVariableElement);
                                 }
                             }
                         }
@@ -1859,7 +1859,7 @@ module Services {
                     case TypeScript.NodeType.FuncDecl: {
                         var funcDecl = <TypeScript.FuncDecl>ast;
                         var kind: string = null;
-                        var name: string = (funcDecl.name !== null ? funcDecl.name.text : null);
+                        var name: string = (funcDecl.name !== null ? funcDecl.name.actualText : null);
                         if (funcDecl.isGetAccessor()) {
                             kind = ScriptElementKind.memberGetAccessorElement;
                         }

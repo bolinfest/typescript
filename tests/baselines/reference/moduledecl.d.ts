@@ -24,7 +24,10 @@ module m1 {
         static s1;
         static s2;
         public d(): string;
-        public e: { x: number; y: string; };
+        public e: {
+            x: number;
+            y: string;
+        };
         constructor (n, n2: number, n3, n4: string);
         public f: c.a;
     }
@@ -64,10 +67,10 @@ module m5 {
     var c;
 }
 module m43 {
-    var b: number;
+    var b;
 }
 module m55 {
-    var c: number;
+    var c;
 }
 module "m3" {
     var b: number;

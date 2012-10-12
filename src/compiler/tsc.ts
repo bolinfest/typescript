@@ -98,30 +98,24 @@ class BatchCompiler {
         if (this.compilationSettings.outputFileName) {
             this.compilationSettings.outputFileName = TypeScript.switchToForwardSlashes(this.ioHost.resolvePath(this.compilationSettings.outputFileName));
         }
-        var outfile: ITextWriter = this.compilationSettings.outputFileName ? this.ioHost.createFile(this.compilationSettings.outputFileName) : null;
         var compiler: TypeScript.TypeScriptCompiler;
-        // initialize to avoid definite assignment warning
-        var errout: ITextWriter = null;
 
-        if (this.compilationSettings.errorFileName) {
-            errout = this.ioHost.createFile(this.compilationSettings.errorFileName);
-            compiler = new TypeScript.TypeScriptCompiler(outfile, errout, new TypeScript.NullLogger(), this.compilationSettings);
-            compiler.setErrorOutput(errout);
-        } else {
-            compiler = new TypeScript.TypeScriptCompiler(outfile, outfile, new TypeScript.NullLogger(), this.compilationSettings);
-            compiler.setErrorOutput(this.ioHost.stderr);
-            compiler.setErrorCallback(
-                (minChar, charLen, message, unitIndex) => {
-                    compiler.errorReporter.hasErrors = true;
-                    var fname = this.resolvedEnvironment.code[unitIndex].path;
-                    var msg = fname + " (" + compiler.parser.scanner.line + "," + compiler.parser.scanner.col + "): " + message;
-                    if (this.compilationSettings.errorRecovery) {
-                        this.ioHost.stderr.WriteLine(msg);
-                    } else {
-                        throw new SyntaxError(msg);
-                    }
-                });
-        }
+        compiler = new TypeScript.TypeScriptCompiler(this.ioHost.stderr, new TypeScript.NullLogger(), this.compilationSettings);
+        compiler.setErrorOutput(this.ioHost.stderr);
+        compiler.setErrorCallback(
+            (minChar, charLen, message, unitIndex) => {
+                compiler.errorReporter.hasErrors = true;
+                var fname = this.resolvedEnvironment.code[unitIndex].path;
+                var lineCol = { line: -1, col: -1 };
+                compiler.parser.getSourceLineCol(lineCol, minChar);
+                // line is 1-base, col, however, is 0-base. add 1 to the col before printing the message
+                var msg = fname + " (" + lineCol.line + "," + (lineCol.col + 1) + "): " + message;
+                if (this.compilationSettings.errorRecovery) {
+                    this.ioHost.stderr.WriteLine(msg);
+                } else {
+                    throw new SyntaxError(msg);
+                }
+            });
 
         if (this.compilationSettings.emitComments) {
             compiler.emitCommentsToOutput();
@@ -147,7 +141,7 @@ class BatchCompiler {
                     }
                     else {
                         if (this.compilationSettings.errorRecovery) {
-                            compiler.parser.setErrorRecovery(outfile, -1, -1);
+                            compiler.parser.setErrorRecovery(this.ioHost.stderr, -1, -1);
                         }
                         compiler.addUnit(code.content, code.path, addAsResident, code.referencedFiles);
                     }
@@ -156,10 +150,7 @@ class BatchCompiler {
             catch (err) {
                 compiler.errorReporter.hasErrors = true;
                 // This includes syntax errors thrown from error callback if not in recovery mode
-                if (errout)
-                    errout.WriteLine(err.message)
-                else
-                    this.ioHost.stderr.WriteLine(err.message);
+                this.ioHost.stderr.WriteLine(err.message);
             }
 
         }
@@ -190,13 +181,8 @@ class BatchCompiler {
 
             compiler.emitDeclarationFile(this.ioHost.createFile);
         }
-
-        if (outfile) {
-            outfile.Close();
-        }
-
-        if (errout) {
-            errout.Close();
+        else { 
+            compiler.emitAST(this.compilationSettings.outputMany, this.ioHost.createFile);
         }
 
         if (compiler.errorReporter.hasErrors) {

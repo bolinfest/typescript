@@ -511,15 +511,6 @@ module TypeScript {
 
             var instanceType = groupType.instanceType;
 
-            if (instanceType && !isStatic) {
-                if (instanceType.call == null) {
-                    instanceType.call = groupType.call;
-                }
-                else if (groupType.call) {
-                    instanceType.call.signatures.concat(groupType.call.signatures);
-                }
-            }
-
             // Ensure that the function's symbol is properly configured
             // (If there were overloads, we'll already have a symbol, otherwise we need to create one)
             var funcName: string = null;
@@ -899,7 +890,7 @@ module TypeScript {
                     var identifier = <Identifier>lhs;
                     var symbol = scope.find(identifier.text, false, true);
                     if (symbol == null) {
-                        this.errorReporter.unresolvedSymbol(identifier, identifier.text);
+                        this.errorReporter.unresolvedSymbol(identifier, identifier.actualText);
                     }
                     else if (symbol.isType()) {
 
@@ -926,7 +917,7 @@ module TypeScript {
                             }
                         }
                         if (!symbol.visible(scope, this)) {
-                            this.errorReporter.simpleError(lhs, "The symbol '" + identifier.text + "' is not visible at this point");
+                            this.errorReporter.simpleError(lhs, "The symbol '" + identifier.actualText + "' is not visible at this point");
                         }
                         lhsType = symbol.getType();
 
@@ -953,7 +944,7 @@ module TypeScript {
                     }
                     else {
                         if (!resultType.symbol.visible(scope, this)) {
-                            this.errorReporter.simpleError(lhs, "The symbol '" + (<Identifier>rhs).text + "' is not visible at this point");
+                            this.errorReporter.simpleError(lhs, "The symbol '" + (<Identifier>rhs).actualText + "' is not visible at this point");
                         }
                     }
                     rhsIdentifier.sym = resultType.symbol;
@@ -1026,11 +1017,11 @@ module TypeScript {
                                 var symbol = scope.find(identifier.text, false, true);
                                 if (symbol == null) {
                                     typeLink.type = this.anyType;
-                                    this.errorReporter.unresolvedSymbol(identifier, identifier.text);
+                                    this.errorReporter.unresolvedSymbol(identifier, identifier.actualText);
                                 }
                                 else if (symbol.isType()) {
                                     if (!symbol.visible(scope, this)) {
-                                        this.errorReporter.simpleError(ast, "The symbol '" + identifier.text + "' is not visible at this point");
+                                        this.errorReporter.simpleError(ast, "The symbol '" + identifier.actualText + "' is not visible at this point");
                                     }
                                     identifier.sym = symbol;
                                     typeLink.type = symbol.getType();
@@ -1195,7 +1186,7 @@ module TypeScript {
                         setTypeAtIndex: (index: number, type: Type) => { }, // no contextual typing here, so no need to do anything
                         getTypeAtIndex: (index: number) => { return index ? Q.signature.returnType.type : best.signature.returnType.type; } // we only want the "second" type - the "first" is skipped
                     }
-                    var bct = this.findBestCommonType(best.signature.returnType.type, null, collection);
+                    var bct = this.findBestCommonType(best.signature.returnType.type, null, collection, false);
                     ambiguous = !bct;
                 }
                 else {
@@ -1482,14 +1473,14 @@ module TypeScript {
             return t == this.undefinedType || t == this.nullType;
         }
 
-        public findBestCommonType(initialType: Type, targetType: Type, collection: ITypeCollection, comparisonInfo?: TypeComparisonInfo) {
+        public findBestCommonType(initialType: Type, targetType: Type, collection: ITypeCollection, acceptVoid:bool, comparisonInfo?: TypeComparisonInfo) {
             var i = 0;
             var len = collection.getLength();
             var nlastChecked = 0;
             var bestCommonType = initialType;
 
             if (targetType) {
-                bestCommonType = bestCommonType ? bestCommonType.mergeOrdered(targetType, this) : targetType;
+                bestCommonType = bestCommonType ? bestCommonType.mergeOrdered(targetType, this, acceptVoid) : targetType;
             }
 
             // it's important that we set the convergence type here, and not in the loop,
@@ -1505,7 +1496,7 @@ module TypeScript {
                         continue;
                     }
 
-                    if (convergenceType && (bestCommonType = convergenceType.mergeOrdered(collection.getTypeAtIndex(i), this, comparisonInfo))) {
+                    if (convergenceType && (bestCommonType = convergenceType.mergeOrdered(collection.getTypeAtIndex(i), this, acceptVoid, comparisonInfo))) {
                         convergenceType = bestCommonType;
                     }
 
@@ -1528,7 +1519,7 @@ module TypeScript {
                 }
             }
 
-            return bestCommonType;
+            return acceptVoid ? bestCommonType : (bestCommonType == this.voidType ? null : bestCommonType);
         }
 
         // Type Identity
@@ -1542,6 +1533,10 @@ module TypeScript {
             }
 
             if (!t1 || !t2) {
+                return false;
+            }
+
+            if (t1.isClass() || t1.isClassInstance()) {
                 return false;
             }
 
@@ -1863,9 +1858,11 @@ module TypeScript {
                     nProp = source.memberScope.find(mPropKeys[iMProp], false, false);
 
                     // methods do not have the "arguments" field
-                    if (mProp.kind() == SymbolKind.Variable && (<VariableSymbol>mProp).variable.typeLink.ast &&
-                        (<VariableSymbol>mProp).variable.typeLink.ast.nodeType == NodeType.Name &&
-                        (<Identifier>(<VariableSymbol>mProp).variable.typeLink.ast).text == "IArguments") {
+                    if (mProp.name == "arguments" &&
+                        this.typeFlow.iargumentsInterfaceType &&
+                        (this.typeFlow.iargumentsInterfaceType.symbol.flags & SymbolFlags.CompilerGenerated) &&
+                        mProp.kind() == SymbolKind.Variable &&
+                        (<VariableSymbol>mProp).variable.typeLink.type == this.typeFlow.iargumentsInterfaceType) {
                         continue;
                     }
 

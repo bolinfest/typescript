@@ -28,8 +28,7 @@ var typescriptServiceFileName = filePath(IO.getExecutingFilePath()) + "typescrip
 var typescriptServiceFile = IO.readFile(typescriptServiceFileName);
 if (typeof ActiveXObject === "function") {
     eval(typescriptServiceFile);
-}
-else if (typeof require === "function") {
+} else if (typeof require === "function") {
     var vm = require('vm');
     vm.runInThisContext(typescriptServiceFile, 'typescriptServices.js');
 } else {
@@ -911,11 +910,10 @@ module Harness {
             public toString() {
                 return this.file + "(" + this.line + "," + this.column + "): " + this.message;
             }
-
         }
 
         export function recreate() {
-            compiler = new TypeScript.TypeScriptCompiler(stdout, stderr);
+            compiler = new TypeScript.TypeScriptCompiler(stderr);
             compiler.parser.errorRecovery = true;
             compiler.settings.codeGenTarget = TypeScript.CodeGenTarget.ES5;
             compiler.settings.controlFlow = true;
@@ -971,11 +969,12 @@ module Harness {
             } 
             
             compiler.reTypeCheck();
-            compiler.emitToOutfile();
+            compiler.emitToOutfile(stdout);
 
             callback(new CompilerResult(stdout.lines, stderr.lines, []));
-            reset();
+            
             recreate();
+            reset();
         }
         export function compileString(code: string, unitName: string, callback: (res: Compiler.CompilerResult) => void , refreshUnitsForLSTests? = false) {
             var scripts: TypeScript.Script[] = [];
@@ -994,9 +993,10 @@ module Harness {
             if (refreshUnitsForLSTests) {
                 maxUnit = 0;
             }
+
             scripts.push(addUnit(code));
             compiler.reTypeCheck();
-            compiler.emitToOutfile();
+            compiler.emitToOutfile(stdout);
 
             callback(new CompilerResult(stdout.lines, stderr.lines, scripts));
         }

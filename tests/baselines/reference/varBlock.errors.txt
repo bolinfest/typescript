@@ -1,0 +1,19 @@
+// 0.ts  line 8 col 15: Ambient variable can not have an initializer
+// 0.ts  line 11 col 30: Arguments in signatures may not have default values
+// 0.ts  line 11 col 21: Overload or ambient signatures may not specify parameter properties
+// 0.ts  line 15 col 14: Ambient variable can not have an initializer
+// 0.ts  line 21 col 15: Ambient variable can not have an initializer
+// 0.ts  line 22 col 19: Ambient variable can not have an initializer
+// 0.ts  line 25 col 18: Ambient variable can not have an initializer
+// 0.ts  line 26 col 23: Ambient variable can not have an initializer
+// 0.ts  line 26 col 32: Ambient variable can not have an initializer
+// 0.ts  line 27 col 26: Ambient variable can not have an initializer
+// 0.ts  line 28 col 32: Ambient variable can not have an initializer
+// 0.ts  line 28 col 42: Ambient variable can not have an initializer
+// 0.ts  line 32 col 10: Ambient variable can not have an initializer
+// 0.ts  line 33 col 15: Ambient variable can not have an initializer
+// 0.ts  line 33 col 24: Ambient variable can not have an initializer
+// 0.ts  line 34 col 18: Ambient variable can not have an initializer
+// 0.ts  line 35 col 24: Ambient variable can not have an initializer
+// 0.ts  line 35 col 34: Ambient variable can not have an initializer
+// 0.ts  line 39 col 14: Ambient variable can not have an initializer

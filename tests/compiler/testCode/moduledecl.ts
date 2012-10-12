@@ -128,11 +128,11 @@ declare module m5 {
 }
 
 declare module m43 {
-    export var b = 10;
+    export var b;
 }
 
 declare module m55 {
-    export var c = 10;
+    export var c;
 }
 
 declare module "m3" {

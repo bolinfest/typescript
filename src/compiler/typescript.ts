@@ -117,8 +117,8 @@ module TypeScript {
 
         public emitSettings: { minWhitespace: bool; propagateConstants: bool; emitComments: bool; path: string; createFile: (path: string) =>ITextWriter; outputMany: bool; };
 
-        constructor (public outfile: ITextWriter, public errorOutput: ITextWriter, public logger: ILogger = new NullLogger(), public settings: CompilationSettings = defaultSettings) {
-            this.errorReporter = new ErrorReporter(this.outfile);
+        constructor (public errorOutput: ITextWriter, public logger: ILogger = new NullLogger(), public settings: CompilationSettings = defaultSettings) {
+            this.errorReporter = new ErrorReporter(this.errorOutput);
             this.persistentTypeState = new PersistentGlobalTypeState(this.errorReporter);
             this.errorReporter.parser = this.parser;
             this.initTypeChecker(this.errorOutput);
@@ -127,7 +127,7 @@ module TypeScript {
             this.parser.style_funcInLoop = this.settings.styleSettings.funcInLoop;
             this.parser.inferPropertiesFromThisAssignment = this.settings.inferPropertiesFromThisAssignment;
             this.emitSettings = { minWhitespace: this.settings.minWhitespace, propagateConstants: this.settings.propagateConstants, emitComments: this.settings.emitComments, path: this.settings.outputFileName, createFile: null, outputMany: this.settings.outputMany };
-            
+
             codeGenTarget = settings.codeGenTarget;
         }
 
@@ -266,11 +266,13 @@ module TypeScript {
         }
 
         public parseSourceUnit(sourceText: ISourceText, filename: string) {
-            this.parser.setErrorRecovery(this.outfile, -1, -1);
+            this.parser.setErrorRecovery(this.errorOutput, -1, -1);
             var script: Script = this.parser.parse(sourceText, filename, 0);
 
-            var context = new PrintContext(this.outfile, this.parser);
-            getAstWalkerFactory().walk(script, prePrintAST, postPrintAST, null, context);
+            var index = this.units.length;
+            this.units[index] = script.locationInfo;
+            this.typeChecker.collectTypes(script);
+            this.scripts.append(script);
         }
 
         public typeCheck() {
@@ -398,7 +400,7 @@ module TypeScript {
             });
         }
 
-        public emitDeclarationFile(createFile: (path: string) => ITextWriter) {
+        public emitDeclarationFile(createFile: (path: string, useUTF8?: bool) => ITextWriter) {
             if (!this.settings.generateDeclarationFiles) {
                 return;
             }
@@ -422,12 +424,12 @@ module TypeScript {
                 if (this.emitSettings.outputMany) {
                     var fname = this.units[i].filename;
                     var declareFileName = getDeclareFilePath(fname);
-                    declareFile = createFile(declareFileName);
+                    declareFile = createFile(declareFileName, this.outputScriptToUTF8(script));
                     declarationEmitter.setDeclarationFile(declareFile);
                 }
                 else if (declareFile == null) {
                     var outfname = getDeclareFilePath(this.settings.outputFileName);
-                    declareFile = createFile(outfname);
+                    declareFile = createFile(outfname, this.outputScriptsToUTF8(<Script[]>(this.scripts.members)));
                     declarationEmitter.setDeclarationFile(declareFile);
                 }
 
@@ -441,9 +443,12 @@ module TypeScript {
             }
         }
 
-        public emit(createFile: (path: string) => ITextWriter) {
+        public emit(createFile: (path: string, useUTF8?: bool) => ITextWriter) {
             var emitter: Emitter = null;
             this.emitSettings.createFile = createFile;
+
+            var outFile: ITextWriter = null;
+
             for (var i = 0, len = this.scripts.members.length; i < len; i++) {
 
                 var script = <Script>this.scripts.members[i];
@@ -451,8 +456,6 @@ module TypeScript {
                     continue;
                 }
 
-
-                var outf = this.outfile;
                 if (this.emitSettings.outputMany) {
                     var fname = this.units[i].filename;
                     var splitFname = fname.split(".");
@@ -460,22 +463,28 @@ module TypeScript {
                     var baseName = splitFname.join(".");
                     var outFname = baseName + ".js";
                     this.emitSettings.path = outFname;
-                    outf = createFile(outFname);
-                    emitter = new Emitter(this.typeChecker, outf, this.emitSettings);
+                    var useUTF8ForOutputFile = this.outputScriptToUTF8(script);
+                    outFile = createFile(outFname, useUTF8ForOutputFile);
+                    emitter = new Emitter(this.typeChecker, outFile, this.emitSettings);
 
                     if (this.settings.mapSourceFiles) {
-                        emitter.setSourceMappings(new TypeScript.SourceMapper(fname, outFname, outf, createFile(outFname + SourceMapper.MapFileExtension)));
+                        emitter.setSourceMappings(new TypeScript.SourceMapper(fname, outFname, outFile, createFile(outFname + SourceMapper.MapFileExtension)));
                     }
                 }
                 else {
+
                     if (emitter == null) {
-                        emitter = new Emitter(this.typeChecker, this.outfile, this.emitSettings);
+                        // Create the file
+                        var useUTF8ForOutputFile = this.outputScriptsToUTF8(<Script[]>(this.scripts.members));
+                        outFile = createFile(this.settings.outputFileName, useUTF8ForOutputFile);
+
+                        emitter = new Emitter(this.typeChecker, outFile, this.emitSettings);
                         if (this.settings.mapSourceFiles) {
-                            emitter.setSourceMappings(new TypeScript.SourceMapper(script.locationInfo.filename, this.settings.outputFileName, this.outfile, createFile(this.settings.outputFileName + SourceMapper.MapFileExtension)));
+                            emitter.setSourceMappings(new TypeScript.SourceMapper(script.locationInfo.filename, this.settings.outputFileName, outFile, createFile(this.settings.outputFileName + SourceMapper.MapFileExtension)));
                         }
                     }
                     else if (this.settings.mapSourceFiles) {
-                        emitter.setSourceMappings(new TypeScript.SourceMapper(script.locationInfo.filename, emitter.sourceMapper.jsFileName, this.outfile, emitter.sourceMapper.sourceMapOut));
+                        emitter.setSourceMappings(new TypeScript.SourceMapper(script.locationInfo.filename, emitter.sourceMapper.jsFileName, outFile, emitter.sourceMapper.sourceMapOut));
                     }
                 }
 
@@ -485,17 +494,18 @@ module TypeScript {
                     if (this.settings.mapSourceFiles) {
                         emitter.emitSourceMappings();
                     }
-                    outf.Close();
+                    outFile.Close();
                 }
             }
             if (!this.emitSettings.outputMany) {
                 if (this.settings.mapSourceFiles) {
                     emitter.emitSourceMappings();
                 }
+                outFile.Close();
             }
         }
 
-        public emitToOutfile() {
+        public emitToOutfile(outFile: ITextWriter) {
             var emitter: Emitter = null;
             if (this.settings.mapSourceFiles) {
                 throw Error("Cannot generate source map");
@@ -507,12 +517,60 @@ module TypeScript {
 
             for (var i = 0, len = this.scripts.members.length; i < len; i++) {
                 if (emitter == null) {
-                    emitter = new Emitter(this.typeChecker, this.outfile, this.emitSettings);
+                    emitter = new Emitter(this.typeChecker, outFile, this.emitSettings);
                 }
                 var script = <Script>this.scripts.members[i];
                 this.typeChecker.locationInfo = script.locationInfo;
                 emitter.emitJavascript(script, TokenID.Comma, false);
             }
+        }
+
+        public emitAST(outputMany: bool, createFile: (path: string, useUTF8?: bool) => ITextWriter) {
+            var outFile: ITextWriter = null;
+            var context: PrintContext = null;
+
+            for (var i = 0, len = this.scripts.members.length; i < len; i++) {
+                var script = <Script>this.scripts.members[i];
+                if (outputMany) {
+                    var fname = this.units[i].filename;
+                    var splitFname = fname.split(".");
+                    splitFname.pop();
+                    var baseName = splitFname.join(".");
+                    var outFname = baseName + ".txt";
+                    this.emitSettings.path = outFname;
+                    outFile = createFile(outFname, this.outputScriptToUTF8(script));
+                    context = new PrintContext(outFile, this.parser);
+                }
+                else if (context == null) {
+                    // Create the file
+                    outFile = createFile(this.settings.outputFileName, this.outputScriptsToUTF8(<Script[]>(this.scripts.members)));
+
+                    context = new PrintContext(outFile, this.parser);
+                }
+
+                getAstWalkerFactory().walk(script, prePrintAST, postPrintAST, null, context);
+
+                if (outputMany) {
+                    outFile.Close();
+                }
+            }
+            if (!outputMany) {
+                outFile.Close();
+            }
+        }
+
+        private outputScriptToUTF8(script: Script): bool {
+            return script.containsUnicodeChar || (this.emitSettings.emitComments && script.containsUnicodeCharInComment);
+        }
+
+        private outputScriptsToUTF8(scripts: Script[]): bool {
+            for (var i = 0, len = scripts.length; i < len; i++) {
+                var script = scripts[i];
+                if (this.outputScriptToUTF8(script)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
