@@ -1,8 +1,6 @@
-0.ts line 27 col 13: Ambiguous call expression - could not choose overload
 0.ts line 27 col 13: Cannot convert 'O.C' to 'string'
 0.ts line 29 col 2: Cannot convert 'number' to 'string'
 0.ts line 31 col 2: Supplied parameters do not match any signature of call target
 0.ts line 32 col 2: Supplied parameters do not match any signature of call target
-0.ts line 33 col 2: Ambiguous call expression - could not choose overload
 0.ts line 33 col 2: Cannot convert 'O.C' to 'string'
 0.ts line 34 col 2: Supplied parameters do not match any signature of call target

@@ -15,5 +15,5 @@
 0.ts line 66 col 44: Cannot convert '{ e: number; f: number; }' to '{ a: { a: string; }; b: string; }': Type '{ e: number; f: number; }' is missing property 'a' from type '{ a: { a: string; }; b: string; }'
 0.ts line 68 col 9: Incompatible types in array literal expression: Type '{ e: number; f: number; }' is missing property 'g' from type '{ e: number; g: number; }'
 0.ts line 72 col 28: Cannot convert 'number' to '() => string': Type '() => string' requires a call signature, but Type 'Number' lacks one
-0.ts line 74 col 20: Cannot convert '(a: any) => any' to '() => any': Call signatures of types '(a: any) => any' and '() => any' are incompatible:
+0.ts line 74 col 20: Cannot convert '(a: any) => number' to '() => any': Call signatures of types '(a: any) => number' and '() => any' are incompatible:
 	Call signature expects 0 or fewer parameters

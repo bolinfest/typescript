@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 interface IResolvedFile {
     content: string;
     path: string;
@@ -52,9 +55,9 @@ declare module process {
 
 var IO = (function() {
 
-    // Create an IO object for use inside CScript hosts
+    // Create an IO object for use inside WindowsScriptHost hosts
     // Depends on WSCript and FileSystemObject
-    function getCScriptIO(): IIO {
+    function getWindowsScriptHostIO(): IIO {
         var fso = new ActiveXObject("Scripting.FileSystemObject");
 
         var args = [];
@@ -198,9 +201,7 @@ var IO = (function() {
 
             arguments: <string[]>args,
             stderr: WScript.StdErr,
-            watchFiles: function(files, callback) {
-                return false;
-            },
+            watchFiles: null,
             run: function(source, filename) {
                 eval(source);
             },
@@ -409,7 +410,7 @@ var IO = (function() {
     };
 
     if (typeof ActiveXObject === "function")
-        return getCScriptIO();
+        return getWindowsScriptHostIO();
     else if (typeof require === "function")
         return getNodeIO();
     else

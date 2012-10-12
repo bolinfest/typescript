@@ -8,8 +8,12 @@ module c.a.b {
     export import ma = a;
 }
 
-import d = a;
-import e = b.a;
+module mImport {
+    import d = a;
+    import e = b.a;
+    export import d1 = a;
+    export import e1 = b.a;
+}
 
 module m0 {
     function f1() {
@@ -80,3 +84,156 @@ module m1 {
     export import m7 = c.a.b;
     export import m8 = c.a.b.ma;
 }
+
+module m {
+    export module m2 {
+        var a = 10;
+        export var b: number;
+    }
+
+    export module m3 {
+        export var c: number;
+    }
+}
+
+module m {
+
+    export module m25 {
+        export module m5 {
+            export var c: number;
+        }
+    }
+}
+
+module m13 {
+    export module m4 {
+        export module m2 {
+            export module m3 {
+                export var c: number;
+            }
+        }
+
+        export function f() {
+            return 20;
+        }
+    }
+}
+
+declare module m4 {
+    export var b;
+}
+
+declare module m5 {
+    export var c;
+}
+
+declare module m43 {
+    export var b = 10;
+}
+
+declare module m55 {
+    export var c = 10;
+}
+
+declare module "m3" {
+    export var b: number;
+}
+module mQImport {
+    import m3 = module ("m3");
+    export import _m3 = module("m3");
+}
+
+module exportTests {
+    export class C1_public {
+        private f2() {
+            return 30;
+        }
+
+        public f3() {
+            return "string";
+        }
+    }
+    class C2_private {
+        private f2() {
+            return 30;
+        }
+
+        public f3() {
+            return "string";
+        }
+    }
+
+    export class C3_public {
+        private getC2_private() {
+            return new C2_private();
+        }
+        private setC2_private(arg: C2_private) {
+        }
+        private get c2() {
+            return new C2_private();
+        }
+        public getC1_public() {
+            return new C1_public();
+        }
+        public setC1_public(arg: C1_public) {
+        }
+        public get c1() {
+            return new C1_public();
+        }
+    }
+}
+
+declare module mAmbient {
+    class C {
+        public myProp: number;
+    }
+
+    function foo() : C;
+    var aVar: C;
+    interface B {
+        x: number;
+        y: C;
+    }
+    enum e {
+        x,
+        y,
+        z
+    }
+
+    module m3 {
+        class C {
+            public myProp: number;
+        }
+
+        function foo(): C;
+        var aVar: C;
+        interface B {
+            x: number;
+            y: C;
+        }
+        enum e {
+            x,
+            y,
+            z
+        }
+    }
+}
+
+function foo() {
+    return mAmbient.foo();
+}
+
+var cVar = new mAmbient.C();
+var aVar = mAmbient.aVar;
+var bB: mAmbient.B;
+var eVar: mAmbient.e;
+
+function m3foo() {
+    return mAmbient.m3.foo();
+}
+
+var m3cVar = new mAmbient.m3.C();
+var m3aVar = mAmbient.m3.aVar;
+var m3bB: mAmbient.m3.B;
+var m3eVar: mAmbient.m3.e;
+

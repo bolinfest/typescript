@@ -1,0 +1,2 @@
+0.ts line 1 col 9: Incompatible types in array literal expression
+0.ts line 4 col 0: Supplied parameters do not match any signature of call target

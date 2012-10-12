@@ -1,10 +1,11 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
 
-    ///
     /// Compiler settings
-    ///
 
     export class StyleSettings {
         // bitwise operations not permitted
@@ -91,8 +92,8 @@ module TypeScript {
         public inferPropertiesFromThisAssignment = false;
         public useDefaultLib = true;
 
-        public codeGenTarget = CodeGenTarget.ES5;
-        public moduleGenTarget = ModuleGenTarget.Asynchronous;
+        public codeGenTarget = CodeGenTarget.ES3;
+        public moduleGenTarget = ModuleGenTarget.Synchronous;
         public outputFileName: string = "";
         public errorFileName: string = "";
         public mapSourceFiles = false;
@@ -124,7 +125,7 @@ module TypeScript {
         var referencesRegEx = /^(\/\/\/\s*<reference\s+path=)('|")(.+?)\2\s*(static=('|")(.+?)\2\s*)*\/>/gim;
         var match = referencesRegEx.exec(comment);
 
-        if (match != null) {
+        if (match) {
             var path: string = normalizePath(match[3]);
             var adjustedPath = normalizePath(path);
     
@@ -144,7 +145,7 @@ module TypeScript {
         var referencesRegEx = /^(\/\/\/\s*<amd-dependency\s+path=)('|")(.+?)\2\s*(static=('|")(.+?)\2\s*)*\/>/gim;
         var match = referencesRegEx.exec(comment);
 
-        if (match != null) {
+        if (match) {
             var path: string = match[3];
             return path;
         }
@@ -255,7 +256,7 @@ module TypeScript {
             
             if (!comment.isBlock) {
                 var referencedCode = getFileReferenceFromReferencePath(comment.getText());
-                if (referencedCode != null) {
+                if (referencedCode) {
                     referencedCode.minChar = comment.startPos;
                     referencedCode.limChar = referencedCode.minChar + comment.value.length;
                     referencedFiles.push(referencedCode);
@@ -266,7 +267,7 @@ module TypeScript {
                 // is it a lib file?
                 var isNoLibRegex = /^(\/\/\/\s*<reference\s+no-default-lib=)('|")(.+?)\2\s*\/>/gim;
                 var isNoLibMatch: any = isNoLibRegex.exec(comment.getText());
-                if (isNoLibMatch != null) {
+                if (isNoLibMatch) {
                     isLibFile = (isNoLibMatch[3] == "true");
                 }
             }

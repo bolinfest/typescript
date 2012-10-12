@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -16,7 +19,6 @@ module TypeScript {
         constructor(ast : AST) {
             this.parent = -1;
             this.firstChild = -1;
-            //public this.__debugAST = ast;
         }
     }
 
@@ -27,14 +29,14 @@ module TypeScript {
         public currentMapping: number;
 
         public jsFileName: string;
-        public strFileName: string;
+        public tsFileName: string;
 
-        constructor(strFileName: string, jsFileName: string, public jsFile: ITextWriter, public sourceMapOut: ITextWriter) {
+        constructor(tsFileName: string, jsFileName: string, public jsFile: ITextWriter, public sourceMapOut: ITextWriter) {
             this.sourceMappings = new SourceMapping[];
             this.currentMapping = -1;
 
             this.jsFileName = TypeScript.getPrettyName(jsFileName, false, true);
-            this.strFileName = TypeScript.getPrettyName(strFileName, false, true);
+            this.tsFileName = TypeScript.getPrettyName(tsFileName, false, true);
         }
         
         static CanEmitMapping(sourceMappings: SourceMapping[], currentMapping: SourceMapping) {
@@ -51,8 +53,8 @@ module TypeScript {
         // Generate source mapping
         static EmitSourceMapping(allSourceMappers: SourceMapper[]) {
 
-            // At this point we know that there is alreast one source mapper present.
-            // If there are multiple source mappers, all correspond to same map file but different sources
+            // At this point we know that there is at least one source mapper present.
+            // If there are multiple source mappers, all will correspond to same map file but different sources
 
             // Output map file name into the js file
             var sourceMapper = allSourceMappers[0];
@@ -61,7 +63,7 @@ module TypeScript {
             // Now output map file
             var sourceMapOut = sourceMapper.sourceMapOut;
             var mappingsString = "";
-            var strFiles: string[] = [];
+            var tsFiles: string[] = [];
 
             var prevEmittedColumn = 0;
             var prevEmittedLine = 0;
@@ -73,9 +75,9 @@ module TypeScript {
                 sourceMapper = allSourceMappers[sourceMapperIndex];
 
                 // If there are any mappings generated
-                if (sourceMapper.sourceMappings != null) {
-                    var currentSourceIndex = strFiles.length;
-                    strFiles.push(sourceMapper.strFileName);
+                if (sourceMapper.sourceMappings) {
+                    var currentSourceIndex = tsFiles.length;
+                    tsFiles.push(sourceMapper.tsFileName);
                     
                     var sourceMappings = sourceMapper.sourceMappings;
                     for (var i = 0, len = sourceMappings.length; i < len; i++) {
@@ -124,7 +126,7 @@ module TypeScript {
                 sourceMapOut.Write('{');
                 sourceMapOut.Write('"version":3,');
                 sourceMapOut.Write('"file":"' + sourceMapper.jsFileName + '",');
-                sourceMapOut.Write('"sources":["' + strFiles.join('","') + '"],');
+                sourceMapOut.Write('"sources":["' + tsFiles.join('","') + '"],');
                 sourceMapOut.Write('"names":[],');
                 sourceMapOut.Write('"mappings":"' + mappingsString);
                 sourceMapOut.Write('"');

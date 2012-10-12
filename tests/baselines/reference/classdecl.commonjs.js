@@ -2,7 +2,7 @@ var __extends = this.__extends || function (d, b) {
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
-}
+};
 var a = (function () {
     function a(ns) {
     }
@@ -92,4 +92,19 @@ var c = (function (_super) {
 var ib2 = (function () {
     function ib2() { }
     return ib2;
+})();
+
+var d = (function () {
+    function d() { }
+    d.prototype.foo = function (ns) {
+        return ns.toString();
+    };
+    return d;
+})();
+var e = (function () {
+    function e() { }
+    e.prototype.foo = function (ns) {
+        return ns.toString();
+    };
+    return e;
 })();

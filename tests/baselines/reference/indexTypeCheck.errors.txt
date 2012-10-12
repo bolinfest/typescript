@@ -1,3 +1,3 @@
-0.ts line 32 col 1: Index signatures may take only one parameter
-0.ts line 36 col 1: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 32 col 1: Index signatures may take one and only one parameter
+0.ts line 36 col 2: Index signatures may only take 'string' or 'number' as their parameter
 0.ts line 51 col 0: Illegal property access

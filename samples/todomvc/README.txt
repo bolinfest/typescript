@@ -13,6 +13,10 @@ TypeScript integration points are highlighted:
 tsc js\todos.ts
 open index.html
 
+=== Caveats ===
+
+This sample uses local storage and will not run properly on Internet Explore if run 
+from the local filesystem.  Instead, host the sample from a web server (eg. IIS).
 
 ------------------------------------------------------------------------------------------
 Microsoft grants you the right to use these script files under the Apache 2.0 license. 

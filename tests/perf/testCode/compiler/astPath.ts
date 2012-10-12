@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -93,15 +96,6 @@ module TypeScript {
                 ((<TypeScript.TypeDecl>this.parent()).name === this.ast());
         }
 
-        public isNameOfES6Class(): bool {
-            if (this.ast() === null || this.parent() === null)
-                return false;
-
-            return (this.ast().nodeType === TypeScript.NodeType.Name) &&
-                (this.parent().nodeType === TypeScript.NodeType.ES6Class) &&
-                ((<TypeScript.TypeDecl>this.parent()).name === this.ast());
-        }
-
         public isNameOfInterface(): bool {
             if (this.ast() === null || this.parent() === null)
                 return false;
@@ -165,43 +159,23 @@ module TypeScript {
 
         public isChildOfClass(): bool {
             var ast = lastOf(this.asts);
-            return this.count() >= 4 &&
-                this.asts[this.top] === ast &&
-                this.asts[this.top - 1].nodeType === TypeScript.NodeType.List &&
-                this.asts[this.top - 2].nodeType === TypeScript.NodeType.FuncDecl &&
-                this.asts[this.top - 3].nodeType === TypeScript.NodeType.Class;
-        }
-
-        public isArgumentOfClass(): bool {
-            var ast = lastOf(this.asts);
-            return this.count() >= 4 &&
-                this.asts[this.top] === ast &&
-                this.asts[this.top - 1].nodeType === TypeScript.NodeType.List &&
-                this.asts[this.top - 2].nodeType === TypeScript.NodeType.FuncDecl &&
-                this.asts[this.top - 3].nodeType === TypeScript.NodeType.Class &&
-                ((<TypeScript.FuncDecl>this.asts[this.top - 2]).isConstructor) &&
-                ((<TypeScript.FuncDecl>this.asts[this.top - 2]).args === this.asts[this.top - 1]);
-        }
-
-        public isChildOfES6Class(): bool {
-            var ast = lastOf(this.asts);
             return this.count() >= 3 &&
                 this.asts[this.top] === ast &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.List &&
-                this.asts[this.top - 2].nodeType === TypeScript.NodeType.ES6Class;
+                this.asts[this.top - 2].nodeType === TypeScript.NodeType.Class;
         }
 
-        public isArgumentOfES6ClassConstructor(): bool {
+        public isArgumentOfClassConstructor(): bool {
             var ast = lastOf(this.asts);
             return this.count() >= 5 &&
                 this.asts[this.top] === ast &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.List &&
                 this.asts[this.top - 2].nodeType === TypeScript.NodeType.FuncDecl &&
                 this.asts[this.top - 3].nodeType === TypeScript.NodeType.List &&
-                this.asts[this.top - 4].nodeType === TypeScript.NodeType.ES6Class &&
+                this.asts[this.top - 4].nodeType === TypeScript.NodeType.Class &&
                 ((<TypeScript.FuncDecl>this.asts[this.top - 2]).isConstructor) &&
                 ((<TypeScript.FuncDecl>this.asts[this.top - 2]).args === this.asts[this.top - 1]) &&
-                ((<TypeScript.ES6ClassDecl>this.asts[this.top - 4]).constructorDecl === this.asts[this.top - 2]);
+                ((<TypeScript.ClassDecl>this.asts[this.top - 4]).constructorDecl === this.asts[this.top - 2]);
         }
 
         public isChildOfInterface(): bool {
@@ -245,16 +219,9 @@ module TypeScript {
         }
 
         public isBodyOfClass(): bool {
-            return this.count() >= 3 &&
-                this.asts[this.top - 1].nodeType === TypeScript.NodeType.FuncDecl &&
-                this.asts[this.top - 2].nodeType === TypeScript.NodeType.Class &&
-                 (<TypeScript.FuncDecl>this.asts[this.top - 1]).bod == this.asts[this.top - 0];
-        }
-
-        public isBodyOfES6Class(): bool {
             return this.count() >= 2 &&
-                this.asts[this.top - 1].nodeType === TypeScript.NodeType.ES6Class &&
-                 (<TypeScript.ES6ClassDecl>this.asts[this.top - 1]).members == this.asts[this.top - 0];
+                this.asts[this.top - 1].nodeType === TypeScript.NodeType.Class &&
+                 (<TypeScript.ClassDecl>this.asts[this.top - 1]).members == this.asts[this.top - 0];
         }
 
         public isBodyOfFunction(): bool {
@@ -568,7 +535,7 @@ module TypeScript {
         var pre = (cur: TypeScript.AST, parent: TypeScript.AST, walker: TypeScript.IAstWalker): TypeScript.AST => {
             if (TypeScript.isValidAstNode(cur)) {
                 // Did we find a closer offset?
-                if (cur.minChar < position) {
+                if (cur.minChar <= position) {
                     bestOffset = max(bestOffset, cur.minChar);
                 }
 

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -92,7 +95,7 @@ module TypeScript {
         IsStatement = 1 << 6, // node is a statement
         StrictMode = 1 << 7, // node is in the strict mode environment
         PossibleOptionalParameter = 1 << 8,
-        ES6ClassBaseConstructorCall = 1 << 9,
+        ClassBaseConstructorCall = 1 << 9,
         OptionalName = 1 << 10,
     }
 
@@ -160,11 +163,11 @@ module TypeScript {
         AutoInit = 1 << 8,
         Property = 1 << 9,
         Readonly = 1 << 10,
-        ES6Class = 1 << 11,
-        ES6ClassProperty = 1 << 12,
-        ES6ClassBodyProperty = 1 << 13,
-        ES6ClassConstructorProperty = 1 << 14,
-        ES6ClassSuperMustBeFirstCallInConstructor = 1 << 15,
+        Class = 1 << 11,
+        ClassProperty = 1 << 12,
+        ClassBodyProperty = 1 << 13,
+        ClassConstructorProperty = 1 << 14,
+        ClassSuperMustBeFirstCallInConstructor = 1 << 15,
         Constant = 1 << 16,
     }
 
@@ -188,7 +191,7 @@ module TypeScript {
         IsFatArrowFunction = 1 << 15,
         IndexerMember = 1 << 16,
         IsFunctionExpression = 1 << 17,
-        ES6ClassMethod = 1 << 18,
+        ClassMethod = 1 << 18,
         ClassPropertyMethodExported = 1 << 19,
     }
 
@@ -216,13 +219,23 @@ module TypeScript {
         BuildingName = 1 << 4,
         HasBaseType = 1 << 5,
         HasBaseTypeOfObject = 1 << 6,
-        IsES6Class = 1 << 7,
+        IsClass = 1 << 7,
+    }
+
+    export enum TypeRelationshipFlags {
+        SuccessfulComparison = 0,
+        SourceIsNullTargetIsVoidOrUndefined = 1,
+        RequiredPropertyIsMissing = 1 << 1,
+        IncompatibleSignatures = 1 << 2,
+        SourceSignatureHasTooManyParameters = 3,
+        IncompatibleReturnTypes = 1 << 4,
+        IncompatiblePropertyTypes = 1 << 5,
+        IncompatibleParameterTypes = 1 << 6,
     }
 
     export enum CodeGenTarget {
         ES3 = 0,
         ES5 = 1,
-        ES6 = 1 << 1,
     }
 
     export enum ModuleGenTarget {
@@ -233,9 +246,9 @@ module TypeScript {
 
     // Compiler defaults to generating ES5-compliant code for
     //  - getters and setters
-    export var codeGenTarget: CodeGenTarget = CodeGenTarget.ES5;
+    export var codeGenTarget: CodeGenTarget = CodeGenTarget.ES3;
 
-    export var moduleGenTarget: ModuleGenTarget = ModuleGenTarget.Asynchronous;
+    export var moduleGenTarget: ModuleGenTarget = ModuleGenTarget.Synchronous;
 
     export var optimizeModuleCodeGen = true;
 

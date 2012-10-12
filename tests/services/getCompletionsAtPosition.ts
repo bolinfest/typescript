@@ -208,5 +208,11 @@ describe('getCompletionsAtPosition', function () {
             assert.arrayContainsOnce(result.entries, function (item: Services.CompletionEntry) { return item.name === "bar"; });
             assert.arrayContainsOnce(result.entries, function (item: Services.CompletionEntry) { return item.name === "baz"; });
         });
+
+        it("checks for completion inside target typed function", function () {
+            var result = ls.languageService.getCompletionsAtPosition(fileNameBugFixes, lineColToPosition(fileNameBugFixes, 15, 40), false);
+            assert.equal(result.isMemberCompletion, false);
+            assert.arrayContainsOnce(result.entries, function (item: Services.CompletionEntry) { return item.name === "elem" && item.type === "string"; });
+        });
     });
 });

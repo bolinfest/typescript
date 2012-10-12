@@ -222,6 +222,7 @@ var efv = EF1(1, 2);
 function Point(x, y) {
     this.x = x;
     this.y = y;
+    return this;
 }
 Point.origin = new Point(0, 0);
 Point.prototype.add = function (dx, dy) {

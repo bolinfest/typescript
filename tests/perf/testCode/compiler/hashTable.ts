@@ -1,127 +1,9 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
-    export var HashSmallSize = 7;
-    export var HashMediumSize = 16;
-    export var HashLargeSize = 128;
-
-    export interface IEquatable {
-        getHashCode: number;
-    }
-
-    export class StringHashEntry {
-        public next: StringHashEntry;
-
-        constructor (public key: string, public data) { }
-    }
-
-    export function StringHashFn(key: string): number {
-        var val: number = 0;
-        for (var i: number = 0; i < key.length; i++) {
-            val = (val << i) ^ key.charCodeAt(i);
-        }
-        if (val > 0) {
-            return val;
-        }
-        else {
-            return -val;
-        }
-    }
-
-    // do not remove: here for comparison 
-    export class StringHashTableOld {
-        public itemCount = 0;
-        public table = new StringHashEntry[];
-
-        constructor (public size: number) { 
-            for (var j: number = 0; j < this.size; j++) {
-                this.table[j] = null;
-            }        
-        }
-
-        public getAllKeys(): string[]{
-            var result: string[] = [];
-            for (var i = 0; i < this.size; i++) {
-                for (var current = this.table[i]; current != null ; current = current.next) {
-                    result[result.length] = current.key;
-                }
-            }
-            return result;
-        }
-
-
-        public add(key: string, data): bool {
-            var current: StringHashEntry;
-            var entry: StringHashEntry = new StringHashEntry(key, data);
-            var val: number = StringHashFn(key);
-            val = val % this.size;
-
-            for (current = this.table[val]; current != null ; current = current.next) {
-                if (key == current.key) {
-                    return false;
-                }
-            }
-            entry.next = this.table[val];
-            this.table[val] = entry;
-            this.itemCount++;
-            return true;
-        }
-
-        public map(fn: (k: string, v, c) => void , context) {
-            for (var i = 0; i < this.size; i++) {
-                for (var current = this.table[i]; current != null ; current = current.next) {
-                    fn(current.key, current.data, context);
-                }
-            }
-        }
-
-        public census() {
-            var current: StringHashEntry;
-            var pop = 0;
-            for (var i = 0; i < this.size; i++) {
-                for (current = this.table[i]; current != null ; current = current.next) {
-                    pop++;
-                }
-            }
-            return pop;
-        }
-
-        public every(fn: (k: string, v, c) => bool, context) {
-            for (var i = 0; i < this.size; i++) {
-                for (var current = this.table[i]; current != null ; current = current.next) {
-                    if (!fn(current.key, current.data, context)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        public some(fn: (k: string, v, c) => bool, context) {
-            for (var i = 0; i < this.size; i++) {
-                for (var current = this.table[i]; current != null ; current = current.next) {
-                    if (fn(current.key, current.data, context)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public count(): number { return this.itemCount };
-
-        public lookup(key: string) {
-            var current: StringHashEntry;
-            var val = StringHashFn(key);
-            val = val % this.size;
-            for (current = this.table[val]; current != null ; current = current.next) {
-                if (key == current.key) {
-                    return (current.data);
-                }
-            }
-            return (null);
-        }
-    }
 
     export class BlockIntrinsics {
         public prototype = undefined;
@@ -347,7 +229,7 @@ module TypeScript {
                 if (this.equalsFn(key, current.key)) {
                     result = current.data;
                     this.itemCount--;
-                    if (prevEntry != null) {
+                    if (prevEntry) {
                         prevEntry.next = current.next;
                     }
                     else {

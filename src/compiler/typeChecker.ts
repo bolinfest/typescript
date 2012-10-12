@@ -165,6 +165,16 @@ module TypeScript {
             this.ambientGlobals = new StringHashTable();
             this.ambientGlobalTypes = new StringHashTable();
 
+            // add global types to the global scope
+            this.globalTypes.add(this.voidType.symbol.name, this.voidType.symbol);
+            this.globalTypes.add(this.booleanType.symbol.name, this.booleanType.symbol);
+            this.globalTypes.add(this.doubleType.symbol.name, this.doubleType.symbol);
+            this.globalTypes.add("number", this.doubleType.symbol);
+            this.globalTypes.add(this.stringType.symbol.name, this.stringType.symbol);
+            this.globalTypes.add(this.anyType.symbol.name, this.anyType.symbol);
+            this.globalTypes.add(this.nullType.symbol.name, this.nullType.symbol);
+            this.globalTypes.add(this.undefinedType.symbol.name, this.undefinedType.symbol);
+
             this.dualGlobalValues.secondaryTable = this.globals;
             this.dualGlobalTypes.secondaryTable = this.globalTypes;
             this.dualAmbientGlobalValues.secondaryTable = this.ambientGlobals;
@@ -264,6 +274,8 @@ module TypeScript {
 
         public provisionalStartedTypecheckObjects: PhasedTypecheckObject[] = [];
 
+        public mustCaptureGlobalThis = false;
+
         constructor (public persistentState: PersistentGlobalTypeState) {
             this.voidType = this.persistentState.voidType;
             this.booleanType = this.persistentState.booleanType;
@@ -326,7 +338,7 @@ module TypeScript {
         }
 
         // Unset the current contextual type without disturbing the stack, effectively "killing" the contextual typing process
-        public killTargetType() { this.currentContextualTypeContext = null; this.errorReporter.pushToErrorSink = false; }
+        public killCurrentContextualType() { this.currentContextualTypeContext = null; this.errorReporter.pushToErrorSink = false; }
         public hasTargetType() { return this.currentContextualTypeContext && this.currentContextualTypeContext.contextualType; }
         public getTargetTypeContext() { return this.currentContextualTypeContext; }
 
@@ -978,7 +990,7 @@ module TypeScript {
             if (len && funcDecl.variableArgList) {
                 if (!signature.parameters[len - 1].parameter.typeLink.type.elementType) {
                     this.errorReporter.simpleErrorFromSym(signature.parameters[len - 1].parameter.symbol, "... parameter must have array type");
-                    signature.parameters[len - 1].parameter.typeLink.type.elementType = this.makeArrayType(signature.parameters[len - 1].parameter.typeLink.type);
+                    signature.parameters[len - 1].parameter.typeLink.type = this.makeArrayType(signature.parameters[len - 1].parameter.typeLink.type);
                 }
             }
             this.resolveTypeLink(scope, signature.returnType,
@@ -1183,7 +1195,7 @@ module TypeScript {
                         setTypeAtIndex: (index: number, type: Type) => { }, // no contextual typing here, so no need to do anything
                         getTypeAtIndex: (index: number) => { return index ? Q.signature.returnType.type : best.signature.returnType.type; } // we only want the "second" type - the "first" is skipped
                     }
-                    var bct = this.findBestCommonType(best.signature.returnType.type, null, collection);
+                    var bct = this.findBestCommonType(best.signature.returnType.type, null, collection, false);
                     ambiguous = !bct;
                 }
                 else {
@@ -1470,14 +1482,14 @@ module TypeScript {
             return t == this.undefinedType || t == this.nullType;
         }
 
-        public findBestCommonType(initialType: Type, targetType: Type, collection: ITypeCollection, comparisonInfo?: TypeComparisonInfo) {
+        public findBestCommonType(initialType: Type, targetType: Type, collection: ITypeCollection, acceptVoid:bool, comparisonInfo?: TypeComparisonInfo) {
             var i = 0;
             var len = collection.getLength();
             var nlastChecked = 0;
             var bestCommonType = initialType;
 
             if (targetType) {
-                bestCommonType = bestCommonType ? bestCommonType.mergeOrdered(targetType, this) : targetType;
+                bestCommonType = bestCommonType ? bestCommonType.mergeOrdered(targetType, this, acceptVoid) : targetType;
             }
 
             // it's important that we set the convergence type here, and not in the loop,
@@ -1493,7 +1505,7 @@ module TypeScript {
                         continue;
                     }
 
-                    if (convergenceType && (bestCommonType = convergenceType.mergeOrdered(collection.getTypeAtIndex(i), this, comparisonInfo))) {
+                    if (convergenceType && (bestCommonType = convergenceType.mergeOrdered(collection.getTypeAtIndex(i), this, acceptVoid, comparisonInfo))) {
                         convergenceType = bestCommonType;
                     }
 
@@ -1516,7 +1528,7 @@ module TypeScript {
                 }
             }
 
-            return bestCommonType;
+            return acceptVoid ? bestCommonType : (bestCommonType == this.voidType ? null : bestCommonType);
         }
 
         // Type Identity
@@ -1530,6 +1542,10 @@ module TypeScript {
             }
 
             if (!t1 || !t2) {
+                return false;
+            }
+
+            if (t1.isClass() || t1.isClassInstance()) {
                 return false;
             }
 
@@ -1851,9 +1867,11 @@ module TypeScript {
                     nProp = source.memberScope.find(mPropKeys[iMProp], false, false);
 
                     // methods do not have the "arguments" field
-                    if (mProp.kind() == SymbolKind.Variable && (<VariableSymbol>mProp).variable.typeLink.ast &&
-                        (<VariableSymbol>mProp).variable.typeLink.ast.nodeType == NodeType.Name &&
-                        (<Identifier>(<VariableSymbol>mProp).variable.typeLink.ast).text == "IArguments") {
+                    if (mProp.name == "arguments" &&
+                        this.typeFlow.iargumentsInterfaceType &&
+                        (this.typeFlow.iargumentsInterfaceType.symbol.flags & SymbolFlags.CompilerGenerated) &&
+                        mProp.kind() == SymbolKind.Variable &&
+                        (<VariableSymbol>mProp).variable.typeLink.type == this.typeFlow.iargumentsInterfaceType) {
                         continue;
                     }
 

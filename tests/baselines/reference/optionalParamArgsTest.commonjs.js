@@ -2,7 +2,7 @@ var __extends = this.__extends || function (d, b) {
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
-}
+};
 var C1 = (function () {
     function C1(v) {
         if (typeof v === "undefined") { v = 1; }

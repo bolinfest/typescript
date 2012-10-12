@@ -709,7 +709,7 @@ module TypeScript {
                 if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
                     moduleDecl.modFlags |= ModuleFlags.Ambient;
                 }
-                if (hasFlag(modifiers, Modifiers.Exported)) {
+                if (this.parsingDeclareFile || svAmbient || hasFlag(modifiers, Modifiers.Exported)) {
                     moduleDecl.modFlags |= ModuleFlags.Exported;
                 }
                 if (isDynamicMod) {
@@ -723,7 +723,6 @@ module TypeScript {
                 this.topLevel = svTopLevel;
                 moduleDecl.leftCurlyCount = this.scanner.leftCurlyCount - leftCurlyCount;
                 moduleDecl.rightCurlyCount = this.scanner.rightCurlyCount - rightCurlyCount;
-
                 return moduleDecl;
             }
 
@@ -817,6 +816,7 @@ module TypeScript {
                         ident.limChar = this.scanner.pos;
                         return this.parseNamedType(errorRecoverySet, minChar,
                                               ident, true);
+
                     case TokenID.LCurly:
                         this.tok = this.scanner.scan();
                         var members = new ASTList();
@@ -1108,6 +1108,11 @@ module TypeScript {
                     else if (this.tok.tokenId == TokenID.Ellipsis) {
                         sawEllipsis = true;
                         this.tok = this.scanner.scan();
+
+                        if (!(this.tok.tokenId == TokenID.ID) || convertTokToID(this.tok, this.strictMode)) {
+                            this.reportParseError("'...' parameters require both a parameter name and an array type annotation to be specified");
+                            sawEllipsis = false; // Do not treat this parameter as vararg
+                        }
                     }
 
                     var argId: Identifier = null;
@@ -1988,7 +1993,7 @@ module TypeScript {
             if (hasFlag(modifiers, Modifiers.Public)) {
                 interfaceDecl.varFlags |= VarFlags.Public;
             }
-            if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Exported)) {
+            if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Exported)) {
                 interfaceDecl.varFlags |= VarFlags.Exported;
             }
 
@@ -2251,7 +2256,7 @@ module TypeScript {
                 }
                 var varDeclName = Identifier.fromToken(this.tok)
                 if (this.strictMode && (varDeclName.text == "eval")) {
-                    this.reportParseError("can not name a variable eval in strict mode");
+                    this.reportParseError("'eval' may not name a variable in strict mode");
                 }
                 varDecl = this.makeVarDecl(varDeclName, this.nestingLevel);
                 varDecl.id.minChar = this.scanner.startPos;
@@ -3266,6 +3271,9 @@ module TypeScript {
                                 needTerminator = true;
                             }
                             ast = fnOrVar;
+                            if (this.parsingDeclareFile || this.ambientModule && ast.nodeType == NodeType.FuncDecl) {
+                                (<FuncDecl>ast).fncFlags |= FncFlags.Exported;
+                            }
                         }
                         else {
                             ast = this.parseFncDecl(errorRecoverySet, true, false, false, null, false, false, isAmbient(), modifiers, null);
@@ -3917,10 +3925,10 @@ module TypeScript {
                         ast = this.parseEnumDecl(errorRecoverySet, modifiers);
                         ast.minChar = minChar;
                         ast.limChar = this.scanner.lastTokenLimChar();
-                        if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
+                        if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Ambient)) {
                             (<ModuleDecl>ast).modFlags |= ModuleFlags.Ambient;
                         }
-                        if (hasFlag(modifiers, Modifiers.Exported)) {
+                        if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Exported)) {
                             (<ModuleDecl>ast).modFlags |= ModuleFlags.Exported;
                         }
                         break;
@@ -4075,7 +4083,7 @@ module TypeScript {
                     if (directivePrologue) {
                         if (stmt.nodeType == NodeType.QString) {
                             var qstring = <StringLiteral>stmt;
-                            if (qstring.text == "use strict") {
+                            if (qstring.text == "\"use strict\"") {
                                 stmts.flags |= ASTFlags.StrictMode;
                                 this.strictMode = true;
                             }

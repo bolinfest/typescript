@@ -9,3 +9,8 @@ module BugFixes {
     import foo f = Foo;
     foo./*here*/;
 }
+
+module BugFix2 {
+    interface iFace { (event: string); }
+    var foo: iFace = function (elem) { /*here*/ }
+}

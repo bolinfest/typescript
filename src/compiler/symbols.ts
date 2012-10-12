@@ -64,7 +64,11 @@ module TypeScript {
         }
 
         public getTypeName(scope: SymbolScope): string {
-            return this.toString();
+            return this.getTypeNameEx(scope).toString();
+        }
+        
+        public getTypeNameEx(scope: SymbolScope): MemberName {
+            return MemberName.create(this.toString());
         }
 
         public getOptionalNameString() {
@@ -137,6 +141,27 @@ module TypeScript {
                 ancestor = ancestor.container;
             }
             return builder;
+        }
+
+        public isExternallyVisible(checker: TypeChecker) {
+            // Global module is not hidden
+            if (this == checker.gloMod) {
+                return true;
+            }
+
+            // private symbol
+            if (hasFlag(this.flags, SymbolFlags.Private)) {
+                return false;
+            }
+
+            // If the current container is not exported
+            // If its in global - it is visible, otherwise it isn't
+            if (!hasFlag(this.flags, SymbolFlags.Exported)) {
+                return this.container == checker.gloMod;
+            }
+
+            // It is visible if its container is visible too
+            return this.container.isExternallyVisible(checker);
         }
 
         public visible(scope: SymbolScope, checker: TypeChecker) {
@@ -236,6 +261,34 @@ module TypeScript {
         public kind(): SymbolKind {
             throw new Error("please implement in derived class");
         }
+
+        public getInterfaceDeclFromSymbol(checker: TypeChecker) {
+            if (this.declAST != null) {
+                if (this.declAST.nodeType == NodeType.Interface) {
+                    return <TypeDecl>this.declAST;
+                } else if (this.container != null && this.container != checker.gloMod && this.container.declAST.nodeType == NodeType.Interface) {
+                    return <TypeDecl>this.container.declAST;
+                }
+            }
+
+            return null;
+        }
+
+        public getVarDeclFromSymbol() {
+            if (this.declAST != null && this.declAST.nodeType == NodeType.VarDecl) {
+                return <VarDecl>this.declAST;
+            }
+
+            return null;
+        }
+
+        public getImportDeclFromSymbol() {
+            if (this.declAST != null && this.declAST.nodeType == NodeType.Import) {
+                return <ImportDecl>this.declAST;
+            }
+
+            return null;
+        }
     }
 
     export class ValueLocation {
@@ -301,9 +354,10 @@ module TypeScript {
         public prettyName: string;
         public onlyReferencedAsTypeRef = optimizeModuleCodeGen;
 
-        public getTypeName(scope: SymbolScope) {
-            return this.type.getMemberTypeName(this.name ? this.name + this.getOptionalNameString() : "", false, false, scope);
+        public getTypeNameEx(scope: SymbolScope) {
+            return this.type.getMemberTypeNameEx(this.name ? this.name + this.getOptionalNameString() : "", false, false, scope);
         }
+
         public instanceScope(): SymbolScope {
             // Don't use the constructor scope for a class body or methods - use the contained scope
             if (!(this.type.typeFlags & TypeFlags.IsClass) && this.type.isClass()) {
@@ -379,9 +433,10 @@ module TypeScript {
         public kind() { return SymbolKind.Field; }
         public writeable() { return this.isAccessor() ? this.setter != null : this.canWrite; }
         public getType() { return this.field.typeLink.type; }
-        public getTypeName(scope: SymbolScope) {
-            return this.name + this.getOptionalNameString() + ": " + this.field.typeLink.type.getMemberTypeName("", true, false, scope);
+        public getTypeNameEx(scope: SymbolScope) {
+            return MemberName.create(this.field.typeLink.type.getScopedTypeNameEx(scope), this.name + this.getOptionalNameString() + ": ", "");
         }
+
         public isMember() { return true; }
         public setType(type: Type) {
             this.field.typeLink.type = type;
@@ -394,7 +449,7 @@ module TypeScript {
         public isAccessor() { return this.getter != null || this.setter != null; }
 
         public isVariable() { return true; }
-        public toString() { return this.name + this.getOptionalNameString() + ":" + this.field.typeLink.type.getTypeName(); }
+        public toString() { return this.getTypeNameEx(null).toString(); }
         public specializeType(pattern: Type, replacement: Type, checker: TypeChecker): Symbol {
             var rType = this.field.typeLink.type.specializeType(pattern, replacement, checker, false);
             if (rType != this.field.typeLink.type) {
@@ -442,11 +497,11 @@ module TypeScript {
             }
         }
 
-        public getTypeName(scope: SymbolScope) {
-            return this.name + (this.isOptional() ? "?" : "") + ":" + this.getType().getMemberTypeName("", false, false, scope);
+        public getTypeNameEx(scope: SymbolScope) {
+            return MemberName.create(this.getType().getScopedTypeNameEx(scope), this.name + (this.isOptional() ? "?" : "") + ": ", "");
         }
 
-        public toString() { return this.name + (this.isOptional() ? "?" : "") + ":" + this.getType().getTypeName(); }
+        public toString() { return this.getTypeNameEx(null).toString(); }
 
         public specializeType(pattern: Type, replacement: Type, checker: TypeChecker): Symbol {
             var rType = this.parameter.typeLink.type.specializeType(pattern, replacement, checker, false);
@@ -472,8 +527,8 @@ module TypeScript {
         public kind() { return SymbolKind.Variable; }
         public writeable() { return true; }
         public getType() { return this.variable.typeLink.type; }
-        public getTypeName(scope: SymbolScope) {
-            return this.name + ":" + this.getType().getMemberTypeName("", false, false, scope);
+        public getTypeNameEx(scope: SymbolScope) {
+            return MemberName.create(this.getType().getScopedTypeNameEx(scope), this.name + ": ", "");
         }
 
         public setType(type: Type) {

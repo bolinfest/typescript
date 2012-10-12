@@ -220,8 +220,7 @@ module TypeScript {
                     this.typeFlags |= TypeFlags.BuildingName;
                     var builder = "";
                     var allMemberNames = new MemberNameArray();
-                    var curlies = isElementType;
-                    var signatureCount = 0;
+                    var curlies = isElementType || this.index != null;
                     var memCount = 0;
                     var delim = "; ";
                     if (this.members) {
@@ -230,59 +229,40 @@ module TypeScript {
                             if (!hasFlag(sym.flags, SymbolFlags.BuiltIn)) {
                                 // Remove the delimiter character from the generated type name, since
                                 // our "allMemberNames" array takes care of storing delimiters
-                                var typeName = sym.getTypeName(scope);
-                                if (typeName.length >= delim.length && typeName.substring(typeName.length - delim.length) == delim) {
-                                    typeName = typeName.substring(0, typeName.length - delim.length);
+                                var typeNameMember = sym.getTypeNameEx(scope);
+                                if (typeNameMember.isArray() && (<MemberNameArray>typeNameMember).delim == delim) {
+                                    allMemberNames.addAll((<MemberNameArray>typeNameMember).entries);
+                                } else {
+                                    allMemberNames.add(typeNameMember);
                                 }
-                                allMemberNames.add(MemberName.create(typeName));
                                 memCount++;
-                                if (sym.kind() == SymbolKind.Type) {
-                                    var memberType = (<TypeSymbol>sym).type;
-                                    if (memberType.callCount() > 1) {
-                                        curlies = true;
-                                    }
-                                }
-                                else {
-                                    curlies = true;
-                                }
+                                curlies = true;
                             }
                         }, null);
                     }
 
-                    var signatures: string[];
+                    var signatureCount = this.callCount();
                     var j: number;
                     var len = 0;
-                    var shortform = (memCount == 0) && (this.callCount() == 1) && topLevel;
-                    if (!shortform) {
-                        allMemberNames.delim = delim;
-                    }
+                    var shortform = !curlies && signatureCount == 1 && topLevel;
                     if (this.call) {
-                        signatures = this.call.toStrings(prefix, shortform, scope);
-                        for (j = 0, len = signatures.length; j < len; j++) {
-                            allMemberNames.add(MemberName.create(signatures[j]));
-                            signatureCount++;
-                        }
+                        allMemberNames.addAll(this.call.toStrings(prefix, shortform, scope));
                     }
 
                     if (this.construct) {
-                        signatures = this.construct.toStrings("new", shortform, scope);
-                        for (j = 0, len = signatures.length; j < len; j++) {
-                            allMemberNames.add(MemberName.create(signatures[j]));
-                            signatureCount++;
-                        }
+                        allMemberNames.addAll(this.construct.toStrings("new", shortform, scope));
                     }
 
                     if (this.index) {
-                        signatures = this.index.toStrings("", shortform, scope);
-                        for (j = 0, len = signatures.length; j < len; j++) {
-                            allMemberNames.add(MemberName.create(signatures[j]));
-                            signatureCount++;
-                        }
+                        allMemberNames.addAll(this.index.toStrings("", shortform, scope));
                     }
 
                     if ((curlies) || ((signatureCount > 1) && topLevel)) {
                         allMemberNames.prefix = "{ ";
                         allMemberNames.suffix = "}";
+                        allMemberNames.delim = delim;
+                    } else if (allMemberNames.entries.length > 1) {
+                        allMemberNames.delim = delim;
                     }
 
                     this.typeFlags &= (~TypeFlags.BuildingName);
@@ -432,7 +412,7 @@ module TypeScript {
             return false;
         }
 
-        public mergeOrdered(b: Type, checker: TypeChecker, comparisonInfo?: TypeComparisonInfo): Type {
+        public mergeOrdered(b: Type, checker: TypeChecker, acceptVoid: bool, comparisonInfo?: TypeComparisonInfo): Type {
             if ((this == checker.anyType) || (b == checker.anyType)) {
                 return checker.anyType;
             }
@@ -445,10 +425,10 @@ module TypeScript {
             else if ((this == checker.nullType) && (b != checker.nullType)) {
                 return b;
             }
-            else if ((b == checker.voidType) && this != checker.voidType) {
+            else if (acceptVoid && (b == checker.voidType) && this != checker.voidType) {
                 return this;
             }
-            else if ((this == checker.voidType) && (b != checker.voidType)) {
+            else if (acceptVoid && (this == checker.voidType) && (b != checker.voidType)) {
                 return b;
             }
             else if ((b == checker.undefinedType) && this != checker.undefinedType) {
@@ -462,7 +442,7 @@ module TypeScript {
                     return this;
                 }
                 else {
-                    var mergedET = this.elementType.mergeOrdered(b.elementType, checker, comparisonInfo);
+                    var mergedET = this.elementType.mergeOrdered(b.elementType, checker, acceptVoid, comparisonInfo);
                     if (mergedET == null) {
                         return checker.makeArrayType(checker.anyType);
                     }

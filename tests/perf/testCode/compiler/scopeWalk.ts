@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -21,12 +24,14 @@ module TypeScript {
     export class EnclosingScopeContext {
 
         public scopeGetter: () => SymbolScope = null;
+        public objectLiteralScopeGetter: () => SymbolScope = null;
         public scopeStartAST: AST = null;
         public skipNextFuncDeclForClass = false;
         public deepestModuleDecl: ModuleDecl = null;
         public enclosingClassDecl: NamedType = null;
         public enclosingObjectLit: UnaryExpression = null;
         public publicsOnly = true;
+        public useFullAst = false;
         private scriptFragment: Script;
 
         constructor (public logger: ILogger,
@@ -38,6 +43,10 @@ module TypeScript {
 
         public getScope(): SymbolScope {
             return this.scopeGetter();
+        }
+
+        public getObjectLiteralScope(): SymbolScope {
+            return this.objectLiteralScopeGetter();
         }
 
         public getScopeAST() {
@@ -69,7 +78,6 @@ module TypeScript {
 
     export function preFindMemberScope(ast: AST, parent: AST, walker: IAstWalker) {
         var memScope: MemberScopeContext = walker.state;
-        // TODO: refine search method
         if (hasFlag(ast.flags, memScope.matchFlag) && ((memScope.pos < 0) || (memScope.pos == ast.limChar))) {
             memScope.ast = ast;
             if ((ast.type == null) && (memScope.pos >= 0)) {
@@ -81,7 +89,6 @@ module TypeScript {
         return ast;
     }
 
-    // moduleDecl non-null only for immediately enclosing module
     export function pushTypeCollectionScope(container: Symbol,
         valueMembers: ScopedMembers,
         ambientValueMembers: ScopedMembers,
@@ -124,7 +131,7 @@ module TypeScript {
                     context.scopeStartAST = script;
                     break;
 
-                case NodeType.ES6Class:
+                case NodeType.Class:
                     context.scopeGetter = function () {
                         return (ast.type === null || ast.type.instanceType.containedScope === null) ? null : ast.type.instanceType.containedScope;
                     };
@@ -132,22 +139,16 @@ module TypeScript {
                     context.enclosingClassDecl = <NamedType>ast;
                     break;
 
-                case NodeType.Class:
-                    context.scopeGetter = function () {
-                        return (ast.type === null || ast.type.instanceType.constructorScope === null) ? null : ast.type.instanceType.constructorScope;
-                    };
-                    context.scopeStartAST = ast;
-                    context.enclosingClassDecl = <NamedType>ast;
-                    context.skipNextFuncDeclForClass = true;
-                    break;
-
                 case NodeType.ObjectLit:
                     var objectLit = <UnaryExpression>ast;
                     // Only consider target-typed object literals
-                    if (objectLit.targetType != null) {
+                    if (objectLit.targetType) {
                         context.scopeGetter = function () {
                             return objectLit.targetType.containedScope;
                         };
+                        context.objectLiteralScopeGetter = function () {
+                            return objectLit.targetType.memberScope;
+                        }
                         context.enclosingObjectLit = objectLit;
                     }
                     break;
@@ -174,18 +175,18 @@ module TypeScript {
                     }
                     else {
                         context.scopeGetter = function () {
-                            // The scope of ES6 class constructor is hidden somewhere we don't expect :-S
-                            if (funcDecl.isConstructor && hasFlag(funcDecl.fncFlags, FncFlags.ES6ClassMethod)) {
-                                if (ast.type != null && ast.type.enclosingType != null) {
+                            // The scope of a class constructor is hidden somewhere we don't expect :-S
+                            if (funcDecl.isConstructor && hasFlag(funcDecl.fncFlags, FncFlags.ClassMethod)) {
+                                if (ast.type && ast.type.enclosingType) {
                                     return ast.type.enclosingType.constructorScope;
                                 }
                             }
 
-                            if (funcDecl.scopeType != null) {
+                            if (funcDecl.scopeType) {
                                 return funcDecl.scopeType.containedScope;
                             }
 
-                            if (funcDecl.type != null) {
+                            if (funcDecl.type) {
                                 return funcDecl.type.containedScope;
                             }
                             return null;

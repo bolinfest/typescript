@@ -1,1 +1,1 @@
-0.ts line 7 col 4: Cannot convert '(x: number[]) => void' to '(x: number[],y: string) => void': Call signatures of types '(x: number[]) => void' and '(x: number[],y: string) => void' are incompatible
+0.ts line 7 col 4: Cannot convert '(...x: number[]) => void' to '(x: number[], y: string) => void': Call signatures of types '(...x: number[]) => void' and '(x: number[], y: string) => void' are incompatible

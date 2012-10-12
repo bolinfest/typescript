@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -14,50 +17,33 @@ module TypeScript {
         }
     }
 
-    // ordered pair of types
-    //export class TypePair {
-    //    constructor (public a: Type, public b: Type) { }
-    //}
+    export class TypeComparisonInfo {
+        public onlyCaptureFirstError = false;
+        public flags: TypeRelationshipFlags = TypeRelationshipFlags.SuccessfulComparison;
+        public message = "";
 
-    //export function hashTypePair(tp): number {
-    //    var typePair = <TypePair>tp;
-    //    var result = typePair.a.primitiveTypeClass ^ (typePair.b.primitiveTypeClass << 4);
-    //    if (typePair.a.members != null) {
-    //        result = result ^ ((typePair.a.members.allMembers.count()) << 7);
-    //    }
-    //    else if (typePair.a.construct != null) {
-    //        result = (result + 3) << 2;
-    //    }
-    //    else if (typePair.a.call != null) {
-    //        result = (result + 7) << 5;
-    //    }
-    //    else if (typePair.a.extendsList != null) {
-    //        result = (result + 11) << 9;
-    //    }
-    //    if (typePair.b.members != null) {
-    //        result = result ^ ((typePair.b.members.allMembers.count()) << 7);
-    //    }
-    //    else if (typePair.b.construct != null) {
-    //        result = (result + 3) << 2;
-    //    }
-    //    else if (typePair.b.call != null) {
-    //        result = (result + 7) << 5;
-    //    }
-    //    else if (typePair.b.extendsList != null) {
-    //        result = (result + 11) << 9;
-    //    }
-    //    return result;
-    //}
+        public addMessageToFront(message) {
+            if (!this.onlyCaptureFirstError) {
+                this.message = this.message ? message + ":\n\t" + this.message : message;
+            }
+            else {
+                this.setMessage(message);
+            }
+        }
 
-    //export function equalsTypePair(a, b): bool {
-    //    var pairA = <TypePair>a;
-    //    var pairB = <TypePair>b;
-    //    return (pairA.a == pairB.a) && (pairA.b == pairB.b);
-    //}
+        public setMessage(message) {
+            this.message = message;
+        }
+    }
 
     export interface SignatureData {
         parameters: ParameterSymbol[];
         nonOptionalParameterCount: number;
+    }
+
+    export interface ApplicableSignature {
+        signature: Signature;
+        hadProvisionalErrors: bool;
     }
 
     export enum TypeCheckCollectionMode {
@@ -99,17 +85,14 @@ module TypeScript {
         public booleanType: Type;
         public doubleType: Type;
 
-        // TODO: string base from core (set in type flow constructor)
         public stringType: Type;
         public anyType: Type;
         public nullType: Type;
         public undefinedType: Type;
 
-
         // Use this flag to turn resident checking on and off
         public residentTypeCheck: bool = true;
 
-        // TODO: make this var when constructor locals entered in earlier pass
         public mod: ModuleType = null;
         public gloMod: TypeSymbol = null;
 
@@ -133,9 +116,8 @@ module TypeScript {
             this.voidType = this.enterPrimitive(Primitive.Void, "void");
             this.booleanType = this.enterPrimitive(Primitive.Boolean, "bool");
             this.doubleType = this.enterPrimitive(Primitive.Double, "number");
-            // number is synonym for double
             this.importedGlobals.ambientEnclosedTypes.addPublicMember("number", this.doubleType.symbol);
-            // TODO: string base from core (set in type flow constructor)
+
             this.stringType = this.enterPrimitive(Primitive.String, "string");
             this.anyType = this.enterPrimitive(Primitive.Any, "any");
             this.nullType = this.enterPrimitive(Primitive.Null, "null");
@@ -206,21 +188,24 @@ module TypeScript {
         public targetAccessorType: Type = null;
 
         constructor (public contextualType: Type,
-            public provisional:bool, public contextID: number) { }
+            public provisional: bool, public contextID: number) { }
     }
 
     export class ContextualTypingContextStack {
         private contextStack: ContextualTypeContext[] = [];
         static contextID = TypeCheckStatus.Finished + 1;
-        public pushContextualType(type: Type, provisional: bool) { this.contextStack.push(new ContextualTypeContext(type, provisional, ContextualTypingContextStack.contextID++)); this.checker.errorReporter.throwOnTypeError = provisional}
+        public pushContextualType(type: Type, provisional: bool) { this.contextStack.push(new ContextualTypeContext(type, provisional, ContextualTypingContextStack.contextID++)); this.checker.errorReporter.pushToErrorSink = provisional; }
+        public hadProvisionalErrors = false; // somewhere in the chain a provisional typecheck error was thrown
         public popContextualType() {
             var tc = this.contextStack.pop();
-            this.checker.errorReporter.throwOnTypeError = this.isProvisional();
+            this.checker.errorReporter.pushToErrorSink = this.isProvisional();
+            this.hadProvisionalErrors = this.hadProvisionalErrors || (tc.provisional && (this.checker.errorReporter.getCapturedErrors().length));
+            this.checker.errorReporter.freeCapturedErrors();
             return tc;
         }
         public getContextualType(): ContextualTypeContext { return (!this.contextStack.length ? null : this.contextStack[this.contextStack.length - 1]); }
-        public getContextID() { return (!this.contextStack.length ? TypeCheckStatus.Finished: this.contextStack[this.contextStack.length - 1].contextID); }
-        public isProvisional() { return (!this.contextStack.length ? false: this.contextStack[this.contextStack.length - 1].provisional); }
+        public getContextID() { return (!this.contextStack.length ? TypeCheckStatus.Finished : this.contextStack[this.contextStack.length - 1].contextID); }
+        public isProvisional() { return (!this.contextStack.length ? false : this.contextStack[this.contextStack.length - 1].provisional); }
 
         constructor (public checker: TypeChecker) { }
     }
@@ -246,7 +231,6 @@ module TypeScript {
 
         public anon = "_anonymous";
 
-        // TODO: make this var when constructor locals entered in earlier pass
         public globals: DualStringHashTable;
         public globalTypes: DualStringHashTable;
         public ambientGlobals: DualStringHashTable;
@@ -267,7 +251,6 @@ module TypeScript {
         public inWith = false;
         public errorsOnWith = true;
 
-        // Contextual typing
         public typingContextStack: ContextualTypingContextStack;
         public currentContextualTypeContext: ContextualTypeContext = null;
 
@@ -278,6 +261,8 @@ module TypeScript {
         public assignableCache: any[] = <any>{};
         public subtypeCache: any[] = <any>{};
         public identicalCache: any[] = <any>{};
+
+        public provisionalStartedTypecheckObjects: PhasedTypecheckObject[] = [];
 
         constructor (public persistentState: PersistentGlobalTypeState) {
             this.voidType = this.persistentState.voidType;
@@ -312,18 +297,23 @@ module TypeScript {
         }
 
         public unsetContextualType() {
-            this.typingContextStack.popContextualType();
+            var lastTC = this.typingContextStack.popContextualType();
             this.currentContextualTypeContext = this.typingContextStack.getContextualType();
+            return lastTC;
         }
-        public unsetContextualTypeWithContext(cxt: ContextualTypeContext) {
-            while (this.currentContextualTypeContext != cxt) {
-                this.unsetContextualType();
+
+        public hadProvisionalErrors() {
+            return this.typingContextStack.hadProvisionalErrors;
+        }
+        public resetProvisionalErrors() {
+            if (!this.typingContextStack.getContextualType()) {
+                this.typingContextStack.hadProvisionalErrors = false;
             }
         }
 
         public typeCheckWithContextualType(contextType: Type, provisional: bool, condition: bool, ast: AST) {
             if (condition) {
-                this.setContextualType(contextType, provisional);
+                this.setContextualType(contextType, this.typingContextStack.isProvisional() || provisional);
             }
             this.typeFlow.typeCheck(ast);
             if (condition) {
@@ -336,8 +326,8 @@ module TypeScript {
         }
 
         // Unset the current contextual type without disturbing the stack, effectively "killing" the contextual typing process
-        public killTargetType() { this.currentContextualTypeContext = null; this.errorReporter.throwOnTypeError = false; }
-        public hasTargetType() { return this.currentContextualTypeContext != null && this.currentContextualTypeContext.contextualType != null; }
+        public killTargetType() { this.currentContextualTypeContext = null; this.errorReporter.pushToErrorSink = false; }
+        public hasTargetType() { return this.currentContextualTypeContext && this.currentContextualTypeContext.contextualType; }
         public getTargetTypeContext() { return this.currentContextualTypeContext; }
 
         public inProvisionalTypecheckMode() {
@@ -357,6 +347,19 @@ module TypeScript {
                    (this.inProvisionalTypecheckMode() && status == this.typingContextStack.getContextID());
         }
 
+        public addStartedPTO(pto: PhasedTypecheckObject) {
+            if (this.inProvisionalTypecheckMode()) {
+                this.provisionalStartedTypecheckObjects[this.provisionalStartedTypecheckObjects.length] = pto;
+            }
+        }
+
+        public cleanStartedPTO() {
+            for (var i = 0; i < this.provisionalStartedTypecheckObjects.length; i++) {
+                this.provisionalStartedTypecheckObjects[i].typeCheckStatus = TypeCheckStatus.NotStarted;
+            }
+            this.provisionalStartedTypecheckObjects = [];
+        }
+
         // type collection      
         public collectTypes(ast: AST): void {
             if (ast.nodeType == NodeType.Script) {
@@ -367,7 +370,7 @@ module TypeScript {
             var context = new TypeCollectionContext(globalChain, this);
             getAstWalkerFactory().walk(ast, preCollectTypes, postCollectTypes, null, context);
         }
-        
+
         public makeArrayType(type: Type): Type {
             if (type.arrayCache == null) {
                 type.arrayCache = new ArrayCache();
@@ -411,7 +414,6 @@ module TypeScript {
 
         // Create a signature for a function definition
         //  (E.g., has a function body - function declarations, property declarations, lambdas)
-        // TODO: Investigate adding support for accessors
         public createFunctionSignature(funcDecl: FuncDecl, container: Symbol, scope: SymbolScope, overloadGroupSym: Symbol, addToScope: bool): Signature {
 
             var isExported = hasFlag(funcDecl.fncFlags, FncFlags.Exported | FncFlags.ClassPropertyMethodExported) || container == this.gloMod;
@@ -429,7 +431,7 @@ module TypeScript {
             // Otherwise:
             //  if it's a signature, its type will be 'any'
             //  if it's a definition, the return type will be inferred  
-            if (funcDecl.returnTypeAnnotation != null || isDefinition) {
+            if (funcDecl.returnTypeAnnotation || isDefinition) {
                 signature.returnType = getTypeLink(funcDecl.returnTypeAnnotation, this, false);
             }
             else {
@@ -448,8 +450,8 @@ module TypeScript {
             signature.declAST = funcDecl;
 
             var useOverloadGroupSym =
-                overloadGroupSym != null &&
-                overloadGroupSym.getType() != null &&
+                overloadGroupSym &&
+                overloadGroupSym.getType() &&
                 !overloadGroupSym.isAccessor() &&
                 (funcDecl.isSignature() || (isAmbient == hasFlag(overloadGroupSym.flags, SymbolFlags.Ambient)));
 
@@ -495,11 +497,11 @@ module TypeScript {
 
             var instanceType = groupType.instanceType;
 
-            if (instanceType != null && !isStatic) {
+            if (instanceType && !isStatic) {
                 if (instanceType.call == null) {
                     instanceType.call = groupType.call;
                 }
-                else if (groupType.call != null) {
+                else if (groupType.call) {
                     instanceType.call.signatures.concat(groupType.call.signatures);
                 }
             }
@@ -517,17 +519,17 @@ module TypeScript {
             // usedHint prevents functions bound to object literal fields from being added to the
             // enclosing scope
             var usedHint = false;
-            if (funcDecl.name != null && !funcDecl.name.isMissing()) {
+            if (funcDecl.name && !funcDecl.name.isMissing()) {
                 funcName = funcDecl.name.text;
             }
-            else if (funcDecl.hint != null) {
+            else if (funcDecl.hint) {
                 funcName = funcDecl.hint;
                 usedHint = true;
             }
 
             if (groupType.symbol == null) {
                 groupType.symbol =
-                    new TypeSymbol((funcName != null) ? funcName : this.anon,
+                    new TypeSymbol(funcName ? funcName : this.anon,
                                     funcDecl.minChar, this.locationInfo.unitIndex,
                                     groupType);
                 if (!useOverloadGroupSym) {
@@ -559,7 +561,7 @@ module TypeScript {
             // if the funcDecl is a constructor, it will be added to the enclosing scope as a class
             if (!isConstructor) {
                 // Add the function's symbol to its enclosing scope
-                if (funcName != null && !isLambda && !funcDecl.isAccessor() && !usedHint) {
+                if (funcName && !isLambda && !funcDecl.isAccessor() && !usedHint) {
 
                     // REVIEW: We're not setting the isDecl flags for fuctions bound to object literal properties
                     // so removing the isDefiniton clause would break object literals
@@ -574,7 +576,7 @@ module TypeScript {
 
                             groupType.symbol.container = container;
                         } // REVIEW: Another check for overloads...
-                        else if (overloadGroupSym == null || (overloadGroupSym.declAST != null && !(<FuncDecl>overloadGroupSym.declAST).isOverload && (container.isType()))) {
+                        else if (overloadGroupSym == null || (overloadGroupSym.declAST && !(<FuncDecl>overloadGroupSym.declAST).isOverload && (container.isType()))) {
                             scope.enter(container, funcDecl, groupType.symbol, this.errorReporter, !isPrivate && (isExported || isStatic || isGlobal), false, isAmbient);
                         }
                     }
@@ -590,31 +592,31 @@ module TypeScript {
             // If, say, a call signature overload was declared before the class type was, we want to reuse
             // the type that's already been instantiated for the class type, rather than allocate a new one
             if (useOverloadGroupSym) {
-                var overloadGroupType = overloadGroupSym != null ? overloadGroupSym.getType() : null;
+                var overloadGroupType = overloadGroupSym ? overloadGroupSym.getType() : null;
                 var classType = groupType;
 
                 if (classType != overloadGroupType) {
                     if (classType.construct == null) {
-                        if (overloadGroupType != null && overloadGroupType.construct != null) {
+                        if (overloadGroupType && overloadGroupType.construct) {
                             classType.construct = overloadGroupType.construct;
                         }
                         else {
                             classType.construct = new SignatureGroup();
                         }
                     }
-                    else if (overloadGroupType != null) {
-                        if (overloadGroupType.construct != null) {
+                    else if (overloadGroupType) {
+                        if (overloadGroupType.construct) {
                             classType.construct.signatures.concat(overloadGroupType.construct.signatures);
                         }
                     }
 
                     // sync call and index signatures as well, but don't allocate should they not
                     // already exist
-                    if (overloadGroupType != null) {
+                    if (overloadGroupType) {
                         if (classType.call == null) {
                             classType.call = overloadGroupType.call;
                         }
-                        else if (overloadGroupType.call != null) {
+                        else if (overloadGroupType.call) {
                             classType.call.signatures.concat(overloadGroupType.call.signatures);
                         }
 
@@ -628,11 +630,11 @@ module TypeScript {
 
                             var instanceType = classType.instanceType;
 
-                            if (instanceType != null) {
+                            if (instanceType) {
                                 if (instanceType.call == null) {
                                     instanceType.call = overloadGroupType.call;
                                 }
-                                else if (overloadGroupType.call != null) {
+                                else if (overloadGroupType.call) {
                                     instanceType.call.signatures.concat(overloadGroupType.call.signatures);
                                 }
                             }
@@ -641,7 +643,7 @@ module TypeScript {
                         if (classType.index == null) {
                             classType.index = overloadGroupType.index;
                         }
-                        else if (overloadGroupType.index != null) {
+                        else if (overloadGroupType.index) {
                             classType.index.signatures.concat(overloadGroupType.index.signatures);
                         }
                     }
@@ -667,13 +669,13 @@ module TypeScript {
                 accessorSym.declAST = funcDecl; // REVIEW: need to reset for getters and setters
 
                 if (hasFlag(funcDecl.fncFlags, FncFlags.GetAccessor)) {
-                    if (accessorSym.getter != null) {
+                    if (accessorSym.getter) {
                         this.errorReporter.simpleError(funcDecl, "Redeclaration of property getter");
                     }
                     accessorSym.getter = <TypeSymbol>sig.declAST.type.symbol;
                 }
                 else {
-                    if (accessorSym.setter != null) {
+                    if (accessorSym.setter) {
                         this.errorReporter.simpleError(funcDecl, "Redeclaration of property setter");
                     }
                     accessorSym.setter = <TypeSymbol>sig.declAST.type.symbol;
@@ -720,13 +722,13 @@ module TypeScript {
                 }
 
                 if (hasFlag(funcDecl.fncFlags, FncFlags.GetAccessor)) {
-                    if (accessorSym.getter != null) {
+                    if (accessorSym.getter) {
                         this.errorReporter.simpleError(funcDecl, "Redeclaration of property getter");
                     }
                     accessorSym.getter = <TypeSymbol>funcDecl.type.symbol;
                 }
                 else {
-                    if (accessorSym.setter != null) {
+                    if (accessorSym.setter) {
                         this.errorReporter.simpleError(funcDecl, "Redeclaration of property setter");
                     }
                     accessorSym.setter = <TypeSymbol>funcDecl.type.symbol;
@@ -736,11 +738,11 @@ module TypeScript {
             return accessorSym;
         }
 
-        public addBases(resultScope: SymbolAggregateScope, type: Type, baseContext: {base: string; baseId: number;}): void {
+        public addBases(resultScope: SymbolAggregateScope, type: Type, baseContext: { base: string; baseId: number; }): void {
             resultScope.addParentScope(new SymbolTableScope(type.members, type.ambientMembers, type.getAllEnclosedTypes(), type.getAllAmbientEnclosedTypes(), type.symbol));
             var i = 0;
             var parent: Type;
-            if (type.extendsList != null) {
+            if (type.extendsList) {
                 for (var len = type.extendsList.length; i < len; i++) {
                     parent = type.extendsList[i];
                     if (baseContext.baseId == parent.typeID) {
@@ -759,32 +761,32 @@ module TypeScript {
             this.addBases(resultScope, type, baseContext);
             return resultScope;
         }
-        
+
         public lookupMemberType(containingType: Type, name: string): Type {
             var symbol: Symbol = null;
-            if (containingType.containedScope != null) {
+            if (containingType.containedScope) {
                 symbol = containingType.containedScope.find(name, false, true);
             }
-            else if (containingType.members != null) {
+            else if (containingType.members) {
                 symbol = containingType.members.allMembers.lookup(name);
 
-                if (symbol == null && containingType.ambientMembers != null) {
+                if (symbol == null && containingType.ambientMembers) {
                     symbol = containingType.ambientMembers.allMembers.lookup(name);
                 }
             }
             if (symbol == null) {
                 var typeMembers = containingType.getAllEnclosedTypes();
                 var ambientTypeMembers = containingType.getAllAmbientEnclosedTypes();
-                if (typeMembers != null) {
+                if (typeMembers) {
                     symbol = typeMembers.allMembers.lookup(name);
 
-                    if (symbol == null && ambientTypeMembers != null) {
+                    if (symbol == null && ambientTypeMembers) {
                         symbol = ambientTypeMembers.allMembers.lookup(name);
                     }
 
                 }
             }
-            if ((symbol != null) && (symbol.isType())) {
+            if (symbol && symbol.isType()) {
                 return symbol.getType();
             }
             else {
@@ -792,12 +794,10 @@ module TypeScript {
             }
         }
 
-        public findSymbolForDynamicModule(idText: string, currentFileName: string, search:(id:string)=>Symbol): Symbol {
+        public findSymbolForDynamicModule(idText: string, currentFileName: string, search: (id: string) =>Symbol): Symbol {
             var originalIdText = idText;
             var symbol = search(idText);
-
-            // REVIEW: In the IDE case, we won't have a mod map to fall back on, so we need to assemble
-            // the mod name by hand                
+           
             if (symbol == null) {
                 // perhaps it's a dynamic module?
                 if (!symbol) {
@@ -842,19 +842,19 @@ module TypeScript {
                         idText = normalizePath(path + strippedIdText + ".ts");
                         symbol = search(idText);
 
-                        // check for .ts
+                        // check for .str
                         if (symbol == null) {
                             idText = changePathToSTR(idText);
                             symbol = search(idText);
                         }
 
-                        // check for .d.str
+                        // check for .d.ts
                         if (symbol == null) {
                             idText = changePathToDTS(idText);
                             symbol = search(idText);
                         }
 
-                        // check for .dstsc
+                        // check for .d.str
                         if (symbol == null) {
                             idText = changePathToDSTR(idText);
                             symbol = search(idText);
@@ -877,7 +877,7 @@ module TypeScript {
             var resultType = this.anyType;
             var lhsType = this.anyType;
 
-            if ((lhs != null) && (rhs != null) && (rhs.nodeType == NodeType.Name)) {
+            if (lhs && rhs && (rhs.nodeType == NodeType.Name)) {
                 if (lhs.nodeType == NodeType.Dot) {
                     lhsType = this.resolveTypeMember(scope, <BinaryExpression>lhs);
                 }
@@ -899,14 +899,14 @@ module TypeScript {
                             }
                         }
 
-                        if (optimizeModuleCodeGen && symbol != null) {
+                        if (optimizeModuleCodeGen && symbol) {
                             var symType = symbol.getType();
                             // Once the type has been referenced outside of a type ref position, there's
                             // no going back                        
-                            if (symType != null && typeSymbol.aliasLink && typeSymbol.onlyReferencedAsTypeRef) {
+                            if (symType && typeSymbol.aliasLink && typeSymbol.onlyReferencedAsTypeRef) {
 
                                 var modDecl = <ModuleDecl>symType.symbol.declAST;
-                                if (modDecl != null && hasFlag(modDecl.modFlags, ModuleFlags.IsDynamic)) {
+                                if (modDecl && hasFlag(modDecl.modFlags, ModuleFlags.IsDynamic)) {
                                     typeSymbol.onlyReferencedAsTypeRef = !this.resolvingBases;
                                 }
                             }
@@ -964,12 +964,20 @@ module TypeScript {
             else {
                 signatures = functionGroupSymbol.type.call.signatures;
             }
-            // TODO: indexer
+
             var signature = signatures[signatures.length - 1];
             var len = signature.parameters.length;
             for (var i = 0; i < len; i++) {
                 var paramSym: ParameterSymbol = signature.parameters[i];
                 this.resolveTypeLink(scope, paramSym.parameter.typeLink, true);
+            }
+
+            // If a vararg list is present, check that the type is an array type
+            if (len && funcDecl.variableArgList) {
+                if (!signature.parameters[len - 1].parameter.typeLink.type.elementType) {
+                    this.errorReporter.simpleErrorFromSym(signature.parameters[len - 1].parameter.symbol, "... parameter must have array type");
+                    signature.parameters[len - 1].parameter.typeLink.type.elementType = this.makeArrayType(signature.parameters[len - 1].parameter.typeLink.type);
+                }
             }
             this.resolveTypeLink(scope, signature.returnType,
                             funcDecl.isSignature());
@@ -996,7 +1004,7 @@ module TypeScript {
             var arrayCount = 0;
             if (typeLink.type == null) {
                 var ast: AST = typeLink.ast;
-                if (ast != null) {
+                if (ast) {
                     while (typeLink.type == null) {
                         switch (ast.nodeType) {
                             case NodeType.Name:
@@ -1050,7 +1058,7 @@ module TypeScript {
                                 interfaceType.containedScope =
                                     new SymbolTableScope(interfaceType.members, null, null, null,
                                                          interfaceSymbol);
-                                
+
                                 interfaceType.containedScope.container = interfaceSymbol;
                                 interfaceType.memberScope = interfaceType.containedScope;
 
@@ -1090,10 +1098,10 @@ module TypeScript {
                                         }
                                     }
                                 }
-                                                                
+
                                 ast.type = interfaceType;
                                 typeLink.type = interfaceType;
-                                
+
                                 break;
                             case NodeType.FuncDecl:
                                 var tsym = <TypeSymbol>this.resolveFuncDecl(<FuncDecl>ast, scope, null);
@@ -1112,38 +1120,21 @@ module TypeScript {
                 if (supplyVar && (typeLink.type == null)) {
                     typeLink.type = this.anyType;
                 }
-                if (typeLink.ast != null) {
+                if (typeLink.ast) {
                     typeLink.ast.type = typeLink.type;
                 }
             }
             // else wait for type inference
         }
 
-        public currentSymbolCompareError(msg: string, left: bool) {
-            if ((this.currentCompareA != null) && (this.currentCompareB != null)) {
-                var builder = "Comparing " + this.currentCompareA.fullName() + " and " + this.currentCompareB.fullName() + ", ";
-                var offendingSym = this.currentCompareA;
-                if (left) {
-                    builder += this.currentCompareA.fullName();
-                }
-                else {
-                    offendingSym = this.currentCompareB;
-                    builder += this.currentCompareB.fullName();
-                }
-                builder += " ";
-                builder += msg;
-                this.errorReporter.simpleErrorFromSym(offendingSym, builder);
-            }
-        }
-
-        public findMostApplicableSignature(signatures: Signature[], args: ASTList): { sig: Signature; ambiguous: bool; } {
+        public findMostApplicableSignature(signatures: ApplicableSignature[], args: ASTList): { sig: Signature; ambiguous: bool; } {
 
             if (signatures.length == 1) {
-                return { sig: signatures[0], ambiguous: false };
+                return { sig: signatures[0].signature, ambiguous: false };
             }
 
-            var best: Signature = signatures[0];
-            var Q: Signature = null;
+            var best: ApplicableSignature = signatures[0];
+            var Q: ApplicableSignature = null;
             var AType: Type = null;
             var PType: Type = null;
             var QType: Type = null;
@@ -1153,13 +1144,13 @@ module TypeScript {
                 Q = signatures[qSig];
                 var i = 0;
                 // find the better conversion
-                for (i = 0; i < args.members.length; i++) {
+                for (i = 0; args && i < args.members.length; i++) {
                     AType = args.members[i].type;
-                    PType = i < best.parameters.length ? best.parameters[i].getType() : best.parameters[best.parameters.length - 1].getType().elementType;
-                    QType = i < Q.parameters.length ?  Q.parameters[i].getType() : Q.parameters[Q.parameters.length - 1].getType().elementType;
+                    PType = i < best.signature.parameters.length ? best.signature.parameters[i].getType() : best.signature.parameters[best.signature.parameters.length - 1].getType().elementType;
+                    QType = i < Q.signature.parameters.length ? Q.signature.parameters[i].getType() : Q.signature.parameters[Q.signature.parameters.length - 1].getType().elementType;
 
                     if (this.typesAreIdentical(PType, QType)) {
-                        break;
+                        continue;
                     }
                     else if (this.typesAreIdentical(AType, PType)) {
                         break;
@@ -1175,31 +1166,45 @@ module TypeScript {
                         best = Q;
                         break;
                     }
+                    else if (Q.hadProvisionalErrors) {
+                        break;
+                    }
+                    else if (best.hadProvisionalErrors) {
+                        best = Q;
+                        break;
+                    }
                 }
 
-                if (i == args.members.length  && !this.typesAreIdentical(best.returnType.type, Q.returnType.type)) { // neither conversion was better
-                    ambiguous = true;
+                if (!args || i == args.members.length) {
+                    var collection: ITypeCollection = {
+                        getLength: () => { return 2; },
+                        setTypeAtIndex: (index: number, type: Type) => { }, // no contextual typing here, so no need to do anything
+                        getTypeAtIndex: (index: number) => { return index ? Q.signature.returnType.type : best.signature.returnType.type; } // we only want the "second" type - the "first" is skipped
+                    }
+                    var bct = this.findBestCommonType(best.signature.returnType.type, null, collection);
+                    ambiguous = !bct;
                 }
                 else {
                     ambiguous = false;
                 }
             }
 
-            return { sig: best, ambiguous: ambiguous };
+            return { sig: best.signature, ambiguous: ambiguous };
         }
 
-        public getApplicableSignatures(signatures: Signature[], args: ASTList): Signature[] {
+        public getApplicableSignatures(signatures: Signature[], args: ASTList, comparisonInfo: TypeComparisonInfo): ApplicableSignature[] {
 
-            var applicableSigs: Signature[] = [];
+            var applicableSigs: ApplicableSignature[] = [];
             var memberType: Type = null;
             var miss = false;
             var cxt: ContextualTypeContext = null;
+            var hadProvisionalErrors = false;
 
             for (var i = 0; i < signatures.length; i++) {
                 miss = false;
 
                 for (var j = 0; j < args.members.length; j++) {
-                    
+
                     if (j >= signatures[i].parameters.length) {
                         continue;
                     }
@@ -1214,11 +1219,14 @@ module TypeScript {
                         continue;
                     }
                     else if (args.members[j].nodeType == NodeType.FuncDecl) {
+                        if (this.typeFlow.functionInterfaceType && memberType == this.typeFlow.functionInterfaceType) {
+                            continue;
+                        }
                         if (!this.canContextuallyTypeFunction(memberType, <FuncDecl>args.members[j], true)) {
                             // if it's just annotations that are blocking us, typecheck the function and add it to the list
                             if (this.canContextuallyTypeFunction(memberType, <FuncDecl>args.members[j], false)) {
                                 this.typeFlow.typeCheck(args.members[j]);
-                                if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
+                                if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType, comparisonInfo)) {
                                     break;
                                 }
                             }
@@ -1227,27 +1235,29 @@ module TypeScript {
                             }
                         }
                         else { // if it can be contextually typed, try it out...
-                            try {
-                                cxt = this.currentContextualTypeContext;
-                                this.typeCheckWithContextualType(memberType, true, true, args.members[j]);
-                                if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
-                                    miss = true;
+
+                            this.typeCheckWithContextualType(memberType, true, true, args.members[j]);
+                            this.cleanStartedPTO();
+                            hadProvisionalErrors = this.hadProvisionalErrors();
+
+                            if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType, comparisonInfo)) {
+                                if (comparisonInfo) {
+                                    comparisonInfo.setMessage("Could not apply type '" + memberType.getTypeName() + "' to argument " + (j + 1) + ", which is of type '" + args.members[j].type.getTypeName() + "'");
                                 }
-                            }
-                            catch (e) {
-                                this.unsetContextualTypeWithContext(cxt);
                                 miss = true;
                             }
+
                             // clean the type
-                            try {
+                            if (hadProvisionalErrors) {
                                 cxt = this.currentContextualTypeContext;
                                 this.typeCheckWithContextualType(null, true, true, args.members[j]);
                                 if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
                                     miss = true;
                                 }
+                                this.cleanStartedPTO();
                             }
-                            catch (e) { this.unsetContextualTypeWithContext(cxt); }
 
+                            this.resetProvisionalErrors();
                             if (miss) {
                                 break;
                             }
@@ -1255,55 +1265,66 @@ module TypeScript {
                     }
                     else if (args.members[j].nodeType == NodeType.ObjectLit) {
                         // now actually attempt to typecheck as the contextual type
-                        try {
-                            cxt = this.currentContextualTypeContext;
-                            this.typeCheckWithContextualType(memberType, true, true, args.members[j]);
-                            if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
-                                miss = true;
-                            }
+                        if (this.typeFlow.objectInterfaceType && memberType == this.typeFlow.objectInterfaceType) {
+                            continue;
                         }
-                        catch (e) {
-                            this.unsetContextualTypeWithContext(cxt);
+
+                        this.typeCheckWithContextualType(memberType, true, true, args.members[j]);
+                        this.cleanStartedPTO();
+                        hadProvisionalErrors = this.hadProvisionalErrors(); 
+
+                        if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType, comparisonInfo)) {
+                            if (comparisonInfo) {
+                                comparisonInfo.setMessage("Could not apply type '" + memberType.getTypeName() + "' to argument " + (j + 1) + ", which is of type '" + args.members[j].type.getTypeName() + "'");
+                            }
                             miss = true;
                         }
+
                         // clean the type
-                        try {
+                        if (hadProvisionalErrors) {
                             this.typeCheckWithContextualType(null, true, true, args.members[j]);
 
                             // is the "cleaned" type even assignable?
                             if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
                                 miss = true;
                             }
-                        }
-                        catch (e) { this.unsetContextualTypeWithContext(cxt); }
 
+                            this.cleanStartedPTO();
+                        }
+
+                        this.resetProvisionalErrors();
                         if (miss) {
                             break;
                         }
                     }
                     else if (args.members[j].nodeType == NodeType.ArrayLit) {
                         // attempt to contextually type the array literal
-                        try {
-                            cxt = this.currentContextualTypeContext;
-                            this.typeCheckWithContextualType(memberType, true, true, args.members[j]);
-                            if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
-                                break;
+                        if (this.typeFlow.arrayInterfaceType && memberType == this.typeFlow.arrayInterfaceType) {
+                            continue;
+                        }
+
+                        this.typeCheckWithContextualType(memberType, true, true, args.members[j]);
+                        this.cleanStartedPTO();
+                        hadProvisionalErrors = this.hadProvisionalErrors(); 
+
+                        if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType, comparisonInfo)) {
+                            if (comparisonInfo) {
+                                comparisonInfo.setMessage("Could not apply type '" + memberType.getTypeName() + "' to argument " + (j + 1) + ", which is of type '" + args.members[j].type.getTypeName() + "'");
                             }
+                            break;
                         }
-                        catch (e) {
-                            this.unsetContextualTypeWithContext(cxt);
-                            miss = true;
-                        }
+
                         // clean the type
-                        try {
-                            var cxt = this.currentContextualTypeContext;
+                        if (hadProvisionalErrors) {
                             this.typeCheckWithContextualType(null, true, true, args.members[j]);
                             if (!this.sourceIsAssignableToTarget(args.members[j].type, memberType)) {
                                 miss = true;
                             }
-                        }
-                        catch (e) { this.unsetContextualTypeWithContext(cxt); }
 
+                            this.cleanStartedPTO();
+                        }
+
+                        this.resetProvisionalErrors();
                         if (miss) {
                             break;
                         }
@@ -1311,9 +1332,9 @@ module TypeScript {
                 }
 
                 if (j == args.members.length) {
-                    applicableSigs[applicableSigs.length] = signatures[i];
+                    applicableSigs[applicableSigs.length] = { signature: signatures[i], hadProvisionalErrors: hadProvisionalErrors };
                 }
-
+                hadProvisionalErrors = false;
             }
 
             return applicableSigs;
@@ -1326,7 +1347,7 @@ module TypeScript {
             //  to its body - instead, it should be applied to its return type
             if (funcDecl.isParenthesized ||
                 funcDecl.isMethod() ||
-                (beStringent && funcDecl.returnTypeAnnotation != null) ||
+                beStringent && funcDecl.returnTypeAnnotation ||
                 funcDecl.isInlineCallLiteral) {
                 return false;
             }
@@ -1362,11 +1383,11 @@ module TypeScript {
                 }
             }
 
-            if (candidateType.construct != null && candidateType.call != null) {
+            if (candidateType.construct && candidateType.call) {
                 return false;
             }
 
-            var candidateSigs = candidateType.construct != null ? candidateType.construct : candidateType.call;
+            var candidateSigs = candidateType.construct ? candidateType.construct : candidateType.call;
 
             if (!candidateSigs || candidateSigs.signatures.length > 1) {
                 return false;
@@ -1435,51 +1456,8 @@ module TypeScript {
             return true;
         }
 
-        public objectLiteralIsSupersetOfContextualType(targetType: Type, objectLit: UnaryExpression): bool {
-
-            var memberDecls = <ASTList>objectLit.operand;
-
-            if (!(memberDecls && targetType.memberScope)) {
-                return false;
-            }
-
-            var id: AST = null;
-            var targetMember: Symbol = null;
-            var text = "";
-            var members = targetType.members.publicMembers.getAllKeys();
-
-            for (var i = 0; i < members.length; i++) {
-
-                for (var j = 0; j < memberDecls.members.length; j++) {
-                    id = (<BinaryExpression>memberDecls.members[j]).operand1;
-
-                    if (id.nodeType == NodeType.Name) {
-                        text = (<Identifier>id).text;
-                    }
-                    else if (id.nodeType == NodeType.QString) {
-                        // TODO: set text to unescaped string
-                        var idText = (<StringLiteral>id).text;
-                        text = idText.substring(1, idText.length - 1);
-                    }
-                    else {
-                        return false;
-                    }
-
-                    if (text == members[i]) {
-                        break;
-                    }
-                }
-
-                if (j == memberDecls.members.length) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         public widenType(t: Type) {
-            if (t == this.undefinedType || t == this.nullType) {
+            if (t == this.undefinedType || t == this.nullType) { // REVIEW: not isNullOrUndefinedType for perf reasons
                 return this.anyType;
             }
 
@@ -1490,7 +1468,7 @@ module TypeScript {
             return t == this.undefinedType || t == this.nullType;
         }
 
-        public findBestCommonType(initialType: Type, targetType: Type, collection: ITypeCollection) {
+        public findBestCommonType(initialType: Type, targetType: Type, collection: ITypeCollection, comparisonInfo?: TypeComparisonInfo) {
             var i = 0;
             var len = collection.getLength();
             var nlastChecked = 0;
@@ -1513,20 +1491,20 @@ module TypeScript {
                         continue;
                     }
 
-                    if (convergenceType && (bestCommonType = convergenceType.mergeOrdered(collection.getTypeAtIndex(i), this))) {
+                    if (convergenceType && (bestCommonType = convergenceType.mergeOrdered(collection.getTypeAtIndex(i), this, comparisonInfo))) {
                         convergenceType = bestCommonType;
                     }
 
                     if (bestCommonType == this.anyType || bestCommonType == null) {
                         break;
                     }
-                    else if (targetType != null) { // set the element type to the target type
+                    else if (targetType) { // set the element type to the target type
                         collection.setTypeAtIndex(i, targetType);
                     }
                 }
 
                 // use the type if we've agreed upon it
-                if (convergenceType != null && bestCommonType != null) {
+                if (convergenceType && bestCommonType) {
                     break;
                 }
 
@@ -1541,15 +1519,6 @@ module TypeScript {
 
         // Type Identity
 
-        // Two types are considered identical when they are both one and the same of the Any, Number, String, 
-        // Boolean, Undefined, Null, or Void types, when they are both array types with identical element types, 
-        // or when they are both object types with identical sets of members. Member sets of object types are 
-        // identical when, one for one,
-        // •	properties are identical in name, optionality, and type,
-        // •	call signatures are identical in return types and parameter count, kinds, and types,
-        // •	construct signatures are identical in return types and parameter count, kinds, and types,
-        // •	index signatures are identical in return and parameter types, and
-        // •	brands are identical.
         public typesAreIdentical(t1: Type, t2: Type) {
 
             // This clause will cover both primitive types (since the type objects are shared),
@@ -1578,7 +1547,7 @@ module TypeScript {
                     return false;
                 }
                 this.identicalCache[comboId] = false;
-                var ret =  this.typesAreIdentical(t1.elementType, t2.elementType);
+                var ret = this.typesAreIdentical(t1.elementType, t2.elementType);
                 if (ret) {
                     this.subtypeCache[comboId] = true;
                 }
@@ -1631,7 +1600,7 @@ module TypeScript {
                     t2MemberType = t2MemberSymbol.getType();
 
                     // catch the mutually recursive or cached cases
-                    if (t1MemberType && t2MemberType && (this.identicalCache[(t2MemberType.typeID << 16) | t1MemberType.typeID ] != undefined)) {
+                    if (t1MemberType && t2MemberType && (this.identicalCache[(t2MemberType.typeID << 16) | t1MemberType.typeID] != undefined)) {
                         continue;
                     }
 
@@ -1703,7 +1672,7 @@ module TypeScript {
                     sigsMatch = false;
                     continue;
                 }
-                
+
                 // no match found for a specific signature
                 return false;
             }
@@ -1738,25 +1707,17 @@ module TypeScript {
             return true;
         }
 
-        // Subtypes and Supertypes
+        // Subtyping and Assignment compatibility
 
-        // A type S is a subtype of a type T, and T is a supertype of S, if one of the following is true:
-        //  •	S and T are identical types.
-        //  •	S is not the Void type and T is the Any type.
-        //  •	S is the Undefined type and T is not the Void type.
-        //  •	S is the Null type and T is not the Undefined or Void type.
-        //  •	S and T are array types with element types SE and TE, and SE is a subtype of TE.
-        //  •	S and T are object types and, for each member M in T, one of the following is true:
-        //      o	M is a property and S contains a property of the same name as M and a type that is a subtype of that of M.
-        //      o	M is an optional property and S contains no property of the same name as M.
-        //      o	M is a call, construct or index signature and S contains a call, construct or index signature N where
-        //          •	the signatures are of the same kind (call, construct or index),
-        //          •	the number of non-optional parameters in N is less than or equal to that of M,
-        //          •	for parameter positions that are present in both signatures, each parameter type in N is a subtype or supertype of the corresponding parameter type in M,
-        //          •	the result type of M is Void, or the result type of N is a subtype of that of M. 
-        //      o	M is a brand and S contains the same brand.
-        //  When comparing call, construct, or index signatures, parameter names are ignored and rest parameters correspond to an unbounded expansion of optional parameters of the rest parameter element type.
-        public sourceIsSubtypeOfTarget(source: Type, target: Type) {
+        public sourceIsSubtypeOfTarget(source: Type, target: Type, comparisonInfo?: TypeComparisonInfo) { return this.sourceIsRelatableToTarget(source, target, false, this.subtypeCache, comparisonInfo); }
+        public signatureGroupIsSubtypeOfTarget(sg1: SignatureGroup, sg2: SignatureGroup, comparisonInfo?: TypeComparisonInfo) { return this.signatureGroupIsRelatableToTarget(sg1, sg2, false, this.subtypeCache, comparisonInfo); }
+        public signatureIsSubtypeOfTarget(s1: Signature, s2: Signature, comparisonInfo?: TypeComparisonInfo) { return this.signatureIsRelatableToTarget(s1, s2, false, this.subtypeCache, comparisonInfo); }
+
+        public sourceIsAssignableToTarget(source: Type, target: Type, comparisonInfo?: TypeComparisonInfo) { return this.sourceIsRelatableToTarget(source, target, true, this.assignableCache, comparisonInfo); }
+        public signatureGroupIsAssignableToTarget(sg1: SignatureGroup, sg2: SignatureGroup, comparisonInfo?: TypeComparisonInfo) { return this.signatureGroupIsRelatableToTarget(sg1, sg2, true, this.assignableCache, comparisonInfo); }
+        public signatureIsAssignableToTarget(s1: Signature, s2: Signature, comparisonInfo?: TypeComparisonInfo) { return this.signatureIsRelatableToTarget(s1, s2, true, this.assignableCache, comparisonInfo); }
+
+        public sourceIsRelatableToTarget(source: Type, target: Type, assignableTo: bool, comparisonCache: any, comparisonInfo: TypeComparisonInfo) {
 
             // REVIEW: Does this check even matter?
             //if (this.typesAreIdentical(source, target)) {
@@ -1767,337 +1728,27 @@ module TypeScript {
             }
 
             // An error has already been reported in this case
-            if (!(source && target)) { 
-                return true; 
+            if (!(source && target)) {
+                return true;
             }
 
             var comboId = (source.typeID << 16) | target.typeID;
 
-            if (this.subtypeCache[comboId]) {
-                return true;
-            }
-
-            // This is one difference between assignment compatibility and subtyping
-            if (target == this.anyType) {
-                return true;
-            }
-
-            if (source == this.undefinedType) {
-                return true;
-            }
-
-            if ((source == this.nullType) && (target != this.undefinedType && target != this.voidType)) {
-                return true;
-            }
-
-            // REVIEW: enum types aren't explicitly covered in the spec
-            if (target == this.numberType && (source.typeFlags & TypeFlags.IsEnum)) {
-                return true;
-            }
-            if (source == this.numberType && (target.typeFlags & TypeFlags.IsEnum)) {
-                return true;
-            }
-            if ((source.typeFlags & TypeFlags.IsEnum) || (target.typeFlags & TypeFlags.IsEnum)) {
-                return false;
-            }
-
-            if (source.isArray() || target.isArray()) {
-                if (!(source.isArray() && target.isArray())) {
-                    return false;
-                }
-                this.subtypeCache[comboId] = false;
-                var ret =  this.sourceIsSubtypeOfTarget(source.elementType, target.elementType);
-                if (ret) {
-                    this.subtypeCache[comboId] = true;
-                }
-                else {
-                    this.subtypeCache[comboId] = undefined;
-                }
-
-                return ret;
-            }
-
-            // this check ensures that we only operate on object types from this point forward,
-            // since the checks involving primitives occurred above
-            if (source.primitiveTypeClass != target.primitiveTypeClass) {
-
-                if (target.primitiveTypeClass == Primitive.None) {
-                    if (source == this.numberType && this.typeFlow.numberInterfaceType) {
-                        source = this.typeFlow.numberInterfaceType;
-                    }
-                    else if (source == this.stringType && this.typeFlow.stringInterfaceType) {
-                        source = this.typeFlow.stringInterfaceType;
-                    }
-                    else if (source == this.booleanType && this.typeFlow.booleanInterfaceType) {
-                        source = this.typeFlow.booleanInterfaceType;
-                    }
-                    else {
-                        return false;
-                    }
-                }
-                else {
-                    return false;
-                }
-            }
-
-            this.subtypeCache[comboId] = false;
-
-            if (source.hasBase(target)) {
-                this.subtypeCache[comboId] = false;
-                return true;
-            }
-
-            if (this.typeFlow.objectInterfaceType && target == this.typeFlow.objectInterfaceType) {
-                return true;
-            }
-
-            if (this.typeFlow.functionInterfaceType && (source.call || source.construct) && target == this.typeFlow.functionInterfaceType) {
-                return true;
-            }
-
-            // At this point, if the target is a class, but not the source or a parent of the source, bail
-            if (target.isClass() || target.isClassInstance()) {
-                this.assignableCache[comboId] = undefined;
-                return false;
-            }
-
-            if (target.memberScope && source.memberScope) {
-                var mPropKeys = target.memberScope.getAllValueSymbolNames(true);
-                var mProp: Symbol = null;
-                var nProp: Symbol = null;
-                var mPropType: Type = null;
-                var nPropType: Type = null;
-                var inferenceSymbol: InferenceSymbol = null;
-
-                for (var iMProp = 0; iMProp < mPropKeys.length; iMProp++) {
-                    mProp = target.memberScope.find(mPropKeys[iMProp], false, false);
-                    nProp = source.memberScope.find(mPropKeys[iMProp], false, false);
-
-                    // methods do not have the "arguments" field
-                    if (mProp.kind() == SymbolKind.Variable && (<VariableSymbol>mProp).variable.typeLink.ast &&
-                        (<VariableSymbol>mProp).variable.typeLink.ast.nodeType == NodeType.Name &&
-                        (<Identifier>(<VariableSymbol>mProp).variable.typeLink.ast).text == "IArguments") {
-                        continue;
-                    }
-
-                    if (mProp.isInferenceSymbol()) {
-                        inferenceSymbol = <InferenceSymbol>mProp;
-                        if (inferenceSymbol.typeCheckStatus == TypeCheckStatus.NotStarted) {
-                            // REVIEW: TypeChanges: Does this ever really happen?  Maybe for out-of-order typecheck?
-                            this.typeFlow.typeCheck(mProp.declAST);
-                        }
-                    }
-                    mPropType = mProp.getType();
-
-                    if (!nProp) {
-                        // If it's not present on the type in question, look for the property on 'Object'
-                        if (this.typeFlow.objectInterfaceType) {
-                            nProp = this.typeFlow.objectInterfaceType.memberScope.find(mPropKeys[iMProp], false, false);
-                        }
-
-                        if (!nProp) {
-                            // Now, the property was not found on Object, but the type in question is a function, look
-                            // for it on function
-                            if (this.typeFlow.functionInterfaceType && (mPropType.call || mPropType.construct)) {
-                                nProp = this.typeFlow.functionInterfaceType.memberScope.find(mPropKeys[iMProp], false, false);
-                            }
-
-                            // finally, check to see if the property is optional
-                            if (!nProp) {
-                                if (!(mProp.flags & SymbolFlags.Optional)) {
-                                    this.subtypeCache[comboId] = undefined;
-                                    return false;
-                                }
-                                else {
-                                    continue;
-                                }
-                            }
-                        }
-                    }
-
-                    if (nProp.isInferenceSymbol()) {
-                        inferenceSymbol = <InferenceSymbol>nProp;
-                        if (inferenceSymbol.typeCheckStatus == TypeCheckStatus.NotStarted) {
-                            this.typeFlow.typeCheck(nProp.declAST);
-                        }
-                    }
-
-                    nPropType = nProp.getType();
-
-                    // catch the mutually recursive or cached cases
-                    if (mPropType && nPropType && (this.subtypeCache[(nPropType.typeID << 16) | mPropType.typeID ] != undefined)) {
-                        continue;
-                    }
-
-                    if (!this.sourceIsSubtypeOfTarget(nPropType, mPropType)) {
-                        this.subtypeCache[comboId] = undefined;
-                        return false;
-                    }
-                }
-            }
-
-            // check signature groups
-            if (source.call || target.call) {
-                if (!this.signatureGroupIsSubtypeOfTarget(source.call, target.call)) {
-                    this.subtypeCache[comboId] = undefined;
-                    return false;
-                }
-            }
-
-            if (source.construct || target.construct) {
-                if (!this.signatureGroupIsSubtypeOfTarget(source.construct, target.construct)) {
-                    this.subtypeCache[comboId] = undefined;
-                    return false;
-                }
-            }
-
-            if (target.index) {
-                if (!this.signatureGroupIsSubtypeOfTarget(source.index, target.index)) {
-                    this.subtypeCache[comboId] = undefined;
-                    return false;
-                }
-            }
-
-            this.subtypeCache[comboId] = true;
-            return true;
-        }
-
-        // REVIEW: TypeChanges: Return an error context object so the user can get better diagnostic info
-        public signatureGroupIsSubtypeOfTarget(sourceSG: SignatureGroup, targetSG: SignatureGroup) {
-
-            if (sourceSG == targetSG) {
-                return true;
-            }
-
-            if (!sourceSG || !targetSG) {
-                return false;
-            }
-
-            var mSig: Signature = null;
-            var nSig: Signature = null;
-            var foundMatch = false;
-
-            for (var iMSig = 0; iMSig < targetSG.signatures.length; iMSig++) {
-                mSig = targetSG.signatures[iMSig];
-
-                for (var iNSig = 0; iNSig < sourceSG.signatures.length; iNSig++) {
-                    nSig = sourceSG.signatures[iNSig];
-                    if (this.signatureIsSubtypeOfTarget(nSig, mSig)) {
-                        foundMatch = true;
-                        break;
-                    }
-                }
-
-                if (foundMatch) {
-                    foundMatch = false;
-                    continue;
-                }
-                return false;
-            }
-
-            return true;
-        }
-
-        public signatureIsSubtypeOfTarget(sourceSig: Signature, targetSig: Signature) {
-
-            if (!(sourceSig.parameters && targetSig.parameters)) {
-                return false;
-            }
-
-            var targetVarArgCount = targetSig.hasVariableArgList ? targetSig.nonOptionalParameterCount - 1 : targetSig.nonOptionalParameterCount;
-            var sourceVarArgCount = sourceSig.hasVariableArgList ? sourceSig.nonOptionalParameterCount - 1 : sourceSig.nonOptionalParameterCount;
-
-            if (sourceVarArgCount > targetVarArgCount && !targetSig.hasVariableArgList) {
-                return false;
-            }
-
-            var sourceReturnType = sourceSig.returnType.type;
-            var targetReturnType = targetSig.returnType.type;
-
-            if (targetReturnType != this.voidType) {
-                if (!this.sourceIsSubtypeOfTarget(sourceReturnType, targetReturnType)) {
-                    return false;
-                }
-            }
-
-            var len = (sourceVarArgCount < targetVarArgCount && sourceSig.hasVariableArgList) ? targetVarArgCount : sourceVarArgCount;
-            var sourceParamType: Type = null;
-            var targetParamType: Type = null;
-
-            for (var iSource = 0, iTarget = 0; iSource < len; iSource++, iTarget++) {
-
-                if (!sourceSig.hasVariableArgList || iSource < sourceVarArgCount) {
-                    sourceParamType = (<ParameterSymbol>sourceSig.parameters[iSource]).parameter.typeLink.type;
-                }
-                else if (iSource == sourceVarArgCount) {
-                    sourceParamType = (<ParameterSymbol>sourceSig.parameters[iSource]).parameter.typeLink.type;
-                    if (sourceParamType.elementType) {
-                        sourceParamType = sourceParamType.elementType;
-                    }
-                }
-
-                //if (!targetSig.hasVariableArgList && iTarget < targetVarArgCount) {
-                if (iTarget < targetSig.parameters.length && iTarget < targetVarArgCount) {
-                    targetParamType = (<ParameterSymbol>targetSig.parameters[iTarget]).parameter.typeLink.type;
-                }
-                else if (targetSig.hasVariableArgList && iTarget == targetVarArgCount) {
-                    targetParamType = (<ParameterSymbol>targetSig.parameters[iTarget]).parameter.typeLink.type;
-                    if (targetParamType.elementType) {
-                        targetParamType = targetParamType.elementType;
-                    }
-                }
-
-                if (!(this.sourceIsSubtypeOfTarget(sourceParamType, targetParamType) || this.sourceIsSubtypeOfTarget(targetParamType, sourceParamType))) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // Assignment compatibility
-
-        // A type S is assignable to a type T, and T is assignable from S, if one of the following is true:
-        //  •	S and T are identical types.
-        //  •	S is not the Void type and T is the Any type.
-        //  •	S is the Any type and T is not the Void type
-        //  •	S is the Undefined type and T is not the Void type.
-        //  •	S is the Null type and T is not the Undefined or Void type.
-        //  •	S and T are array types with element types SE and TE, and SE is assignable to TE.
-        //  •	S and T are object types and, for each member M in T, one of the following is true:
-        //      o	M is a property and S contains a property of the same name as M and a type that is assignable to that of M.
-        //      o	M is an optional property and S contains no property of the same name as M.
-        //      o	M is a call, construct or index signature and S contains a call, construct or index signature N where
-        //          •	the signatures are of the same kind (call, construct or index),
-        //          •	the number of non-optional parameters in N is less than or equal to that of M,
-        //          •	for parameter positions that are present in both signatures, each parameter type in N is assignable to or from the corresponding parameter type in M,
-        //          •	the result type of M is Void, or the result type of N is assignable to that of M. 
-        //      o	M is a brand and S contains the same brand.
-        // When comparing call, construct, or index signatures, parameter names are ignored and rest parameters correspond to an unbounded expansion of optional parameters of the rest parameter element type.
-
-        public sourceIsAssignableToTarget(source: Type, target: Type) {
-
-            // REVIEW: Does this check even matter?
-            //if (this.typesAreIdentical(source, target)) {
-            //    return true;
-            //}
-            if (source == target) {
-                return true;
-            }
-
-            // An error has already been reported in this case
-            if (!(source && target)) { 
-                return true; 
-            }
-
-            var comboId = (source.typeID << 16) | target.typeID;
-
-            if (this.assignableCache[comboId]) {
+            if (comparisonCache[comboId]) {
                 return true;
             }
 
             // this is one difference between subtyping and assignment compatibility
-            if (source == this.anyType || target == this.anyType) {
-                return true;
+            if (assignableTo) {
+                if (source == this.anyType || target == this.anyType) {
+                    return true;
+                }
+            }
+            else {
+                // This is one difference between assignment compatibility and subtyping
+                if (target == this.anyType) {
+                    return true;
+                }
             }
 
             if (source == this.undefinedType) {
@@ -2123,13 +1774,13 @@ module TypeScript {
                 if (!(source.isArray() && target.isArray())) {
                     return false;
                 }
-                this.assignableCache[comboId] = false;
-                var ret =  this.sourceIsAssignableToTarget(source.elementType, target.elementType);
+                comparisonCache[comboId] = false;
+                var ret = this.sourceIsRelatableToTarget(source.elementType, target.elementType, assignableTo, comparisonCache, comparisonInfo);
                 if (ret) {
-                    this.assignableCache[comboId] = true;
+                    comparisonCache[comboId] = true;
                 }
                 else {
-                    this.assignableCache[comboId] = undefined;
+                    comparisonCache[comboId] = undefined;
                 }
 
                 return ret;
@@ -2158,10 +1809,10 @@ module TypeScript {
                 }
             }
 
-            this.assignableCache[comboId] = false;
+            comparisonCache[comboId] = false;
 
             if (source.hasBase(target)) {
-                this.assignableCache[comboId] = true;
+                comparisonCache[comboId] = true;
                 return true;
             }
 
@@ -2173,9 +1824,14 @@ module TypeScript {
                 return true;
             }
 
+            // REVIEW: We should perhaps do this, though it wouldn't be quite right without generics support
+            //if (this.typeFlow.arrayInterfaceType && (source.index) && target == this.typeFlow.arrayInterfaceType) {
+            //    return true;
+            //}
+
             // At this point, if the target is a class, but not the source or a parent of the source, bail
             if (target.isClass() || target.isClassInstance()) {
-                this.assignableCache[comboId] = undefined;
+                comparisonCache[comboId] = undefined;
                 return false;
             }
 
@@ -2223,7 +1879,11 @@ module TypeScript {
                             // finally, check to see if the property is optional
                             if (!nProp) {
                                 if (!(mProp.flags & SymbolFlags.Optional)) {
-                                    this.assignableCache[comboId] = undefined;
+                                    comparisonCache[comboId] = undefined;
+                                    if (comparisonInfo) { // only surface the first error
+                                        comparisonInfo.flags |= TypeRelationshipFlags.RequiredPropertyIsMissing;
+                                        comparisonInfo.addMessageToFront("Type '" + source.getTypeName() + "' is missing property '" + mPropKeys[iMProp] + "' from type '" + target.getTypeName() + "'");
+                                    }
                                     return false;
                                 }
                                 else {
@@ -2240,16 +1900,20 @@ module TypeScript {
                         }
                     }
 
-                    
+
                     nPropType = nProp.getType();
 
                     // catch the mutually recursive or cached cases
-                    if (mPropType && nPropType && (this.assignableCache[(nPropType.typeID << 16) | mPropType.typeID ] != undefined)) {
+                    if (mPropType && nPropType && (comparisonCache[(nPropType.typeID << 16) | mPropType.typeID] != undefined)) {
                         continue;
                     }
 
-                    if (!this.sourceIsAssignableToTarget(nPropType, mPropType)) {
-                        this.assignableCache[comboId] = undefined;
+                    if (!this.sourceIsRelatableToTarget(nPropType, mPropType, assignableTo, comparisonCache, comparisonInfo)) {
+                        comparisonCache[comboId] = undefined;
+                        if (comparisonInfo) { // only surface the first error
+                            comparisonInfo.flags |= TypeRelationshipFlags.IncompatiblePropertyTypes;
+                            comparisonInfo.addMessageToFront("Types of property '" + mProp.name + "' of types '" + source.getTypeName() + "' and '" + target.getTypeName() + "' are incompatible");
+                        }
                         return false;
                     }
                 }
@@ -2257,32 +1921,61 @@ module TypeScript {
 
             // check signature groups
             if (source.call || target.call) {
-                if (!this.signatureGroupIsAssignableToTarget(source.call, target.call)) {
-                    this.assignableCache[comboId] = undefined;
+                if (!this.signatureGroupIsRelatableToTarget(source.call, target.call, assignableTo, comparisonCache, comparisonInfo)) {
+                    if (comparisonInfo) {
+                        if (source.call && target.call) {
+                            comparisonInfo.addMessageToFront("Call signatures of types '" + source.getTypeName() + "' and '" + target.getTypeName() + "' are incompatible");
+                        }
+                        else {
+                            var hasSig = target.call ? target.getTypeName() : source.getTypeName();
+                            var lacksSig = !target.call ? target.getTypeName() : source.getTypeName();
+                            comparisonInfo.setMessage("Type '" + hasSig + "' requires a call signature, but Type '" + lacksSig + "' lacks one");
+                        }
+                        comparisonInfo.flags |= TypeRelationshipFlags.IncompatibleSignatures;
+                    }
+                    comparisonCache[comboId] = undefined;
                     return false;
                 }
             }
 
             if (source.construct || target.construct) {
-                if (!this.signatureGroupIsAssignableToTarget(source.construct, target.construct)) {
-                    this.assignableCache[comboId] = undefined;
+                if (!this.signatureGroupIsRelatableToTarget(source.construct, target.construct, assignableTo, comparisonCache, comparisonInfo)) {
+                    if (comparisonInfo) {
+                        if (source.construct && target.construct) {
+                            comparisonInfo.addMessageToFront("Construct signatures of types '" + source.getTypeName() + "' and '" + target.getTypeName() + "' are incompatible");
+                        }
+                        else {
+                            var hasSig = target.construct ? target.getTypeName() : source.getTypeName();
+                            var lacksSig = !target.construct ? target.getTypeName() : source.getTypeName();
+                            comparisonInfo.setMessage("Type '" + hasSig + "' requires a construct signature, but Type '" + lacksSig + "' lacks one");
+                        }
+                        comparisonInfo.flags |= TypeRelationshipFlags.IncompatibleSignatures;
+                    }
+                    comparisonCache[comboId] = undefined;
                     return false;
                 }
             }
 
             if (target.index) {
-                if (!this.signatureGroupIsAssignableToTarget(source.index, target.index)) {
-                    this.assignableCache[comboId] = undefined;
+                var targetIndex = !target.index && this.typeFlow.objectInterfaceType ? this.typeFlow.objectInterfaceType.index : target.index;
+                var sourceIndex = !source.index && this.typeFlow.objectInterfaceType ? this.typeFlow.objectInterfaceType.index : source.index;
+
+                if (!this.signatureGroupIsRelatableToTarget(sourceIndex, targetIndex, assignableTo, comparisonCache, comparisonInfo)) {
+                    if (comparisonInfo) {
+                        comparisonInfo.addMessageToFront("Index signatures of types '" + source.getTypeName() + "' and '" + target.getTypeName() + "' are incompatible");
+                        comparisonInfo.flags |= TypeRelationshipFlags.IncompatibleSignatures;
+                    }
+                    comparisonCache[comboId] = undefined;
                     return false;
                 }
             }
 
-            this.assignableCache[comboId] = true;
+            comparisonCache[comboId] = true;
             return true;
         }
 
         // REVIEW: TypeChanges: Return an error context object so the user can get better diagnostic info
-        public signatureGroupIsAssignableToTarget(sourceSG: SignatureGroup, targetSG: SignatureGroup) {
+        public signatureGroupIsRelatableToTarget(sourceSG: SignatureGroup, targetSG: SignatureGroup, assignableTo: bool, comparisonCache: any, comparisonInfo?: TypeComparisonInfo) {
             if (sourceSG == targetSG) {
                 return true;
             }
@@ -2300,7 +1993,7 @@ module TypeScript {
 
                 for (var iNSig = 0; iNSig < sourceSG.signatures.length; iNSig++) {
                     nSig = sourceSG.signatures[iNSig];
-                    if (this.signatureIsAssignableToTarget(nSig, mSig)) {
+                    if (this.signatureIsRelatableToTarget(nSig, mSig, assignableTo, comparisonCache, comparisonInfo)) {
                         foundMatch = true;
                         break;
                     }
@@ -2316,7 +2009,7 @@ module TypeScript {
             return true;
         }
 
-        public signatureIsAssignableToTarget(sourceSig: Signature, targetSig: Signature) {
+        public signatureIsRelatableToTarget(sourceSig: Signature, targetSig: Signature, assignableTo: bool, comparisonCache: any, comparisonInfo?: TypeComparisonInfo) {
 
             if (!sourceSig.parameters || !targetSig.parameters) {
                 return false;
@@ -2326,6 +2019,10 @@ module TypeScript {
             var sourceVarArgCount = sourceSig.hasVariableArgList ? sourceSig.nonOptionalParameterCount - 1 : sourceSig.nonOptionalParameterCount;
 
             if (sourceVarArgCount > targetVarArgCount && !targetSig.hasVariableArgList) {
+                if (comparisonInfo) {
+                    comparisonInfo.flags |= TypeRelationshipFlags.SourceSignatureHasTooManyParameters;
+                    comparisonInfo.addMessageToFront("Call signature expects " + targetVarArgCount + " or fewer parameters");
+                }
                 return false;
             }
 
@@ -2333,7 +2030,12 @@ module TypeScript {
             var targetReturnType = targetSig.returnType.type;
 
             if (targetReturnType != this.voidType) {
-                if (!this.sourceIsAssignableToTarget(sourceReturnType, targetReturnType)) {
+                if (!this.sourceIsRelatableToTarget(sourceReturnType, targetReturnType, assignableTo, comparisonCache, comparisonInfo)) {
+                    if (comparisonInfo) {
+                        comparisonInfo.flags |= TypeRelationshipFlags.IncompatibleReturnTypes;
+                        // No need to print this one here - it's printed as part of the signature error in sourceIsRelatableToTarget
+                        //comparisonInfo.addMessageToFront("Incompatible return types: '" + sourceReturnType.getTypeName() + "' and '" + targetReturnType.getTypeName() + "'");
+                    }
                     return false;
                 }
             }
@@ -2341,31 +2043,41 @@ module TypeScript {
             var len = (sourceVarArgCount < targetVarArgCount && sourceSig.hasVariableArgList) ? targetVarArgCount : sourceVarArgCount;
             var sourceParamType: Type = null;
             var targetParamType: Type = null;
+            var sourceParamName = "";
+            var targetParamName = "";
 
             for (var iSource = 0, iTarget = 0; iSource < len; iSource++, iTarget++) {
 
                 if (!sourceSig.hasVariableArgList || iSource < sourceVarArgCount) {
                     sourceParamType = (<ParameterSymbol>sourceSig.parameters[iSource]).parameter.typeLink.type;
+                    sourceParamName = (<ParameterSymbol>sourceSig.parameters[iSource]).parameter.symbol.name;
                 }
                 else if (iSource == sourceVarArgCount) {
                     sourceParamType = (<ParameterSymbol>sourceSig.parameters[iSource]).parameter.typeLink.type;
                     if (sourceParamType.elementType) {
                         sourceParamType = sourceParamType.elementType;
                     }
+                    sourceParamName = (<ParameterSymbol>sourceSig.parameters[iSource]).parameter.symbol.name;
                 }
 
-                //if (!targetSig.hasVariableArgList || iTarget < targetVarArgCount) {
                 if (iTarget < targetSig.parameters.length && iTarget < targetVarArgCount) {
                     targetParamType = (<ParameterSymbol>targetSig.parameters[iTarget]).parameter.typeLink.type;
+                    targetParamName = (<ParameterSymbol>targetSig.parameters[iTarget]).parameter.symbol.name;
                 }
                 else if (targetSig.hasVariableArgList && iTarget == targetVarArgCount) {
                     targetParamType = (<ParameterSymbol>targetSig.parameters[iTarget]).parameter.typeLink.type;
                     if (targetParamType.elementType) {
                         targetParamType = targetParamType.elementType;
                     }
+                    targetParamName = (<ParameterSymbol>targetSig.parameters[iTarget]).parameter.symbol.name;
                 }
 
-                if (!(this.sourceIsAssignableToTarget(sourceParamType, targetParamType) || this.sourceIsAssignableToTarget(targetParamType, sourceParamType))) {
+                if (!(this.sourceIsRelatableToTarget(sourceParamType, targetParamType, assignableTo, comparisonCache, comparisonInfo) ||
+                        this.sourceIsRelatableToTarget(targetParamType, sourceParamType, assignableTo, comparisonCache, comparisonInfo))) {
+
+                    if (comparisonInfo) {
+                        comparisonInfo.flags |= TypeRelationshipFlags.IncompatibleParameterTypes;
+                    }
                     return false;
                 }
             }

@@ -1,2 +1,2 @@
 declare class foo{};
-function foo() {}
+function foo() { return null; }

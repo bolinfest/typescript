@@ -149,7 +149,7 @@ class HarnessBatch {
 
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
-            compiler.emit(this.compilationSettings.outputMany, this.host.createFile);
+            compiler.emit(this.host.createFile);
         }
 
         if (outfile) {

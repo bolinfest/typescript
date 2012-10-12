@@ -1,7 +1,7 @@
-0.ts line 35 col 4: Index signatures may only take 'string' or 'number' as their parameter
-0.ts line 37 col 4: Index signatures may take only one parameter
-0.ts line 68 col 4: Index signatures may only take 'string' or 'number' as their parameter
-0.ts line 70 col 4: Index signatures may take only one parameter
+0.ts line 35 col 5: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 37 col 4: Index signatures may take one and only one parameter
+0.ts line 68 col 5: Index signatures may only take 'string' or 'number' as their parameter
+0.ts line 70 col 4: Index signatures may take one and only one parameter
 0.ts line 80 col 4: Signature for 'p7' is duplicated
 0.ts line 95 col 15: Cannot convert 'Object' to 'i1': Type 'Object' is missing property 'p' from type 'i1'
 0.ts line 96 col 15: Value of type 'i1' is not newable

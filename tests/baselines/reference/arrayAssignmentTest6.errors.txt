@@ -1,2 +1,6 @@
+0.ts line 14 col 32: exported class 'Bug' implements private interface 'IMode'
+0.ts line 15 col 37: public function parameter 'tokens' has or is using private type 'IToken'
+0.ts line 15 col 74: public function return type has or is using private type 'ILineTokens'
+0.ts line 16 col 12: public function return type has or is using private type 'ILineTokens'
 0.ts line 14 col 4: Class 'Bug' declares interface 'IMode' but does not implement it: Types of property 'tokenize' of types 'Bug' and 'IMode' are incompatible:
-	Call signatures of types '(line: string,tokens: IToken[],includeStates: bool) => ILineTokens' and '(line: string,state: IState,includeStates: bool) => ILineTokens' are incompatible
+	Call signatures of types '(line: string, tokens: IToken[], includeStates: bool) => ILineTokens' and '(line: string, state: IState, includeStates: bool) => ILineTokens' are incompatible

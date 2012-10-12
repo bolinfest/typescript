@@ -5,7 +5,7 @@ module Diff {
     /// <summary>
     ///  Enum indicating what happened to a Segment of text analyzed in a diff.
     /// </summary>
-    enum SegmentType {
+    export enum SegmentType {
         Unchanged,
         Added,
         Removed,
@@ -13,7 +13,7 @@ module Diff {
         MovedTo
     }
 
-    enum UnicodeCategory {
+    export enum UnicodeCategory {
         SpaceSeparator,
         LowercaseLetter
     }
@@ -23,7 +23,7 @@ module Diff {
     ///  to the diff algorithm. Identifies the content and what happened to it between
     ///  the old and new states of the string diff'd.
     /// </summary>
-    class Segment {
+    export class Segment {
         constructor (public content? = '', public type? = SegmentType.Unchanged) { }
     }
 
@@ -32,7 +32,7 @@ module Diff {
     ///  to the diff algorithm. Identifies the index and length in the parent text,
     ///  and what happened to it between the old and new states of the string diff'd.
     /// </summary>
-    class Region {
+    export class Region {
         constructor (public index: number, public length: number, public type: SegmentType) { }
     }
 
@@ -40,7 +40,7 @@ module Diff {
     ///  Represents any subset of the file content. Files are split into
     ///  Chunks for the algorithm to associate.
     /// </summary>
-    class Chunk {
+    export class Chunk {
         public hashCode: string;
         public matchingIndex: number;
         public innerDiff: InnerDiff;
@@ -288,7 +288,7 @@ module Diff {
         }
     }
 
-    class InnerDiff {
+    export class InnerDiff {
         public Segments: Segment[];
 
         constructor (oldContent: string, newContent: string) {

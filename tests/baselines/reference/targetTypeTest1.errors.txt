@@ -1,2 +1,4 @@
-0.ts line 40 col 18: Cannot convert '{ x: number; y: number; add: (dx: number,dy: number) => Point; }' to 'Point'
-0.ts line 66 col 1: Cannot convert '{ a: number; b: number; C1M1: (c: number,d: number) => number; }' to 'C'
+0.ts line 14 col 0: Function declared a non-void return type, but has no return expression
+0.ts line 40 col 18: Cannot convert '{ x: number; y: number; add: (dx: number, dy: number) => Point; }' to 'Point'
+0.ts line 60 col 0: Function declared a non-void return type, but has no return expression
+0.ts line 66 col 1: Cannot convert '{ a: number; b: number; C1M1: (c: number, d: number) => any; }' to 'C'

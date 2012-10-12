@@ -127,6 +127,12 @@ class BatchCompiler {
 
                 if (!this.compilationSettings.resolve) {
                     code.content = this.ioHost.readFile(code.path);
+                    // If declaration files are going to be emitted, 
+                    // preprocess the file contents and add in referenced files as well
+                    if (this.compilationSettings.generateDeclarationFiles) {
+                        TypeScript.CompilerDiagnostics.assert(code.referencedFiles == null, "With no resolve option, referenced files need to null");
+                        code.referencedFiles = TypeScript.getReferencedFiles(code);
+                    }
                 }
 
                 if (code.content) {
@@ -137,7 +143,7 @@ class BatchCompiler {
                         if (this.compilationSettings.errorRecovery) {
                             compiler.parser.setErrorRecovery(this.ioHost.stderr, -1, -1);
                         }
-                        compiler.addUnit(code.content, code.path, addAsResident);
+                        compiler.addUnit(code.content, code.path, addAsResident, code.referencedFiles);
                     }
                 }
             }
@@ -163,19 +169,17 @@ class BatchCompiler {
 
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
-            if (this.compilationSettings.generateDeclarationFiles && compiler.errorReporter.hasErrors) {
-                // There were errors reported, do not generate declaration file
-                this.compilationSettings.generateDeclarationFiles = false;
-            }
-
             try {
-                compiler.emit(this.compilationSettings.outputMany, this.ioHost.createFile);
+                compiler.emit(this.ioHost.createFile);
             } catch (err) {
+                compiler.errorReporter.hasErrors = true;
                 // Catch emitter exceptions
                 if (err.message != "EmitError") {
                     throw err;
                 }
             }
+
+            compiler.emitDeclarationFile(this.ioHost.createFile);
         }
         else { 
             compiler.emitAST(this.compilationSettings.outputMany, this.ioHost.createFile);
@@ -236,7 +240,7 @@ class BatchCompiler {
             }
         });
 
-        opts.flag('declarations', {
+        opts.flag('declaration', {
             usage: 'Generates corresponding .d.ts file',
             set: () => {
                 this.compilationSettings.generateDeclarationFiles = true;

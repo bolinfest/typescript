@@ -53,7 +53,7 @@ module TypeScript {
             return this;
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             switch (this.nodeType) {
@@ -207,8 +207,8 @@ module TypeScript {
             return this;
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
-            emitter.emitJavascriptList(this, null, TokenID.SColon, startLine, false, false, writeDeclFile);
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
+            emitter.emitJavascriptList(this, null, TokenID.SColon, startLine, false, false);
         }
 
         public typeCheck(typeFlow: TypeFlow) {
@@ -272,7 +272,7 @@ module TypeScript {
             return typeFlow.typeCheckName(this);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitJavascriptName(this, true);
         }
 
@@ -287,7 +287,7 @@ module TypeScript {
         }
         public isMissing() { return true; }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             // Emit nothing for a missing ID
         }
     }
@@ -304,7 +304,7 @@ module TypeScript {
             return this;
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeLineToOutput(this.id.actualText + ":");
@@ -401,7 +401,7 @@ module TypeScript {
             return this;
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             switch (this.nty) {
@@ -499,7 +499,7 @@ module TypeScript {
             }
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
 
@@ -603,7 +603,7 @@ module TypeScript {
             return this;
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             var binTokenId = nodeTypeToTokTable[this.nodeType];
 
             emitter.emitParensAndCommentsInPlace(this, true);
@@ -690,7 +690,7 @@ module TypeScript {
             return typeFlow.typeCheckQMark(this);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.emitJavascript(this.operand1, TokenID.QMark, false);
@@ -719,7 +719,7 @@ module TypeScript {
             return "num: " + this.value;
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             if (this.isNegativeZero) {
@@ -753,7 +753,7 @@ module TypeScript {
             return this;
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput(this.regex.toString());
@@ -769,7 +769,7 @@ module TypeScript {
         }
 
         public isStatementOrExpression() { return true; }
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.emitStringLiteral(this.text);
@@ -800,12 +800,8 @@ module TypeScript {
             super(NodeType.Import);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             var mod = <ModuleType>this.alias.type;
-            if (writeDeclFile) {
-                emitter.emitImportDecl(this);
-            }
-
             // REVIEW: Only modules may be aliased for now, though there's no real
             // restriction on what the type symbol may be
             if (!this.isDynamicImport || (this.id.sym && !(<TypeSymbol>this.id.sym).onlyReferencedAsTypeRef)) {
@@ -817,7 +813,7 @@ module TypeScript {
                 emitter.writeToOutput("var " + this.id.actualText + " = ");
                 emitter.modAliasId = this.id.actualText;
                 emitter.firstModAlias = this.firstAliasedModToString();
-                emitter.emitJavascript(this.alias, TokenID.Tilde, false, writeDeclFile);
+                emitter.emitJavascript(this.alias, TokenID.Tilde, false);
                 // the dynamic import case will insert the semi-colon automatically
                 if (!this.isDynamicImport) {
                     emitter.writeToOutput(";");
@@ -890,8 +886,8 @@ module TypeScript {
         public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }
         public isStatic() { return hasFlag(this.varFlags, VarFlags.Static); }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
-            emitter.emitJavascriptVarDecl(this, tokenId, writeDeclFile);
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
+            emitter.emitJavascriptVarDecl(this, tokenId);
         }
 
         public treeViewLabel() {
@@ -914,13 +910,10 @@ module TypeScript {
 
         public parameterPropertySym: FieldSymbol = null;
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput(this.id.actualText);
-            if (writeDeclFile) {
-                emitter.emitArgDecl(this);
-            }
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -1024,8 +1017,8 @@ module TypeScript {
             return typeFlow.typeCheckFunction(this);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
-            emitter.emitJavascriptFunction(this, writeDeclFile);
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
+            emitter.emitJavascriptFunction(this);
         }
 
         public getNameText() {
@@ -1083,6 +1076,7 @@ module TypeScript {
 
     export class Script extends FuncDecl {
         public locationInfo: LocationInfo = null;
+        public referencedFiles: IFileReference[] = [];
         public requiresGlobal = false;
         public requiresInherits = false;
         public isResident = false;
@@ -1143,16 +1137,11 @@ module TypeScript {
             return false;
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             if (this.emitRequired()) {
                 emitter.emitParensAndCommentsInPlace(this, true);
                 emitter.recordSourceMappingStart(this);
-                emitter.emitPrologue(this.requiresInherits);
-                var oldDeclContainingAST: AST = writeDeclFile ? emitter.setDeclContainingAST(this) : null;
-                emitter.emitJavascriptList(this.bod, null, TokenID.SColon, true, false, false, writeDeclFile);
-                if (writeDeclFile) {
-                    emitter.setDeclContainingAST(oldDeclContainingAST);
-                }
+                emitter.emitJavascriptList(this.bod, null, TokenID.SColon, true, false, false, true, this.requiresInherits);
                 emitter.recordSourceMappingEnd(this);
                 emitter.emitParensAndCommentsInPlace(this, false);
             }
@@ -1208,13 +1197,11 @@ module TypeScript {
             return typeFlow.typeCheckModule(this);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             if (!hasFlag(this.modFlags, ModuleFlags.ShouldEmitModuleDecl)) {
                 emitter.emitParensAndCommentsInPlace(this, true);
-                emitter.emitJavascriptModule(this, writeDeclFile);
+                emitter.emitJavascriptModule(this);
                 emitter.emitParensAndCommentsInPlace(this, false);
-            } else if (writeDeclFile) {
-                emitter.emitModuleSignature(this);
             }
         }
     }
@@ -1261,8 +1248,8 @@ module TypeScript {
             return typeFlow.typeCheckClass(this);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
-            emitter.emitJavascriptClass(this, writeDeclFile);
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
+            emitter.emitJavascriptClass(this);
         }
     }
 
@@ -1300,13 +1287,8 @@ module TypeScript {
             }
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
-            if (this.nty == NodeType.Interface) {
-                if (writeDeclFile) {
-                    emitter.emitInterfaceDeclaration(this);
-                }
-            }
-            else {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
+            if (this.nty != NodeType.Interface) {
                 throw new Error("please implement emit for node type" + this.nty);
             }
         }
@@ -1332,16 +1314,16 @@ module TypeScript {
             super(NodeType.LabeledStatement);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             if (this.labels) {
                 var labelsLen = this.labels.members.length;
                 for (var i = 0; i < labelsLen; i++) {
-                    this.labels.members[i].emit(emitter, tokenId, startLine, writeDeclFile);
+                    this.labels.members[i].emit(emitter, tokenId, startLine);
                 }
             }
-            this.stmt.emit(emitter, tokenId, true, writeDeclFile);
+            this.stmt.emit(emitter, tokenId, true);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -1366,19 +1348,19 @@ module TypeScript {
             super(NodeType.Block);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             if (this.visible) {
                 emitter.writeLineToOutput(" {");
-                emitter.increaseIndent();
+                emitter.indenter.increaseIndent();
             }
             var temp = emitter.setInObjectLiteral(false);
             if (this.stmts) {
                 emitter.emitJavascriptList(this.stmts, null, TokenID.SColon, true, false, false);
             }
             if (this.visible) {
-                emitter.decreaseIndent();
+                emitter.indenter.decreaseIndent();
                 emitter.emitIndent();
                 emitter.writeToOutput("}");
             }
@@ -1449,7 +1431,7 @@ module TypeScript {
             context.unconditionalBranch(this.resolvedTarget, (this.nty == NodeType.Continue));
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             if (this.nty == NodeType.Break) {
@@ -1477,7 +1459,7 @@ module TypeScript {
 
         public isLoop() { return true; }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
@@ -1534,7 +1516,7 @@ module TypeScript {
             super(NodeType.DoWhile);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
@@ -1593,7 +1575,7 @@ module TypeScript {
 
         public isCompoundStatement() { return true; }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
@@ -1668,7 +1650,7 @@ module TypeScript {
             super(NodeType.Return);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
@@ -1762,7 +1744,7 @@ module TypeScript {
             return false;
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
@@ -1828,7 +1810,7 @@ module TypeScript {
         public isStatementOrExpression() { return true; }
         public isLoop() { return true; }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
@@ -1924,7 +1906,7 @@ module TypeScript {
             super(NodeType.With);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput("with (");
@@ -1961,14 +1943,14 @@ module TypeScript {
             emitter.writeToOutput("switch(");
             emitter.emitJavascript(this.val, TokenID.ID, false);
             emitter.writeLineToOutput(") {");
-            emitter.increaseIndent();
+            emitter.indenter.increaseIndent();
             var casesLen = this.caseList.members.length;
             for (var i = 0; i < casesLen; i++) {
                 var caseExpr = this.caseList.members[i];
                 emitter.emitJavascript(caseExpr, TokenID.CASE, true);
                 emitter.writeLineToOutput("");
             }
-            emitter.decreaseIndent();
+            emitter.indenter.decreaseIndent();
             emitter.emitIndent();
             emitter.writeToOutput("}");
             emitter.setInObjectLiteral(temp);
@@ -2024,7 +2006,7 @@ module TypeScript {
             super(NodeType.Case);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             if (this.expr) {
@@ -2078,7 +2060,7 @@ module TypeScript {
             super(NodeType.TypeRef);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             throw new Error("should not emit a type ref");
         }
 
@@ -2087,6 +2069,10 @@ module TypeScript {
             typeFlow.inTypeRefTypeCheck = true;
             var typeLink = getTypeLink(this, typeFlow.checker, true);
             typeFlow.checker.resolveTypeLink(typeFlow.scope, typeLink, false);
+
+            if (this.term) {
+                typeFlow.typeCheck(this.term);
+            }
 
             typeFlow.checkForVoidConstructor(typeLink.type, this);
 
@@ -2158,7 +2144,7 @@ module TypeScript {
         public isStatementOrExpression() { return true; }
         public isCompoundStatement() { return true; }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.emitJavascript(this.tryNode, TokenID.TRY, false);
@@ -2208,7 +2194,7 @@ module TypeScript {
         }
 
         public isStatementOrExpression() { return true; }
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput("try ");
@@ -2242,7 +2228,7 @@ module TypeScript {
 
         public containedScope: SymbolScope = null;
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput(" catch (");
@@ -2313,7 +2299,7 @@ module TypeScript {
             super(NodeType.Finally);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput("finally");
@@ -2366,7 +2352,7 @@ module TypeScript {
             super(NodeType.Debugger);
         }
 
-        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool, writeDeclFile: bool) {
+        public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeLineToOutput("debugger;");

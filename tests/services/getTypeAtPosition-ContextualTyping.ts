@@ -22,7 +22,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
     describe('in class property decls', function() {
         it('contextually types a function literal with different arity', function() {
             // function itself
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(15, 58)), '(i: number,s: string) => number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(15, 58)), '(i: number, s: string) => number');
             
             // parameter
             assert.equal(getTypeAtPosition(fileName, lineToOffset(15, 53)), 'number');
@@ -35,7 +35,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
     describe('in module property decls', function() {
         it('contextually types a function literal with different arity', function() {
             // function itself
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(22, 60)), '(i: number,s: string) => number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(22, 60)), '(i: number, s: string) => number');
             
             // parameter
             assert.equal(getTypeAtPosition(fileName, lineToOffset(22, 64)), 'number');
@@ -92,7 +92,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('contextually types a function literal with two parameters', function() {
             // Function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(35, 47)), '(n: number,s: string) => IFoo');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(35, 47)), '(n: number, s: string) => IFoo');
             
             // Parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(35, 52)), 'number');
@@ -106,7 +106,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('does not contextually type a function literal to an overloaded function', function() {
             // Function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(39, 8)), '{ (n: any): number; (s1: any): number; }');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(39, 8)), '{ (n: number): number; (s1: string): number; }');
             
             // Parameter
             assert.equal(getTypeAtPosition(fileName, lineToOffset(39, 13)), 'any');
@@ -118,7 +118,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('contextually types a function literal with different arity than the target', function() {
             // Function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(41, 49)), '(n: number,s: string) => number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(41, 49)), '(n: number, s: string) => number');
             
             // Parameter
             assert.equal(getTypeAtPosition(fileName, lineToOffset(41, 54)), 'number');
@@ -151,10 +151,10 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('contextually types function literals inside arrays', function() {
             // outer array
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(44, 49)), '{ (n: number,s: string): string; }[]');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(44, 49)), '{ (n: number, s: string): string; }[]');
             
             // inner function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(44, 53)), '(n: number,s: string) => string');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(44, 53)), '(n: number, s: string) => string');
             
             // inner parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(44, 59)), 'number');
@@ -182,11 +182,11 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
             assert.equal(getTypeAtPosition(fileName, lineToOffset(48, 16)), 'IFoo');
             
             // outer property f
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(49, 4)), '{ f: (i: any,s: any) => any; }');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(49, 4)), '{ f: (i: any, s: any) => any; }');
             
             // inner function literal
             // Note: this is not '(i: number,s: string) => string', since we're using a type assertion
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(49, 12)), '(i: any,s: any) => any');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(49, 12)), '(i: any, s: any) => any');
             
             // inner function parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(49, 16)), 'any');
@@ -213,7 +213,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
     describe('in class property assignments', function() {
         it('contextually types a function literal with same arity', function() {
             // function itself
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(59, 20)), '(i: number,s: string) => string');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(59, 20)), '(i: number, s: string) => string');
             
             // parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(59, 28)), 'number');
@@ -229,7 +229,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
     describe('in module property assignments', function() {
         it('contextually types a function literal with same arity', function() {
             // function itself
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(68, 15)), '(i: number,s: string) => string');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(68, 15)), '(i: number, s: string) => string');
             
             // parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(68, 19)), 'number');
@@ -312,7 +312,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('contextually types a function literal with two parameters', function() {
             // Function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(129, 16)), '(n: number,s: string) => IFoo');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(129, 16)), '(n: number, s: string) => IFoo');
             
             // Parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(129, 20)), 'number');
@@ -326,7 +326,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('does not contextually type a function literal to an overloaded function', function() {
             // Function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(130, 16)), '(n: number,s: string) => number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(130, 16)), '(n: number, s: string) => number');
             
             // Parameter
             assert.equal(getTypeAtPosition(fileName, lineToOffset(130, 20)), 'number');
@@ -337,7 +337,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('contextually types a function literal with different arity than the target', function() {
             // Function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(132, 16)), '(n: number,s: string) => number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(132, 16)), '(n: number, s: string) => number');
             
             // Parameter
             assert.equal(getTypeAtPosition(fileName, lineToOffset(132, 20)), 'number');
@@ -370,10 +370,10 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('contextually types function literals inside arrays', function() {
             // outer array
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(135, 12)), '{ (n: number,s: string): string; }[]');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(135, 12)), '{ (n: number, s: string): string; }[]');
             
             // inner function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(135, 18)), '(n: number,s: string) => string');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(135, 18)), '(n: number, s: string) => string');
             
             // inner parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(135, 22)), 'number');
@@ -401,10 +401,10 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
             assert.equal(getTypeAtPosition(fileName, lineToOffset(139, 16)), 'IFoo');
             
             // outer property f
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(140, 4)), '{ f: (i: any,s: any) => any; }');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(140, 4)), '{ f: (i: any, s: any) => any; }');
             
             // inner function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(140, 12)), '(i: any,s: any) => any');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(140, 12)), '(i: any, s: any) => any');
             
             // inner function parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(140, 16)), 'any');
@@ -444,10 +444,10 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
     describe('in a return statement call', function() {
         it('contextually types a function literal with one parameter', function() {
             // function itself
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 65)), '(n: number) => IFoo');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 65)), '(n: any) => IFoo');
             
             // parameter 1
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 68)), 'number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 68)), 'any');
             
             // Return type
             assert.equal(getTypeAtPosition(fileName, lineToOffset(152, 80)), 'IFoo');
@@ -516,7 +516,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('contextually types a function literal with two parameters', function() {
             // Function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(166, 50)), '(n: number,s: string) => IFoo');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(166, 50)), '(n: number, s: string) => IFoo');
             
             // Parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(166, 54)), 'number');
@@ -574,10 +574,10 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         
         it('contextually types function literals inside arrays', function() {
             // outer array
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(175, 51)), '{ (n: number,s: string): string; }[]');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(175, 51)), '{ (n: number, s: string): string; }[]');
             
             // inner function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(175, 56)), '(n: number,s: string) => string');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(175, 56)), '(n: number, s: string) => string');
             
             // inner parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(175, 61)), 'number');
@@ -605,10 +605,10 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
             assert.equal(getTypeAtPosition(fileName, lineToOffset(179, 16)), 'IFoo');
             
             // outer property f
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(180, 4)), '{ f: (i: any,s: any) => any; }');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(180, 4)), '{ f: (i: any, s: any) => any; }');
             
             // inner function literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(180, 12)), '(i: any,s: any) => any');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(180, 12)), '(i: any, s: any) => any');
             
             // inner function parameter 1
             assert.equal(getTypeAtPosition(fileName, lineToOffset(180, 16)), 'any');
@@ -635,7 +635,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
     describe('from ambient declarations', function() {
         it('contextually types a function declaration', function() {
             // type of the function
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(190, 12)), '(a: number,b: number) => number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(190, 12)), '(a: number, b: number) => number');
             
             // type of param 'a'
             assert.equal(getTypeAtPosition(fileName, lineToOffset(191, 13)), 'number');
@@ -645,7 +645,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
         });
         it('contextually types a class declaration', function() {
             // constructor function type
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(207, 12)), '{ origin: Point; new(x: number,y: number): Point; }');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(207, 12)), '{ origin: Point; new(x: number, y: number): Point; }');
             
             // constructor param x
             assert.equal(getTypeAtPosition(fileName, lineToOffset(207, 15)), 'number');
@@ -663,30 +663,30 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
             assert.equal(getTypeAtPosition(fileName, lineToOffset(209, 11)), 'number');
             
             // constructor type in 'new' expression
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(212, 21)), '{ origin: Point; new(x: number,y: number): Point; }');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(214, 21)), '{ origin: Point; new(x: number, y: number): Point; }');
             
             // target type function on assignment to 'add'
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(214, 25)), '(dx: number,dy: number) => Point');            
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(216, 25)), '(dx: number, dy: number) => Point');            
             
             // target type of 'add' in object literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(221, 6)), '(dx: number,dy: number) => Point');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(223, 6)), '(dx: number, dy: number) => Point');
             
             // target type of add's 'dx' argument in object literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(221, 19)), 'number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(223, 19)), 'number');
             
             // target type of add's 'dy' argument in object literal
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(221, 23)), 'number');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(223, 23)), 'number');
             
         });
         it('contextually types a lambda to a library function', function() {
             // type of function
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(227, 25)), '(ev: MouseEvent) => any');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(229, 25)), '(ev: MouseEvent) => any');
             
             // type of function param 'ev'
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(227, 31)), 'MouseEvent');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(229, 31)), 'MouseEvent');
             
             // type of 'ev.bubbles'
-            assert.equal(getTypeAtPosition(fileName, lineToOffset(228, 10)), 'bool');
+            assert.equal(getTypeAtPosition(fileName, lineToOffset(230, 10)), 'bool');
         });        
     });        
 });

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -885,7 +888,7 @@ module TypeScript {
             }
             this.prevLine = this.line;
             this.prevTok = this.innerScan();
-            if (this.saveScan != null) {
+            if (this.saveScan) {
                 this.saveScan.addToken(this.prevTok, this);
             }
             return this.prevTok;
@@ -973,7 +976,7 @@ module TypeScript {
                     }
                     else {
                         var regexTok = this.speculateRegex();
-                        if (regexTok != null) {
+                        if (regexTok) {
                             return regexTok;
                         }
                         else {
@@ -1027,7 +1030,7 @@ module TypeScript {
                 }
                 else if ((this.ch >= LexCode_0) && (this.ch <= LexCode_9)) {
                     rtok = this.scanNumber();
-                    if (rtok != null) {
+                    if (rtok) {
                         return rtok;
                     }
                     else {
@@ -1089,7 +1092,7 @@ module TypeScript {
                         else {
                             this.nextChar();
                             rtok = this.scanFraction();
-                            if (rtok != null) {
+                            if (rtok) {
                                 return rtok;
                             }
                             else {

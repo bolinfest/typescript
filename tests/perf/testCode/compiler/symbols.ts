@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -8,36 +11,9 @@ module TypeScript {
         Finished,
     }
 
-    // todo: make these two functions library routines over { name:string }
-    export function uniqueSymbols(dup: Symbol[]): Symbol[]{
-        var a: Symbol[] = new Symbol[];
-        var l: number = dup.length;
-        var prevName = "@";
-        for (var i: number = 0; i < l; i++) {
-            if (prevName != dup[i].name) {
-                a[a.length] = dup[i];
-                prevName = dup[i].name;
-            }
-        }
-        return a;
-    }
-
-    export function symbolCompareByName(a: Symbol, b: Symbol): number {
-        if (a.name < b.name) {
-            return -1;
-        }
-        else if (a.name == b.name) {
-            return 0;
-        }
-        else {
-            return 1;
-        }
-    }
-
     // For lexically-scoped constructs
-    // REVIEW: Expand for "with"
     export function aLexicallyEnclosesB(a: Symbol, b: Symbol) {
-        if (a.declAST != null && b != null && b.declAST != null && a.declAST.nodeType == NodeType.FuncDecl) {
+        if (a.declAST && b && b.declAST && a.declAST.nodeType == NodeType.FuncDecl) {
             return a.declAST.minChar <= b.declAST.minChar && a.declAST.limChar >= b.declAST.limChar;
         }
         else {
@@ -46,13 +22,17 @@ module TypeScript {
     }
 
     export function aEnclosesB(a: Symbol, b: Symbol) {
-        while (a.container != null) {
+        while (a.container) {
             if (a == b || aLexicallyEnclosesB(a.container, b)) {
                 return true;
             }
             a = a.container;
         }
         return false;
+    }
+
+    export interface PhasedTypecheckObject {
+        typeCheckStatus: TypeCheckStatus;
     }
 
     export class Symbol {
@@ -74,7 +54,6 @@ module TypeScript {
         public declAST: AST = null;
         public declModule: ModuleDecl = null;  // if child of module, this is the module that declared it
 
-        // REVIEW: For diagnostics purposes
         public passSymbolCreated: number = CompilerDiagnostics.analysisPass;
 
         constructor(public name: string, public location: number,
@@ -95,7 +74,7 @@ module TypeScript {
         public pathToRoot() {
             var path = new Symbol[];
             var node = this;
-            while ((node != null) && (node.name != globalId)) {
+            while (node && (node.name != globalId)) {
                 path[path.length] = node;
                 node = node.container;
             }
@@ -108,7 +87,7 @@ module TypeScript {
             }
             var aPath = this.container.pathToRoot();
             var bPath: Symbol[];
-            if (b != null) {
+            if (b) {
                 bPath = b.pathToRoot();
             }
             else {
@@ -153,7 +132,7 @@ module TypeScript {
         public fullName(): string {
             var builder = this.name;
             var ancestor = this.container;
-            while ((ancestor != null) && (ancestor.name != globalId)) {
+            while (ancestor && (ancestor.name != globalId)) {
                 builder = ancestor.name + "." + builder;
                 ancestor = ancestor.container;
             }
@@ -186,19 +165,19 @@ module TypeScript {
                     // as we reference the actual module fragment of declaration
                     // during typecheck.  Doing this also prevents us from printing
                     // multiple error messages if the symbol is not visible.
-                    return checker != null && (checker.currentModDecl == this.declModule) ||
-                                                (checker.currentModDecl != null &&
-                                                    checker.currentModDecl.mod != null &&
-                                                    checker.currentModDecl.mod.symbol != null &&
-                                                    this.declModule != null &&
-                                                    this.declModule.mod != null &&
-                                                    this.declModule.mod.symbol != null &&
+                    return checker && (checker.currentModDecl == this.declModule) ||
+                                                (checker.currentModDecl &&
+                                                    checker.currentModDecl.mod &&
+                                                    checker.currentModDecl.mod.symbol &&
+                                                    this.declModule &&
+                                                    this.declModule.mod &&
+                                                    this.declModule.mod.symbol &&
                                                     aEnclosesB(checker.currentModDecl.mod.symbol, this.declModule.mod.symbol));
                 }
             }
             else {
                 // field or method
-                var isFunction = this.declAST != null && this.declAST.nodeType == NodeType.FuncDecl;
+                var isFunction = this.declAST && this.declAST.nodeType == NodeType.FuncDecl;
                 var isMethod = isFunction && (<FuncDecl>this.declAST).isMethod();
                 var isStaticFunction = isFunction && hasFlag((<FuncDecl>this.declAST).fncFlags, FncFlags.Static)
                 var isPrivateMethod = isMethod && hasFlag((<FuncDecl>this.declAST).fncFlags, FncFlags.Private);
@@ -217,7 +196,7 @@ module TypeScript {
                         return true;
                     }
                 }
-                else if (this.container != null) {
+                else if (this.container) {
                     return aEnclosesB(this, scope.container);
                 }
                 else {
@@ -227,14 +206,14 @@ module TypeScript {
         }
 
         public addRef(identifier: Identifier) {
-            if (this.refs == null) {
+            if (!this.refs) {
                 this.refs = [];
             }
             this.refs[this.refs.length] = identifier;
         }
 
         public toString() {
-            if (this.name != null) {
+            if (this.name) {
                 return this.name;
             }
             else {
@@ -323,11 +302,11 @@ module TypeScript {
         public onlyReferencedAsTypeRef = optimizeModuleCodeGen;
 
         public getTypeName(scope: SymbolScope) {
-            return this.type.getMemberTypeName((this.name != null) ? this.name + this.getOptionalNameString() : "", false, false, scope);
+            return this.type.getMemberTypeName(this.name ? this.name + this.getOptionalNameString() : "", false, false, scope);
         }
         public instanceScope(): SymbolScope {
-            // Don't use the constructor scope for an ES6 class body or methods - use the contained scope
-            if (!(this.type.typeFlags & TypeFlags.IsES6Class) && this.type.isClass()) {
+            // Don't use the constructor scope for a class body or methods - use the contained scope
+            if (!(this.type.typeFlags & TypeFlags.IsClass) && this.type.isClass()) {
                 return this.type.instanceType.constructorScope;
             }
             else {
@@ -339,7 +318,7 @@ module TypeScript {
 
         public toString() {
             var result = this.type.getTypeName();
-            if (this.name != null) {
+            if (this.name) {
                 result = this.name + ":" + result;
             }
             return result;
@@ -455,7 +434,7 @@ module TypeScript {
         public isVariable() { return true; }
         public argsOffset = (-1);
         public isOptional() {
-            if (this.parameter != null && this.parameter.symbol != null && this.parameter.symbol.declAST != null) {
+            if (this.parameter && this.parameter.symbol && this.parameter.symbol.declAST) {
                 return (<ArgDecl>this.parameter.symbol.declAST).isOptional;
             }
             else {

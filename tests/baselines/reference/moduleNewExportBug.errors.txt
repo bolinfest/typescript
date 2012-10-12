@@ -1,1 +1,2 @@
 0.ts line 10 col 8: The symbol 'C' is not visible at this point
+0.ts line 10 col 0: exported variable 'c' has or is using private type 'C'

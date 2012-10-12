@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// See LICENSE.txt in the project root for complete license information.
+
 ///<reference path='typescript.ts' />
 
 module TypeScript {
@@ -5,7 +8,7 @@ module TypeScript {
         constructor (public checker: TypeChecker) { }
         public resolveBaseTypeLinks(typeLinks: TypeLink[], scope: SymbolScope) {
             var extendsList: Type[] = null;
-            if (typeLinks != null) {
+            if (typeLinks) {
                 extendsList = new Type[];
                 for (var i = 0, len = typeLinks.length; i < len; i++) {
                     var typeLink = typeLinks[i];
@@ -48,7 +51,7 @@ module TypeScript {
 
             type.implementsList = this.resolveBaseTypeLinks(type.implementsTypeLinks, scope);
 
-            if (type.implementsList != null) {
+            if (type.implementsList) {
                 for (i = 0, len = type.implementsList.length; i < len; i++) {
                     var iface = type.implementsList[i];
                     if (iface.isClassInstance()) {
@@ -65,7 +68,7 @@ module TypeScript {
             var supplyVar = !(signatureGroup.hasImplementation);
             for (var i = 0, len = signatureGroup.signatures.length; i < len; i++) {
                 var signature = signatureGroup.signatures[i];
-                if (instanceType != null) {
+                if (instanceType) {
                     signature.returnType.type = instanceType;
                 }
                 else {
@@ -82,13 +85,14 @@ module TypeScript {
                     if (!lastParam.getType().isArray()) {
                         this.checker.errorReporter.simpleErrorFromSym(lastParam,
                                                                  "... parameter must have array type");
+                        lastParam.parameter.typeLink.type = this.checker.makeArrayType(lastParam.parameter.typeLink.type);
                     }
                 }
             }
         }
 
         public bindType(scope: SymbolScope, type: Type, instanceType: Type): void {
-            if (instanceType != null) {
+            if (instanceType) {
                 this.bindType(scope, instanceType, null);
             }
             if (type.hasMembers()) {
@@ -106,34 +110,34 @@ module TypeScript {
                     this.checker.currentModDecl = <ModuleDecl>type.symbol.declAST;
                     this.checker.inBind = true;
                 }
-                if (members != null) {
+                if (members) {
                     this.bind(agg, type.members.allMembers); // REVIEW: Should only be getting exported types?
                 }
-                if (typeMembers != null) {
+                if (typeMembers) {
                     this.bind(agg, typeMembers.allMembers);
                 }
-                if (ambientMembers != null) {
+                if (ambientMembers) {
                     this.bind(agg, ambientMembers.allMembers);
                 }
-                if (ambientTypeMembers != null) {
+                if (ambientTypeMembers) {
                     this.bind(agg, ambientTypeMembers.allMembers);
                 }
                 this.checker.currentModDecl = prevCurrentModDecl;
                 this.checker.inBind = prevBindStatus;
             }
-            if (type.extendsTypeLinks != null) {
+            if (type.extendsTypeLinks) {
                 this.resolveBases(scope, type);
             }
-            if (type.construct != null) {
+            if (type.construct) {
                 this.resolveSignatureGroup(type.construct, scope, instanceType);
             }
-            if (type.call != null) {
+            if (type.call) {
                 this.resolveSignatureGroup(type.call, scope, null);
             }
-            if (type.index != null) {
+            if (type.index) {
                 this.resolveSignatureGroup(type.index, scope, null);
             }
-            if (type.elementType != null) {
+            if (type.elementType) {
                 this.bindType(scope, type.elementType, null);
             }
         }
@@ -141,7 +145,7 @@ module TypeScript {
         public bindSymbol(scope: SymbolScope, symbol: Symbol) {
             if (!symbol.bound) {
                 var prevLocationInfo = this.checker.locationInfo;
-                if ((this.checker.units != null) && (symbol.unitIndex >= 0) && (symbol.unitIndex < this.checker.units.length)) {
+                if ((this.checker.units) && (symbol.unitIndex >= 0) && (symbol.unitIndex < this.checker.units.length)) {
                     this.checker.locationInfo = this.checker.units[symbol.unitIndex];
                 }
                 switch (symbol.kind()) {

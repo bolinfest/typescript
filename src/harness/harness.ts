@@ -13,6 +13,32 @@ declare var run;
 declare var IO: IIO;
 declare var __dirname; // Node-specific
 
+function switchToForwardSlashes(path: string) {
+    return path.replace(/\\/g, "/");
+}
+
+function filePath(fullPath: string) {
+    fullPath = switchToForwardSlashes(fullPath);
+    var components = fullPath.split("/");
+    var path: string[] = components.slice(0, components.length - 1);
+    return path.join("/") + "/";
+}
+
+var typescriptServiceFileName = filePath(IO.getExecutingFilePath()) + "typescriptServices.js";
+var typescriptServiceFile = IO.readFile(typescriptServiceFileName);
+if (typeof ActiveXObject === "function") {
+    eval(typescriptServiceFile);
+}
+else if (typeof require === "function") {
+    var _fs = require('fs');
+    var _path = require('path');
+    var _module = require('module');
+
+    require.main.filename = typescriptServiceFileName;
+    require.main.paths = _module._nodeModulePaths(_path.dirname(_fs.realpathSync(typescriptServiceFileName)));
+    require.main._compile(typescriptServiceFile, typescriptServiceFileName)
+}
+
 declare module process {
     export function nextTick(callback: () => any): void;
 }
@@ -389,7 +415,7 @@ module Harness {
                 testCode += 'var __test1__val__ = __test1__.__val__;\n';
 
                 testCode += 'module __test2__ {\n';
-                testCode += '    ' + other.code + ';\n';
+                testCode += '    export ' + other.code + ';\n';
                 testCode += '    export var __val__ = ' + other.identifier + ';\n';
                 testCode += '}\n';
                 testCode += 'var __test2__val__ = __test2__.__val__;\n';
@@ -509,17 +535,19 @@ module Harness {
 
         }
 
-        export function generateDeclFile(code: string): string {
+        export function generateDeclFile(code: string, verifyNoDeclFile : bool): string {
             reset();
 
             compiler.settings.generateDeclarationFiles = true;
+            var oldOutputMany = compiler.settings.outputMany;
             try {
                 addUnit(code);
                 compiler.reTypeCheck();
 
                 var outputs = {};
 
-                compiler.emit(true, (fn: string) => {
+                compiler.settings.outputMany = true;
+                compiler.emitDeclarationFile((fn: string) => {
                     outputs[fn] = new Harness.Compiler.WriterAggregator();
                     return outputs[fn];
                 });
@@ -528,13 +556,19 @@ module Harness {
                     if (fn.indexOf('.d.ts') >= 0) {
                         var writer = <Harness.Compiler.WriterAggregator>outputs[fn];
                         writer.Close();
+                        if (verifyNoDeclFile) {
+                            throw new Error('Compilation should not produce ' + fn);
+                        }
                         return writer.lines.join('\n');
                     }
                 }
 
-                throw new Error('Compilation produced no .d.ts files');
+                if (!verifyNoDeclFile) {
+                    throw new Error('Compilation did not produced .d.ts files');
+                }
             } finally {
                 compiler.settings.generateDeclarationFiles = false;
+                compiler.settings.outputMany = oldOutputMany;
             }
 
             return '';
@@ -589,6 +623,7 @@ module Harness {
                 compiler.updateUnit('', i + '.ts', false/*setRecovery*/);
             }
 
+            compiler.errorReporter.hasErrors = false;
             currentUnit = 0;
         }
 
@@ -947,7 +982,7 @@ module Harness {
         (e?: Error): void;
     }
 
-    class Runnable {
+    export class Runnable {
         constructor (public description: string, public block: any) { }
 
         // The current stack of Runnable objects
