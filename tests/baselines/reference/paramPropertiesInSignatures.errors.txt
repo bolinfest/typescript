@@ -1,5 +1,5 @@
-// 0.ts  line 2 col 30: Overload or ambient signatures may not specify parameter properties
-// 0.ts  line 3 col 31: Overload or ambient signatures may not specify parameter properties
-// 0.ts  line 8 col 30: Overload or ambient signatures may not specify parameter properties
-// 0.ts  line 9 col 31: Overload or ambient signatures may not specify parameter properties
-// 0.ts  line 10 col 27: Overload or ambient signatures may not specify parameter properties
+// 0.ts  line 2 col 13: Overload or ambient signatures may not specify parameter properties
+// 0.ts  line 3 col 13: Overload or ambient signatures may not specify parameter properties
+// 0.ts  line 8 col 13: Overload or ambient signatures may not specify parameter properties
+// 0.ts  line 9 col 13: Overload or ambient signatures may not specify parameter properties
+// 0.ts  line 10 col 13: Overload or ambient signatures may not specify parameter properties

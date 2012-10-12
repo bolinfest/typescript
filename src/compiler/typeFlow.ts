@@ -915,10 +915,6 @@ module TypeScript {
                     }
 
                     if (varDecl.init) {
-                        if (hasFlag(varDecl.varFlags, VarFlags.Ambient)) {
-                            this.checker.errorReporter.simpleError(varDecl, "Ambient variable can not have an initializer");
-                        }
-
                         // if the bound decl is a function-local static, we need to set the
                         // encapsulating scope to the function's member scope
                         var isLocalStatic = hasFlag(varDecl.varFlags, VarFlags.LocalStatic);

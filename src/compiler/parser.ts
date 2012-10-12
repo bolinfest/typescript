@@ -1722,7 +1722,7 @@ module TypeScript {
                 for (var i = 0; i < args.members.length; i++) {
                     var arg = <ArgDecl> args.members[i];
                     if (hasFlag(arg.varFlags, VarFlags.Property)) {
-                        this.reportParseError("Overload or ambient signatures may not specify parameter properties");
+                        this.reportParseError("Overload or ambient signatures may not specify parameter properties", arg.minChar, arg.limChar);
                     }
                 }
             }
@@ -2232,7 +2232,6 @@ module TypeScript {
         public parseVarDecl(errorRecoverySet: ErrorRecoverySet,
             modifiers: Modifiers,
             allowIn: bool,
-            requireSignature: bool,
             isStatic: bool): AST {
             var isConst = hasFlag(modifiers, Modifiers.Readonly);
             var minChar = this.scanner.startPos;
@@ -2292,13 +2291,8 @@ module TypeScript {
                 }
 
                 if (this.tok.tokenId == TokenID.Asg) {
-                    if (requireSignature) {
-                        this.reportParseError("context does not permit variable initializer");
-                        if (this.errorRecovery) {
-                            this.skip(errorRecoverySet);
-                            varDecl.flags |= ASTFlags.Error;
-                            return varDecl;
-                        }
+                    if (hasFlag(varDecl.varFlags, VarFlags.Ambient)) {
+                        this.reportParseError("Ambient variable can not have an initializer");
                     }
                     // TODO: note assignment for language service
                     this.tok = this.scanner.scan();
@@ -3498,7 +3492,7 @@ module TypeScript {
                         break;
                     case TokenID.VAR:
                         var declAst: AST = this.parseVarDecl(errorRecoverySet | ErrorRecoverySet.StmtStart, modifiers,
-                                                     true, false, false);
+                                                     true, false);
                         if (declAst.nodeType == NodeType.VarDecl) {
                             ast = declAst;
                         }
@@ -3566,7 +3560,7 @@ module TypeScript {
                         switch (this.tok.tokenId) {
                             case TokenID.VAR:
                                 temp = this.parseVarDecl(errorRecoverySet | ErrorRecoverySet.SColon |
-                                                  ErrorRecoverySet.In, Modifiers.None, false, false, false);
+                                                  ErrorRecoverySet.In, Modifiers.None, false, false);
                                 break;
                             case TokenID.SColon:
                                 temp = null;
