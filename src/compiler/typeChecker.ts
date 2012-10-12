@@ -511,15 +511,6 @@ module TypeScript {
 
             var instanceType = groupType.instanceType;
 
-            if (instanceType && !isStatic) {
-                if (instanceType.call == null) {
-                    instanceType.call = groupType.call;
-                }
-                else if (groupType.call) {
-                    instanceType.call.signatures.concat(groupType.call.signatures);
-                }
-            }
-
             // Ensure that the function's symbol is properly configured
             // (If there were overloads, we'll already have a symbol, otherwise we need to create one)
             var funcName: string = null;

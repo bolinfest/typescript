@@ -1,0 +1,1 @@
+0.ts line 10 col 0: Value of type 'M.Function' is not callable
