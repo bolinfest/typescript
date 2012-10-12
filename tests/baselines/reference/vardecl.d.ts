@@ -48,4 +48,23 @@ var d4: {
         y: number;
     };
 };
+module m2 {
+    var a, b2: number, b;
+    class C2 {
+        public b;
+        constructor (b);
+    }
+    var mE;
+    var d1E, d2E;
+    var b2E;
+    var v1E;
+}
+var a22, b22: number, c22: number;
+var nn;
+var normalVar;
+var xl;
+var x;
+var z;
+function foo(a2): void;
+var b: number;
 

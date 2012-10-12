@@ -21,4 +21,6 @@ export module m2 {
 export module m3 {
     function foo(): string;
 }
+export var eVar1, eVar2: number;
+export var eVar3: number, eVar4, eVar5;
 

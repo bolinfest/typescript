@@ -52,3 +52,7 @@ export module m3 {
         return m1.foo();
     }
 }
+
+export var eVar1, eVar2 = 10;
+var eVar2;
+export var eVar3 = 10, eVar4, eVar5;

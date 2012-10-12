@@ -11,6 +11,7 @@ module TypeScript {
         public isDottedModuleName: bool[] = [];
         public ignoreCallbackAst: AST = null;
         private singleDeclFile: ITextWriter = null;
+        private varListCount: number = 0;
 
         private getAstDeclarationContainer() {
             return this.declarationContainerStack[this.declarationContainerStack.length - 1];
@@ -209,7 +210,10 @@ module TypeScript {
             if (pre && this.canEmitSignature(ToDeclFlags(varDecl.varFlags), false)) {
                 var interfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
                 if (!interfaceMember) {
-                    this.emitDeclFlags(ToDeclFlags(varDecl.varFlags), "var");
+                    // If it is var list of form var a, b, c = emit it only if count > 0 - which will be when emitting first var                    // If it is var list of form  var a = varList count will be 0                    if (this.varListCount >= 0) {
+                        this.emitDeclFlags(ToDeclFlags(varDecl.varFlags), "var");
+                        this.varListCount = -this.varListCount;
+                    }
                     this.declFile.Write(varDecl.id.text);
                 } else {
                     this.emitIndent();
@@ -235,7 +239,25 @@ module TypeScript {
                     this.declFile.Write(": ");
                     this.emitTypeSignature(type);
                 }
-                this.declFile.WriteLine(";");
+               
+                // emitted one var decl
+                if (this.varListCount > 0) { this.varListCount--; } else if (this.varListCount < 0) { this.varListCount++; }                // Write ; or ,                if (this.varListCount < 0) {
+                    this.declFile.Write(", ");
+                } else {
+                    this.declFile.WriteLine(";");
+                }
+            }
+            return false;
+        }
+
+        public BlockCallback(pre: bool, block: Block): bool {
+            if (!block.isStatementBlock) {
+                if (pre) {
+                    this.varListCount = block.stmts.members.length;
+                } else {
+                    this.varListCount = 0;
+                }
+                return true;
             }
             return false;
         }

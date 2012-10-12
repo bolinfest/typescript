@@ -88,7 +88,7 @@ module TypeScript.AstWalkerWithDetailCallback {
         IfCallback? (pre, ast: AST): bool;
         WhileCallback? (pre, ast: AST): bool;
         DoWhileCallback? (pre, ast: AST): bool;
-        BlockCallback? (pre, ast: AST): bool;
+        BlockCallback? (pre, block: Block): bool;
         CaseCallback? (pre, ast: AST): bool;
         SwitchCallback? (pre, ast: AST): bool;
         TryCallback? (pre, ast: AST): bool;
@@ -631,7 +631,7 @@ module TypeScript.AstWalkerWithDetailCallback {
 
             case NodeType.Block:
                 if (callback.BlockCallback) {
-                    return callback.BlockCallback(pre, ast);
+                    return callback.BlockCallback(pre, <Block>ast);
                 }
                 break;
 
