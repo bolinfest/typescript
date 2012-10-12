@@ -748,7 +748,7 @@ module TypeScript {
             }
             
             // Accessors are set to 'exported' above
-            if (fgSym && !fgSym.isAccessor() && fgSym.type.call) {
+            if (fgSym && !fgSym.isAccessor() && fgSym.kind() == SymbolKind.Type && fgSym.type.call) {
                 fgSym.flags |= SymbolFlags.Exported;
             }
         }
