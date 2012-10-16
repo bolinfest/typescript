@@ -67,7 +67,7 @@ module Harness {
     export module Assert {
         export function is(result: bool, msg?: string) {
             if (!result)
-                throw new Error(msg ? msg : "Expected true, got false.");
+                throw new Error(msg || "Expected true, got false.");
         }
 
         export function arrayLengthIs(arr: any[], length: number) {
@@ -78,15 +78,15 @@ module Harness {
             }
         }
 
-        export function equal(left, right) {
-            if (left !== right) {
-                throw new Error("Expected " + left + " to equal " + right);
+        export function equal(actual, expected) {
+            if (actual !== expected) {
+                throw new Error("Expected " + actual + " to equal " + expected);
             }
         }
 
-        export function notEqual(left, right) {
-            if (left === right) {
-                throw new Error("Expected " + left + " to *not* equal " + right);
+        export function notEqual(actual, expected) {
+            if (actual === expected) {
+                throw new Error("Expected " + actual + " to *not* equal " + expected);
             }
         }
 
@@ -125,7 +125,7 @@ module Harness {
             }
         }
 
-        export function arrayContains(arr, contains) {
+        export function arrayContains(arr: any[], contains: any[]) {
             var found;
 
             for (var i = 0; i < contains.length; i++) {
@@ -153,28 +153,13 @@ module Harness {
             }
 
             if (foundCount !== 1)
-                throw new Error("Expected array to match element only once (instead of " + foundCount + " time(s))");
+                throw new Error("Expected array to match element only once (instead of " + foundCount + " times)");
         }
     }
 
-    // Helper functions
-    export module Helper {
-        // Decide env
-        export function getHost() {
-            if (typeof ActiveXObject === "function") {
-                return "WScript";
-            }
-            else if (typeof require === "function") {
-                return "Node";
-            }
-            else {
-                return null;
-            }
-        }
-        // Reads a file under tests
-        export function readFile(path: string) {
-            return IO.readFile(Harness.userSpecifiedroot + "tests//" + path);
-        }
+    // Reads a file under tests
+    export function readFile(path: string) {
+        return IO.readFile(Harness.userSpecifiedroot + "tests//" + path);
     }
 
     // Logger
@@ -788,6 +773,7 @@ module Harness {
                 }
             }
         }
+
         export class TypeFactory {
             public any: Type;
             public number: Type;
@@ -830,7 +816,6 @@ module Harness {
             }
         }
 
-        // Generate Decl File
         export function generateDeclFile(code: string, verifyNoDeclFile: bool): string {
             reset();
 
@@ -960,7 +945,7 @@ module Harness {
             if (settingsCallback) {
                 settingsCallback();
             }
-            compileString(Helper.readFile(path), path.match(/[^\\]*$/)[0], callback);
+            compileString(readFile(path), path.match(/[^\\]*$/)[0], callback);
         }
         export function compileUnits(callback: (res: Compiler.CompilerResult) => void, settingsCallback?: () => void ) {
             reset();
@@ -1071,7 +1056,7 @@ module Harness {
         }
 
         public addFile(name: string, isResident = false) {
-            var code: string = Helper.readFile(name);
+            var code: string = readFile(name);
             this.addScript(name, code, isResident);
         }
 
@@ -1220,9 +1205,9 @@ module Harness {
         // "baselineFileName"
         //
         public checkEdits(sourceFileName: string, baselineFileName: string, edits: Services.TextEdit[]) {
-            var script = Helper.readFile(sourceFileName);
+            var script = readFile(sourceFileName);
             var formattedScript = this.applyEdits(script, edits);
-            var baseline = Helper.readFile(baselineFileName);
+            var baseline = readFile(baselineFileName);
 
             assert.noDiff(formattedScript, baseline);
             assert.equal(formattedScript, baseline);
@@ -1334,7 +1319,7 @@ module Harness {
     // Runs TypeScript or Javascript code.
     export module Runner {
         export function runCollateral(path: string, callback: (error: Error, result: any) => void ) {
-            runString(Helper.readFile(path), path.match(/[^\\]*$/)[0], callback);
+            runString(readFile(path), path.match(/[^\\]*$/)[0], callback);
         }
 
         export function runJSString(code: string, callback: (error: Error, result: any) => void ) {

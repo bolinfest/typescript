@@ -2,7 +2,7 @@
 ///<reference path='..\..\src\harness\harness.ts' />
 
 describe('getInScopeNamesAndTypesFromPosition', function () {
-    var code: string = Harness.Helper.readFile('ls/testCode/scopelist.ts');
+    var code: string = Harness.readFile('ls/testCode/scopelist.ts');
     var script: TypeScript.Script = null;
     var ls: TypeScript.TypeScriptCompiler = null;
 
