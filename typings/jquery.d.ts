@@ -235,7 +235,8 @@ interface JQueryStatic {
     /******
      EVENTS
     *******/
-    proxy(context: any, name: any): any;
+    proxy(func: Function, context: any): any;
+    proxy(context: any, name: string): any;
 
     /*********
      INTERNALS
