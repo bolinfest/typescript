@@ -596,7 +596,11 @@ module TypeScript {
                     var modFilePath = stripQuotes(trimModName(moduleDecl.name.actualText)) + ".js";
 
                     if (this.emitOptions.createFile) {
-                        if (modFilePath != this.emitOptions.path) {
+                        // Ensure that the slashes are normalized so that the comparison is fair
+                        // REVIEW: Note that modFilePath is normalized to forward slashes in Parser.parse, so the 
+                        // first call to switchToForwardSlashes is technically a no-op, but it will prevent us from
+                        // regressing if the parser changes
+                        if (switchToForwardSlashes(modFilePath) != switchToForwardSlashes(this.emitOptions.path)) {
                             var useUTF8InOutputfile = moduleDecl.containsUnicodeChar || (this.emitOptions.emitComments && moduleDecl.containsUnicodeCharInComment);
                             this.outfile = this.emitOptions.createFile(modFilePath, useUTF8InOutputfile);
                         } else if (!this.emitOptions.outputMany) {
