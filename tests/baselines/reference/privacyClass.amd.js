@@ -103,6 +103,7 @@ define(["require", "exports"], function(require, exports) {
         })(m1_c_private);
         m1.m1_C12_public = m1_C12_public;        
     })(exports.m1 || (exports.m1 = {}));
+    var m1 = exports.m1;
     var m2;
     (function (m2) {
         var m2_c_public = (function () {

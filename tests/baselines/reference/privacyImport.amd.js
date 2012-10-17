@@ -17,6 +17,7 @@ define(["require", "exports"], function(require, exports) {
         
         
     })(exports.m1 || (exports.m1 = {}));
+    var m1 = exports.m1;
     var m2;
     (function (m2) {
         (function (m2_M1_public) {
@@ -40,6 +41,7 @@ define(["require", "exports"], function(require, exports) {
         function f1() {
         }
     })(exports.glo_M1_public || (exports.glo_M1_public = {}));
+    var glo_M1_public = exports.glo_M1_public;
     var glo_M2_private;
     (function (glo_M2_private) {
     })(glo_M2_private || (glo_M2_private = {}));

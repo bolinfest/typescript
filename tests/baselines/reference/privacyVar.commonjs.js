@@ -50,6 +50,7 @@
     var m1_v23_private = new C2_private();
     m1.m1_v24_public = new C2_private();
 })(exports.m1 || (exports.m1 = {}));
+var m1 = exports.m1;
 var m2;
 (function (m2) {
     var m2_C1_public = (function () {

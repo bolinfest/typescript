@@ -129,6 +129,7 @@ function AA() {
         NotExportedModule.ClassA = ClassA;        
     })(NotExportedModule || (NotExportedModule = {}));
 })(exports.TopLevelModule1 || (exports.TopLevelModule1 = {}));
+var TopLevelModule1 = exports.TopLevelModule1;
 var TopLevelModule2;
 (function (TopLevelModule2) {
     (function (SubModule3) {

@@ -706,9 +706,13 @@ module TypeScript {
                     else {
                         this.writeLineToOutput("})();");
                     }
-                    if (temp != EmitContainer.Prog && !parentIsDynamic && isExported) {
+                    if (temp != EmitContainer.Prog && isExported) {
                         this.emitIndent();
-                        this.writeLineToOutput("var " + this.moduleName + " = " + svModuleName + "." + this.moduleName + ";");
+                        if (parentIsDynamic) {
+                            this.writeLineToOutput("var " + this.moduleName + " = exports." + this.moduleName + ";");
+                        } else {
+                            this.writeLineToOutput("var " + this.moduleName + " = " + svModuleName + "." + this.moduleName + ";");
+                        }
                     }
                 }
 

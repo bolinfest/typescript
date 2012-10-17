@@ -48,6 +48,7 @@ var m1;
     }
     m3.foo = foo;
 })(exports.m3 || (exports.m3 = {}));
+var m3 = exports.m3;
 exports.eVar1;
 exports.eVar2 = 10;
 var eVar2;

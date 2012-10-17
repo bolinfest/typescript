@@ -11,5 +11,6 @@
     })(TypeScript.Strasse || (TypeScript.Strasse = {}));
     var Strasse = TypeScript.Strasse;
 })(exports.TypeScript || (exports.TypeScript = {}));
+var TypeScript = exports.TypeScript;
 var rue = new TypeScript.Strasse.Street.Rue();
 rue.address = "1 Main Street";

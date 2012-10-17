@@ -6,4 +6,5 @@ define(["require", "exports"], function(require, exports) {
         })(outer.inner || (outer.inner = {}));
         var inner = outer.inner;
     })(exports.outer || (exports.outer = {}));
+    var outer = exports.outer;
 })
