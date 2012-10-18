@@ -203,7 +203,8 @@ function runTests(tests: string[]) {
                 Services: Services,
                 DumpAST: DumpAST,
                 Formatting: Formatting,
-                Diff: Diff
+                Diff: Diff,
+                FourSlash: FourSlash
             },
             "generated_test_code.js"
         );
