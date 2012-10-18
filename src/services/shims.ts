@@ -161,11 +161,11 @@ module Services {
     }
 
     function _resultToJSON(result: any): string {
-        return "{'result':" + JSON.stringify(result) + "}";
+        return '{"result":' + JSON.stringify(result) + "}";
     }
 
     function _errorToJSON(err): string {
-        return "{'error':" + JSON.stringify(err) + "}";
+        return '{"error":' + JSON.stringify(err) + "}";
     }
 
     export class LanguageServiceShim implements ILanguageServiceShim {
