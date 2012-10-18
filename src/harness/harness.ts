@@ -1094,7 +1094,7 @@ module Harness {
         //////////////////////////////////////////////////////////////////////
         // ILogger implementation
         //
-        public information(): bool { return true; }
+        public information(): bool { return false; }
         public debug(): bool { return true; }
         public warning(): bool { return true; }
         public error(): bool { return true; }
@@ -1139,7 +1139,8 @@ module Harness {
 
         public getScriptEditRangeSinceVersion(scriptIndex: number, scriptVersion: number): string {
             var range = this.scripts[scriptIndex].getEditRangeSinceVersion(scriptVersion);
-            return (range.minChar + "," + range.limChar + "," + range.delta);
+            var result = (range.minChar + "," + range.limChar + "," + range.delta);
+            return result;
         }
 
         //
