@@ -4,4 +4,5 @@ define(["require", "exports"], function(require, exports) {
     })(exports.Baz || (exports.Baz = {}));
     var Baz = exports.Baz;
     Baz.x = "goodbye";
+    void 0;
 })

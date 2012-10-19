@@ -8,3 +8,4 @@ var rue = new TypeScript.Strasse.Street.Rue();
 
 rue.address = "1 Main Street";
 
+void 0;
