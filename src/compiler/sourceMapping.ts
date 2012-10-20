@@ -52,7 +52,6 @@ module TypeScript {
 
         // Generate source mapping
         static EmitSourceMapping(allSourceMappers: SourceMapper[]) {
-
             // At this point we know that there is at least one source mapper present.
             // If there are multiple source mappers, all will correspond to same map file but different sources
 
@@ -71,6 +70,9 @@ module TypeScript {
             var prevSourceLine = 0;
             var prevSourceIndex = 0;
             var emitComma = false;
+            var prevSourceMapping: SourceMapping = null;
+            var emptySourceMapping = new SourceMapping(null);
+            var doEmitCheck = true;
             for (var sourceMapperIndex = 0; sourceMapperIndex < allSourceMappers.length; sourceMapperIndex++) {
                 sourceMapper = allSourceMappers[sourceMapperIndex];
 
@@ -80,11 +82,38 @@ module TypeScript {
                     tsFiles.push(sourceMapper.tsFileName);
                     
                     var sourceMappings = sourceMapper.sourceMappings;
+                   
                     for (var i = 0, len = sourceMappings.length; i < len; i++) {
                         var sourceMapping = sourceMappings[i];
-                        if (!SourceMapper.CanEmitMapping(sourceMappings, sourceMapping)) {
+                        if (doEmitCheck && !SourceMapper.CanEmitMapping(sourceMappings, sourceMapping)) {
+                            if (prevSourceMapping != null) {
+                                prevSourceMapping = sourceMapping;
+                            }
                             continue;
                         }
+
+                        // Emit blank line mapping start
+                        if (prevSourceMapping != null) {
+                            if (prevSourceMapping.emittedEndLine < sourceMapping.emittedStartLine || 
+                                (prevSourceMapping.emittedEndLine == sourceMapping.emittedStartLine &&
+                                prevSourceMapping.emittedEndColumn > sourceMapping.emittedStartColumn)) {
+                                emptySourceMapping.emittedStartLine = prevSourceMapping.emittedEndLine;
+                                emptySourceMapping.emittedEndLine = sourceMapping.emittedStartLine;
+                                emptySourceMapping.emittedStartColumn = prevSourceMapping.emittedEndColumn;
+                                emptySourceMapping.emittedEndColumn = sourceMapping.emittedStartColumn;
+                                emptySourceMapping.sourceStartLine = prevSourceMapping.sourceEndLine;
+                                emptySourceMapping.sourceEndLine = sourceMapping.sourceStartLine;
+                                emptySourceMapping.sourceStartColumn = prevSourceMapping.sourceEndColumn;
+                                emptySourceMapping.sourceEndColumn = sourceMapping.sourceStartColumn;
+
+                                doEmitCheck = false;
+                                sourceMapping = emptySourceMapping;
+                                i--;
+                            } else {
+                                doEmitCheck = true;
+                            }
+                        }
+                        
 
                         if (prevEmittedLine !== sourceMapping.emittedStartLine) {
                             while (prevEmittedLine < sourceMapping.emittedStartLine) {
@@ -115,8 +144,8 @@ module TypeScript {
                         prevSourceColumn = sourceMapping.sourceStartColumn;
 
                         // 5. Since no names , let it go for time being
-
                         emitComma = true;
+                        prevSourceMapping = sourceMapping;
                     }
                 }
             }
