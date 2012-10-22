@@ -141,8 +141,8 @@ module TypeScript {
 
     // used in the parser, but kept here in case we want to reintegrate it with preprocessing
     export function getAdditionalDependencyPath(comment: string): string {
-        var referencesRegEx = /^(\/\/\/\s*<amd-dependency\s+path=)('|")(.+?)\2\s*(static=('|")(.+?)\2\s*)*\/>/gim;
-        var match = referencesRegEx.exec(comment);
+        var amdDependencyRegEx = /^(\/\/\/\s*<amd-dependency\s+path=)('|")(.+?)\2\s*(static=('|")(.+?)\2\s*)*\/>/gim;
+        var match = amdDependencyRegEx.exec(comment);
 
         if (match) {
             var path: string = match[3];
@@ -151,6 +151,17 @@ module TypeScript {
         else {
             return null;
         }
+    }
+
+    export function getImplicitImport(comment: string): bool {
+        var implicitImportRegEx = /^(\/\/\/\s*<implicit-import\s*)*\/>/gim;
+        var match = implicitImportRegEx.exec(comment);
+
+        if (match) {
+            return true;
+        }
+        
+        return false;
     }
 
     export function getStyleSettings(comment: string, styleSettings: StyleSettings) {

@@ -279,6 +279,10 @@ module TypeScript {
                     if (dependencyPath) {
                         this.amdDependencies.push(dependencyPath);
                     }
+
+                    if (getImplicitImport(comment.value)) {
+                        this.hasTopLevelImportOrExport = true;
+                    }
                 }
 
                 return c;
