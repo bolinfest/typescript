@@ -1816,8 +1816,10 @@ module TypeScript {
 
                 varDecl.limChar = varDecl.init.limChar;
 
-                // member initializers require that super be invoked as the first call within the constructor
-                this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
+                // member initializers on instance properties require that super be invoked as the first call within the constructor
+                if (!(modifiers & Modifiers.Static)) {
+                    this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
+                }
             }
             else {
                 varDecl.limChar = this.scanner.pos;

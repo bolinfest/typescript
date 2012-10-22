@@ -1,0 +1,3 @@
+0.ts line 16 col 4: If a derived class contains initialized properties or constructor parameter properties, the first statement in the constructor body must be a call to the super constructor
+0.ts line 24 col 4: If a derived class contains initialized properties or constructor parameter properties, the first statement in the constructor body must be a call to the super constructor
+0.ts line 32 col 4: If a derived class contains initialized properties or constructor parameter properties, the first statement in the constructor body must be a call to the super constructor
