@@ -2179,7 +2179,9 @@ module TypeScript {
                     if (superCallMustBeFirst) {
                         if (!funcDecl.bod ||
                             !funcDecl.bod.members.length ||
-                            !(funcDecl.bod.members[0].nodeType == NodeType.Call && (<CallExpression>funcDecl.bod.members[0]).target.nodeType == NodeType.Super)) {
+                            !((funcDecl.bod.members[0].nodeType == NodeType.Call && (<CallExpression>funcDecl.bod.members[0]).target.nodeType == NodeType.Super) ||
+                            (hasFlag(funcDecl.bod.flags, ASTFlags.StrictMode) && funcDecl.bod.members.length > 1 &&
+                             funcDecl.bod.members[1].nodeType == NodeType.Call && (<CallExpression>funcDecl.bod.members[1]).target.nodeType == NodeType.Super))) {
                             this.checker.errorReporter.simpleError(funcDecl, "If a derived class contains initialized properties or constructor parameter properties, the first statement in the constructor body must be a call to the super constructor");
                         }
                     }

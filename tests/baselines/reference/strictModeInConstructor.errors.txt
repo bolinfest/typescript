@@ -1,0 +1,1 @@
+0.ts line 27 col 4: If a derived class contains initialized properties or constructor parameter properties, the first statement in the constructor body must be a call to the super constructor
