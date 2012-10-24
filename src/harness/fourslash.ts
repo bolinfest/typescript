@@ -134,6 +134,11 @@ module FourSlash {
             return this.realLangSvc.getCompletionsAtPosition(this.activeFile.name, this.currentCaretPosition, false);
         }
 
+        public verifyQuickInfo(expectedTypeName: string) {
+            var actualQuickInfo = this.realLangSvc.getTypeAtPosition(this.activeFile.name, this.currentCaretPosition);
+            assert.equal(actualQuickInfo.memberName.toString(), expectedTypeName);
+        }
+
         public verifyCurrentParameterIsVariable(isVariable: bool) {
             assert.equal(isVariable, this.getActiveParameter().isVariable);
         }
@@ -180,6 +185,11 @@ module FourSlash {
         public printCurrentParameterHelp() {
             var help = this.realLangSvc.getSignatureAtPosition(this.activeFile.name, this.currentCaretPosition);
             IO.printLine(JSON.stringify(help));
+        }
+
+        public printCurrentQuickInfo() {
+            var quickInfo = this.realLangSvc.getTypeAtPosition(this.activeFile.name, this.currentCaretPosition);
+            IO.printLine(JSON.stringify(quickInfo));
         }
 
         public printCurrentFileState() {

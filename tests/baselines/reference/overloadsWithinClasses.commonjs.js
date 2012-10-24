@@ -12,3 +12,9 @@ var bar = (function () {
     }
     return bar;
 })();
+var X = (function () {
+    function X() { }
+    X.prototype.attr = function (first, second) {
+    };
+    return X;
+})();

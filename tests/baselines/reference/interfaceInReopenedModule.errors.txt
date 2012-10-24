@@ -1,0 +1,1 @@
+0.ts line 8 col 19: The name 'f' does not exist in the current scope

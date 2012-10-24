@@ -121,6 +121,10 @@ module FourSlashInterface {
             FourSlash.currentTestState.verifyCurrentSignatureHelpReturnType(returnTypeName);
         }
 
+        public quickInfoIs(typeName: string) {
+            FourSlash.currentTestState.verifyQuickInfo(typeName);
+        }
+
         public currentSignatureHelpCountIs(expected: number) {
             FourSlash.currentTestState.verifyCurrentSignatureHelpCount(expected);
         }
@@ -151,6 +155,10 @@ module FourSlashInterface {
 
         public printCurrentFileState() {
             FourSlash.currentTestState.printCurrentFileState();
+        }
+
+        public printCurrentQuickInfo() {
+            FourSlash.currentTestState.printCurrentQuickInfo();
         }
     }
 }

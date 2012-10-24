@@ -14,3 +14,9 @@ class bar {
  
 }
 
+class X {
+   public attr(name:string):string;
+   public attr(name:string, value:string):X;
+   public attr(first:any, second?:any):any {
+   }
+}
