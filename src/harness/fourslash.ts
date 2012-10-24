@@ -102,6 +102,24 @@ module FourSlash {
             this.activeFile = fileToOpen;
         }
 
+        public verifyErrorExistsBetweenMarkers(startMarker: string, endMarker: string) {
+            var startPos = this.getMarkerByName(startMarker).position;
+            var endPos = this.getMarkerByName(endMarker).position;
+            var fileIndex = this.getScriptIndex(this.findFile(this.getMarkerByName(startMarker).fileName));
+            var errors = this.realLangSvc.getErrors(9999);
+            var exists = errors.some(function (error: TypeScript.ErrorEntry) { 
+                if (error.unitIndex != fileIndex) return false;
+                return ((error.minChar === startPos) && (error.limChar === endPos));
+            });
+            if (!exists) {
+                IO.printLine("Expected error not found.  Error list is:");
+                errors.forEach(function (error: TypeScript.ErrorEntry) {
+                    IO.printLine("  minChar: " + error.minChar + ", limChar: " + error.limChar + ", message: " + error.message);
+                });
+                throw new Error("Error does not exist between markers: " + startMarker + ", " + endMarker);
+            }
+        }
+
         public verifyMemberListContains(symbol: string) {
             var members = this.getMemberListAtCaret();
             this.assertItemInList(members.entries.map(c => c.name), symbol);

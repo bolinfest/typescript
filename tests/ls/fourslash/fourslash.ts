@@ -136,6 +136,10 @@ module FourSlashInterface {
         public currentQuickInfoType(expected: string) {
             FourSlash.currentTestState.verifyQuickInfoType(expected);
         }
+
+        public errorExistsBetweenMarkers(startMarker: string, endMarker: string) {
+            FourSlash.currentTestState.verifyErrorExistsBetweenMarkers(startMarker, endMarker);
+        }
     }
     
     export class edit {
