@@ -13,3 +13,5 @@ tests/services/browser/typescriptServices.js
 src/compiler/*.js
 baseline-report.html
 *.swp
+build.json
+monaco.editor.json
