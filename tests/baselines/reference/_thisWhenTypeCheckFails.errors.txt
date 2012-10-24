@@ -1,0 +1,2 @@
+0.ts line 4 col 12: Cannot assign type 'void' to variable 's'
+0.ts line 4 col 28: Cannot convert 'void' to 'string'
