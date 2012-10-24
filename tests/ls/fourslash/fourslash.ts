@@ -172,6 +172,14 @@ module FourSlashInterface {
         public printCurrentQuickInfo() {
             FourSlash.currentTestState.printCurrentQuickInfo();
         }
+
+        public printMemberListMembers() { 
+            FourSlash.currentTestState.printMemberListMembers();
+        }
+
+        public printCompletionListMembers() { 
+            FourSlash.currentTestState.printCompletionListMembers();
+        }
     }
 }
 

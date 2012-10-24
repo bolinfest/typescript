@@ -5,7 +5,6 @@
 ////}
 
 goTo.marker();
+// Bug 17112 - not able to repro on LS level
 //verify.not.memberListContains('btoa');
-//verify.memberListContains('btoa');
-
-
+//debug.printCompletionListMembers();

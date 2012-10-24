@@ -213,12 +213,12 @@ module FourSlash {
 
         public printCurrentParameterHelp() {
             var help = this.realLangSvc.getSignatureAtPosition(this.activeFile.name, this.currentCaretPosition);
-            IO.printLine(JSON.stringify(help));
+            IO.printLine(JSON2.stringify(help));
         }
 
         public printCurrentQuickInfo() {
             var quickInfo = this.realLangSvc.getTypeAtPosition(this.activeFile.name, this.currentCaretPosition);
-            IO.printLine(JSON.stringify(quickInfo));
+            IO.printLine(JSON2.stringify(quickInfo));
         }
 
         public printCurrentFileState() {
@@ -233,6 +233,16 @@ module FourSlash {
                 }
                 IO.printLine(content);
             }
+        }
+
+        public printMemberListMembers() {
+            var members = this.getMemberListAtCaret();
+            IO.printLine(JSON2.stringify(members));
+        }
+
+        public printCompletionListMembers() {
+            var completions = this.getCompletionListAtCaret();
+            IO.printLine(JSON2.stringify(completions));
         }
 
         // Enters lines of text at the current caret position
