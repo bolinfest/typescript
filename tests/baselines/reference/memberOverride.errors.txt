@@ -1,0 +1,1 @@
+0.ts line 8 col 16: Cannot convert 'string' to 'number'
