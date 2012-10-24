@@ -229,3 +229,7 @@ Point.prototype = {
 window.onmousedown = function(ev) {
     ev.bubbles;
 }
+
+interface A { x: string; }
+interface B extends A { }
+var x: B = { };

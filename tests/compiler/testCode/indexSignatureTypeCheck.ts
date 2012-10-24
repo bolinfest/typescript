@@ -1,6 +1,6 @@
 interface IPropertySet {
 
-  [index: string]: any;
+    [index: string]: any;
 
 }
 
@@ -8,3 +8,11 @@ interface IPropertySet {
 var ps: IPropertySet = null;
 var index: any = "hello";
 ps[index] = 12;
+
+//bug 15893
+interface indexErrors {
+    [p2?: string];
+    [...p3: any[]];
+    [p4: string, p5?: string];
+    [p6: string, ...p7: any[]];
+}

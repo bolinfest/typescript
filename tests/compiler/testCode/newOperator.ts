@@ -33,3 +33,15 @@ var t5 = new new Date;
 // Can be an expression
 new String;
 
+// Bug 17662
+module M {
+    export class T {
+        x: number;
+    }
+}
+
+class S {
+    public get xs(): M.T[] {
+        return new M.T[];
+    }
+}

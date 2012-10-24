@@ -10,3 +10,13 @@ declare module M {
 
 	var foo: { [index: any]; }; // expect an error here
 }
+
+interface myInt {
+    voidFn(): void;
+}
+var myVar: myInt;
+var strArray: string[] = [myVar.voidFn()];
+
+//Bug 17543
+var myArray: number[][][];
+myArray = [[1,2]];

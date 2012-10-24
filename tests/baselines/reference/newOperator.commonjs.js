@@ -10,3 +10,22 @@ var t4 = new Array();
 var f = new q();
 var t5 = new new Date()();
 new String();
+var M;
+(function (M) {
+    var T = (function () {
+        function T() { }
+        return T;
+    })();
+    M.T = T;    
+})(M || (M = {}));
+var S = (function () {
+    function S() { }
+    Object.defineProperty(S.prototype, "xs", {
+        get: function () {
+            return new ();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return S;
+})();
