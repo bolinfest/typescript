@@ -120,6 +120,10 @@ module FourSlashInterface {
         public currentSignatureHelpReturnTypeIs(returnTypeName: string) {
             FourSlash.currentTestState.verifyCurrentSignatureHelpReturnType(returnTypeName);
         }
+
+        public currentSignatureHelpCountIs(expected: number) {
+            FourSlash.currentTestState.verifyCurrentSignatureHelpCount(expected);
+        }
     }
     
     export class edit {

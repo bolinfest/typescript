@@ -144,7 +144,12 @@ module FourSlash {
 
         public verifyCurrentSignatureHelpReturnType(returnTypeName: string) {
             var actualReturnType = this.getActiveSignatureHelp().returnType;
-            assert.equal(returnTypeName, actualReturnType);
+            assert.equal(actualReturnType, returnTypeName);
+        }
+
+        public verifyCurrentSignatureHelpCount(expected: number) {
+            var help = this.realLangSvc.getSignatureAtPosition(this.activeFile.name, this.currentCaretPosition);
+            assert.equal(help.formal.signatureGroup.length, expected);
         }
 
         private getActiveSignatureHelp() {
