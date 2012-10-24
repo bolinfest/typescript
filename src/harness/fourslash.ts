@@ -107,9 +107,10 @@ module FourSlash {
             var endPos = this.getMarkerByName(endMarker).position;
             var fileIndex = this.getScriptIndex(this.findFile(this.getMarkerByName(startMarker).fileName));
             var errors = this.realLangSvc.getErrors(9999);
-            var exists = errors.some(function (error: TypeScript.ErrorEntry) { 
-                if (error.unitIndex != fileIndex) return false;
-                return ((error.minChar === startPos) && (error.limChar === endPos));
+            var exists = false;
+            errors.forEach(function (error: TypeScript.ErrorEntry) {
+                if (error.unitIndex != fileIndex) return;
+                if ((error.minChar === startPos) && (error.limChar === endPos)) exists = true;
             });
             if (!exists) {
                 IO.printLine("Expected error not found.  Error list is:");
