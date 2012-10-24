@@ -144,7 +144,17 @@ module FourSlash {
         }
 
         public verifyCurrentParameterHelpName(name: string) {
-            assert.equal(name, this.getActiveParameter().name);
+            assert.equal(this.getActiveParameter().name, name);
+        }
+
+        public verifyCurrentParameterHelpType(typeName: string) {
+            assert.equal(this.getActiveParameter().type, typeName);
+        }
+
+        public verifyQuickInfoType(expected: string) {
+            var memberName = this.realLangSvc.getTypeAtPosition(this.activeFile.name, this.currentCaretPosition).memberName;
+            var typeName = memberName.toString();
+            assert.equal(typeName, expected);
         }
 
         public verifyCurrentSignatureHelpReturnType(returnTypeName: string) {

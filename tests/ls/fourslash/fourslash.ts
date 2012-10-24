@@ -128,6 +128,14 @@ module FourSlashInterface {
         public currentSignatureHelpCountIs(expected: number) {
             FourSlash.currentTestState.verifyCurrentSignatureHelpCount(expected);
         }
+
+        public currentParameterHelpType(expected: string) {
+            FourSlash.currentTestState.verifyCurrentParameterHelpType(expected);
+        }
+
+        public currentQuickInfoType(expected: string) {
+            FourSlash.currentTestState.verifyQuickInfoType(expected);
+        }
     }
     
     export class edit {
