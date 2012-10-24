@@ -1,0 +1,1 @@
+0.ts line 5 col 4: Getters must return a value
