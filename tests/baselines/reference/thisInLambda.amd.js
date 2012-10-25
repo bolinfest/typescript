@@ -11,3 +11,16 @@ var Foo = (function () {
     };
     return Foo;
 })();
+function myFn(a) {
+}
+var myCls = (function () {
+    function myCls() {
+        var _this = this;
+        myFn(function () {
+            myFn(function () {
+                console.log(_this);
+            });
+        });
+    }
+    return myCls;
+})();

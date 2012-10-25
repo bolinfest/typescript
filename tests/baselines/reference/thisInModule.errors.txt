@@ -1,0 +1,1 @@
+0.ts line 3 col 4: 'this' may not be referenced within module bodies

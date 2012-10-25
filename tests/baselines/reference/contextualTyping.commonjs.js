@@ -238,3 +238,5 @@ Point.prototype = {
 window.onmousedown = function (ev) {
     ev.bubbles;
 };
+var x = {
+};

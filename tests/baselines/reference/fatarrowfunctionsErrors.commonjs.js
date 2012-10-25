@@ -15,3 +15,7 @@ var y = x;
 ;
 function (number) {
     return x * x;
+}(function () {
+    return null;
+});
+null;

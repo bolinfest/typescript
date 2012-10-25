@@ -1,0 +1,4 @@
+0.ts line 3 col 4: Cannot assign type 'void' to variable 'n'
+0.ts line 6 col 0: Function declared a non-void return type, but has no return expression
+0.ts line 9 col 4: unreachable code
+0.ts line 13 col 4: unreachable code

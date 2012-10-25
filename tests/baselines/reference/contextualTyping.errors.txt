@@ -1,1 +1,2 @@
 0.ts line 220 col 18: Cannot convert '{ x: number; y: number; add: (dx: number, dy: number) => Point; }' to 'Point'
+0.ts line 235 col 11: Cannot convert '{}' to 'B': Type '{}' is missing property 'x' from type 'B'
