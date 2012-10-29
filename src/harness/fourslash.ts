@@ -496,7 +496,7 @@ module FourSlash {
     }
 
     function chompLeadingSpace(content: string) {
-        var lines = content.split(/\r?\n/);
+        var lines = content.split("\n");
         for (var i = 0; i < lines.length; i++) {
             if ((lines[i].length !== 0) && (lines[i].charAt(0) !== ' ')) {
                 return content;
@@ -518,7 +518,12 @@ module FourSlash {
         var makeDefaultFilename = () => 'file_' + files.length + '.ts';
 
         // Split up the input file by line
-        var lines = contents.split(/\r?\n/);
+        // Note: IE JS engine incorrectly handles consecutive delimiters here when using RegExp split, so
+        // we have to string-based splitting instead and try to figure out the delimiting chars
+        var lines = contents.split('\r\n');
+        if (lines.length === 1) {
+            lines = contents.split('\n');
+        }
 
         var markers: MarkerMap = {};
         var markerNames: string[] = [];
