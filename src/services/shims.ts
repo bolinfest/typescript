@@ -238,6 +238,18 @@ module Services {
                 });
         }
 
+        /// EXPRESSIONATSPAN
+        /// Computes a string representation of the expression at the requested position
+        // in the active file.
+        public getExpressionAtSpan(fileName: string, startPos: number, endPos: number): string {
+            return this.forwardJSONCall(
+                "getExpressionAtSpan(\"" + fileName + "\", " + startPos + ", "  + endPos + ")",
+                () => {
+                    var expressionInfo = this.languageService.getExpressionAtSpan(fileName, startPos, endPos);
+                    return _resultToJSON(expressionInfo);
+                });
+        }
+
         /// SIGNATUREHELP
         /// Computes a string representation of the signatures at the requested position
         /// in the active file.

@@ -23,6 +23,7 @@ module Services {
         getScriptErrors(fileName: string, maxCount: number): TypeScript.ErrorEntry[];
         getCompletionsAtPosition(fileName: string, pos: number, isMemberCompletion: bool): CompletionInfo;
         getTypeAtPosition(fileName: string, pos: number): TypeInfo;
+        getExpressionAtSpan(fileName: string, startPos: number, endPos: number): ExpressionSpanInfo;
         getSignatureAtPosition(fileName: string, pos: number): SignatureInfo;
         getDefinitionAtPosition(fileName: string, pos: number): DefinitionInfo;
         getReferencesAtPosition(fileName: string, pos: number): ReferenceEntry[];
@@ -301,6 +302,11 @@ module Services {
         }
     }
 
+    export class ExpressionSpanInfo {
+        constructor (public minChar: number, public limChar: number, public text: string = null) {
+        }
+    }
+    
     export class SignatureInfo {
         public actual: ActualSignatureInfo;
         public formal: FormalSignatureInfo;
@@ -552,6 +558,31 @@ module Services {
 
             var memberName = typeInfo.type.getScopedTypeNameEx(enclosingScopeContext.getScope());
             return new TypeInfo(memberName, typeInfo.ast.minChar, typeInfo.ast.limChar);
+        }
+
+        public getExpressionAtSpan(fileName: string, startPos: number, endPos: number): ExpressionSpanInfo {
+            this.refresh();
+
+            var script = this.compilerState.getScriptAST(fileName);
+
+            // First check whether we are in a comment where quick info should not be displayed
+            var path = this.getAstPathToPosition(script, startPos);
+            if (path.count() == 0)
+                return null;
+
+            if (path.nodeType() === TypeScript.NodeType.Comment) {
+                this.logger.log("The specified location is inside a comment");
+                return null;
+            }
+
+            // Look for AST node containing the position
+            var expressionInfo = this.getExpressionAtPosition(startPos, script);
+            if (expressionInfo == null) {
+                this.logger.log("No expression found at the specified location.");
+                return null;
+            }
+
+            return expressionInfo;
         }
 
         public getSignatureAtPosition(fileName: string, pos: number): SignatureInfo {
@@ -1513,6 +1544,41 @@ module Services {
                             else if (cur.type != null) {
                                 result = { ast: cur, type: cur.type };
                             }
+                        }
+                    }
+                }
+                return cur;
+            }
+
+            TypeScript.getAstWalkerFactory().walk(script, pre);
+            return result;
+        }
+
+        private getExpressionAtPosition(pos: number, script: TypeScript.Script): ExpressionSpanInfo  {
+            var result: ExpressionSpanInfo = null;
+
+            var pre = (cur: TypeScript.AST, parent: TypeScript.AST): TypeScript.AST => {
+                if (TypeScript.isValidAstNode(cur)) {
+                    if (pos >= cur.minChar && pos < cur.limChar) {
+                        if (cur.nodeType == TypeScript.NodeType.Dot) {
+                            // Dotted expression
+                            if (result == null) {
+                                result = new ExpressionSpanInfo(cur.minChar, cur.limChar);
+                            }
+                        }
+                        else if (cur.nodeType == TypeScript.NodeType.Name) {
+                            // If it was the first thing we found, use it directly
+                            if (result == null) {
+                                result = new ExpressionSpanInfo(cur.minChar, cur.limChar);
+                            }
+                            else {
+                                // Its a dotted expression, use the current end as the end of our span
+                                result.limChar = cur.limChar;
+                            }
+                        } else if (cur.nodeType == TypeScript.NodeType.QString || 
+                            cur.nodeType == TypeScript.NodeType.This || 
+                            cur.nodeType == TypeScript.NodeType.Super) {
+                            result = new ExpressionSpanInfo(cur.minChar, cur.limChar);
                         }
                     }
                 }
