@@ -1,3 +1,3 @@
 0.ts line 6 col 4: Class 'C1' declares interface 'I1' but does not implement it: Types of property 'item' of types 'C1' and 'I1' are incompatible
 0.ts line 31 col 4: Class 'C1' declares interface 'I1' but does not implement it: Types of property 'item' of types 'C1' and 'I1' are incompatible
-0.ts line 55 col 26: Type of overridden member 'item' is not subtype of original member defined by type 'I1'
+0.ts line 54 col 26: Type of overridden member 'item' is not subtype of original member defined by type 'I1'

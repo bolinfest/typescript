@@ -1,4 +1,4 @@
-// bug 17136
+// bug 17136: Error when forward-referencing derived class forwarding constructor
 // Error forward referencing derived class with forwarding constructor
 
 function f() {

@@ -4,6 +4,12 @@
 function checkTestCodeOutput(filename: string) {
     describe('JS output and errors for ' + filename, function () {
 
+        var content = IO.readFile('tests\\compiler\\testCode\\' + filename);
+        var bugs = content.match(/bug (\d+)/i);
+        if (bugs) {
+            bugs.forEach(bug => assert.bug(bug));
+        }
+
         var jsOutputAsync = '';
         var jsOutputSync = '';
         var errorDescriptionAsync = '';

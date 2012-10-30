@@ -1,1 +1,1 @@
-// 0.ts  line 5 col 17: Static properties can not be declared as parameter properties
+// 0.ts  line 4 col 17: Static properties can not be declared as parameter properties

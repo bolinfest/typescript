@@ -51,5 +51,4 @@ class C3 implements M2.M3.I1 {
     public item:string;
 }
 
-//BUG 12857
 interface I2 extends I1 { item:string; }

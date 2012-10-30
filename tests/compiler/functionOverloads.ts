@@ -4,7 +4,9 @@
 describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
     // type factory for return types
     var typeFactory = new Harness.Compiler.TypeFactory();
-    /* BUG 13922
+
+    assert.bug('13922: [Overload] Overload implementations should be right after signatures');
+    /*
     it("Overload implementations should be right after signatures", function() {
         var code  = 'function foo();';
             code += '1+1;';
@@ -336,17 +338,14 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
         });
     });
 
-    /*
-    BUG 13937 -> Should be ambiguous
     it("Check the return type of overload with primitive types - 9", function() {
         var code  = "function foo(bar:string):string;";
             code += "function foo(bar:number):number;";
             code += "function foo(bar:any):any{ return bar };";
-            code += "var baz:any; var x = foo(baz);";
+            code += "var baz:number; var x = foo(baz);";
         var returnType = typeFactory.get(code, "x");
         assert.equal(returnType.type, "number");
     });
-    */
 
     it("Check the return type of overload with primitive types - 10", function() {
         var code  = "function foo(bar:string):string;";
@@ -377,8 +376,6 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
         assert.equal(returnType.type, "number");
     });
     
-    /*    
-    BUG 15698 -> wrong type (got number, expect string)
     it("Check the return type of overload with object literals - 3", function() {
         var code  = "function foo(bar:{a:number;}):number;";
             code += "function foo(bar:{a:string;}):string;";
@@ -387,7 +384,7 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
         var returnType = typeFactory.get(code, "x");
         assert.equal(returnType.type, "string");
     });
-    */
+
 
     it("Check the return type of overload with object literals - 4", function() {
         var code  = "function foo(bar:{a:number;}):number;";
@@ -395,10 +392,12 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
             code += "function foo(bar:{a:any;}):any{ return bar };";
             code += "var x = foo({a:true});";
         Harness.Compiler.compileString(code, 'overload', function(result) {     
-            assert.equal(result.errors.length, 1);
+            assert.arrayLengthIs(result.errors, 1);
         });
     });
 
+    assert.bug("17994: Shouldn't issue error about incompatible types in array literal due to contextual typing");
+    /*
     it("Check the return type of overload with object literals - 5", function() {
         var code  = "function foo(bar:{a:number;}):string;";
             code += "function foo(bar:{a:bool;}):number;";
@@ -409,9 +408,8 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
             assert.compilerWarning(result, 1, 125, "Supplied parameters do not match any signature of call target:\n\tCould not apply type '{ a: bool; }' to argument 1, which is of type '{}'");
         }
     });
+    */
 
-    /*
-    BUG 15698 -> Can't contextually type
     it("Check the return type of overload with object literals- 6", function() {
         var code  = "function foo(bar:{a:number;}):string;";
             code += "function foo(bar:{a:any;}):number;";
@@ -420,7 +418,6 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
         var returnType = typeFactory.get(code, "x");
         assert.equal(returnType.type, "number");
     });
-    */
 
     it("Check the return type of overload with array literals", function() {
         var code  = "function foo(bar:{a:number;}[]):string;";
@@ -442,8 +439,6 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
         assert.equal(returnType.type, "string");
     });
 
-    /* 
-    BUG 15698 -> Type definition contains errors: 0.ts(1,137): type mismatch - could not apply contextual type,0.ts(1,135): incompatible types in array literal expression
     it("Check the return type of overload with array literals - 3", function() {
         var code  = "function foo(bar:{a:number;}[]):string;";
             code += "function foo(bar:{a:bool;}[]):number;";
@@ -453,6 +448,8 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
         assert.equal(returnType.type, "number");
     });
 
+    assert.bug("17994: Shouldn't issue error about incompatible types in array literal due to contextual typing");
+    /*
     it("Check the return type of overload with array literals - 4", function() {
         var code  = "function foo(bar:{a:number;}[]):string;";
             code += "function foo(bar:{a:bool;}[]):number;";
@@ -463,6 +460,7 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
             assert.equal(result.errors.length, 1);
         });
     });
+    */
 
     /*
     BUG -> Should give ambiguous error
@@ -476,8 +474,10 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
             assert.equal(result.errors.length, 1);
         });
     });
+    */
 
     /* BUG -> can't contextually type
+    */
     it("Check the return type of overload with array literals - 6", function() {
         var code  = "function foo(bar:{a:number;}[]):string;";
             code += "function foo(bar:{a:any;}[]):number;";
@@ -486,7 +486,6 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
         var returnType = typeFactory.get(code, "x");
         assert.equal(returnType.type, "number");
     });
-    */
 
     it("Check the return type of overload with functions", function() {
         var code  = "function foo(bar:(b:string)=>void):string;";

@@ -18,12 +18,13 @@ describe('Compiling tests\\compiler\\constructSignatureTests.ts', function() {
         });
     });
 
-    /* BUG 13978
     it("A construct signature can't have the same overload", function() {
+        assert.bug('13978: Declaring the same call or construct signature multiple times should be a bug');
+        return;
         var code  = 'var foo: { new (): string; new (): string; };';
             Harness.Compiler.compileString(code, 'call signatures', function(result) {
             assert.equal(result.errors.length, 1);
             assert.compilerWarning(result, 1, 20, 'can not assign to variable test a value of type void');
         });
-    });*/
+    });
 });

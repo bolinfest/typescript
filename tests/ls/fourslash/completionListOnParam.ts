@@ -9,6 +9,6 @@
 ////}
 
 goTo.marker();
-//Bug 17382
+// Bug 17382: Completion list wont work on a certain position
 verify.not.memberListContains('Blah');
 //verify.memberListContains('Blah');

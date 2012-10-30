@@ -51,7 +51,6 @@ describe('Compiling tests\\compiler\\classOverloads.ts', function() {
         });
     });
 
-    /* BUG 16340
     it("The Null type is a subtype of all types, except the Undefined and Void types - 3", function() {
         var code  = 'class baz { public bar():void { }; }';
             code += 'class foo extends baz { public bar() { return null; } }';
@@ -59,7 +58,6 @@ describe('Compiling tests\\compiler\\classOverloads.ts', function() {
             assert.arrayLengthIs(result.errors, 0);
         });
     });
-    */
 
     describe('An object type S is a subtype of an object type T', function() {
         it("A property in T is matched by a property in S", function() {

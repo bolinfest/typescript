@@ -19,12 +19,14 @@ describe('Compiling tests\\compiler\\callSignatureTests.ts', function() {
         });
     });
 
-    /* BUG 13978
     it("A call signature can't have the same overload", function() {
+        assert.bug('13978: Declaring the same call or construct signature multiple times should be a bug');
+        /*
         var code  = 'var foo: { (): string; (): string; };';
             Harness.Compiler.compileString(code, 'call signatures', function(result) {
             assert.equal(result.errors.length, 1);
             assert.compilerWarning(result, 1, 20, 'can not assign to variable test a value of type void');
         });
-    });*/
+        */
+    });
 });

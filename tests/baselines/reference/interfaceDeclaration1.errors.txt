@@ -1,3 +1,6 @@
 0.ts line 3 col 4: Duplicate identifier 'item'
 0.ts line 8 col 4: Duplicate identifier 'item'
-0.ts line 39 col 0: Class 'C1' declares interface 'I3' but does not implement it: Type 'C1' is missing property 'prototype' from type 'I3'
+0.ts line 22 col 0: Type 'I5' is recursively referenced as a base class of itself
+0.ts line 41 col 0: Type 'i8' is recursively referenced as a base class of itself
+0.ts line 42 col 0: Type 'i9' is recursively referenced as a base class of itself
+0.ts line 35 col 0: Class 'C1' declares interface 'I3' but does not implement it: Type 'C1' is missing property 'prototype' from type 'I3'

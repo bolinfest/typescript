@@ -1,4 +1,4 @@
-// bug 15937
+// bug 15937: Constructor parameter initializers should disallow this
 // this should not compiler, this reference in in 
 // constructor parameter initializer not allowed
 

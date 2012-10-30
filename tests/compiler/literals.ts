@@ -39,9 +39,7 @@ describe('Literal expressions have the correct types', function() {
         isString("'q\tq'");
     });
     
-    describe('RegExp literals are of the "RegExp" type (BUG 11051)', function() {
-        // BUG 11051 use this line instead
-        // var isRegExp = function(x) { isOfType(x, 'RegExp'); };
+    describe('RegExp literals are of the "RegExp" type', function() {
         var isRegExp = function(x) { isOfType(x, 'RegExp'); };
         
         isRegExp('/q/');

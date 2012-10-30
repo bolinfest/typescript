@@ -460,6 +460,12 @@ module FourSlash {
         // Parse out the files and their metadata
         var testData = parseTestData(content);
 
+        // Log any bugs associated with the test
+        var bugs = content.match(/bug (\d+)/i);
+        if (bugs) {
+            bugs.forEach(bug => assert.bug(bug));
+        }
+
         currentTestState = new TestState(testData);
 
         var mockFilename = 'test_input.ts';

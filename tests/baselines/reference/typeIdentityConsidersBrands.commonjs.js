@@ -7,7 +7,6 @@ var Y = (function () {
     return Y;
 })();
 function foo(arg) {
-    console.log("called");
 }
 var a = new Y();
 var b = new X();

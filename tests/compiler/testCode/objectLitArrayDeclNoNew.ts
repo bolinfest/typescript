@@ -16,7 +16,6 @@ module Test {
         public moo: number = 0;
     }
 
-    /* BUG 13273
     export function bug(): ILineTokens {
       var state:IState= null;
       return {
@@ -25,5 +24,4 @@ module Test {
       };
      }
     }
-*/
 }

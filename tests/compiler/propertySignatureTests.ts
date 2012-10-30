@@ -1,8 +1,9 @@
-﻿///<reference path='..\..\compiler\typescript.ts' />
-///<reference path='..\..\harness\harness.ts' />
+﻿///<reference path='..\..\src\compiler\typescript.ts' />
+///<reference path='..\..\src\harness\harness.ts' />
 
 describe('Compiling tests\\compiler\\propertySignatureTests.ts', function() {
-    /* BUG 13986
+    assert.bug('13986: Having duplicate (property signature) identifiers inside objects prints out error message twice');
+    /*
     it('The Identifier of a property signature must be unique within its containing type. ', function(){
         var code  = 'var foo: { a:string; a: string; };';
             Harness.Compiler.compileString(code, 'property signatures', function(result) {

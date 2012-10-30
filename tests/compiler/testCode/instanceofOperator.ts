@@ -6,7 +6,8 @@
 class Object { }
 var obj: Object;
 
-// Should be error but isn't (Bug 17075: instanceof operator type restrictions don't match spec/error description)
+// Should be error but isn't
+// Bug 17075: instanceof operator type restrictions don't match spec/error description
 4 instanceof null; 
 
 // Error and should be error

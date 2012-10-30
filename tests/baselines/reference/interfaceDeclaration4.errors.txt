@@ -1,9 +1,9 @@
+// 0.ts  line 34 col 13: Expected '{'
+// 0.ts  line 35 col 0: Expected '}'
 0.ts line 1 col 20: The name '"interfaceDeclaration5"' does not exist in the current scope
 0.ts line 1 col 20: A module cannot be aliased to a non-module type
 0.ts line 1 col 0: Interface base type must be interface
-0.ts line 8 col 0: Base type 'any' lacks an implementation.
 0.ts line 1 col 0: Interface base type must be interface
-0.ts line 14 col 0: Base type 'any' lacks an implementation.
 0.ts line 1 col 0: Interface base type must be interface
-0.ts line 18 col 0: Base type 'any' lacks an implementation.
+0.ts line 1 col 0: Interface base type must be interface
 0.ts line 1 col 0: Interface base type must be interface

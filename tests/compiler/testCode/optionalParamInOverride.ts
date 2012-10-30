@@ -1,4 +1,3 @@
-// Bug 16374: Optional parameters not considered when computing overloads
 class Z {
     public func(): void { }
 }

@@ -9,6 +9,6 @@ class Foo2 {
 }
 
 class Foo3 {
-    // Doesn't work, but should (bug 17115)
+    // Bug 17115: Can't combine member prefix (public/private) with ... (rest arg)
     constructor (public ...args: string[]) { }
 }

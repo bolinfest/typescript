@@ -1,4 +1,4 @@
-// test for 17506
+// Bug 17506: Shouldn't be able to index a class instance by a number (unless it has declared a number index signature)
 
 class foo { }
 

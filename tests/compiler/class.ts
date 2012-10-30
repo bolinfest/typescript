@@ -6,16 +6,14 @@ describe('Compiling tests\\compiler\\class.ts', function() {
     var typeFactory = new Harness.Compiler.TypeFactory();
     
     describe('Class Declarations', function() {
-        /* BUG 13883
         it("Extending class and referencing itself indirectly", function() {
-            var code = "class c1() extends c2{ }; ";
-            code    += "class c2() extends c1{ }; ";
+            var code = "class c1 extends c2{ }; ";
+            code    += "class c2 extends c1{ }; ";
 
             Harness.Compiler.compileString(code, 'circularExtending', function(result) {          
-                assert.equal(result.errors.length, 3);
+                assert.arrayLengthIs(result.errors, 2);
             });
         });
-        */
     })
 });
 

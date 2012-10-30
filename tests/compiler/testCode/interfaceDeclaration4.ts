@@ -10,7 +10,6 @@ interface I2 extends Foo.I1 {
 }
 
 // Negative Case
-// BUG 12857
 interface I3 extends Foo.I1 {
     item:number;
 }
@@ -24,8 +23,7 @@ class C2 implements I4 {
     public token: string;
 }
 
-// BUG 12860
-//interface I5 extends Foo { }
+interface I5 extends Foo { }
 
 // Negative case
 interface I6 extends Foo.C1 { }
@@ -33,5 +31,4 @@ interface I6 extends Foo.C1 { }
 class C3 implements Foo.I1 { }
 
 // Negative case 
-// BUG 16126
-// interface Foo.I1 { }
+interface Foo.I1 { }

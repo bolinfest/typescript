@@ -1,0 +1,2 @@
+// 0.ts  line 22 col 19: Check format of expression term
+// 0.ts  line 27 col 0: Unexpected statement block terminator '}'

@@ -61,10 +61,20 @@ module Harness {
         id: string;
         desc: string;
         pass: bool;
+        bugs: string[];
     }
 
     // Assert functions
     export module Assert {
+        export var bugDescriptions: string[] = [];
+
+        // Marks that the current scenario is impacted by a bug
+        export function bug(description: string) {
+            if (bugDescriptions.indexOf(description) < 0) {
+                bugDescriptions.push(description);
+            }
+        }
+
         export function is(result: bool, msg?: string) {
             if (!result)
                 throw new Error(msg || "Expected true, got false.");
@@ -170,11 +180,13 @@ module Harness {
         scenarioEnd: (scenario: IScenarioMetadata, error?: Error) => void;
         testStart: (test: ITestMetadata) => void;
         pass: (test: ITestMetadata) => void;
+        bug: (test: ITestMetadata) => void;
         fail: (test: ITestMetadata) => void;
         error: (test: ITestMetadata, error: Error) => void;
         comment: (comment: string) => void;
         verify: (test: ITestMetadata, passed: bool, actual: any, expected: any, message: string) => void;
     }
+
     export class Logger implements ILogger {
         public start(fileName?: string, priority?: number) { }
         public end(fileName?: string) { }
@@ -182,6 +194,7 @@ module Harness {
         public scenarioEnd(scenario: IScenarioMetadata, error?: Error) { }
         public testStart(test: ITestMetadata) { }
         public pass(test: ITestMetadata) { }
+        public bug(test: ITestMetadata) { }
         public fail(test: ITestMetadata) { }
         public error(test: ITestMetadata, error: Error) { }
         public comment(comment: string) { }
@@ -216,6 +229,9 @@ module Harness {
 
         // Whether or not this object has any failures (including in its descendants)
         public passed = null;
+
+        // A list of bugs impacting this object
+        public bugs: string[] = [];
 
         // A list of all our child Runnables
         public children: Runnable[] = [];
@@ -354,7 +370,10 @@ module Harness {
                 if (e) {
                     that.passed = false;
                     that.error = e;
-                    emitLog('scenarioEnd', { desc: this.description, pass: false }, e);
+                    var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: false, bugs: assert.bugDescriptions};
+                    // Report all bugs affecting this scenario
+                    assert.bugDescriptions.forEach(desc => emitLog('bug', metadata, desc););
+                    emitLog('scenarioEnd', metadata, e);
                     done();
                 } else {
                     that.passed = true; // so far so good.
@@ -382,7 +401,10 @@ module Harness {
                     return;
             }
 
-            emitLog('scenarioEnd', { desc: this.description, pass: this.passed });
+            var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: that.passed, bugs: assert.bugDescriptions };
+            // Report all bugs affecting this scenario
+            assert.bugDescriptions.forEach(desc => emitLog('bug', metadata, desc););
+            emitLog('scenarioEnd', metadata);
 
             done();
         }
@@ -402,13 +424,18 @@ module Harness {
             var that = this;
 
             for (; index < this.children.length; index++) {
+                // Clear out bug descriptions
+                assert.bugDescriptions = [];
+
                 async = this.runChild(index, <any>function (e) {
-                    if (async)
+                    if (async) {
                         that.runChildren(index + 1);
+                    }
                 });
 
-                if (async)
+                if (async) {
                     return;
+                }
             }
 
             Perf.runBenchmarks();

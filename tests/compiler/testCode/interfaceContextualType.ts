@@ -1,4 +1,3 @@
-// Bug 16075: Incorrect rejection of correct contextual typing
 export interface IOptions {
     italic?: bool;
     bold?: bool;

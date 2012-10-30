@@ -9,7 +9,7 @@ var ps: IPropertySet = null;
 var index: any = "hello";
 ps[index] = 12;
 
-//bug 15893
+// Bug 15893: Index signatures should take required parameters only
 interface indexErrors {
     [p2?: string];
     [...p3: any[]];

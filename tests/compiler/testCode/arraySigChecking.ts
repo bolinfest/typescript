@@ -17,6 +17,6 @@ interface myInt {
 var myVar: myInt;
 var strArray: string[] = [myVar.voidFn()];
 
-//Bug 17543
+//Bug 17543: 3d array accepting 2d array members
 var myArray: number[][][];
 myArray = [[1,2]];

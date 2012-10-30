@@ -33,7 +33,7 @@ var t5 = new new Date;
 // Can be an expression
 new String;
 
-// Bug 17662
+// Bug 17662: No errors reported on return new class array
 module M {
     export class T {
         x: number;

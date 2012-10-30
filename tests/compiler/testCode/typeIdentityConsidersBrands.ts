@@ -16,8 +16,6 @@ class Y{
 
 function foo(arg: X){
 
-      console.log("called");
-
 }
 
  
