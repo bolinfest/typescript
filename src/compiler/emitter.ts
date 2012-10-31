@@ -379,7 +379,13 @@ module TypeScript {
             if (printName) {
                 var id = funcDecl.getNameText();
                 if (id && !funcDecl.isAccessor()) {
+                    if (funcDecl.name) {
+                        this.recordSourceMappingStart(funcDecl.name);
+                    }
                     this.writeToOutput(id);
+                    if (funcDecl.name) {
+                        this.recordSourceMappingEnd(funcDecl.name);
+                    }
                 }
             }
 
@@ -1092,38 +1098,35 @@ module TypeScript {
         public recordSourceMappingStart(ast: AST) {
             if (this.sourceMapper && ast) {
                 var lineCol = { line: -1, col: -1 };
-                var sourceMapping = new SourceMapping(ast);
-                sourceMapping.emittedStartColumn = this.emitState.column;
-                sourceMapping.emittedStartLine = this.emitState.line;
+                var sourceMapping = new SourceMapping();
+                sourceMapping.start.emittedColumn = this.emitState.column;
+                sourceMapping.start.emittedLine = this.emitState.line;
                 // REVIEW: check time consumed by this binary search (about two per leaf statement)
                 getSourceLineColFromMap(lineCol, ast.minChar, this.checker.locationInfo.lineMap);
-                sourceMapping.sourceStartColumn = lineCol.col;
-                sourceMapping.sourceStartLine = lineCol.line;
+                sourceMapping.start.sourceColumn = lineCol.col;
+                sourceMapping.start.sourceLine = lineCol.line;
                 getSourceLineColFromMap(lineCol, ast.limChar, this.checker.locationInfo.lineMap);
-                sourceMapping.sourceEndColumn = lineCol.col;
-                sourceMapping.sourceEndLine = lineCol.line;
-                sourceMapping.parent = this.sourceMapper.currentMapping;
-                this.sourceMapper.currentMapping = this.sourceMapper.sourceMappings.length;
-                this.sourceMapper.sourceMappings.push(sourceMapping);
-                if (sourceMapping.parent >= 0) {
-                    var parentMapping = this.sourceMapper.sourceMappings[sourceMapping.parent];
-                    if (parentMapping.firstChild == -1) {
-                        parentMapping.firstChild = this.sourceMapper.currentMapping;
-                    }
-                }
+                sourceMapping.end.sourceColumn = lineCol.col;
+                sourceMapping.end.sourceLine = lineCol.line;
+
+                // Set parent and child relation ship
+                var siblings = this.sourceMapper.currentMappings[this.sourceMapper.currentMappings.length - 1];
+                siblings.push(sourceMapping);
+                this.sourceMapper.currentMappings.push(sourceMapping.childMappings);
             }
         }
 
         public recordSourceMappingEnd(ast: AST) {
             if (this.sourceMapper && ast) {
-                var currentMappingIndex = this.sourceMapper.currentMapping;
-                var sourceMapping = this.sourceMapper.sourceMappings[currentMappingIndex];
-                //if (sourceMapping.__debugAST !== ast) {
-                //    throw Error("Unbalanced AST start and stop record found");
-                //}
-                sourceMapping.emittedEndColumn = this.emitState.column;
-                sourceMapping.emittedEndLine = this.emitState.line;
-                this.sourceMapper.currentMapping = sourceMapping.parent;
+                // Pop source mapping childs
+                this.sourceMapper.currentMappings.pop(); 
+
+                // Get the last source mapping from sibling list = which is the one we are recording end for
+                var siblings = this.sourceMapper.currentMappings[this.sourceMapper.currentMappings.length - 1];
+                var sourceMapping = siblings[siblings.length - 1];
+
+                sourceMapping.end.emittedColumn = this.emitState.column;
+                sourceMapping.end.emittedLine = this.emitState.line;
             }
         }
 
