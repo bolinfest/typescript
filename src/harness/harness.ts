@@ -66,12 +66,12 @@ module Harness {
 
     // Assert functions
     export module Assert {
-        export var bugDescriptions: string[] = [];
+        export var bugIds: string[] = [];
 
         // Marks that the current scenario is impacted by a bug
-        export function bug(description: string) {
-            if (bugDescriptions.indexOf(description) < 0) {
-                bugDescriptions.push(description);
+        export function bug(id: string) {
+            if (bugIds.indexOf(id) < 0) {
+                bugIds.push(id);
             }
         }
 
@@ -370,9 +370,9 @@ module Harness {
                 if (e) {
                     that.passed = false;
                     that.error = e;
-                    var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: false, bugs: assert.bugDescriptions};
+                    var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: false, bugs: assert.bugIds};
                     // Report all bugs affecting this scenario
-                    assert.bugDescriptions.forEach(desc => emitLog('bug', metadata, desc););
+                    assert.bugIds.forEach(desc => emitLog('bug', metadata, desc););
                     emitLog('scenarioEnd', metadata, e);
                     done();
                 } else {
@@ -401,9 +401,9 @@ module Harness {
                     return;
             }
 
-            var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: that.passed, bugs: assert.bugDescriptions };
+            var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: this.passed, bugs: assert.bugIds };
             // Report all bugs affecting this scenario
-            assert.bugDescriptions.forEach(desc => emitLog('bug', metadata, desc););
+            assert.bugIds.forEach(desc => emitLog('bug', metadata, desc););
             emitLog('scenarioEnd', metadata);
 
             done();
@@ -425,7 +425,7 @@ module Harness {
 
             for (; index < this.children.length; index++) {
                 // Clear out bug descriptions
-                assert.bugDescriptions = [];
+                assert.bugIds = [];
 
                 async = this.runChild(index, <any>function (e) {
                     if (async) {

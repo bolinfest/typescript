@@ -19,7 +19,7 @@ class ConsoleLogger extends Harness.Logger {
     private errorString: string = '';
     private passCounts = { Scenario: 0, Testcase: 0 };
     private failCounts = { Scenario: 0, Testcase: 0 };
-    private bugCount = 0;
+    private blockedScenarioCount = 0;
 
     // Adds the specified indentation to each line in the string
     private fixIndent(str: string, indent: string) {
@@ -61,7 +61,7 @@ class ConsoleLogger extends Harness.Logger {
         
         IO.printLine('Scenarios: ' + (this.passCounts['Scenario'] || 0) + ' passed, ' + (this.failCounts['Scenario'] || 0) + ' failed.');
         IO.printLine('Testcases: ' + (this.passCounts['Testcase'] || 0) + ' passed, ' + (this.failCounts['Testcase'] || 0) + ' failed.');
-        IO.printLine('     Bugs: ' + this.bugCount);
+        IO.printLine('  Blocked: ' + this.blockedScenarioCount);
         return;
     }
 
@@ -114,7 +114,7 @@ class ConsoleLogger extends Harness.Logger {
         }
         
         if (scenario.bugs && scenario.bugs.length > 0) {
-            this.bugCount++;
+            this.blockedScenarioCount++;
         }
 
         if (error) {

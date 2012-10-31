@@ -461,7 +461,7 @@ module FourSlash {
         var testData = parseTestData(content);
 
         // Log any bugs associated with the test
-        var bugs = content.match(/bug (\d+)/i);
+        var bugs = content.match(/\bbug (\d+)/i);
         if (bugs) {
             bugs.forEach(bug => assert.bug(bug));
         }

@@ -476,8 +476,6 @@ describe('Compiling tests\\compiler\\functionOverloads.ts', function() {
     });
     */
 
-    /* BUG -> can't contextually type
-    */
     it("Check the return type of overload with array literals - 6", function() {
         var code  = "function foo(bar:{a:number;}[]):string;";
             code += "function foo(bar:{a:any;}[]):number;";
