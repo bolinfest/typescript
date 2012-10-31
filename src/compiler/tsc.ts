@@ -447,7 +447,7 @@ class BatchCompiler {
         if (this.compilationSettings.useDefaultLib) {
             var compilerFilePath = this.ioHost.getExecutingFilePath()
             var binDirPath = this.ioHost.dirName(compilerFilePath);
-            var libStrPath = this.ioHost.resolvePath(binDirPath + "\\lib.d.ts");
+            var libStrPath = this.ioHost.resolvePath(binDirPath + "/lib.d.ts");
             code = new TypeScript.SourceUnit(libStrPath, null);
             this.compilationEnvironment.code.push(code);
         }

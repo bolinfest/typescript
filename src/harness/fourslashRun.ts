@@ -3,7 +3,7 @@
 var testList: string[] = [];
 
 if (IO.arguments.length === 0) {
-    IO.dir(Harness.userSpecifiedroot + 'tests\\ls\\fourslash', /\.ts$/).forEach(fn => {
+    IO.dir(Harness.userSpecifiedroot + 'tests/ls/fourslash', /\.ts$/).forEach(fn => {
         if (!fn.match(/fourslash.ts$/i)) {
             testList.push(fn);
         }

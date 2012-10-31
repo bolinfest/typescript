@@ -130,7 +130,8 @@ module DumpAST {
     }
 
     function getBaselineFileName(fileName: string): string {
-        var nameIndex = fileName.lastIndexOf("\\") + 1;
+        fileName = switchToForwardSlashes(fileName);
+        var nameIndex = fileName.lastIndexOf("/") + 1;
         return getOutputPath() + "/" + fileName.substring(nameIndex) + ".json";
     }
 
@@ -216,8 +217,8 @@ module DumpAST {
         var fileNames = getExistingTestCodeFileNames();
 
         for (var i = 0; i < fileNames.length; i++) {
-            var fileName = fileNames[i];
-            var nameOnly = fileName.substr(fileName.lastIndexOf('\\') + 1);
+            var fileName = switchToForwardSlashes(fileNames[i]);
+            var nameOnly = fileName.substr(fileName.lastIndexOf('/') + 1);
             
             var run = (fn) => {
                 Harness.Baseline.runBaseline('AST data for ' + fn, nameOnly.replace(/\.ts/, '.ast'),

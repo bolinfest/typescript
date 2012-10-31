@@ -230,19 +230,19 @@ var files: string[] = [];
 var opts = new OptionsParser(IO);
 
 opts.option('compiler', {
-    set: function () { files = IO.dir("tests\\compiler", /\.ts$/) }
+    set: function () { files = IO.dir("tests/compiler", /\.ts$/) }
 });
 
 opts.option('ls', {
-    set: function () { files = IO.dir("tests\\ls", /\.ts$/) }
+    set: function () { files = IO.dir("tests/ls", /\.ts$/) }
 });
 
 opts.option('services', {
-    set: function () { files = IO.dir("tests\\services", /\.ts$/) }
+    set: function () { files = IO.dir("tests/services", /\.ts$/) }
 });
 
 opts.option('harness', {
-    set: function () => { files = IO.dir("tests\\harness", /\.ts$/) }
+    set: function () => { files = IO.dir("tests/harness", /\.ts$/) }
 });
 
 opts.option('dump', {
@@ -259,10 +259,10 @@ opts.option('root', {
 opts.parse(IO.arguments)
 
 if (opts.unnamed.length === 0 && files.length === 0) {
-    files = IO.dir(Harness.userSpecifiedroot + "tests\\compiler", /\.ts$/)
-            .concat(IO.dir(Harness.userSpecifiedroot + "tests\\ls", /\.ts$/))
-            .concat(IO.dir(Harness.userSpecifiedroot + "tests\\services", /\.ts$/))
-            .concat(IO.dir(Harness.userSpecifiedroot + "tests\\projects", /\.ts$/));
+    files = IO.dir(Harness.userSpecifiedroot + "tests/compiler", /\.ts$/)
+            .concat(IO.dir(Harness.userSpecifiedroot + "tests/ls", /\.ts$/))
+            .concat(IO.dir(Harness.userSpecifiedroot + "tests/services", /\.ts$/))
+            .concat(IO.dir(Harness.userSpecifiedroot + "tests/projects", /\.ts$/));
 } else {
     for (var i = 0; i < opts.unnamed.length; i++) {
         files.push(Harness.userSpecifiedroot + opts.unnamed[i]);

@@ -169,7 +169,7 @@ module Harness {
 
     // Reads a file under tests
     export function readFile(path: string) {
-        return IO.readFile(Harness.userSpecifiedroot + "tests//" + path);
+        return IO.readFile(Harness.userSpecifiedroot + "tests/" + path);
     }
 
     // Logger
@@ -659,7 +659,7 @@ module Harness {
             }
         }
 
-        var libFolder: string = global['WScript'] ? TypeScript.filePath(global['WScript'].ScriptFullName) : (__dirname + '\\');
+        var libFolder: string = global['WScript'] ? TypeScript.filePath(global['WScript'].ScriptFullName) : (__dirname + '/');
         export var libText = IO ? IO.readFile(libFolder + "lib.d.ts") : '';
 
         var stdout = new WriterAggregator();
@@ -972,7 +972,8 @@ module Harness {
             if (settingsCallback) {
                 settingsCallback();
             }
-            compileString(readFile(path), path.match(/[^\\]*$/)[0], callback);
+            path = switchToForwardSlashes(path);
+            compileString(readFile(path), path.match(/[^\/]*$/)[0], callback);
         }
         export function compileUnits(callback: (res: Compiler.CompilerResult) => void, settingsCallback?: () => void ) {
             reset();
@@ -1347,7 +1348,8 @@ module Harness {
     // Runs TypeScript or Javascript code.
     export module Runner {
         export function runCollateral(path: string, callback: (error: Error, result: any) => void ) {
-            runString(readFile(path), path.match(/[^\\]*$/)[0], callback);
+            path = switchToForwardSlashes(path);
+            runString(readFile(path), path.match(/[^\/]*$/)[0], callback);
         }
 
         export function runJSString(code: string, callback: (error: Error, result: any) => void ) {

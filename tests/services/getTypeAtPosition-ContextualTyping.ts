@@ -5,7 +5,7 @@ describe('Contextual typed literals with getTypeAtPosition', function() {
     
     typescriptLS.addDefaultLibrary();
     
-    var fileName = 'compiler\\testCode\\contextualTyping.ts';
+    var fileName = 'compiler/testCode/contextualTyping.ts';
     typescriptLS.addFile(fileName);
     
     var ls = typescriptLS.getLanguageService();

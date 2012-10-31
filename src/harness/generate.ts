@@ -6,6 +6,7 @@
 
 module CollateralGenerator {
     export function generateFromSourceFile(path, options) {
+        path = switchToForwardSlashes(path);
         options = options || {};
         options.generateErrorTests = options.generateErrorTests || true;
         options.generateRuntimeBaseline = options.generateRuntimeBaseline || true;
@@ -14,29 +15,29 @@ module CollateralGenerator {
         
         var fileContents = IO.readFile(path);
         
-        var pathParts = path.match(/^(.*\\|)compiler\\testCode\\([^\\]*)\.(\w+)$/);
+        var pathParts = path.match(/^(.*\/|)compiler\/testCode\/([^\/]*)\.(\w+)$/);
         var prefix    = pathParts[1];
-        var compilerDir = prefix + "compiler\\";
-        var baselineDir = compilerDir + "baselines\\";
-        var testCodeDir = compilerDir + "testCode\\";
+        var compilerDir = prefix + "compiler/";
+        var baselineDir = compilerDir + "baselines/";
+        var testCodeDir = compilerDir + "testCode/";
         var fileName  = pathParts[2];
         var fileExt   = pathParts[3];
         var codeBaseline = "";
         var codeBaselineLocation = baselineDir + fileName + ".js";
         var testFileLocation =  compilerDir + fileName + ".ts";
 
-        if(path.indexOf("src\\tests\\") > -1) {
-            path = path.replace(/.*src\\tests\\/, "");
+        if(path.indexOf("src/tests/") > -1) {
+            path = path.replace(/.*src\/tests\//, "");
         }
         
-        var testCase      = "describe('Compiling " + path.replace(/\\/g, "\\\\") + "', function() {\n";
-        testCase         += "    Harness.Helper.readFile('tests\\\\compiler\\\\testCode\\\\" + fileName + "." + fileExt + "', function(result) {\n";
+        var testCase      = "describe('Compiling " + path.replace(/\//g, "//") + "', function() {\n";
+        testCase         += "    Harness.Helper.readFile('tests/compiler/testCode/" + fileName + "." + fileExt + "', function(result) {\n";
             
         Harness.Compiler.compileString(fileContents, path, function(result) {
             testCase     += "        it('has " + result.errors.length + " compile errors', function() {\n";
             
             for(var i = 0; i < result.errors.length;i++) {
-                testCase += "            assert.compilerWarning(result, " + result.errors[i].line + ", " + result.errors[i].column + ", '" + result.errors[i].message.replace(/'/g, "\\'") + "');\n";
+                testCase += "            assert.compilerWarning(result, " + result.errors[i].line + ", " + result.errors[i].column + ", '" + result.errors[i].message.replace(/'/g, "/'") + "');\n";
             }
             
             testCase     += "            assert.equal(result.errors.length, " + result.errors.length + ");\n";
@@ -47,7 +48,7 @@ module CollateralGenerator {
                 testCase += "        it('compiles properly against the baseline', function() {\n";
                 if(result.code.indexOf("\n") > -1) {
                     codeBaseline = result.code;
-                    testCase += "            assert.noDiff(result.code, Harness.Helper.readFile('tests\\\\compiler\\\\baselines\\\\" + fileName + ".js'));\n";
+                    testCase += "            assert.noDiff(result.code, Harness.Helper.readFile('tests/compiler/baselines/" + fileName + ".js'));\n";
                 } else {
                     testCase += "            assert.noDiff(result.code, '" + result.code + "');\n";
                 }
@@ -66,10 +67,10 @@ module CollateralGenerator {
                     return;
 
 
-                testCase += "describe('Running " + path.replace(/\\/g, "\\\\") + "', function() {\n";
-                testCase += "    Harness.Runner.runCollateral('compiler\\\\testCode\\\\" + fileName + "." + fileExt + "', function(error, result) {\n";
+                testCase += "describe('Running " + path.replace(/\//g, "/") + "', function() {\n";
+                testCase += "    Harness.Runner.runCollateral('compiler/testCode/" + fileName + "." + fileExt + "', function(error, result) {\n";
                 testCase += "        it('matches baseline', function() {\n";
-                testCase += "            assert.equal('" + result.replace(/'/g, "\\'").replace(/\r/g, "\\r").replace(/\n/g, "\\n") + "', result);\n";
+                testCase += "            assert.equal('" + result.replace(/'/g, "/'").replace(/\r/g, "\\r").replace(/\n/g, "\\n") + "', result);\n";
                 testCase += "        });\n";
                 testCase += "    });\n";
                 testCase += "});\n"

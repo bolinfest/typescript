@@ -92,7 +92,10 @@ var IO = (function() {
                     if ((bomChar.charCodeAt(0) == 0xFE && bomChar.charCodeAt(1) == 0xFF)
                         || (bomChar.charCodeAt(0) == 0xFF && bomChar.charCodeAt(1) == 0xFE)) {
                         streamObj.Charset = 'unicode';
-                    } else if (bomChar.charCodeAt(0) == 0xEF && bomChar.charCodeAt(1) == 0xBB) {                        streamObj.Charset = 'utf-8';                     }
+                    } else if (bomChar.charCodeAt(0) == 0xEF && bomChar.charCodeAt(1) == 0xBB) {
+                        streamObj.Charset = 'utf-8'; 
+                    }
+
                     // Read the whole file
                     var str = streamObj.ReadText(-1 /* read from the current position to EOS */);
                     streamObj.Close();
@@ -194,7 +197,7 @@ var IO = (function() {
                         fc = new Enumerator(folder.subfolders);
 
                         for (; !fc.atEnd() ; fc.moveNext()) {
-                            paths = paths.concat(filesInFolder(fc.item(), root + "\\" + fc.item().Name));
+                            paths = paths.concat(filesInFolder(fc.item(), root + "/" + fc.item().Name));
                         }
                     }
 
@@ -202,7 +205,7 @@ var IO = (function() {
 
                     for (; !fc.atEnd() ; fc.moveNext()) {
                         if (!spec || fc.item().Name.match(spec)) {
-                            paths.push(root + "\\" + fc.item().Name);
+                            paths.push(root + "/" + fc.item().Name);
                         }
                     }
 
@@ -324,11 +327,11 @@ var IO = (function() {
 
                     var files = _fs.readdirSync(folder);
                     for (var i = 0; i < files.length; i++) {
-                        var stat = _fs.statSync(folder + "\\" + files[i]);
+                        var stat = _fs.statSync(folder + "/" + files[i]);
                         if (options.recursive && stat.isDirectory()) {
-                            paths = paths.concat(filesInFolder(folder + "\\" + files[i]));
+                            paths = paths.concat(filesInFolder(folder + "/" + files[i]));
                         } else if (stat.isFile() && (!spec || files[i].match(spec))) {
-                            paths.push(folder + "\\" + files[i]);
+                            paths.push(folder + "/" + files[i]);
                         }
                     }
 

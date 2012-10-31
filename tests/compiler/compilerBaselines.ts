@@ -16,7 +16,7 @@ function checkTestCodeOutput(filename: string) {
         var errorDescriptionLocal = '';
         
         //TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
-        Harness.Compiler.compileUnit('compiler\\testCode\\' + filename, function (result) {
+        Harness.Compiler.compileUnit('compiler/testCode/' + filename, function (result) {
             for (var i = 0; i < result.errors.length; i++) {
                 errorDescriptionLocal += result.errors[i].file + ' line ' + result.errors[i].line + ' col ' + result.errors[i].column + ': ' + result.errors[i].message + '\r\n';
             }
@@ -26,7 +26,7 @@ function checkTestCodeOutput(filename: string) {
         });
 
         
-        Harness.Compiler.compileUnit('compiler\\testCode\\' + filename, function (result) {
+        Harness.Compiler.compileUnit('compiler/testCode/' + filename, function (result) {
             for (var i = 0; i < result.errors.length; i++) {
                 errorDescriptionAsync += result.errors[i].file + ' line ' + result.errors[i].line + ' col ' + result.errors[i].column + ': ' + result.errors[i].message + '\r\n';
             }
@@ -70,6 +70,7 @@ function checkTestCodeOutput(filename: string) {
 
 }
 
-IO.dir(Harness.userSpecifiedroot + 'tests\\compiler\\testCode', /\.ts$/).forEach(fn => {
-    checkTestCodeOutput(fn.substr(fn.lastIndexOf('\\') + 1));
+IO.dir(Harness.userSpecifiedroot + 'tests/compiler/testCode', /\.ts$/).forEach(fn => {
+    fn = fn.replace(/\\/g, "/");
+    checkTestCodeOutput(fn.substr(fn.lastIndexOf('/') + 1));
 });

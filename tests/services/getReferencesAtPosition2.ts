@@ -216,7 +216,7 @@ function extractCodeSpans(code: string, outputSpans: Span[], caretPositions: Spa
     return result;
 }
 
-var refFile = function(fn) { return Harness.userSpecifiedroot + 'tests\\services\\testCode\\references\\' + fn; };
+var refFile = function(fn) { return Harness.userSpecifiedroot + 'tests/services/testCode/references/' + fn; };
 
 testFileForReferenceHighlighting(refFile('classLocal.ts'));
     
