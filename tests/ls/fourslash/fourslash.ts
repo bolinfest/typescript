@@ -169,6 +169,10 @@ module FourSlashInterface {
             FourSlash.currentTestState.printCurrentFileState();
         }
 
+        public printCurrentFileStateWithWhitepsace() {
+            FourSlash.currentTestState.printCurrentFileState(true);
+        }
+
         public printCurrentQuickInfo() {
             FourSlash.currentTestState.printCurrentQuickInfo();
         }
@@ -181,6 +185,12 @@ module FourSlashInterface {
             FourSlash.currentTestState.printCompletionListMembers();
         }
     }
+
+    export class format {
+        public document() {
+            FourSlash.currentTestState.formatDocument();
+        }
+    }
 }
 
 module fs {
@@ -188,9 +198,11 @@ module fs {
     export var verify = new FourSlashInterface.verify();
     export var edit = new FourSlashInterface.edit();
     export var debug = new FourSlashInterface.debug();
+    export var format = new FourSlashInterface.format();
 }
 
 var goTo = new FourSlashInterface.goTo();
 var verify = new FourSlashInterface.verify();
 var edit = new FourSlashInterface.edit();
 var debug = new FourSlashInterface.debug();
+var format = new FourSlashInterface.format();

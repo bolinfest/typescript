@@ -221,7 +221,7 @@ module FourSlash {
             IO.printLine(JSON2.stringify(quickInfo));
         }
 
-        public printCurrentFileState() {
+        public printCurrentFileState(makeWhitespaceVisible = false) {
             for (var i = 0; i < this.testData.files.length; i++) {
                 var file = this.testData.files[i];
                 var active = (this.activeFile === file);
@@ -230,6 +230,9 @@ module FourSlash {
                 var content = this.langSvc.getScriptSourceText(index, 0, this.langSvc.getScriptSourceLength(index));
                 if (active) {
                     content = content.substr(0, this.currentCaretPosition) + '|' + content.substr(this.currentCaretPosition);
+                }
+                if (makeWhitespaceVisible) {
+                    content = TestState.makeWhitespaceVisible(content);
                 }
                 IO.printLine(content);
             }
@@ -258,21 +261,44 @@ module FourSlash {
 
                 // Handle post-keystroke formatting
                 var edits = this.realLangSvc.getFormattingEditsAfterKeystroke(this.activeFile.name, offset, ch, opts);
-                // We get back a set of edits, but langSvc.editScript only accepts one at a time. Use this to keep track
-                // of the incremental offest from each edit to the next. Assumption is that these edit ranges don't overlap
-                // or come in out-of-order.
-                var runningOffset = 0;
-                for (var j = 0; j < edits.length; j++) {
-                    this.langSvc.editScript(this.activeFile.name, edits[j].minChar + runningOffset, edits[j].limChar + runningOffset, edits[j].text);
-                    this.updateMarkersForEdit(this.activeFile.name, edits[j].minChar + runningOffset, edits[j].limChar + runningOffset, edits[j].text);
-                    var change = (edits[j].minChar - edits[j].limChar) + edits[j].text.length;
-                    offset += change;
-                    runningOffset += change;
-                }
+                offset += this.applyEdits(this.activeFile.name, edits);
             }
 
             // Move the caret to wherever we ended up
             this.currentCaretPosition = offset;
+
+            this.fixCaretPosition();
+        }
+
+        private fixCaretPosition() {
+            // The caret can potentially end up between the \r and \n, which is confusing. If
+            // that happens, move it back one character
+            if (this.currentCaretPosition > 0) {
+                var ch = this.langSvc.getScriptSourceText(this.getActiveFileIndex(), this.currentCaretPosition - 1, this.currentCaretPosition);
+                if (ch === '\r') {
+                    this.currentCaretPosition--;
+                }
+            };
+        }
+
+        private applyEdits(filename: string, edits: Services.TextEdit[]): number {
+            // We get back a set of edits, but langSvc.editScript only accepts one at a time. Use this to keep track
+            // of the incremental offest from each edit to the next. Assumption is that these edit ranges don't overlap
+            // or come in out-of-order.
+            var runningOffset = 0;
+            for (var j = 0; j < edits.length; j++) {
+                this.langSvc.editScript(filename, edits[j].minChar + runningOffset, edits[j].limChar + runningOffset, edits[j].text);
+                this.updateMarkersForEdit(filename, edits[j].minChar + runningOffset, edits[j].limChar + runningOffset, edits[j].text);
+                var change = (edits[j].minChar - edits[j].limChar) + edits[j].text.length;
+                runningOffset += change;
+            }
+            return runningOffset;
+        }
+
+        public formatDocument() {
+            var edits = this.realLangSvc.getFormattingEditsForRange(this.activeFile.name, 0, this.langSvc.getScriptSourceLength(this.getActiveFileIndex()), new Services.FormatCodeOptions());
+            this.currentCaretPosition += this.applyEdits(this.activeFile.name, edits);
+            this.fixCaretPosition();
         }
 
         private updateMarkersForEdit(filename: string, minChar: number, limChar: number, text: string) {
@@ -448,6 +474,10 @@ module FourSlash {
             } else {
                 return markerPos;
             }
+        }
+
+        private static makeWhitespaceVisible(text: string) {
+            return text.replace(/ /g, '\u00B7').replace(/\r/g, '\u00B6').replace(/\n/g, '\u2193\n').replace(/\t/g, '\u2192\   ');
         }
     }
 
