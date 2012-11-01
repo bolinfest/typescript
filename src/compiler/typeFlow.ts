@@ -1943,7 +1943,7 @@ module TypeScript {
         // Checks if the privacy is satisfied by type that is used in the declaration inside container
         private checkTypePrivacy(type: Type, declSymbol: Symbol, errorCallback: (typeName: string) =>void ) {
             // Primitive types
-            if (type == null || type.primitiveTypeClass != Primitive.None) {
+            if (!(type && type.primitiveTypeClass == Primitive.None)) {
                 return;
             }
 

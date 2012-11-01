@@ -429,7 +429,7 @@ module TypeScript {
         }
     }
 
-    export function isValidAstNode(ast: TypeScript.AST): bool {
+    export function isValidAstNode(ast: TypeScript.ASTSpan): bool {
         if (ast === null)
             return false;
 

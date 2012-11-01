@@ -424,7 +424,7 @@ module TypeScript {
                 member.init = memberValue;
                 // Note: Leave minChar, limChar as "-1" on typeExpr as this is a parsing artifact.
                 member.typeExpr = new TypeReference(this.createRef(name.actualText, name.hasEscapeSequence, -1), 0);
-                member.varFlags |= (VarFlags.Readonly | VarFlags.Property );
+                member.varFlags |= (VarFlags.Readonly | VarFlags.Property);
                 if (memberValue.nodeType == NodeType.NumberLit) {
                     member.varFlags |= VarFlags.Constant;
                 }
@@ -443,9 +443,13 @@ module TypeScript {
                 }
                 break;
             }
+            var endingToken = new ASTSpan();
+            endingToken.minChar = this.scanner.startPos;
+            endingToken.limChar = this.scanner.pos;
+
             this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
             members.limChar = this.scanner.lastTokenLimChar();
-            var modDecl = new ModuleDecl(name, members, this.topVarList(), this.topScopeList());
+            var modDecl = new ModuleDecl(name, members, this.topVarList(), this.topScopeList(), endingToken);
             modDecl.modFlags |= ModuleFlags.IsEnum;
             this.popDeclLists();
 
@@ -661,6 +665,10 @@ module TypeScript {
                                 AllowedElements.ModuleMembers, modifiers);
                 moduleBody.minChar = bodyMinChar;
                 moduleBody.limChar = this.scanner.pos;
+
+                var endingToken = new ASTSpan();
+                endingToken.minChar = this.scanner.startPos;
+                endingToken.limChar = this.scanner.pos;
                 this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
 
                 var limChar = this.scanner.pos;
@@ -669,7 +677,7 @@ module TypeScript {
                     var len = enclosedList.length;
                     var innerName = <Identifier>enclosedList[len - 1];
                     var innerDecl = new ModuleDecl(innerName, moduleBody, this.topVarList(),
-                                                    this.topScopeList());
+                                                    this.topScopeList(), endingToken);
 
                     if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
                         innerDecl.modFlags |= ModuleFlags.Ambient;
@@ -688,7 +696,7 @@ module TypeScript {
                         outerModBod.append(innerDecl);
                         innerName = <Identifier>enclosedList[i];
                         innerDecl = new ModuleDecl(innerName, outerModBod, new ASTList(),
-                                                    new ASTList());
+                                                    new ASTList(), endingToken);
                         outerModBod.minChar = innerDecl.minChar = minChar;
                         outerModBod.limChar = innerDecl.limChar = limChar;
 
@@ -703,10 +711,10 @@ module TypeScript {
                     outerModBod.minChar = minChar;
                     outerModBod.limChar = limChar;
                     moduleDecl = new ModuleDecl(<Identifier>name, outerModBod, new ASTList(),
-                                                new ASTList());
+                                                new ASTList(), endingToken);
                 }
                 else {
-                    moduleDecl = new ModuleDecl(<Identifier>name, moduleBody, this.topVarList(), this.topScopeList());
+                    moduleDecl = new ModuleDecl(<Identifier>name, moduleBody, this.topVarList(), this.topScopeList(), endingToken);
                     this.popDeclLists();
                 }
 
@@ -951,18 +959,27 @@ module TypeScript {
                 }
                 else {
                     if (!wasShorthand || isAnonLambda) {
+                        funcDecl.endingToken = new ASTSpan();
+                        funcDecl.endingToken.minChar = this.scanner.startPos;
+                        funcDecl.endingToken.limChar = this.scanner.pos;
                         this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
 
                         if (isAnonLambda) {
                             funcDecl.fncFlags |= FncFlags.IsFatArrowFunction;
                         }
                     }
-                    else {  
+                    else {
                         funcDecl.fncFlags |= FncFlags.IsFatArrowFunction;
+                        funcDecl.endingToken = new ASTSpan();
 
                         // eliminate the trailing semicolon
                         if (this.tok.tokenId == TokenID.SColon) {
+                            funcDecl.endingToken.minChar = this.scanner.startPos;
+                            funcDecl.endingToken.limChar = this.scanner.pos;
                             this.tok = this.scanner.scan();
+                        } else {
+                            funcDecl.endingToken.minChar = bod.members[0].minChar;
+                            funcDecl.endingToken.limChar = bod.members[0].limChar;
                         }
                     }
                 }
@@ -1681,6 +1698,9 @@ module TypeScript {
 
             var membersLimChar = this.scanner.pos;
             if (this.tok.tokenId == TokenID.RCurly) {
+                classDecl.endingToken = new ASTSpan();
+                classDecl.endingToken.minChar = this.scanner.startPos;
+                classDecl.endingToken.limChar = this.scanner.pos;
 
                 // for a class with an empty body, consume any 'dangling' inner comments
                 if (!this.currentClassDefinition.definitionMembers.members.length) {
@@ -3120,6 +3140,8 @@ module TypeScript {
 
                     var ecatch = new Catch(new VarDecl(new MissingIdentifier(), this.nestingLevel),
                                             new Statement(NodeType.Empty));
+                    ecatch.statement.minChar = catchMinChar;
+                    ecatch.statement.limChar = this.scanner.pos;
                     ecatch.minChar = this.scanner.startPos;
                     ecatch.limChar = this.scanner.pos;
                     ecatch.flags |= ASTFlags.Error;
@@ -3132,6 +3154,7 @@ module TypeScript {
             param.minChar = param.id.minChar;
             param.limChar = param.id.limChar;
             this.tok = this.scanner.scan();
+            var statementPos = this.scanner.pos;
             this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet |
                         ErrorRecoverySet.StmtStart);
             if (this.tok.tokenId != TokenID.LCurly) {
@@ -3141,6 +3164,8 @@ module TypeScript {
 
                     var ecatch = new Catch(new VarDecl(new MissingIdentifier(), this.nestingLevel),
                                             new Statement(NodeType.Empty));
+                    ecatch.statement.minChar = catchMinChar;
+                    ecatch.statement.limChar = statementPos;
                     ecatch.minChar = this.scanner.startPos;
                     ecatch.limChar = this.scanner.pos;
                     ecatch.flags |= ASTFlags.Error;
@@ -3150,6 +3175,8 @@ module TypeScript {
 
             var catchStmt = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
             var catchNode = new Catch(param, catchStmt);
+            catchNode.statement.minChar = catchMinChar;
+            catchNode.statement.limChar = statementPos;
             catchNode.minChar = catchMinChar;
             catchNode.limChar = catchStmt.limChar;
             catchNode.preComments = preComments;
@@ -3595,6 +3622,8 @@ module TypeScript {
                                                                            TypeContext.NoTypes));
 
                                 forInStmt.limChar = this.scanner.pos;
+                                forInStmt.statement.minChar = minChar;
+                                forInStmt.statement.limChar = this.scanner.pos;
                                 this.chkCurTok(TokenID.RParen, "Expected ')'", ErrorRecoverySet.StmtStart |
                                           errorRecoverySet);
                                 this.pushStmt(forInStmt, labelList);
@@ -3684,6 +3713,8 @@ module TypeScript {
                                                                      OperatorPrecedence.No,
                                                                      true,
                                                                      TypeContext.NoTypes));
+                        switchStmt.statement.minChar = minChar;
+                        switchStmt.statement.limChar = this.scanner.pos;
                         this.chkCurTok(TokenID.RParen, "Expected ')'",
                                   errorRecoverySet | ErrorRecoverySet.LCurly);
                         var caseListMinChar = this.scanner.startPos;
@@ -3795,6 +3826,8 @@ module TypeScript {
                                                              OperatorPrecedence.No, true,
                                                              TypeContext.NoTypes));
                         ifStmt.minChar = minChar;
+                        ifStmt.statement.minChar = minChar;
+                        ifStmt.statement.limChar = this.scanner.pos;
                         this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet |
                                   ErrorRecoverySet.StmtStart);
                         this.pushStmt(ifStmt, labelList);
@@ -4149,7 +4182,7 @@ module TypeScript {
             if (moduleGenTarget != ModuleGenTarget.Local && this.hasTopLevelImportOrExport) {
                 var correctedFileName = switchToForwardSlashes(filename);
                 var id: Identifier = new Identifier(correctedFileName);
-                topLevelMod = new ModuleDecl(id, bod, this.topVarList(), this.topScopeList());
+                topLevelMod = new ModuleDecl(id, bod, this.topVarList(), this.topScopeList(), null);
 
                 topLevelMod.modFlags |= ModuleFlags.IsDynamic;
                 topLevelMod.modFlags |= ModuleFlags.IsWholeFile;

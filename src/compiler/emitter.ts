@@ -228,18 +228,18 @@ module TypeScript {
         }
 
         public emitNew(target: AST, args: ASTList) {
-            this.recordSourceMappingStart(target);
             this.writeToOutput("new ");
             if (target.nodeType == NodeType.TypeRef) {
                 this.writeToOutput("Array()");
             }
             else {
                 this.emitJavascript(target, TokenID.Tilde, false);
+                this.recordSourceMappingStart(args);
                 this.writeToOutput("(");
                 this.emitJavascriptList(args, ", ", TokenID.Comma, false, false, false);
                 this.writeToOutput(")");
+                this.recordSourceMappingEnd(args);
             }
-            this.recordSourceMappingEnd(target);
         }
 
         public tryEmitConstant(dotExpr: BinaryExpression) {
@@ -276,9 +276,11 @@ module TypeScript {
                     if (target.nodeType == NodeType.FuncDecl && !target.isParenthesized) {
                         this.writeToOutput(")");
                     }
+                    this.recordSourceMappingStart(args);
                     this.writeToOutput("(");
                     this.emitJavascriptList(args, ", ", TokenID.Comma, false, false, false);
                     this.writeToOutput(")");
+                    this.recordSourceMappingEnd(args);
                 }
                 else {
                     this.indenter.decreaseIndent();
@@ -512,7 +514,13 @@ module TypeScript {
 
             this.indenter.decreaseIndent();
             this.emitIndent();
+            this.recordSourceMappingStart(funcDecl.endingToken);
             this.writeToOutput("}");
+            this.recordSourceMappingEnd(funcDecl.endingToken);
+            this.recordSourceMappingEnd(funcDecl);
+
+            // The extra call is to make sure the caller's funcDecl end is recorded, since caller wont be able to record it
+            this.recordSourceMappingEnd(funcDecl);
             if (!isProtoMember &&
                 //funcDecl.name != null &&
                 !hasFlag(funcDecl.fncFlags, FncFlags.IsFunctionExpression) &&
@@ -543,6 +551,7 @@ module TypeScript {
                         this.emitPropertyAccessor(innerFunc, funcDecl.name.actualText, false);
                     }
                     else {
+                        this.recordSourceMappingStart(innerFunc);
                         this.writeToOutput(funcName + "." + innerFunc.name.actualText + " = ");
                         this.emitInnerFunction(innerFunc, (innerFunc.name && !innerFunc.name.isMissing()), false,
                                          null, innerFunc.hasSelfReference(), null);
@@ -568,7 +577,6 @@ module TypeScript {
                 var prefix = printProto ? this.thisClassNode.name.actualText + ".prototype." : "";
                 this.writeLineToOutput("})(" + prefix + funcName + ");")
             }
-            this.recordSourceMappingEnd(funcDecl);
             this.emitParensAndCommentsInPlace(funcDecl, false);
             /// TODO: See the other part of this at the beginning of function
             //if (funcDecl.preComments!=null && funcDecl.preComments.length>0) {
@@ -588,6 +596,10 @@ module TypeScript {
             if (!hasFlag(moduleDecl.modFlags, ModuleFlags.Ambient)) {
                 var isDynamicMod = hasFlag(moduleDecl.modFlags, ModuleFlags.IsDynamic);
                 var prevOutFile = this.outfile;
+                var prevAllSourceMappers = this.allSourceMappers;
+                var prevSourceMapper = this.sourceMapper;
+                var prevColumn = this.emitState.column;
+                var prevLine = this.emitState.line;
                 var temp = this.setContainer(EmitContainer.Module);
                 var svModuleName = this.moduleName;
                 var isExported = hasFlag(moduleDecl.modFlags, ModuleFlags.Exported);
@@ -595,11 +607,11 @@ module TypeScript {
 
                 this.moduleName = moduleDecl.name.actualText;
 
-                this.recordSourceMappingStart(moduleDecl);
                 // prologue
                 if (isDynamicMod) {
                     // create the new outfile for this module
-                    var modFilePath = stripQuotes(trimModName(moduleDecl.name.actualText)) + ".js";
+                    var tsModFileName = stripQuotes(moduleDecl.name.actualText);
+                    var modFilePath =  trimModName(tsModFileName) + ".js";
 
                     if (this.emitOptions.createFile) {
                         // Ensure that the slashes are normalized so that the comparison is fair
@@ -609,6 +621,12 @@ module TypeScript {
                         if (switchToForwardSlashes(modFilePath) != switchToForwardSlashes(this.emitOptions.path)) {
                             var useUTF8InOutputfile = moduleDecl.containsUnicodeChar || (this.emitOptions.emitComments && moduleDecl.containsUnicodeCharInComment);
                             this.outfile = this.emitOptions.createFile(modFilePath, useUTF8InOutputfile);
+                            if (prevSourceMapper != null) {
+                                this.allSourceMappers = [];
+                                this.setSourceMappings(new TypeScript.SourceMapper(tsModFileName, modFilePath, this.outfile, this.emitOptions.createFile(modFilePath + SourceMapper.MapFileExtension)));
+                                this.emitState.column = 0;
+                                this.emitState.line = 0;
+                            }
                         } else if (!this.emitOptions.outputMany) {
                             // If we are emitting single file then its path cannot collide with module output
                             this.checker.errorReporter.emitterError(moduleDecl, "Module emit collides with emitted script: " + modFilePath);
@@ -617,6 +635,7 @@ module TypeScript {
 
                     this.setContainer(EmitContainer.DynamicModule); // discard the previous 'Module' container
 
+                    this.recordSourceMappingStart(moduleDecl);
                     if (moduleGenTarget == ModuleGenTarget.Asynchronous) { // AMD
                         var dependencyList = "[\"require\", \"exports\"";
                         var importList = "require, exports";
@@ -655,11 +674,23 @@ module TypeScript {
                 else {
 
                     if (!isExported) {
-                        this.writeLineToOutput("var " + this.moduleName + ";");
+                        this.recordSourceMappingStart(moduleDecl);
+                        this.writeToOutput("var ");
+                        this.recordSourceMappingStart(moduleDecl.name);
+                        this.writeToOutput(this.moduleName);
+                        this.recordSourceMappingEnd(moduleDecl.name);
+                        this.writeLineToOutput(";");
+                        this.recordSourceMappingEnd(moduleDecl);
                         this.emitIndent();
                     }
 
-                    this.writeLineToOutput("(function (" + this.moduleName + ") {");
+                    this.writeToOutput("(");
+                    this.recordSourceMappingStart(moduleDecl);
+                    this.writeToOutput("function (");
+                    this.recordSourceMappingStart(moduleDecl.name);
+                    this.writeToOutput(this.moduleName);
+                    this.recordSourceMappingEnd(moduleDecl.name);
+                    this.writeLineToOutput(") {");
                 }
 
                 // body - don't indent for Node
@@ -669,7 +700,9 @@ module TypeScript {
 
                 if (moduleDecl.modFlags & ModuleFlags.MustCaptureThis) {
                     this.emitIndent();
+                    this.recordSourceMappingStart(moduleDecl);
                     this.writeLineToOutput(this.captureThisStmtString);
+                    this.recordSourceMappingEnd(moduleDecl);
                 }
 
                 this.emitJavascriptList(moduleDecl.members, null, TokenID.SColon, true, false, false);
@@ -685,9 +718,17 @@ module TypeScript {
                     }
                     else { // Node
                     }
+                    this.recordSourceMappingEnd(moduleDecl);
 
                     // close the module outfile, and restore the old one
                     if (this.outfile != prevOutFile) {
+                        if (prevSourceMapper != null) {
+                            this.emitSourceMappings();
+                            this.allSourceMappers = prevAllSourceMappers;
+                            this.sourceMapper = prevSourceMapper;
+                            this.emitState.column = prevColumn;
+                            this.emitState.line = prevLine;
+                        }
                         this.outfile.Close();
                         this.outfile = prevOutFile;
                     }
@@ -699,30 +740,41 @@ module TypeScript {
                     }
                     var parentIsDynamic = containingMod && hasFlag(containingMod.modFlags, ModuleFlags.IsDynamic);
 
+                    this.recordSourceMappingStart(moduleDecl.endingToken);
                     if (temp == EmitContainer.Prog && isExported) {
-                        this.writeLineToOutput("})(this." + this.moduleName + " || (this." + this.moduleName + " = {}));");
+                        this.writeToOutput("}");
+                        this.recordSourceMappingEnd(moduleDecl.endingToken);
+                        this.writeLineToOutput(")(this." + this.moduleName + " || (this." + this.moduleName + " = {}));");
                     }
                     else if (isExported || temp == EmitContainer.Prog) {
                         var dotMod = svModuleName != "" ? (parentIsDynamic ? "exports" : svModuleName) + "." : svModuleName;
-                        this.writeLineToOutput("})(" + dotMod + this.moduleName + " || (" + dotMod + this.moduleName + " = {}));");
+                        this.writeToOutput("}");
+                        this.recordSourceMappingEnd(moduleDecl.endingToken);
+                        this.writeLineToOutput(")(" + dotMod + this.moduleName + " || (" + dotMod + this.moduleName + " = {}));");
                     }
                     else if (!isExported && temp != EmitContainer.Prog) {
-                        this.writeLineToOutput("})(" + this.moduleName + " || (" + this.moduleName + " = {}));");
+                        this.writeToOutput("}");
+                        this.recordSourceMappingEnd(moduleDecl.endingToken);
+                        this.writeLineToOutput(")(" + this.moduleName + " || (" + this.moduleName + " = {}));");
                     }
                     else {
-                        this.writeLineToOutput("})();");
+                        this.writeToOutput("}");
+                        this.recordSourceMappingEnd(moduleDecl.endingToken);
+                        this.writeLineToOutput(")();");
                     }
+                    this.recordSourceMappingEnd(moduleDecl);
                     if (temp != EmitContainer.Prog && isExported) {
                         this.emitIndent();
+                        this.recordSourceMappingStart(moduleDecl);
                         if (parentIsDynamic) {
                             this.writeLineToOutput("var " + this.moduleName + " = exports." + this.moduleName + ";");
                         } else {
                             this.writeLineToOutput("var " + this.moduleName + " = " + svModuleName + "." + this.moduleName + ";");
                         }
+                        this.recordSourceMappingEnd(moduleDecl);
                     }
                 }
 
-                this.recordSourceMappingEnd(moduleDecl);
                 this.setContainer(temp);
                 this.moduleName = svModuleName;
                 this.moduleDeclList.length--;
@@ -779,7 +831,6 @@ module TypeScript {
                 else {
                     this.emitInnerFunction(funcDecl, (funcDecl.name && !funcDecl.name.isMissing()), false, bases, hasSelfRef, this.thisClassNode);
                 }
-                this.recordSourceMappingEnd(funcDecl);
                 this.setInObjectLiteral(tempLit);
             }
             this.setContainer(temp);
@@ -1095,8 +1146,8 @@ module TypeScript {
             }
         }
 
-        public recordSourceMappingStart(ast: AST) {
-            if (this.sourceMapper && ast) {
+        public recordSourceMappingStart(ast: ASTSpan) {
+            if (this.sourceMapper && isValidAstNode(ast)) {
                 var lineCol = { line: -1, col: -1 };
                 var sourceMapping = new SourceMapping();
                 sourceMapping.start.emittedColumn = this.emitState.column;
@@ -1109,15 +1160,15 @@ module TypeScript {
                 sourceMapping.end.sourceColumn = lineCol.col;
                 sourceMapping.end.sourceLine = lineCol.line;
 
-                // Set parent and child relation ship
+                // Set parent and child relationship
                 var siblings = this.sourceMapper.currentMappings[this.sourceMapper.currentMappings.length - 1];
                 siblings.push(sourceMapping);
                 this.sourceMapper.currentMappings.push(sourceMapping.childMappings);
             }
         }
 
-        public recordSourceMappingEnd(ast: AST) {
-            if (this.sourceMapper && ast) {
+        public recordSourceMappingEnd(ast: ASTSpan) {
+            if (this.sourceMapper && isValidAstNode(ast)) {
                 // Pop source mapping childs
                 this.sourceMapper.currentMappings.pop(); 
 
@@ -1284,6 +1335,7 @@ module TypeScript {
                     var getter: FuncDecl = <FuncDecl>accessorSymbol.getter.declAST;
 
                     this.emitIndent();
+                    this.recordSourceMappingStart(getter);
                     this.writeToOutput("get: ");
                     this.emitInnerFunction(getter, false, isProto, null, funcDecl.hasSelfReference(), null);
                     this.writeLineToOutput(",");
@@ -1293,6 +1345,7 @@ module TypeScript {
                     var setter: FuncDecl = <FuncDecl>accessorSymbol.setter.declAST;
 
                     this.emitIndent();
+                    this.recordSourceMappingStart(setter);
                     this.writeToOutput("set: ");
                     this.emitInnerFunction(setter, false, isProto, null, funcDecl.hasSelfReference(), null);
                     this.writeLineToOutput(",");
@@ -1322,7 +1375,6 @@ module TypeScript {
                     this.recordSourceMappingStart(funcDecl);
                     this.writeToOutput(className + ".prototype." + funcDecl.getNameText() + " = ");
                     this.emitInnerFunction(funcDecl, false, true, null, funcDecl.hasSelfReference(), null);
-                    this.recordSourceMappingEnd(funcDecl);
                     this.writeLineToOutput(";");
                 }
             }
@@ -1496,7 +1548,6 @@ module TypeScript {
                                     this.writeToOutput(classDecl.name.actualText + "." + fn.name.actualText + " = ");
                                     this.emitInnerFunction(fn, (fn.name && !fn.name.isMissing()), false,
                                             null, fn.hasSelfReference(), null);
-                                    this.recordSourceMappingEnd(fn)
                                 }
                             }
                         }
@@ -1524,15 +1575,17 @@ module TypeScript {
                 }
 
                 this.emitIndent();
-                this.recordSourceMappingStart(classDecl);
+                this.recordSourceMappingStart(classDecl.endingToken);
                 this.writeLineToOutput("return " + className + ";");
-                this.recordSourceMappingEnd(classDecl);
+                this.recordSourceMappingEnd(classDecl.endingToken);
                 this.indenter.decreaseIndent();
                 this.emitIndent();
+                this.recordSourceMappingStart(classDecl.endingToken);
                 this.writeToOutput("})(");
                 if (baseClass)
                     this.emitJavascript(baseName, TokenID.Tilde, false);
                 this.writeToOutput(");");
+                this.recordSourceMappingEnd(classDecl.endingToken);
 
                 if ((temp == EmitContainer.Module || temp == EmitContainer.DynamicModule) && hasFlag(classDecl.varFlags, VarFlags.Exported)) {
                     this.writeLineToOutput("");

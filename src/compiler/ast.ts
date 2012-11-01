@@ -4,12 +4,19 @@
 ///<reference path='typescript.ts' />
 
 module TypeScript {
-    export class AST {
+    export interface IASTSpan {
+        minChar: number;
+        limChar: number;
+    }
+
+    export class ASTSpan implements IASTSpan {
+        public minChar: number = -1;  // -1 = "undefined" or "compiler generated"
+        public limChar: number = -1;  // -1 = "undefined" or "compiler generated"   
+    }
+
+    export class AST extends ASTSpan {
         public type: Type = null;
         public flags = ASTFlags.Writeable;
-
-        public minChar: number = -1;  // -1 = "undefined" or "compiler generated"
-        public limChar: number = -1;  // -1 = "undefined" or "compiler generated"
 
         // REVIEW: for diagnostic purposes
         public passCreated: number = CompilerDiagnostics.analysisPass;
@@ -19,7 +26,9 @@ module TypeScript {
 
         public isParenthesized = false;
 
-        constructor (public nodeType: NodeType) { }
+        constructor (public nodeType: NodeType) {
+            super();
+        }
 
         public isStatementOrExpression() { return false; }
         public isCompoundStatement() { return false; }
@@ -55,27 +64,37 @@ module TypeScript {
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
-            emitter.recordSourceMappingStart(this);
             switch (this.nodeType) {
                 case NodeType.This:
+                    emitter.recordSourceMappingStart(this);
                     if (emitter.thisFnc && (hasFlag(emitter.thisFnc.fncFlags, FncFlags.IsFatArrowFunction))) {
                         emitter.writeToOutput("_this");
                     }
                     else {
                         emitter.writeToOutput("this");
                     }
+                    emitter.recordSourceMappingEnd(this);
                     break;
                 case NodeType.Null:
+                    emitter.recordSourceMappingStart(this);
                     emitter.writeToOutput("null");
+                    emitter.recordSourceMappingEnd(this);
                     break;
                 case NodeType.False:
+                    emitter.recordSourceMappingStart(this);
                     emitter.writeToOutput("false");
+                    emitter.recordSourceMappingEnd(this);
                     break;
                 case NodeType.True:
+                    emitter.recordSourceMappingStart(this);
                     emitter.writeToOutput("true");
+                    emitter.recordSourceMappingEnd(this);
                     break;
                 case NodeType.Super:
+                    emitter.recordSourceMappingStart(this);
                     emitter.emitSuperReference();
+                    emitter.recordSourceMappingEnd(this);
+                    break;
                 case NodeType.EndCode:
                     break;
                 case NodeType.Error:
@@ -83,15 +102,18 @@ module TypeScript {
                     break;
 
                 case NodeType.Empty:
+                    emitter.recordSourceMappingStart(this);
                     emitter.writeToOutput("; ");
+                    emitter.recordSourceMappingEnd(this);
                     break;
                 case NodeType.Void:
+                    emitter.recordSourceMappingStart(this);
                     emitter.writeToOutput("void ");
+                    emitter.recordSourceMappingEnd(this);
                     break;
                 default:
                     throw new Error("please implement in derived class");
             }
-            emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
 
@@ -309,13 +331,16 @@ module TypeScript {
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            emitter.writeLineToOutput(this.id.actualText + ":");
+            emitter.recordSourceMappingStart(this.id);
+            emitter.writeToOutput(this.id.actualText);
+            emitter.recordSourceMappingEnd(this.id);
+            emitter.writeLineToOutput(":");
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
 
     }
-
+    
     export class UnaryExpression extends AST {
 
         public targetType: Type = null; // Target type for an object literal (null if no target type)
@@ -948,6 +973,7 @@ module TypeScript {
         public rightCurlyCount = 0;
         public returnStatementsWithExpressions: ReturnStatement[] = [];
         public scopeType: Type = null; // Type of the FuncDecl, before target typing
+        public endingToken: ASTSpan = null;
 
         constructor (public name: Identifier, public bod: ASTList, public isConstructor: bool,
                     public args: ASTList, public vars: ASTList, public scopes: ASTList, public statics: ASTList,
@@ -1176,7 +1202,7 @@ module TypeScript {
         public containsUnicodeChar = false;
         public containsUnicodeCharInComment = false;
 
-        constructor (name: Identifier, members: ASTList, vars: ASTList, scopes: ASTList) {
+        constructor (name: Identifier, members: ASTList, vars: ASTList, scopes: ASTList, public endingToken: ASTSpan) {
             super(NodeType.Module, name, members);
 
             this.members = members;
@@ -1233,6 +1259,7 @@ module TypeScript {
         public baseClass: ASTList;
         public implementsList: ASTList;
         public definitionMembers: ASTList;
+        public endingToken: ASTSpan = null;
 
         constructor (name: Identifier, definitionMembers: ASTList, baseClass: ASTList,
             implementsList: ASTList) {
@@ -1449,8 +1476,8 @@ module TypeScript {
             if (this.hasExplicitTarget()) {
                 emitter.writeToOutput(" " + this.target);
             }
-            emitter.writeToOutput(";");
             emitter.recordSourceMappingEnd(this);
+            emitter.writeToOutput(";");
             emitter.emitParensAndCommentsInPlace(this, false);
         }
     }
@@ -1574,6 +1601,7 @@ module TypeScript {
         public isStatementOrExpression() { return true; }
         public thenBod: AST;
         public elseBod: AST = null;
+        public statement: ASTSpan = new ASTSpan();
 
         constructor (public cond: AST) {
             super(NodeType.If);
@@ -1585,9 +1613,11 @@ module TypeScript {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
+            emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("if(");
             emitter.emitJavascript(this.cond, TokenID.IF, false);
             emitter.writeToOutput(")");
+            emitter.recordSourceMappingEnd(this.statement);
             emitter.emitJavascriptStatements(this.thenBod, true, false);
             if (this.elseBod) {
                 emitter.writeToOutput(" else");
@@ -1695,6 +1725,7 @@ module TypeScript {
                 (<BoundDecl>this.lval).varFlags |= VarFlags.AutoInit;
             }
         }
+        public statement: ASTSpan = new ASTSpan();
         public body: AST;
         public isStatementOrExpression() { return true; }
         public isLoop() { return true; }
@@ -1754,11 +1785,13 @@ module TypeScript {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
+            emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("for(");
             emitter.emitJavascript(this.lval, TokenID.FOR, false);
             emitter.writeToOutput(" in ");
             emitter.emitJavascript(this.obj, TokenID.FOR, false);
             emitter.writeToOutput(")");
+            emitter.recordSourceMappingEnd(this.statement);
             emitter.emitJavascriptStatements(this.body, true, false);
             emitter.setInObjectLiteral(temp);
             emitter.recordSourceMappingEnd(this);
@@ -1935,6 +1968,7 @@ module TypeScript {
     export class SwitchStatement extends Statement {
         public caseList: ASTList;
         public defaultCase: CaseStatement = null;
+        public statement: ASTSpan = new ASTSpan();
 
         constructor (public val: AST) {
             super(NodeType.Switch);
@@ -1947,9 +1981,12 @@ module TypeScript {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
+            emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("switch(");
             emitter.emitJavascript(this.val, TokenID.ID, false);
-            emitter.writeLineToOutput(") {");
+            emitter.writeToOutput(")"); 
+            emitter.recordSourceMappingEnd(this.statement);
+            emitter.writeLineToOutput(" {");
             emitter.indenter.increaseIndent();
             var casesLen = this.caseList.members.length;
             for (var i = 0; i < casesLen; i++) {
@@ -2232,15 +2269,18 @@ module TypeScript {
                 this.param.varFlags |= VarFlags.AutoInit;
             }
         }
-
+        public statement: ASTSpan = new ASTSpan();
         public containedScope: SymbolScope = null;
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            emitter.writeToOutput(" catch (");
+            emitter.writeToOutput(" ");
+            emitter.recordSourceMappingStart(this.statement);
+            emitter.writeToOutput("catch (");
             emitter.emitJavascript(this.param, TokenID.LParen, false);
             emitter.writeToOutput(")");
+            emitter.recordSourceMappingEnd(this.statement);
             emitter.emitJavascript(this.body, TokenID.CATCH, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
