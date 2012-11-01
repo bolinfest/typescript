@@ -94,6 +94,10 @@ module FourSlashInterface {
         public currentParameterIsVariable() {
             FourSlash.currentTestState.verifyCurrentParameterIsVariable(!this.negative);
         }
+
+        public signatureHelpPresent() {
+            FourSlash.currentTestState.verifySignatureHelpPresent(!this.negative);
+        }
     }
 
     export class verify extends verifyNegatable {
@@ -175,6 +179,10 @@ module FourSlashInterface {
 
         public printCurrentQuickInfo() {
             FourSlash.currentTestState.printCurrentQuickInfo();
+        }
+
+        public printCurrentSignatureHelp() {
+            FourSlash.currentTestState.printCurrentSignatureHelp();
         }
 
         public printMemberListMembers() { 

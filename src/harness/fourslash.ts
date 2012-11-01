@@ -186,6 +186,19 @@ module FourSlash {
             assert.equal(help.formal.signatureGroup.length, expected);
         }
 
+        public verifySignatureHelpPresent(shouldBePresent = true) {
+            var actual = this.realLangSvc.getSignatureAtPosition(this.activeFile.name, this.currentCaretPosition);
+            if (shouldBePresent) {
+                if (!actual) {
+                    throw new Error("Expected signature help to be present, but it wasn't");
+                }
+            } else {
+                if (actual) {
+                    throw new Error("Expected no signature help, but got '" + JSON2.stringify(actual) + "'");
+                }
+            }
+        }
+
         private getActiveSignatureHelp() {
             var help = this.realLangSvc.getSignatureAtPosition(this.activeFile.name, this.currentCaretPosition);
             var activeFormal = help.activeFormal;
@@ -236,6 +249,11 @@ module FourSlash {
                 }
                 IO.printLine(content);
             }
+        }
+
+        public printCurrentSignatureHelp() {
+            var sigHelp = this.getActiveSignatureHelp();
+            IO.printLine(JSON2.stringify(sigHelp));
         }
 
         public printMemberListMembers() {
