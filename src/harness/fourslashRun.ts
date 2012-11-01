@@ -23,6 +23,9 @@ testList.forEach(test => {
         passCount++;
     } catch (e) {
         IO.printLine(e);
+        if (e.stack) {
+            IO.printLine(e.stack);
+        }
         failCount++;
     }
 });
