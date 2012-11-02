@@ -631,6 +631,15 @@ module Services {
             return <TypeScript.Script>this.compiler.scripts.members[unitIndex];
         }
 
+        public getLineMap(fileName: string): number[] {
+            var unitIndex = this.compilerCache.getUnitIndex(fileName);
+            if (unitIndex < 0) {
+                throw new Error("Interal error: No AST found for file \"" + fileName + "\".");
+            }
+
+            return this.compiler.units[unitIndex].lineMap;
+        }
+
         public getScopeEntries(enclosingScopeContext: TypeScript.EnclosingScopeContext) {
             return new TypeScript.ScopeTraversal(this.compiler).getScopeEntries(enclosingScopeContext);
         }

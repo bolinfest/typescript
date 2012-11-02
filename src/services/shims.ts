@@ -238,15 +238,26 @@ module Services {
                 });
         }
 
-        /// EXPRESSIONATSPAN
-        /// Computes a string representation of the expression at the requested position
+        /// NAMEORDOTTEDNAMESPAN
+        /// Computes span information of the name or dotted name at the requested position
         // in the active file.
-        public getExpressionAtSpan(fileName: string, startPos: number, endPos: number): string {
+        public getNameOrDottedNameSpan(fileName: string, startPos: number, endPos: number): string {
             return this.forwardJSONCall(
-                "getExpressionAtSpan(\"" + fileName + "\", " + startPos + ", "  + endPos + ")",
+                "getNameOrDottedNameSpan(\"" + fileName + "\", " + startPos + ", "  + endPos + ")",
                 () => {
-                    var expressionInfo = this.languageService.getExpressionAtSpan(fileName, startPos, endPos);
-                    return _resultToJSON(expressionInfo);
+                    var spanInfo = this.languageService.getNameOrDottedNameSpan(fileName, startPos, endPos);
+                    return _resultToJSON(spanInfo);
+                });
+        }
+
+        /// STATEMENTSPAN
+        /// Computes span information of statement at the requested position in the active file.
+        public getBreakpointStatementAtPosition(fileName: string, pos: number): string {
+            return this.forwardJSONCall(
+                "getBreakpointStatementAtPosition(\"" + fileName + "\", " + pos + ")",
+                () => {
+                    var spanInfo = this.languageService.getBreakpointStatementAtPosition(fileName, pos);
+                    return _resultToJSON(spanInfo);
                 });
         }
 

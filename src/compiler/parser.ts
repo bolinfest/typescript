@@ -3218,7 +3218,7 @@ module TypeScript {
             var tf: TryFinally = null;
             if (this.tok.tokenId == TokenID.CATCH) {
                 var catchPart = this.parseCatch(errorRecoverySet | ErrorRecoverySet.Catch, allowedElements, parentModifiers);
-                tc = new TryCatch(tryPart, catchPart);
+                tc = new TryCatch(<Try>tryPart, catchPart);
                 tc.minChar = tryPart.minChar;
                 tc.limChar = catchPart.limChar;
             }

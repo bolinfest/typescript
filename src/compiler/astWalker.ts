@@ -416,11 +416,11 @@ module TypeScript {
 
         export function walkTryCatchChildren(preAst: TryCatch, parent: AST, walker: IAstWalker): void {
             if (preAst.tryNode) {
-                preAst.tryNode = walker.walk(preAst.tryNode, preAst);
+                preAst.tryNode = <Try>walker.walk(preAst.tryNode, preAst);
             }
 
             if ((preAst.catchNode) && walker.options.goNextSibling) {
-                preAst.catchNode = walker.walk(preAst.catchNode, preAst);
+                preAst.catchNode = <Catch>walker.walk(preAst.catchNode, preAst);
             }
         }
 
@@ -430,7 +430,7 @@ module TypeScript {
             }
 
             if (preAst.finallyNode && walker.options.goNextSibling) {
-                preAst.finallyNode = walker.walk(preAst.finallyNode, preAst);
+                preAst.finallyNode = <Finally>walker.walk(preAst.finallyNode, preAst);
             }
         }
 

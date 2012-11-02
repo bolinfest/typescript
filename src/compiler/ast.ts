@@ -4,12 +4,7 @@
 ///<reference path='typescript.ts' />
 
 module TypeScript {
-    export interface IASTSpan {
-        minChar: number;
-        limChar: number;
-    }
-
-    export class ASTSpan implements IASTSpan {
+    export class ASTSpan {
         public minChar: number = -1;  // -1 = "undefined" or "compiler generated"
         public limChar: number = -1;  // -1 = "undefined" or "compiler generated"   
     }
@@ -30,6 +25,7 @@ module TypeScript {
             super();
         }
 
+        public isExpression() { return false; }
         public isStatementOrExpression() { return false; }
         public isCompoundStatement() { return false; }
         public isLeaf() { return this.isStatementOrExpression() && (!this.isCompoundStatement()); }
@@ -352,6 +348,7 @@ module TypeScript {
             this.nty = nty;
         }
 
+        public isExpression() { return true; }
         public isStatementOrExpression() { return true; }
 
         public addToControlFlow(context: ControlFlowContext): void {
@@ -516,6 +513,7 @@ module TypeScript {
         }
 
         public signature: Signature = null;
+        public isExpression() { return true; }
         public isStatementOrExpression() { return true; }
         public typeCheck(typeFlow: TypeFlow) {
             if (this.nty == NodeType.New) {
@@ -551,6 +549,7 @@ module TypeScript {
         }
 
         public isStatementOrExpression() { return true; }
+        public isExpression() { return true; }
 
         public typeCheck(typeFlow: TypeFlow) {
             switch (this.nty) {
@@ -712,6 +711,7 @@ module TypeScript {
             this.nty = nty;
         }
 
+        public isExpression() { return true; }
         public isStatementOrExpression() { return true; }
         public typeCheck(typeFlow: TypeFlow) {
             return typeFlow.typeCheckQMark(this);
@@ -2134,7 +2134,7 @@ module TypeScript {
 
     export class TryFinally extends Statement {
 
-        constructor (public tryNode: AST, public finallyNode: AST) {
+        constructor (public tryNode: AST, public finallyNode: Finally) {
             super(NodeType.TryFinally);
         }
 
@@ -2150,7 +2150,7 @@ module TypeScript {
 
         public typeCheck(typeFlow: TypeFlow) {
             this.tryNode = typeFlow.typeCheck(this.tryNode);
-            this.finallyNode = typeFlow.typeCheck(this.finallyNode);
+            this.finallyNode = <Finally>typeFlow.typeCheck(this.finallyNode);
             this.type = typeFlow.voidType;
             return this;
         }
@@ -2181,7 +2181,7 @@ module TypeScript {
 
     export class TryCatch extends Statement {
 
-        constructor (public tryNode: AST, public catchNode: AST) {
+        constructor (public tryNode: Try, public catchNode: Catch) {
             super(NodeType.TryCatch);
         }
 
@@ -2224,8 +2224,8 @@ module TypeScript {
         }
 
         public typeCheck(typeFlow: TypeFlow) {
-            this.tryNode = typeFlow.typeCheck(this.tryNode);
-            this.catchNode = typeFlow.typeCheck(this.catchNode);
+            this.tryNode = <Try>typeFlow.typeCheck(this.tryNode);
+            this.catchNode = <Catch>typeFlow.typeCheck(this.catchNode);
             this.type = typeFlow.voidType;
             return this;
         }
