@@ -14,6 +14,7 @@ module TypeScript {
     export class SourceMapping {
         public start = new SourceMapPosition();
         public end = new SourceMapPosition();
+        public nameIndex: number = -1;
         public childMappings: SourceMapping[] = [];
     }
 
@@ -22,6 +23,9 @@ module TypeScript {
         
         public sourceMappings: SourceMapping[] = [];
         public currentMappings: SourceMapping[][] = [];
+
+        public names: string[] = [];
+        public currentNameIndex: number[] = [];
 
         public jsFileName: string;
         public tsFileName: string;
@@ -52,7 +56,11 @@ module TypeScript {
             var prevSourceColumn = 0;
             var prevSourceLine = 0;
             var prevSourceIndex = 0;
+            var prevNameIndex = 0;
+            var namesList: string[] = [];
+            var namesCount = 0;
             var emitComma = false;
+
             var recordedPosition: SourceMapPosition = null;
             for (var sourceMapperIndex = 0; sourceMapperIndex < allSourceMappers.length; sourceMapperIndex++) {
                 sourceMapper = allSourceMappers[sourceMapperIndex];
@@ -61,7 +69,12 @@ module TypeScript {
                 var currentSourceIndex = tsFiles.length;
                 tsFiles.push(sourceMapper.tsFileName);
 
-                var recordSourceMapping = (mappedPosition: SourceMapPosition) {
+                // Join namelist
+                if (sourceMapper.names.length > 0) {
+                    namesList.push(sourceMapper.names.join('","'));
+                }
+
+                var recordSourceMapping = (mappedPosition: SourceMapPosition, nameIndex: number) {
                     if (recordedPosition != null &&
                         recordedPosition.emittedColumn == mappedPosition.emittedColumn &&
                         recordedPosition.emittedLine == mappedPosition.emittedLine) {
@@ -98,7 +111,12 @@ module TypeScript {
                     mappingsString = mappingsString + Base64VLQFormat.encode(mappedPosition.sourceColumn - prevSourceColumn);
                     prevSourceColumn = mappedPosition.sourceColumn;
 
-                    // 5. Since no names , let it go for time being
+                    // 5. Relative namePosition 0 based
+                    if (nameIndex >= 0) {
+                        mappingsString = mappingsString + Base64VLQFormat.encode(namesCount + nameIndex - prevNameIndex);
+                        prevNameIndex = namesCount + nameIndex;
+                    }
+
                     emitComma = true;
                     recordedPosition = mappedPosition;
                 }
@@ -107,13 +125,14 @@ module TypeScript {
                 var recordSourceMappingSiblings = (sourceMappings: SourceMapping[]) {
                     for (var i = 0; i < sourceMappings.length; i++) {
                         var sourceMapping = sourceMappings[i];
-                        recordSourceMapping(sourceMapping.start);
+                        recordSourceMapping(sourceMapping.start, sourceMapping.nameIndex);
                         recordSourceMappingSiblings(sourceMapping.childMappings);
-                        recordSourceMapping(sourceMapping.end);
+                        recordSourceMapping(sourceMapping.end, sourceMapping.nameIndex);
                     }
                 }
 
-                recordSourceMappingSiblings(sourceMapper.sourceMappings);
+                recordSourceMappingSiblings(sourceMapper.sourceMappings, -1);
+                namesCount = namesCount + sourceMapper.names.length;
             }
 
             // Write the actual map file
@@ -122,7 +141,7 @@ module TypeScript {
                 sourceMapOut.Write('"version":3,');
                 sourceMapOut.Write('"file":"' + sourceMapper.jsFileName + '",');
                 sourceMapOut.Write('"sources":["' + tsFiles.join('","') + '"],');
-                sourceMapOut.Write('"names":[],');
+                sourceMapOut.Write('"names":["' + namesList.join('","') + '"],');
                 sourceMapOut.Write('"mappings":"' + mappingsString);
                 sourceMapOut.Write('"');
                 //sourceMapOut.Write('"sourceRoot":""'); // not needed since we arent generating it in the folder

@@ -417,6 +417,15 @@ module TypeScript {
             }
             this.writeLineToOutput(") {");
 
+            if (funcDecl.isConstructor) {
+                this.recordSourceMappingNameStart("constructor");
+            } else if (funcDecl.isGetAccessor()) {
+                this.recordSourceMappingNameStart("get_" + funcDecl.getNameText());
+            } else if (funcDecl.isSetAccessor()) {
+                this.recordSourceMappingNameStart("set_" + funcDecl.getNameText());
+            } else {
+                this.recordSourceMappingNameStart(funcDecl.getNameText());
+            }
             this.indenter.increaseIndent();
 
             // set default args first
@@ -516,6 +525,7 @@ module TypeScript {
             this.emitIndent();
             this.recordSourceMappingStart(funcDecl.endingToken);
             this.writeToOutput("}");
+            this.recordSourceMappingNameEnd();
             this.recordSourceMappingEnd(funcDecl.endingToken);
             this.recordSourceMappingEnd(funcDecl);
 
@@ -604,14 +614,14 @@ module TypeScript {
                 var svModuleName = this.moduleName;
                 var isExported = hasFlag(moduleDecl.modFlags, ModuleFlags.Exported);
                 this.moduleDeclList[this.moduleDeclList.length] = moduleDecl;
-
+                var isWholeFile = hasFlag(moduleDecl.modFlags, ModuleFlags.IsWholeFile);
                 this.moduleName = moduleDecl.name.actualText;
 
                 // prologue
                 if (isDynamicMod) {
                     // create the new outfile for this module
                     var tsModFileName = stripQuotes(moduleDecl.name.actualText);
-                    var modFilePath =  trimModName(tsModFileName) + ".js";
+                    var modFilePath = trimModName(tsModFileName) + ".js";
 
                     if (this.emitOptions.createFile) {
                         // Ensure that the slashes are normalized so that the comparison is fair
@@ -693,6 +703,10 @@ module TypeScript {
                     this.writeLineToOutput(") {");
                 }
 
+                if (!isWholeFile) {
+                    this.recordSourceMappingNameStart(this.moduleName);
+                }
+
                 // body - don't indent for Node
                 if (!isDynamicMod || moduleGenTarget == ModuleGenTarget.Asynchronous) {
                     this.indenter.increaseIndent();
@@ -717,6 +731,9 @@ module TypeScript {
                         this.writeLineToOutput("})");
                     }
                     else { // Node
+                    }
+                    if (!isWholeFile) {
+                        this.recordSourceMappingNameEnd();
                     }
                     this.recordSourceMappingEnd(moduleDecl);
 
@@ -743,22 +760,34 @@ module TypeScript {
                     this.recordSourceMappingStart(moduleDecl.endingToken);
                     if (temp == EmitContainer.Prog && isExported) {
                         this.writeToOutput("}");
+                        if (!isWholeFile) {
+                            this.recordSourceMappingNameEnd();
+                        }
                         this.recordSourceMappingEnd(moduleDecl.endingToken);
                         this.writeLineToOutput(")(this." + this.moduleName + " || (this." + this.moduleName + " = {}));");
                     }
                     else if (isExported || temp == EmitContainer.Prog) {
                         var dotMod = svModuleName != "" ? (parentIsDynamic ? "exports" : svModuleName) + "." : svModuleName;
                         this.writeToOutput("}");
+                        if (!isWholeFile) {
+                            this.recordSourceMappingNameEnd();
+                        }
                         this.recordSourceMappingEnd(moduleDecl.endingToken);
                         this.writeLineToOutput(")(" + dotMod + this.moduleName + " || (" + dotMod + this.moduleName + " = {}));");
                     }
                     else if (!isExported && temp != EmitContainer.Prog) {
                         this.writeToOutput("}");
+                        if (!isWholeFile) {
+                            this.recordSourceMappingNameEnd();
+                        }
                         this.recordSourceMappingEnd(moduleDecl.endingToken);
                         this.writeLineToOutput(")(" + this.moduleName + " || (" + this.moduleName + " = {}));");
                     }
                     else {
                         this.writeToOutput("}");
+                        if (!isWholeFile) {
+                            this.recordSourceMappingNameEnd();
+                        }
                         this.recordSourceMappingEnd(moduleDecl.endingToken);
                         this.writeLineToOutput(")();");
                     }
@@ -1146,6 +1175,25 @@ module TypeScript {
             }
         }
 
+        public recordSourceMappingNameStart(name: string) {
+            if (this.sourceMapper) {
+                var finalName = name;
+                if (this.sourceMapper.currentNameIndex.length > 0) {
+                    finalName = this.sourceMapper.names[this.sourceMapper.currentNameIndex.length - 1] + "." + name;
+                }
+
+                // We are currently not looking for duplicate but that is possible.
+                this.sourceMapper.names.push(finalName);
+                this.sourceMapper.currentNameIndex.push(this.sourceMapper.names.length - 1);
+            }
+        }
+
+        public recordSourceMappingNameEnd() {
+            if (this.sourceMapper) {
+                this.sourceMapper.currentNameIndex.pop();
+            }
+        }
+
         public recordSourceMappingStart(ast: ASTSpan) {
             if (this.sourceMapper && isValidAstNode(ast)) {
                 var lineCol = { line: -1, col: -1 };
@@ -1159,7 +1207,9 @@ module TypeScript {
                 getSourceLineColFromMap(lineCol, ast.limChar, this.checker.locationInfo.lineMap);
                 sourceMapping.end.sourceColumn = lineCol.col;
                 sourceMapping.end.sourceLine = lineCol.line;
-
+                if (this.sourceMapper.currentNameIndex.length > 0) {
+                    sourceMapping.nameIndex = this.sourceMapper.currentNameIndex[this.sourceMapper.currentNameIndex.length - 1];
+                }
                 // Set parent and child relationship
                 var siblings = this.sourceMapper.currentMappings[this.sourceMapper.currentMappings.length - 1];
                 siblings.push(sourceMapping);
@@ -1453,6 +1503,7 @@ module TypeScript {
                     this.writeLineToOutput(" = (function () {");
                 }
 
+                this.recordSourceMappingNameStart(className);
                 this.indenter.increaseIndent();
 
                 if (baseClass) {
@@ -1487,6 +1538,7 @@ module TypeScript {
                     // default constructor
                     this.indenter.increaseIndent();
                     this.writeToOutput("function " + classDecl.name.actualText + "() {");
+                    this.recordSourceMappingNameStart("constructor");
                     if (baseClass) {
                         this.writeLineToOutput("");
                         this.emitIndent();
@@ -1523,6 +1575,7 @@ module TypeScript {
                         this.writeLineToOutput(" }");
                         this.indenter.decreaseIndent();
                     }
+                    this.recordSourceMappingNameEnd();
                     this.recordSourceMappingEnd(classDecl);
                 }
 
@@ -1581,11 +1634,15 @@ module TypeScript {
                 this.indenter.decreaseIndent();
                 this.emitIndent();
                 this.recordSourceMappingStart(classDecl.endingToken);
-                this.writeToOutput("})(");
+                this.writeToOutput("}");
+                this.recordSourceMappingNameEnd();
+                this.recordSourceMappingEnd(classDecl.endingToken);
+                this.recordSourceMappingStart(classDecl);
+                this.writeToOutput(")(");
                 if (baseClass)
                     this.emitJavascript(baseName, TokenID.Tilde, false);
                 this.writeToOutput(");");
-                this.recordSourceMappingEnd(classDecl.endingToken);
+                this.recordSourceMappingEnd(classDecl);
 
                 if ((temp == EmitContainer.Module || temp == EmitContainer.DynamicModule) && hasFlag(classDecl.varFlags, VarFlags.Exported)) {
                     this.writeLineToOutput("");
