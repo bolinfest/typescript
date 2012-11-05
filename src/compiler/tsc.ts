@@ -80,12 +80,25 @@ class BatchCompiler {
 
         for (var i = 0; i < this.compilationEnvironment.residentCode.length; i++) {
             if (!this.commandLineHost.isResolved(this.compilationEnvironment.residentCode[i].path)) {
-                this.ioHost.stderr.WriteLine("Error reading file \"" + this.compilationEnvironment.residentCode[i].path + "\": File not found");
+                var path = this.compilationEnvironment.residentCode[i].path;
+                if (!TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path) && !TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path)) {
+                    this.ioHost.stderr.WriteLine("Unknown extension for file: \"" + path + "\". Only .ts and .d.ts extensions are allowed.");
+                }
+                else {
+                    this.ioHost.stderr.WriteLine("Error reading file \"" + path + "\": File not found");
+                }
+
             }
         }
         for (var i = 0; i < this.compilationEnvironment.code.length; i++) {
             if (!this.commandLineHost.isResolved(this.compilationEnvironment.code[i].path)) {
-                this.ioHost.stderr.WriteLine("Error reading file \"" + this.compilationEnvironment.code[i].path + "\": File not found");
+                var path = this.compilationEnvironment.code[i].path;
+                if (!TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path) && !TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path)) {
+                    this.ioHost.stderr.WriteLine("Unknown extension for file: \""+path+"\". Only .ts and .d.ts extensions are allowed.");
+                }
+                else {
+                    this.ioHost.stderr.WriteLine("Error reading file \"" + path + "\": File not found");
+                }
             }
         }
 
