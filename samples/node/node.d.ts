@@ -594,6 +594,7 @@ declare module "url" {
         search: string;
         query: string;
         slashes: bool;
+        hash: string;
     }
 
     export function parse(urlStr: string, parseQueryString? , slashesDenoteHost? ): Url;
