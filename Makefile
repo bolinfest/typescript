@@ -207,5 +207,7 @@ baseline-accept:
 $(BUILT_LOCALTEST)\fsrun.js: unit-tests-dependencies $(HSRC)\fourslashRun.ts
 	$(STRC_LOCAL) -noresolve -target es5 $(BUILT_LOCALTEST)\typescriptServices.d.ts $(CSRC)\io.ts $(CSRC)\optionsParser.ts $(HSRC)\exec.ts  $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\baselining.ts $(HSRC)\fourslash.ts $(HSRC)\dumpAST-baselining.ts $(HSRC)\external\json2.ts $(HSRC)\fourslashRun.ts -out $(BUILT_LOCALTEST)\fsrun.js
 
+fs-build: local tests $(BUILT_LOCALTEST)\fsrun.js
+
 fs: $(BUILT_LOCALTEST)\fsrun.js
 	$(HOST) $(BUILT_LOCALTEST)\fsrun.js $(tests)
