@@ -1686,6 +1686,8 @@ module TypeScript {
             super(NodeType.Return);
         }
 
+        public isStatementOrExpression() { return true; }
+        
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);

@@ -120,6 +120,14 @@ module TypeScript {
             }
         }
 
+        public writeCaptureThisStatement(ast: AST) {
+            this.emitIndent();
+            this.recordSourceMappingStart(ast);
+            this.writeToOutput(this.captureThisStmtString);
+            this.recordSourceMappingEnd(ast);
+            this.writeLineToOutput("");
+        }
+
         public setInVarBlock(count: number) {
             this.varListCount = count;
         }
@@ -444,8 +452,7 @@ module TypeScript {
             }
 
             if (funcDecl.isConstructor && ((<ClassDecl>funcDecl.classDecl).varFlags & VarFlags.MustCaptureThis)) {
-                this.emitIndent();
-                this.writeLineToOutput(this.captureThisStmtString);
+                this.writeCaptureThisStatement(funcDecl);
             }
 
             if (funcDecl.isConstructor && !classPropertiesMustComeAfterSuperCall) {
@@ -475,8 +482,7 @@ module TypeScript {
                 }
             }
             if (hasSelfRef) {
-                this.emitIndent();
-                this.writeLineToOutput(this.captureThisStmtString);
+                this.writeCaptureThisStatement(funcDecl);
             }
             if (funcDecl.variableArgList) {
                 argsLen = funcDecl.args.members.length;
@@ -713,10 +719,7 @@ module TypeScript {
                 }
 
                 if (moduleDecl.modFlags & ModuleFlags.MustCaptureThis) {
-                    this.emitIndent();
-                    this.recordSourceMappingStart(moduleDecl);
-                    this.writeLineToOutput(this.captureThisStmtString);
-                    this.recordSourceMappingEnd(moduleDecl);
+                    this.writeCaptureThisStatement(moduleDecl);
                 }
 
                 this.emitJavascriptList(moduleDecl.members, null, TokenID.SColon, true, false, false);
@@ -1178,7 +1181,9 @@ module TypeScript {
         public recordSourceMappingNameStart(name: string) {
             if (this.sourceMapper) {
                 var finalName = name;
-                if (this.sourceMapper.currentNameIndex.length > 0) {
+                if (!name) {
+                    finalName = "";
+                } else if (this.sourceMapper.currentNameIndex.length > 0) {
                     finalName = this.sourceMapper.names[this.sourceMapper.currentNameIndex.length - 1] + "." + name;
                 }
 
@@ -1547,8 +1552,7 @@ module TypeScript {
                     }
 
                     if (classDecl.varFlags & VarFlags.MustCaptureThis) {
-                        this.emitIndent();
-                        this.writeLineToOutput(this.captureThisStmtString);
+                        this.writeCaptureThisStatement(classDecl);
                     }
 
                     var members = (<ASTList>this.thisClassNode.members).members
