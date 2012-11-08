@@ -483,7 +483,24 @@ describe("Compiling a project", function (done) {
             , collectedFiles: ['A.ts', 'B.ts', 'C.ts']
             , outputFiles: ['A.js', 'B.js', 'C.js']
     });
-    
+
+    tests.push({
+        scenario: 'nested local module - with recursive typecheck'
+            , projectRoot: 'tests/projects/nested local module - with recursive typecheck'
+            , inputFiles: ['test1.ts']
+            , collectedFiles: ['test1.ts', 'test2.ts']
+            , outputFiles: ['test1.js', 'test2.js']
+            , skipRun: true
+    });
+        
+    tests.push({
+        scenario: 'nested local module - simple case'
+            , projectRoot: 'tests/projects/nested local module - simple case'
+            , inputFiles: ['test1.ts']
+            , collectedFiles: ['test1.ts', 'test2.ts']
+            , outputFiles: ['test1.js', 'test2.js']
+            , skipRun: true
+    });
 
     for (var i = 0; i < tests.length; i++) {
         createTest(tests[i]);

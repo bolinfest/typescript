@@ -2858,9 +2858,15 @@ module TypeScript {
             }
             else {
                 sym.type = mod;
-                if (this.checker.currentModDecl && this.checker.currentModDecl.mod) {
-                    this.checker.currentModDecl.mod.importedModules.push(importDecl);
+                
+                // Add the imported module to the AMD dependency list
+                if (this.checker.typeFlow.currentScript && 
+                    this.checker.typeFlow.currentScript.topLevelMod && 
+                    this.checker.typeFlow.currentScript.topLevelMod.mod) 
+                {
+                    this.checker.typeFlow.currentScript.topLevelMod.mod.importedModules.push(importDecl);
                 }
+
                 (<TypeSymbol>importDecl.id.sym).type = mod;
 
                 if (mod.symbol && mod.symbol.declAST) {
