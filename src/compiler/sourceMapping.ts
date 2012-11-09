@@ -33,8 +33,13 @@ module TypeScript {
         constructor(tsFileName: string, jsFileName: string, public jsFile: ITextWriter, public sourceMapOut: ITextWriter) {
             this.currentMappings.push(this.sourceMappings);
 
+            jsFileName = switchToForwardSlashes(jsFileName);
             this.jsFileName = TypeScript.getPrettyName(jsFileName, false, true);
-            this.tsFileName = TypeScript.getPrettyName(tsFileName, false, true);
+
+            var removalIndex = jsFileName.lastIndexOf(this.jsFileName);
+            var fixedPath = jsFileName.substring(0, removalIndex);
+
+            this.tsFileName = TypeScript.getRelativePathToFixedPath(fixedPath, tsFileName);
         }
         
         // Generate source mapping
