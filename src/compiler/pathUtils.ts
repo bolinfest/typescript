@@ -85,6 +85,16 @@ module TypeScript {
         return components.length ? (quote ? quoteStr(components[components.length - 1]) : components[components.length - 1]) : modPath;
     }
 
+    export function getRelativePathToFixedPath(fixedModFilePath: string, absoluteModPath: string) {
+        absoluteModPath = switchToForwardSlashes(absoluteModPath);
+        var fileNameIndex = absoluteModPath.indexOf(fixedModFilePath);
+        if (fileNameIndex == 0) {
+            return absoluteModPath.substring(fixedModFilePath.length);
+        }
+
+        return absoluteModPath;
+    }
+
     export function quoteBaseName(modPath: string) {
         var modName = trimModName(stripQuotes(modPath));
         var path = getRootFilePath(modName);

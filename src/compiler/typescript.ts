@@ -484,7 +484,7 @@ module TypeScript {
                         }
                     }
                     else if (this.settings.mapSourceFiles) {
-                        emitter.setSourceMappings(new TypeScript.SourceMapper(script.locationInfo.filename, emitter.sourceMapper.jsFileName, outFile, emitter.sourceMapper.sourceMapOut));
+                        emitter.setSourceMappings(new TypeScript.SourceMapper(script.locationInfo.filename, this.settings.outputFileName, outFile, emitter.sourceMapper.sourceMapOut));
                     }
                 }
 
