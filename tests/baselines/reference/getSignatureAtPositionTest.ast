@@ -339,7 +339,7 @@
                                   {"nodeType": "TypeRef", "minChar": 1346, "limChar": 1352, "startLine": 57, "startCol": 46, "endLine": 57, "endCol": 52, "children": [
                                     {"nodeType": "Name", "minChar": 1346, "limChar": 1352, "startLine": 57, "startCol": 46, "endLine": 57, "endCol": 52, "children": []}]}]}]},
                               {"nodeType": "List", "minChar": 1354, "limChar": -1, "startLine": 57, "startCol": 54, "endLine": -1, "endCol": -1, "children": [
-                                {"nodeType": "Return", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": [
+                                {"nodeType": "Return", "minChar": 1357, "limChar": 1359, "startLine": 57, "startCol": 57, "endLine": 57, "endCol": 59, "children": [
                                   {"nodeType": "QString", "minChar": 1357, "limChar": 1359, "startLine": 57, "startCol": 57, "endLine": 57, "endCol": 59, "children": []}]}]}]}]}]}]}]},
                     {"nodeType": "Call", "minChar": 1368, "limChar": 1379, "startLine": 58, "startCol": 5, "endLine": 58, "endCol": 16, "children": [
                       {"nodeType": "Dot", "minChar": 1368, "limChar": 1371, "startLine": 58, "startCol": 5, "endLine": 58, "endCol": 8, "children": [

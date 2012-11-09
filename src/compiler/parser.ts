@@ -924,6 +924,8 @@ module TypeScript {
                                               TypeContext.NoTypes);
                         var retStmt = new ReturnStatement();
                         retStmt.returnExpression = retExpr;
+                        retStmt.minChar = retExpr.minChar;
+                        retStmt.limChar = retExpr.limChar;
                         bod.minChar = bodMinChar;
                         bod.append(retStmt);
                     }

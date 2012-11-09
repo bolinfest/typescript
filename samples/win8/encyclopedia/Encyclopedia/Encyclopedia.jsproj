@@ -104,8 +104,13 @@
   <ItemGroup>
     <TypeScriptCompile Include="$(ProjectDir)\**\*.ts" />
   </ItemGroup>
+  <PropertyGroup>
+    <TypeScriptSourceMap Condition="'$(Configuration)'=='Debug'"> --sourcemap</TypeScriptSourceMap>
+  </PropertyGroup>
   <Target Name="BeforeBuild">
-    <Exec Command="&quot;$(PROGRAMFILES)\Microsoft SDKs\TypeScript\0.8.0.0\tsc&quot; -target ES5 @(TypeScriptCompile ->'&quot;%(fullpath)&quot;', ' ')" />
+    <Message Text="Compiling TypeScript files"/>
+    <Message Text="Executing &quot;$(PROGRAMFILES)\Microsoft SDKs\TypeScript\0.8.0.0\tsc&quot;$(TypeScriptSourceMap) -target ES5 @(TypeScriptCompile ->'&quot;%(fullpath)&quot;', ' ')"/>
+    <Exec Command="&quot;$(PROGRAMFILES)\Microsoft SDKs\TypeScript\0.8.0.0\tsc&quot;$(TypeScriptSourceMap) -target ES5 @(TypeScriptCompile ->'&quot;%(fullpath)&quot;', ' ')" />
   </Target>
   <Target Name="AfterBuild">
   </Target>

@@ -235,7 +235,8 @@ interface JQueryStatic {
     /******
      EVENTS
     *******/
-    proxy(context: any, name: any): any;
+    proxy(func: Function, context: any): any;
+    proxy(context: any, name: string): any;
 
     /*********
      INTERNALS
@@ -499,6 +500,9 @@ interface JQuery {
 
     mouseevent(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseevent(handler: (eventObject: JQueryEventObject) => any): JQuery;
+
+    mouseenter(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mouseenter(handler: (eventObject: JQueryEventObject) => any): JQuery;
 
     mouseleave(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseleave(handler: (eventObject: JQueryEventObject) => any): JQuery;

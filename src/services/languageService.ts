@@ -624,7 +624,7 @@ module Services {
             TypeScript.getSourceLineColFromMap(lineCol, pos, lineMap);
 
             // Get the valid breakpoint location container list till position so we could choose where to set breakpoint
-            var pre = (cur: TypeScript.AST, parent: TypeScript.AST): TypeScript.AST => {
+            var pre = (cur: TypeScript.AST, parent: TypeScript.AST, walker: TypeScript.IAstWalker): TypeScript.AST => {
                 if (TypeScript.isValidAstNode(cur)) {
                     if (pos >= cur.minChar && pos <= cur.limChar) {
                         switch (cur.nodeType) {
@@ -652,6 +652,11 @@ module Services {
                             case TypeScript.NodeType.LogNot:
                                 break;
 
+                            // Type Reference cannot have breakpoint, nor can its children
+                            case TypeScript.NodeType.TypeRef:
+                                walker.options.goChildren = false;
+                                break;
+
                             default:
                                 // If it is a statement or expression - they are debuggable
                                 // But expressions are debuggable as standalone statement only
@@ -665,6 +670,8 @@ module Services {
                                 }
                                 break;
                         }
+                    } else {
+                        walker.options.goChildren = false;
                     }
                 }
                 return cur;

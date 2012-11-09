@@ -247,7 +247,6 @@ class BatchCompiler {
 
         opts.flag('sourcemap', {
             usage: 'Generates corresponding .map file',
-            experimental: true,
             set: () => {
                 this.compilationSettings.mapSourceFiles = true;
             }
