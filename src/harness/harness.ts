@@ -372,7 +372,7 @@ module Harness {
                     that.error = e;
                     var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: false, bugs: assert.bugIds};
                     // Report all bugs affecting this scenario
-                    assert.bugIds.forEach(desc => emitLog('bug', metadata, desc););
+                    assert.bugIds.forEach(desc => emitLog('bug', metadata, desc));
                     emitLog('scenarioEnd', metadata, e);
                     done();
                 } else {
@@ -403,7 +403,7 @@ module Harness {
 
             var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: this.passed, bugs: assert.bugIds };
             // Report all bugs affecting this scenario
-            assert.bugIds.forEach(desc => emitLog('bug', metadata, desc););
+            assert.bugIds.forEach(desc => emitLog('bug', metadata, desc));
             emitLog('scenarioEnd', metadata);
 
             done();

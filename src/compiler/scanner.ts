@@ -392,6 +392,7 @@ module TypeScript {
         setErrorHandler(reportError: (message: string) => void): void;
         seenUnicodeChar: bool;
         seenUnicodeCharInComment: bool;
+        getLookAheadToken(): Token;
     }
 
     export class SavedTokens implements IScanner {
@@ -534,9 +535,15 @@ module TypeScript {
         }
         public setErrorHandler(reportError: (message: string) => void ) { 
         }
+        public getLookAheadToken(): Token {
+            throw new Error("Invalid operation.");
+        }
     }
 
     export class Scanner implements IScanner {
+        // REVIEW: When adding new variables make sure to handle storing them in getLookAheadToken. 
+        //         The method works by storing the state before scanning and restoring it later on, missing a member variable 
+        //         could result in an inconsistent state.
         public prevLine = 1;
         public line = 1;
         public col = 0;
@@ -1004,6 +1011,54 @@ module TypeScript {
             this.pos++;
             this.col++;
             this.ch = this.peekChar();
+        }
+
+        public getLookAheadToken(): Token {
+            // REVIEW: This method is only used for parsing varargs in lambda expressions. If this functionality is needed for more common cases, 
+            //         it needs to be designed. 
+            //         Look-ahead token needs to be integrated in the scanner design to allow for an efficient lookup.
+
+            // Store the scanner state
+            var prevLine = this.prevLine;
+            var line = this.line;
+            var col = this.col;
+            var pos = this.pos;
+            var startPos = this.startPos;
+            var startCol = this.startCol;
+            var startLine = this.startLine;
+            var ch = this.ch;
+            var prevTok = this.prevTok;
+            var lexState = this.lexState;
+            var interveningWhitespace = this.interveningWhitespace;
+            var interveningWhitespacePos = this.interveningWhitespacePos;
+            var leftCurlyCount = this.leftCurlyCount;
+            var rightCurlyCount = this.rightCurlyCount;
+            var seenUnicodeChar = this.seenUnicodeChar;
+            var seenUnicodeCharInComment = this.seenUnicodeCharInComment;
+            var commentStackLength = this.commentStack.length;
+
+            var lookAheadToken = this.scan();
+
+            // Restore state
+            this.prevLine = prevLine;
+            this.line = line;
+            this.col = col;
+            this.pos = pos;
+            this.startPos = startPos;
+            this.startCol = startCol;
+            this.startLine = startLine;
+            this.ch = ch;
+            this.prevTok = prevTok;
+            this.lexState = lexState;
+            this.interveningWhitespace = interveningWhitespace;
+            this.interveningWhitespacePos = interveningWhitespacePos;
+            this.leftCurlyCount = leftCurlyCount;
+            this.rightCurlyCount = rightCurlyCount;
+            this.seenUnicodeChar = seenUnicodeChar;
+            this.seenUnicodeCharInComment = seenUnicodeCharInComment;
+            this.commentStack.length = commentStackLength;
+
+            return lookAheadToken;
         }
 
         public scan(): Token {

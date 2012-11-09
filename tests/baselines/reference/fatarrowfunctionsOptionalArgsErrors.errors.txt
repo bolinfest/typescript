@@ -1,0 +1,8 @@
+// 0.ts  line 1 col 14: Optional parameters may only be followed by other optional parameters
+// 0.ts  line 2 col 8: Varargs may not be optional or have default parameters
+// 0.ts  line 2 col 8: '...' parameters require both a parameter name and an array type annotation to be specified
+// 0.ts  line 3 col 7: '...' parameters require both a parameter name and an array type annotation to be specified
+// 0.ts  line 4 col 22: Varargs may not be optional or have default parameters
+// 0.ts  line 5 col 4: '...' parameters require both a parameter name and an array type annotation to be specified
+// 0.ts  line 8 col 14: Invalid lambda argument
+// 0.ts  line 9 col 12: Invalid lambda argument

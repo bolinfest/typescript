@@ -11,8 +11,8 @@ foo((x,y:number,z:number)=>{return x+y+z;});
 foo((x,y,z:number)=>{return x+y+z;});
 foo(()=>{return 0;});
 
-foo((x:number,y,z)=>x+y+z;);
-foo((x,y,z)=>x+y+z;);
+foo((x:number,y,z)=>x+y+z);
+foo((x,y,z)=>x+y+z);
 foo((x,y:number,z)=>{return x+y+z;});
 foo((x,y:number,z:number)=>{return x+y+z;});
 foo((x,y,z:number)=>{return x+y+z;});

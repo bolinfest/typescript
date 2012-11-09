@@ -861,7 +861,7 @@ module TypeScript {
                         var formals = new ASTList();
                         var variableArgList =
                             this.parseFormalParameterList(errorRecoverySet | ErrorRecoverySet.RParen,
-                                              formals, false, true, false, false, false, null);
+                                              formals, false, true, false, false, false, false, null, true);
                         this.chkCurTok(TokenID.Arrow, "Expected '=>'", errorRecoverySet);
                         var returnType = this.parseTypeReference(errorRecoverySet, true);
                         var funcDecl = new FuncDecl(null, null, false, formals, null, null, null,
@@ -972,15 +972,8 @@ module TypeScript {
                         funcDecl.fncFlags |= FncFlags.IsFatArrowFunction;
                         funcDecl.endingToken = new ASTSpan();
 
-                        // eliminate the trailing semicolon
-                        if (this.tok.tokenId == TokenID.SColon) {
-                            funcDecl.endingToken.minChar = this.scanner.startPos;
-                            funcDecl.endingToken.limChar = this.scanner.pos;
-                            this.tok = this.scanner.scan();
-                        } else {
-                            funcDecl.endingToken.minChar = bod.members[0].minChar;
-                            funcDecl.endingToken.limChar = bod.members[0].limChar;
-                        }
+                        funcDecl.endingToken.minChar = bod.members[0].minChar;
+                        funcDecl.endingToken.limChar = bod.members[0].limChar;
                     }
                 }
                 funcDecl.minChar = minChar;
@@ -994,11 +987,11 @@ module TypeScript {
                 return funcDecl;
             }
 
-            public transformAnonymousArgsIntoFormals(formals: ASTList, argList: AST) {
+            public transformAnonymousArgsIntoFormals(formals: ASTList, argList: AST) : bool {
 
-                var translateBinExOperand = (operand: AST) => {
+                var translateBinExOperand = (operand: AST) : bool => {
                     if (operand.nodeType == NodeType.Comma) {
-                        this.transformAnonymousArgsIntoFormals(formals, operand);
+                        return this.transformAnonymousArgsIntoFormals(formals, operand);
                     }
                     else if (operand.nodeType == NodeType.Name || operand.nodeType == NodeType.Asg) {
                         var opArg = operand.nodeType == NodeType.Asg ? (<BinaryExpression>operand).operand1 : operand;
@@ -1018,21 +1011,30 @@ module TypeScript {
                         }
 
                         formals.append(arg);
+
+                        return arg.isOptional;
                     }
                     else {
                         this.reportParseError("Invalid lambda argument");
                     }
-
+                    return false;
                 }
 
                 if (argList) {
                     if (argList.nodeType == NodeType.Comma) {
                         var commaList = <BinaryExpression> argList;
-                        translateBinExOperand(commaList.operand1);
-                        translateBinExOperand(commaList.operand2);
+                        if (commaList.operand1.isParenthesized) { 
+                            this.reportParseError("Invalid lambda argument", commaList.operand1.minChar, commaList.operand1.limChar);
+                        }
+                        if (commaList.operand2.isParenthesized) { 
+                            this.reportParseError("Invalid lambda argument", commaList.operand2.minChar, commaList.operand2.limChar);
+                        }
+                        var isOptional = translateBinExOperand(commaList.operand1);
+                        isOptional = translateBinExOperand(commaList.operand2) || isOptional;
+                        return isOptional;
                     }
                     else {
-                        translateBinExOperand(argList);
+                        return translateBinExOperand(argList);
                     }
                 }
             }
@@ -1044,14 +1046,16 @@ module TypeScript {
                                                 isIndexer: bool,
                                                 isGetter: bool,
                                                 isSetter: bool,
-                                                preProcessedLambdaArgs: AST): bool 
+                                                isLambda: bool,
+                                                preProcessedLambdaArgs: AST,
+                                                expectClosingRParen: bool): bool 
             {
 
                 formals.minChar = this.scanner.startPos; // '(' or '['
                 if (isIndexer) {
                     this.tok = this.scanner.scan();
                 }
-                else if (!preProcessedLambdaArgs) {
+                else if (!isLambda) {
                     this.chkCurTok(TokenID.LParen, "Expected '('",
                               errorRecoverySet | ErrorRecoverySet.RParen);
                 }
@@ -1060,15 +1064,10 @@ module TypeScript {
                 var hasOptional = false;
                 var haveFirstArgID = false;
 
-                // REVIEW: hasPartialArgList is used to eliminate the trailing RParen in the case that parseTerm
-                // wasn't able to gather a complete param list for an anonymous function (e.g., if one of the parameters
-                // contained a type annotation or was optional)
-                var hasPartialArgList = false;
-
                 // if preProcessedLambdaArgs is "true", we either have a typeless argument list, or we have
                 // a single identifier node and the current token is the ':' before a typereference
-                if (preProcessedLambdaArgs) {
-                    this.transformAnonymousArgsIntoFormals(formals, preProcessedLambdaArgs);
+                if (isLambda && preProcessedLambdaArgs && preProcessedLambdaArgs.nodeType != NodeType.EmptyExpr) {
+                    hasOptional = this.transformAnonymousArgsIntoFormals(formals, preProcessedLambdaArgs);
                     haveFirstArgID = true;
                 }
 
@@ -1154,7 +1153,6 @@ module TypeScript {
 
                             if (arg.isOptional) {
                                 hasOptional = true;
-                                hasPartialArgList = true;
                             }
                         }
                         else {
@@ -1182,9 +1180,6 @@ module TypeScript {
                         if (this.tok.tokenId == TokenID.Colon) {
                             this.tok = this.scanner.scan();
                             type = this.parseTypeReference(errorRecoverySet, false);
-                            if (preProcessedLambdaArgs) {
-                                hasPartialArgList = true;
-                            }
                         }
 
                         // check for default parameter
@@ -1209,6 +1204,11 @@ module TypeScript {
 
                         if (sawEllipsis && arg.isOptionalArg()) {
                             this.reportParseError("Varargs may not be optional or have default parameters");
+                        }
+
+                        if (sawEllipsis && !type) {
+                            // Ellipsis is missing a type definition
+                            this.reportParseError("'...' parameters require both a parameter name and an array type annotation to be specified");
                         }
 
                         // REVIEW: Ok for lambdas?
@@ -1245,7 +1245,7 @@ module TypeScript {
                 if (isIndexer) {
                     this.chkCurTok(TokenID.RBrack, "Expected ']'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
                 }
-                else if (!preProcessedLambdaArgs || hasPartialArgList) {
+                else if (expectClosingRParen) {
                     this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
                 }
                 formals.limChar = this.scanner.lastTokenLimChar(); // ')' or ']'
@@ -1260,7 +1260,8 @@ module TypeScript {
                                     isStatic: bool,
                                     markedAsAmbient: bool,
                                     modifiers: Modifiers,
-                                    lambdaArgContext: ILambdaArgumentContext): AST {
+                                    lambdaArgContext: ILambdaArgumentContext,
+                                    expectClosingRParen: bool): AST {
 
                 var leftCurlyCount = this.scanner.leftCurlyCount;
                 var rightCurlyCount = this.scanner.rightCurlyCount;
@@ -1307,9 +1308,9 @@ module TypeScript {
                 var isOverload = false;
                 var isGetter = hasFlag(modifiers, Modifiers.Getter);
                 var isSetter = hasFlag(modifiers, Modifiers.Setter);
-                if ((this.tok.tokenId == TokenID.LParen) || (indexer && (this.tok.tokenId == TokenID.LBrack)) || (lambdaArgContext && lambdaArgContext.preProcessedLambdaArgs)) {
+                if ((this.tok.tokenId == TokenID.LParen) || (indexer && (this.tok.tokenId == TokenID.LBrack)) || (lambdaArgContext && (lambdaArgContext.preProcessedLambdaArgs || this.tok.tokenId == TokenID.Ellipsis))) {
                     // arg list
-                    variableArgList = this.parseFormalParameterList(errorRecoverySet, args, false, requiresSignature, indexer, isGetter, isSetter, lambdaArgContext ? lambdaArgContext.preProcessedLambdaArgs : null);
+                    variableArgList = this.parseFormalParameterList(errorRecoverySet, args, false, requiresSignature, indexer, isGetter, isSetter, !!lambdaArgContext, lambdaArgContext ? lambdaArgContext.preProcessedLambdaArgs : null, expectClosingRParen);
                 }
                 this.state = ParseState.FncDeclArgs;
                 var returnType: AST = null;
@@ -1730,7 +1731,7 @@ module TypeScript {
             this.tok = this.scanner.scan(); // scan past the 'constructor' token
 
             if (this.tok.tokenId == TokenID.LParen) {
-                variableArgList = this.parseFormalParameterList(errorRecoverySet, args, true, isAmbient, false, false, false, null);
+                variableArgList = this.parseFormalParameterList(errorRecoverySet, args, true, isAmbient, false, false, false, false, null, true);
                 if (args.members.length > 0) {
                     var lastArg = args.members[args.members.length - 1];
                 }
@@ -1894,7 +1895,7 @@ module TypeScript {
             }
 
             // REVIEW: Why bother passing in isAmbient for both requiresSignature and isAmbient?  Shouldn't just saying its ambient suffice?
-            var ast: AST = this.parseFncDecl(errorRecoverySet, true, isAmbient, true, methodName, false, isStatic, isAmbient, modifiers, null);
+            var ast: AST = this.parseFncDecl(errorRecoverySet, true, isAmbient, true, methodName, false, isStatic, isAmbient, modifiers, null, true);
             if (ast.nodeType == NodeType.Error) {
                 return ast;
             }
@@ -2145,7 +2146,7 @@ module TypeScript {
                     ers = errorRecoverySet | ErrorRecoverySet.RBrack;
                 }
                 var ast = this.parseFncDecl(ers, true, requireSignature,
-                                       !this.inFncDecl, text, isIndexer, isStatic, (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)), modifiers, null);
+                                       !this.inFncDecl, text, isIndexer, isStatic, (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)), modifiers, null, true);
                 var funcDecl: FuncDecl;
                 if (ast.nodeType == NodeType.Error) {
                     return ast;
@@ -2452,7 +2453,7 @@ module TypeScript {
                 if (accessorPattern) {
                     var args = new ASTList();
                     this.parseFormalParameterList(errorRecoverySet | ErrorRecoverySet.RParen,
-                                      args, false, true, false, !isSet, isSet, null);
+                                      args, false, true, false, !isSet, isSet, false, null, true);
 
                     var funcDecl: FuncDecl =
                         this.parseFunctionStatements(errorRecoverySet | ErrorRecoverySet.RCurly,
@@ -2573,6 +2574,7 @@ module TypeScript {
             var minChar = this.scanner.startPos;
             var limChar = this.scanner.pos;
             var parseAsLambda = false;
+            var expectlambdaRParen = false;
 
             // keywords first
             switch (this.tok.tokenId) {
@@ -2632,7 +2634,7 @@ module TypeScript {
                     break;
                 case TokenID.FUNCTION:
                     minChar = this.scanner.pos;
-                    ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, Modifiers.None, null);
+                    ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, Modifiers.None, null, true);
                     (<FuncDecl>ast).fncFlags |= FncFlags.IsFunctionExpression;
                     ast.minChar = minChar;
                     limChar = this.scanner.lastTokenLimChar();
@@ -2652,9 +2654,6 @@ module TypeScript {
 
                     if (this.tok.tokenId == TokenID.QMark) {
                         ast.flags |= ASTFlags.PossibleOptionalParameter;
-                    }
-                    else if (this.tok.tokenId == TokenID.Arrow) {
-                        parseAsLambda = true;
                     }
 
                     limChar = this.scanner.lastTokenLimChar();
@@ -2680,19 +2679,30 @@ module TypeScript {
 
                         if (couldBeLambda && this.tok.tokenId == TokenID.RParen) {
                             parseAsLambda = true;
+                            expectlambdaRParen = false;
                             this.tok = this.scanner.scan();
+                        }
+                        else if (couldBeLambda && this.tok.tokenId == TokenID.Ellipsis) {
+                            parseAsLambda = true;
+                            expectlambdaRParen = true;
                         }
                         else {
                             ast = this.parseExpr(errorRecoverySet | ErrorRecoverySet.RParen,
-                                          OperatorPrecedence.No, true, TypeContext.NoTypes);
+                                          OperatorPrecedence.No, true, TypeContext.NoTypes, couldBeLambda);
                             limChar = this.scanner.lastTokenLimChar();
                             parseAsLambda = couldBeLambda && (ast.nodeType == NodeType.Name || ast.nodeType == NodeType.Comma) &&
                                             (this.tok.tokenId == TokenID.Colon || this.tok.tokenId == TokenID.QMark);
+                            expectlambdaRParen = true;
                         }
 
                         // Check for the RParen if it's not an anonymous '=>' function
-                        // REVIEW: Uncomment the clause below for optional parameters and default arguments
-                        if ((ast && /*(ast.nodeType != NodeType.FuncDecl || !hasFlag((<FuncDecl>ast).fncFlags, FncFlags.IsFatArrowFunction)) &&*/ !parseAsLambda)) {
+                        if ((ast && !parseAsLambda)) {
+                            if (hasFlag(ast.flags, ASTFlags.SkipNextRParen)) {
+                                // REVIEW: parseExpr resulted in a lambda node, the LParen scanned earlier, is the beginning of that node, and not of a parenthesized expression;
+                                //         do not look for a matching RParen for this node, but make sure to remove the flag, so that any enclosing parenthesis are matched correctly.
+                                ast.flags = ast.flags & (~(ASTFlags.SkipNextRParen)); 
+                                break;
+                            }
                             this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet);
                             ast.isParenthesized = true;
                         }
@@ -2782,16 +2792,15 @@ module TypeScript {
             if (parseAsLambda) {
                 // If the next token is an fat arrow or a colon, we either have a parameter list, or can rightly assume
                 // that we have a typed formal, so we proceed with the lambda parse
-                if (this.tok.tokenId == TokenID.Arrow ||
+                if (
                     this.tok.tokenId == TokenID.Colon ||
                     this.tok.tokenId == TokenID.Comma ||
-                    this.tok.tokenId == TokenID.RParen) {
+                    this.tok.tokenId == TokenID.RParen ||
+                    this.tok.tokenId == TokenID.Ellipsis) {
 
                         // We won't scan in the ':' case, since keeping the ':' simplifies argument handling in parseFormalParameterList
                         // Note that we don't set the minchar in this case
-                    ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, Modifiers.None, { preProcessedLambdaArgs: ast });
-                    (<FuncDecl>ast).fncFlags |= FncFlags.IsFunctionExpression;
-                    (<FuncDecl>ast).fncFlags |= FncFlags.IsFatArrowFunction;
+                    ast = this.parseLambdaExpr(errorRecoverySet, ast, true /* skipNextRParen */, expectlambdaRParen);
                     ast.minChar = minChar;
                     limChar = this.scanner.lastTokenLimChar();
                     ast.limChar = limChar;
@@ -2832,8 +2841,22 @@ module TypeScript {
 
         }
 
+        public parseLambdaExpr(errorRecoverySet: ErrorRecoverySet, lambdaArgs: AST, skipNextRParen: bool, expectClosingRParen: bool): AST {
+            // REVIEW: Parse the remainder of a lambda expression. The opening paren has been read already, if it existed. 
+            //         skipNextRParen sets a flag on the resulting lambda node to tell the calling parseTerm that the LParen it scanned has been matched as part of parsing the formal parameter list
+            //         expectClosingRParen indicates that a closing RParen is expected, in the cases with optional parameter or more than one parameter.
+            var ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, Modifiers.None, { preProcessedLambdaArgs: lambdaArgs }, expectClosingRParen);
+            (<FuncDecl>ast).fncFlags |= FncFlags.IsFunctionExpression;
+            (<FuncDecl>ast).fncFlags |= FncFlags.IsFatArrowFunction;
+            if (!skipNextRParen) {
+                ast.flags |= ASTFlags.SkipNextRParen;
+            }
+            ast.limChar = this.scanner.lastTokenLimChar();;
+            return ast;
+        }
+
         public parseExpr(errorRecoverySet: ErrorRecoverySet, minPrecedence: number, allowIn: bool,
-            typeContext: TypeContext): AST {
+            typeContext: TypeContext, possiblyInLambda: bool = false): AST {
             var ast: AST = null;
             var tokenInfo = lookupToken(this.tok.tokenId);
             var canAssign: bool = true;
@@ -2942,21 +2965,33 @@ module TypeScript {
                     break;
                 }
 
+                if (possiblyInLambda && this.tok.tokenId == TokenID.Comma && this.scanner.getLookAheadToken().tokenId == TokenID.Ellipsis) {
+                    // The ellipsis can only exist in the formal list of a lambda expression, so do not attempt to parse the comma token as the comma binary operator
+                    // instead parse it as a lambda
+                    exprIsAnonLambda = true;
+                    canAssign = false;
+                    ast = this.parseLambdaExpr(errorRecoverySet, ast, false, true);
+                    break;
+                }
+
                 // Precedence is high enough. Consume the operator token.
                 this.tok = this.scanner.scan();
                 canAssign = false;
                 if (tokenInfo.binopNodeType == NodeType.QMark) {
-                    this.prevExpr = ast;
-                    var qmarkNode = this.parseExpr(errorRecoverySet | ErrorRecoverySet.Colon,
-                                            OperatorPrecedence.Asg, allowIn,
-                                            TypeContext.NoTypes);
+                    if (possiblyInLambda && 
+                        ( this.tok.tokenId == TokenID.Asg || this.tok.tokenId == TokenID.Colon || this.tok.tokenId == TokenID.RParen || this.tok.tokenId == TokenID.Comma)) {
+                        // The QMark is not a ternary expression, it is a marker for optional parameter in a lambda expression.
+                        exprIsAnonLambda = true;
+                        canAssign = true;
+                    }
+                    else {
+                        this.prevExpr = ast;
+                        var qmarkNode = this.parseExpr(errorRecoverySet | ErrorRecoverySet.Colon,
+                                                OperatorPrecedence.Asg, allowIn,
+                                                TypeContext.NoTypes);
 
-                    // Do not hold onto the prevExpr handle
-                    this.prevExpr = null;
-
-                    // qmarkNode may end up being a FuncDecl, if the '?' token above marked
-                    // an optional parameter for a lambda
-                    if (!(qmarkNode.nodeType == NodeType.FuncDecl && hasFlag((<FuncDecl>qmarkNode).fncFlags, FncFlags.IsFatArrowFunction))) {
+                        // Do not hold onto the prevExpr handle
+                        this.prevExpr = null;
                         this.chkCurTok(TokenID.Colon, "Expected :", errorRecoverySet |
                                   ErrorRecoverySet.ExprStart);
                         ast = new TrinaryExpression(NodeType.QMark, ast, qmarkNode,
@@ -2964,10 +2999,6 @@ module TypeScript {
                                                             ErrorRecoverySet.BinOp,
                                                             OperatorPrecedence.Asg,
                                                             allowIn, TypeContext.NoTypes));
-                    }
-                    else {
-                        ast = qmarkNode;
-                        exprIsAnonLambda = true;
                     }
                 }
                 else {
@@ -2978,7 +3009,7 @@ module TypeScript {
                                                     this.parseExpr(errorRecoverySet |
                                                             ErrorRecoverySet.BinOp,
                                                             tokenInfo.binopPrecedence,
-                                                            allowIn, TypeContext.NoTypes));
+                                                            allowIn, TypeContext.NoTypes, possiblyInLambda));
                     if (binExpr2.operand2.nodeType == NodeType.FuncDecl) {
                         var funcDecl = <FuncDecl>binExpr2.operand2;
                         funcDecl.hint = idHint;
@@ -3092,7 +3123,7 @@ module TypeScript {
                         break;
                     }
                     case TokenID.Arrow:
-                        ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, Modifiers.None, { preProcessedLambdaArgs: ast });
+                        ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, Modifiers.None, { preProcessedLambdaArgs: ast }, false);
                         (<FuncDecl>ast).fncFlags |= FncFlags.IsFunctionExpression;
                         ast.minChar = lhsMinChar;
                         ast.limChar = this.scanner.lastTokenLimChar();
@@ -3300,7 +3331,7 @@ module TypeScript {
                             }
                         }
                         else {
-                            ast = this.parseFncDecl(errorRecoverySet, true, false, false, null, false, false, isAmbient(), modifiers, null);
+                            ast = this.parseFncDecl(errorRecoverySet, true, false, false, null, false, false, isAmbient(), modifiers, null, true);
                             if (hasFlag((<FuncDecl>ast).fncFlags, FncFlags.IsFatArrowFunction)) {
                                 needTerminator = true;
                             }

@@ -97,6 +97,10 @@ module TypeScript {
         PossibleOptionalParameter = 1 << 8,
         ClassBaseConstructorCall = 1 << 9,
         OptionalName = 1 << 10,
+        // REVIEW: This flag is to mark lambda nodes to note that the LParen of an expression has already been matched in the lambda header.
+        //         The flag is used to communicate this piece of information to the calling parseTerm, which intern will remove it.
+        //         Once we have a better way to associate information with nodes, this flag should not be used.
+        SkipNextRParen = 1 << 11, 
     }
 
     export enum DeclFlags {
