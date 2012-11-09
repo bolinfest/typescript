@@ -4533,8 +4533,11 @@ var TypeScript;
             this.names = [];
             this.currentNameIndex = [];
             this.currentMappings.push(this.sourceMappings);
+            jsFileName = TypeScript.switchToForwardSlashes(jsFileName);
             this.jsFileName = TypeScript.getPrettyName(jsFileName, false, true);
-            this.tsFileName = TypeScript.getPrettyName(tsFileName, false, true);
+            var removalIndex = jsFileName.lastIndexOf(this.jsFileName);
+            var fixedPath = jsFileName.substring(0, removalIndex);
+            this.tsFileName = TypeScript.getRelativePathToFixedPath(fixedPath, tsFileName);
         }
         SourceMapper.MapFileExtension = ".map";
         SourceMapper.EmitSourceMapping = function EmitSourceMapping(allSourceMappers) {
@@ -21610,6 +21613,15 @@ var TypeScript;
         return components.length ? (quote ? quoteStr(components[components.length - 1]) : components[components.length - 1]) : modPath;
     }
     TypeScript.getPrettyName = getPrettyName;
+    function getRelativePathToFixedPath(fixedModFilePath, absoluteModPath) {
+        absoluteModPath = switchToForwardSlashes(absoluteModPath);
+        var fileNameIndex = absoluteModPath.indexOf(fixedModFilePath);
+        if(fileNameIndex == 0) {
+            return absoluteModPath.substring(fixedModFilePath.length);
+        }
+        return absoluteModPath;
+    }
+    TypeScript.getRelativePathToFixedPath = getRelativePathToFixedPath;
     function quoteBaseName(modPath) {
         var modName = trimModName(stripQuotes(modPath));
         var path = getRootFilePath(modName);
@@ -23306,7 +23318,7 @@ var TypeScript;
                         }
                     } else {
                         if(this.settings.mapSourceFiles) {
-                            emitter.setSourceMappings(new TypeScript.SourceMapper(script.locationInfo.filename, emitter.sourceMapper.jsFileName, outFile, emitter.sourceMapper.sourceMapOut));
+                            emitter.setSourceMappings(new TypeScript.SourceMapper(script.locationInfo.filename, this.settings.outputFileName, outFile, emitter.sourceMapper.sourceMapOut));
                         }
                     }
                 }
