@@ -496,12 +496,26 @@ module TypeScript {
                 this.writeLineToOutput(" = [];");
                 this.recordSourceMappingEnd(lastArg);
                 this.emitIndent();
-                this.writeLineToOutput("for (var _i = 0; _i < (arguments.length - " + (argsLen - 1) +
-                                  "); _i++) {");
+                this.writeToOutput("for (")
+                this.recordSourceMappingStart(lastArg);
+                this.writeToOutput("var _i = 0;");
+                this.recordSourceMappingEnd(lastArg);
+                this.writeToOutput(" ");
+                this.recordSourceMappingStart(lastArg);
+                this.writeToOutput("_i < (arguments.length - " + (argsLen - 1) + ")");
+                this.recordSourceMappingEnd(lastArg);
+                this.writeToOutput("; "); 
+                this.recordSourceMappingStart(lastArg);
+                this.writeToOutput("_i++");
+                this.recordSourceMappingEnd(lastArg);
+                this.writeLineToOutput(") {");
                 this.indenter.increaseIndent();
                 this.emitIndent();
 
-                this.writeLineToOutput(lastArg.id.actualText + "[_i] = arguments[_i + " + (argsLen - 1) + "];");
+                this.recordSourceMappingStart(lastArg);
+                this.writeToOutput(lastArg.id.actualText + "[_i] = arguments[_i + " + (argsLen - 1) + "];");
+                this.recordSourceMappingEnd(lastArg);
+                this.writeLineToOutput("");
                 this.indenter.decreaseIndent();
                 this.emitIndent();
                 this.writeLineToOutput("}");

@@ -14,6 +14,7 @@ describe('Output of sourcemap matches the baseline', function () {
     testFile('typeResolution.ts');
     testFile('es6ClassTest2.ts');
     testFile('recursiveClassReferenceTest.ts');
+    testFile('sourceMapSample.ts');
 
     files.forEach(filename => {
         var filenameOnly = filenameRegex.exec(filename)[0];
