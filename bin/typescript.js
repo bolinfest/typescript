@@ -108,6 +108,7 @@ var TypeScript;
         ASTFlags.PossibleOptionalParameter = 1 << 8;
         ASTFlags.ClassBaseConstructorCall = 1 << 9;
         ASTFlags.OptionalName = 1 << 10;
+        ASTFlags.SkipNextRParen = 1 << 11;
     })(TypeScript.ASTFlags || (TypeScript.ASTFlags = {}));
     var ASTFlags = TypeScript.ASTFlags;
     (function (DeclFlags) {
@@ -4989,10 +4990,25 @@ var TypeScript;
                 this.writeLineToOutput(" = [];");
                 this.recordSourceMappingEnd(lastArg);
                 this.emitIndent();
-                this.writeLineToOutput("for (var _i = 0; _i < (arguments.length - " + (argsLen - 1) + "); _i++) {");
+                this.writeToOutput("for (");
+                this.recordSourceMappingStart(lastArg);
+                this.writeToOutput("var _i = 0;");
+                this.recordSourceMappingEnd(lastArg);
+                this.writeToOutput(" ");
+                this.recordSourceMappingStart(lastArg);
+                this.writeToOutput("_i < (arguments.length - " + (argsLen - 1) + ")");
+                this.recordSourceMappingEnd(lastArg);
+                this.writeToOutput("; ");
+                this.recordSourceMappingStart(lastArg);
+                this.writeToOutput("_i++");
+                this.recordSourceMappingEnd(lastArg);
+                this.writeLineToOutput(") {");
                 this.indenter.increaseIndent();
                 this.emitIndent();
-                this.writeLineToOutput(lastArg.id.actualText + "[_i] = arguments[_i + " + (argsLen - 1) + "];");
+                this.recordSourceMappingStart(lastArg);
+                this.writeToOutput(lastArg.id.actualText + "[_i] = arguments[_i + " + (argsLen - 1) + "];");
+                this.recordSourceMappingEnd(lastArg);
+                this.writeLineToOutput("");
                 this.indenter.decreaseIndent();
                 this.emitIndent();
                 this.writeLineToOutput("}");
@@ -6866,7 +6882,7 @@ var TypeScript;
                 }
                 case TypeScript.TokenID.LParen: {
                     var formals = new TypeScript.ASTList();
-                    var variableArgList = this.parseFormalParameterList(errorRecoverySet | TypeScript.ErrorRecoverySet.RParen, formals, false, true, false, false, false, null);
+                    var variableArgList = this.parseFormalParameterList(errorRecoverySet | TypeScript.ErrorRecoverySet.RParen, formals, false, true, false, false, false, false, null, true);
                     this.chkCurTok(TypeScript.TokenID.Arrow, "Expected '=>'", errorRecoverySet);
                     var returnType = this.parseTypeReference(errorRecoverySet, true);
                     var funcDecl = new TypeScript.FuncDecl(null, null, false, formals, null, null, null, TypeScript.NodeType.FuncDecl);
@@ -6954,14 +6970,8 @@ var TypeScript;
                 } else {
                     funcDecl.fncFlags |= TypeScript.FncFlags.IsFatArrowFunction;
                     funcDecl.endingToken = new TypeScript.ASTSpan();
-                    if(this.tok.tokenId == TypeScript.TokenID.SColon) {
-                        funcDecl.endingToken.minChar = this.scanner.startPos;
-                        funcDecl.endingToken.limChar = this.scanner.pos;
-                        this.tok = this.scanner.scan();
-                    } else {
-                        funcDecl.endingToken.minChar = bod.members[0].minChar;
-                        funcDecl.endingToken.limChar = bod.members[0].limChar;
-                    }
+                    funcDecl.endingToken.minChar = bod.members[0].minChar;
+                    funcDecl.endingToken.limChar = bod.members[0].limChar;
                 }
             }
             funcDecl.minChar = minChar;
@@ -6976,7 +6986,7 @@ var TypeScript;
             var _this = this;
             var translateBinExOperand = function (operand) {
                 if(operand.nodeType == TypeScript.NodeType.Comma) {
-                    _this.transformAnonymousArgsIntoFormals(formals, operand);
+                    return _this.transformAnonymousArgsIntoFormals(formals, operand);
                 } else {
                     if(operand.nodeType == TypeScript.NodeType.Name || operand.nodeType == TypeScript.NodeType.Asg) {
                         var opArg = operand.nodeType == TypeScript.NodeType.Asg ? (operand).operand1 : operand;
@@ -6992,27 +7002,36 @@ var TypeScript;
                             arg.init = (operand).operand2;
                         }
                         formals.append(arg);
+                        return arg.isOptional;
                     } else {
                         _this.reportParseError("Invalid lambda argument");
                     }
                 }
+                return false;
             };
             if(argList) {
                 if(argList.nodeType == TypeScript.NodeType.Comma) {
                     var commaList = argList;
-                    translateBinExOperand(commaList.operand1);
-                    translateBinExOperand(commaList.operand2);
+                    if(commaList.operand1.isParenthesized) {
+                        this.reportParseError("Invalid lambda argument", commaList.operand1.minChar, commaList.operand1.limChar);
+                    }
+                    if(commaList.operand2.isParenthesized) {
+                        this.reportParseError("Invalid lambda argument", commaList.operand2.minChar, commaList.operand2.limChar);
+                    }
+                    var isOptional = translateBinExOperand(commaList.operand1);
+                    isOptional = translateBinExOperand(commaList.operand2) || isOptional;
+                    return isOptional;
                 } else {
-                    translateBinExOperand(argList);
+                    return translateBinExOperand(argList);
                 }
             }
         };
-        Parser.prototype.parseFormalParameterList = function (errorRecoverySet, formals, isClassConstr, isSig, isIndexer, isGetter, isSetter, preProcessedLambdaArgs) {
+        Parser.prototype.parseFormalParameterList = function (errorRecoverySet, formals, isClassConstr, isSig, isIndexer, isGetter, isSetter, isLambda, preProcessedLambdaArgs, expectClosingRParen) {
             formals.minChar = this.scanner.startPos;
             if(isIndexer) {
                 this.tok = this.scanner.scan();
             } else {
-                if(!preProcessedLambdaArgs) {
+                if(!isLambda) {
                     this.chkCurTok(TypeScript.TokenID.LParen, "Expected '('", errorRecoverySet | TypeScript.ErrorRecoverySet.RParen);
                 }
             }
@@ -7020,9 +7039,8 @@ var TypeScript;
             var firstArg = true;
             var hasOptional = false;
             var haveFirstArgID = false;
-            var hasPartialArgList = false;
-            if(preProcessedLambdaArgs) {
-                this.transformAnonymousArgsIntoFormals(formals, preProcessedLambdaArgs);
+            if(isLambda && preProcessedLambdaArgs && preProcessedLambdaArgs.nodeType != TypeScript.NodeType.EmptyExpr) {
+                hasOptional = this.transformAnonymousArgsIntoFormals(formals, preProcessedLambdaArgs);
                 haveFirstArgID = true;
             }
             while(true) {
@@ -7097,7 +7115,6 @@ var TypeScript;
                         arg = formals.members[formals.members.length - 1];
                         if(arg.isOptional) {
                             hasOptional = true;
-                            hasPartialArgList = true;
                         }
                     } else {
                         arg = new TypeScript.ArgDecl(argId);
@@ -7119,9 +7136,6 @@ var TypeScript;
                     if(this.tok.tokenId == TypeScript.TokenID.Colon) {
                         this.tok = this.scanner.scan();
                         type = this.parseTypeReference(errorRecoverySet, false);
-                        if(preProcessedLambdaArgs) {
-                            hasPartialArgList = true;
-                        }
                     }
                     if(this.tok.tokenId == TypeScript.TokenID.Asg) {
                         if(isSig) {
@@ -7136,6 +7150,9 @@ var TypeScript;
                     }
                     if(sawEllipsis && arg.isOptionalArg()) {
                         this.reportParseError("Varargs may not be optional or have default parameters");
+                    }
+                    if(sawEllipsis && !type) {
+                        this.reportParseError("'...' parameters require both a parameter name and an array type annotation to be specified");
                     }
                     arg.postComments = this.parseComments();
                     arg.typeExpr = type;
@@ -7166,14 +7183,14 @@ var TypeScript;
             if(isIndexer) {
                 this.chkCurTok(TypeScript.TokenID.RBrack, "Expected ']'", errorRecoverySet | TypeScript.ErrorRecoverySet.LCurly | TypeScript.ErrorRecoverySet.SColon);
             } else {
-                if(!preProcessedLambdaArgs || hasPartialArgList) {
+                if(expectClosingRParen) {
                     this.chkCurTok(TypeScript.TokenID.RParen, "Expected ')'", errorRecoverySet | TypeScript.ErrorRecoverySet.LCurly | TypeScript.ErrorRecoverySet.SColon);
                 }
             }
             formals.limChar = this.scanner.lastTokenLimChar();
             return sawEllipsis;
         };
-        Parser.prototype.parseFncDecl = function (errorRecoverySet, isDecl, requiresSignature, isMethod, methodName, indexer, isStatic, markedAsAmbient, modifiers, lambdaArgContext) {
+        Parser.prototype.parseFncDecl = function (errorRecoverySet, isDecl, requiresSignature, isMethod, methodName, indexer, isStatic, markedAsAmbient, modifiers, lambdaArgContext, expectClosingRParen) {
             var leftCurlyCount = this.scanner.leftCurlyCount;
             var rightCurlyCount = this.scanner.rightCurlyCount;
             var prevInConstr = this.parsingClassConstructorDefinition;
@@ -7212,8 +7229,8 @@ var TypeScript;
             var isOverload = false;
             var isGetter = TypeScript.hasFlag(modifiers, TypeScript.Modifiers.Getter);
             var isSetter = TypeScript.hasFlag(modifiers, TypeScript.Modifiers.Setter);
-            if((this.tok.tokenId == TypeScript.TokenID.LParen) || (indexer && (this.tok.tokenId == TypeScript.TokenID.LBrack)) || (lambdaArgContext && lambdaArgContext.preProcessedLambdaArgs)) {
-                variableArgList = this.parseFormalParameterList(errorRecoverySet, args, false, requiresSignature, indexer, isGetter, isSetter, lambdaArgContext ? lambdaArgContext.preProcessedLambdaArgs : null);
+            if((this.tok.tokenId == TypeScript.TokenID.LParen) || (indexer && (this.tok.tokenId == TypeScript.TokenID.LBrack)) || (lambdaArgContext && (lambdaArgContext.preProcessedLambdaArgs || this.tok.tokenId == TypeScript.TokenID.Ellipsis))) {
+                variableArgList = this.parseFormalParameterList(errorRecoverySet, args, false, requiresSignature, indexer, isGetter, isSetter, !!lambdaArgContext, lambdaArgContext ? lambdaArgContext.preProcessedLambdaArgs : null, expectClosingRParen);
             }
             this.state = ParseState.FncDeclArgs;
             var returnType = null;
@@ -7566,7 +7583,7 @@ var TypeScript;
             var preComments = this.parseComments();
             this.tok = this.scanner.scan();
             if(this.tok.tokenId == TypeScript.TokenID.LParen) {
-                variableArgList = this.parseFormalParameterList(errorRecoverySet, args, true, isAmbient, false, false, false, null);
+                variableArgList = this.parseFormalParameterList(errorRecoverySet, args, true, isAmbient, false, false, false, false, null, true);
                 if(args.members.length > 0) {
                     var lastArg = args.members[args.members.length - 1];
                 }
@@ -7677,7 +7694,7 @@ var TypeScript;
             if(isAccessor && (modifiers & TypeScript.Modifiers.Ambient)) {
                 this.reportParseError("Property accessors may not be declared in ambient classes");
             }
-            var ast = this.parseFncDecl(errorRecoverySet, true, isAmbient, true, methodName, false, isStatic, isAmbient, modifiers, null);
+            var ast = this.parseFncDecl(errorRecoverySet, true, isAmbient, true, methodName, false, isStatic, isAmbient, modifiers, null, true);
             if(ast.nodeType == TypeScript.NodeType.Error) {
                 return ast;
             }
@@ -7891,7 +7908,7 @@ var TypeScript;
                 if(isIndexer) {
                     ers = errorRecoverySet | TypeScript.ErrorRecoverySet.RBrack;
                 }
-                var ast = this.parseFncDecl(ers, true, requireSignature, !this.inFncDecl, text, isIndexer, isStatic, (this.parsingDeclareFile || TypeScript.hasFlag(modifiers, TypeScript.Modifiers.Ambient)), modifiers, null);
+                var ast = this.parseFncDecl(ers, true, requireSignature, !this.inFncDecl, text, isIndexer, isStatic, (this.parsingDeclareFile || TypeScript.hasFlag(modifiers, TypeScript.Modifiers.Ambient)), modifiers, null, true);
                 var funcDecl;
                 if(ast.nodeType == TypeScript.NodeType.Error) {
                     return ast;
@@ -8159,7 +8176,7 @@ var TypeScript;
                 }
                 if(accessorPattern) {
                     var args = new TypeScript.ASTList();
-                    this.parseFormalParameterList(errorRecoverySet | TypeScript.ErrorRecoverySet.RParen, args, false, true, false, !isSet, isSet, null);
+                    this.parseFormalParameterList(errorRecoverySet | TypeScript.ErrorRecoverySet.RParen, args, false, true, false, !isSet, isSet, false, null, true);
                     var funcDecl = this.parseFunctionStatements(errorRecoverySet | TypeScript.ErrorRecoverySet.RCurly, memberName, false, true, args, TypeScript.AllowedElements.FunctionDecls, this.scanner.startPos, false, TypeScript.Modifiers.None);
                     if(isSet && funcDecl.returnTypeAnnotation) {
                         this.reportParseError("Property setters may not declare a return type");
@@ -8252,6 +8269,7 @@ var TypeScript;
             var minChar = this.scanner.startPos;
             var limChar = this.scanner.pos;
             var parseAsLambda = false;
+            var expectlambdaRParen = false;
             switch(this.tok.tokenId) {
                 case TypeScript.TokenID.NUMBER:
                 case TypeScript.TokenID.BOOL:
@@ -8320,7 +8338,7 @@ var TypeScript;
                 }
                 case TypeScript.TokenID.FUNCTION: {
                     minChar = this.scanner.pos;
-                    ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, TypeScript.Modifiers.None, null);
+                    ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, TypeScript.Modifiers.None, null, true);
                     (ast).fncFlags |= TypeScript.FncFlags.IsFunctionExpression;
                     ast.minChar = minChar;
                     limChar = this.scanner.lastTokenLimChar();
@@ -8338,10 +8356,6 @@ var TypeScript;
                     this.tok = this.scanner.scan();
                     if(this.tok.tokenId == TypeScript.TokenID.QMark) {
                         ast.flags |= TypeScript.ASTFlags.PossibleOptionalParameter;
-                    } else {
-                        if(this.tok.tokenId == TypeScript.TokenID.Arrow) {
-                            parseAsLambda = true;
-                        }
                     }
                     limChar = this.scanner.lastTokenLimChar();
                 }
@@ -8358,13 +8372,24 @@ var TypeScript;
                         var couldBeLambda = prevTokId == TypeScript.TokenID.LParen || prevTokId == TypeScript.TokenID.Comma || prevTokId == TypeScript.TokenID.EQ || prevTokId == TypeScript.TokenID.Colon;
                         if(couldBeLambda && this.tok.tokenId == TypeScript.TokenID.RParen) {
                             parseAsLambda = true;
+                            expectlambdaRParen = false;
                             this.tok = this.scanner.scan();
                         } else {
-                            ast = this.parseExpr(errorRecoverySet | TypeScript.ErrorRecoverySet.RParen, TypeScript.OperatorPrecedence.No, true, TypeContext.NoTypes);
-                            limChar = this.scanner.lastTokenLimChar();
-                            parseAsLambda = couldBeLambda && (ast.nodeType == TypeScript.NodeType.Name || ast.nodeType == TypeScript.NodeType.Comma) && (this.tok.tokenId == TypeScript.TokenID.Colon || this.tok.tokenId == TypeScript.TokenID.QMark);
+                            if(couldBeLambda && this.tok.tokenId == TypeScript.TokenID.Ellipsis) {
+                                parseAsLambda = true;
+                                expectlambdaRParen = true;
+                            } else {
+                                ast = this.parseExpr(errorRecoverySet | TypeScript.ErrorRecoverySet.RParen, TypeScript.OperatorPrecedence.No, true, TypeContext.NoTypes, couldBeLambda);
+                                limChar = this.scanner.lastTokenLimChar();
+                                parseAsLambda = couldBeLambda && (ast.nodeType == TypeScript.NodeType.Name || ast.nodeType == TypeScript.NodeType.Comma) && (this.tok.tokenId == TypeScript.TokenID.Colon || this.tok.tokenId == TypeScript.TokenID.QMark);
+                                expectlambdaRParen = true;
+                            }
                         }
                         if((ast && !parseAsLambda)) {
+                            if(TypeScript.hasFlag(ast.flags, TypeScript.ASTFlags.SkipNextRParen)) {
+                                ast.flags = ast.flags & (~(TypeScript.ASTFlags.SkipNextRParen));
+                                break;
+                            }
                             this.chkCurTok(TypeScript.TokenID.RParen, "Expected ')'", errorRecoverySet);
                             ast.isParenthesized = true;
                         }
@@ -8456,12 +8481,8 @@ var TypeScript;
                 }
             }
             if(parseAsLambda) {
-                if(this.tok.tokenId == TypeScript.TokenID.Arrow || this.tok.tokenId == TypeScript.TokenID.Colon || this.tok.tokenId == TypeScript.TokenID.Comma || this.tok.tokenId == TypeScript.TokenID.RParen) {
-                    ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, TypeScript.Modifiers.None, {
-                        preProcessedLambdaArgs: ast
-                    });
-                    (ast).fncFlags |= TypeScript.FncFlags.IsFunctionExpression;
-                    (ast).fncFlags |= TypeScript.FncFlags.IsFatArrowFunction;
+                if(this.tok.tokenId == TypeScript.TokenID.Colon || this.tok.tokenId == TypeScript.TokenID.Comma || this.tok.tokenId == TypeScript.TokenID.RParen || this.tok.tokenId == TypeScript.TokenID.Ellipsis) {
+                    ast = this.parseLambdaExpr(errorRecoverySet, ast, true, expectlambdaRParen);
                     ast.minChar = minChar;
                     limChar = this.scanner.lastTokenLimChar();
                     ast.limChar = limChar;
@@ -8489,7 +8510,21 @@ var TypeScript;
                 return new TypeScript.AST(TypeScript.NodeType.Error);
             }
         };
-        Parser.prototype.parseExpr = function (errorRecoverySet, minPrecedence, allowIn, typeContext) {
+        Parser.prototype.parseLambdaExpr = function (errorRecoverySet, lambdaArgs, skipNextRParen, expectClosingRParen) {
+            var ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, TypeScript.Modifiers.None, {
+                preProcessedLambdaArgs: lambdaArgs
+            }, expectClosingRParen);
+            (ast).fncFlags |= TypeScript.FncFlags.IsFunctionExpression;
+            (ast).fncFlags |= TypeScript.FncFlags.IsFatArrowFunction;
+            if(!skipNextRParen) {
+                ast.flags |= TypeScript.ASTFlags.SkipNextRParen;
+            }
+            ast.limChar = this.scanner.lastTokenLimChar();
+            ; ;
+            return ast;
+        };
+        Parser.prototype.parseExpr = function (errorRecoverySet, minPrecedence, allowIn, typeContext, possiblyInLambda) {
+            if (typeof possiblyInLambda === "undefined") { possiblyInLambda = false; }
             var ast = null;
             var tokenInfo = TypeScript.lookupToken(this.tok.tokenId);
             var canAssign = true;
@@ -8578,23 +8613,29 @@ var TypeScript;
                         break;
                     }
                 }
+                if(possiblyInLambda && this.tok.tokenId == TypeScript.TokenID.Comma && this.scanner.getLookAheadToken().tokenId == TypeScript.TokenID.Ellipsis) {
+                    exprIsAnonLambda = true;
+                    canAssign = false;
+                    ast = this.parseLambdaExpr(errorRecoverySet, ast, false, true);
+                    break;
+                }
                 this.tok = this.scanner.scan();
                 canAssign = false;
                 if(tokenInfo.binopNodeType == TypeScript.NodeType.QMark) {
-                    this.prevExpr = ast;
-                    var qmarkNode = this.parseExpr(errorRecoverySet | TypeScript.ErrorRecoverySet.Colon, TypeScript.OperatorPrecedence.Asg, allowIn, TypeContext.NoTypes);
-                    this.prevExpr = null;
-                    if(!(qmarkNode.nodeType == TypeScript.NodeType.FuncDecl && TypeScript.hasFlag((qmarkNode).fncFlags, TypeScript.FncFlags.IsFatArrowFunction))) {
+                    if(possiblyInLambda && (this.tok.tokenId == TypeScript.TokenID.Asg || this.tok.tokenId == TypeScript.TokenID.Colon || this.tok.tokenId == TypeScript.TokenID.RParen || this.tok.tokenId == TypeScript.TokenID.Comma)) {
+                        exprIsAnonLambda = true;
+                        canAssign = true;
+                    } else {
+                        this.prevExpr = ast;
+                        var qmarkNode = this.parseExpr(errorRecoverySet | TypeScript.ErrorRecoverySet.Colon, TypeScript.OperatorPrecedence.Asg, allowIn, TypeContext.NoTypes);
+                        this.prevExpr = null;
                         this.chkCurTok(TypeScript.TokenID.Colon, "Expected :", errorRecoverySet | TypeScript.ErrorRecoverySet.ExprStart);
                         ast = new TypeScript.TrinaryExpression(TypeScript.NodeType.QMark, ast, qmarkNode, this.parseExpr(errorRecoverySet | TypeScript.ErrorRecoverySet.BinOp, TypeScript.OperatorPrecedence.Asg, allowIn, TypeContext.NoTypes));
-                    } else {
-                        ast = qmarkNode;
-                        exprIsAnonLambda = true;
                     }
                 } else {
                     var tc = TypeContext.NoTypes;
                     var binExpr2;
-                    binExpr2 = new TypeScript.BinaryExpression(tokenInfo.binopNodeType, ast, this.parseExpr(errorRecoverySet | TypeScript.ErrorRecoverySet.BinOp, tokenInfo.binopPrecedence, allowIn, TypeContext.NoTypes));
+                    binExpr2 = new TypeScript.BinaryExpression(tokenInfo.binopNodeType, ast, this.parseExpr(errorRecoverySet | TypeScript.ErrorRecoverySet.BinOp, tokenInfo.binopPrecedence, allowIn, TypeContext.NoTypes, possiblyInLambda));
                     if(binExpr2.operand2.nodeType == TypeScript.NodeType.FuncDecl) {
                         var funcDecl = binExpr2.operand2;
                         funcDecl.hint = idHint;
@@ -8693,7 +8734,7 @@ var TypeScript;
                     case TypeScript.TokenID.Arrow: {
                         ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, TypeScript.Modifiers.None, {
                             preProcessedLambdaArgs: ast
-                        });
+                        }, false);
                         (ast).fncFlags |= TypeScript.FncFlags.IsFunctionExpression;
                         ast.minChar = lhsMinChar;
                         ast.limChar = this.scanner.lastTokenLimChar();
@@ -8887,7 +8928,7 @@ var TypeScript;
                                 (ast).fncFlags |= TypeScript.FncFlags.Exported;
                             }
                         } else {
-                            ast = this.parseFncDecl(errorRecoverySet, true, false, false, null, false, false, isAmbient(), modifiers, null);
+                            ast = this.parseFncDecl(errorRecoverySet, true, false, false, null, false, false, isAmbient(), modifiers, null, true);
                             if(TypeScript.hasFlag((ast).fncFlags, TypeScript.FncFlags.IsFatArrowFunction)) {
                                 needTerminator = true;
                             }
@@ -12134,6 +12175,9 @@ var TypeScript;
         };
         SavedTokens.prototype.setErrorHandler = function (reportError) {
         };
+        SavedTokens.prototype.getLookAheadToken = function () {
+            throw new Error("Invalid operation.");
+        };
         return SavedTokens;
     })();
     TypeScript.SavedTokens = SavedTokens;    
@@ -12539,6 +12583,44 @@ var TypeScript;
             this.pos++;
             this.col++;
             this.ch = this.peekChar();
+        };
+        Scanner.prototype.getLookAheadToken = function () {
+            var prevLine = this.prevLine;
+            var line = this.line;
+            var col = this.col;
+            var pos = this.pos;
+            var startPos = this.startPos;
+            var startCol = this.startCol;
+            var startLine = this.startLine;
+            var ch = this.ch;
+            var prevTok = this.prevTok;
+            var lexState = this.lexState;
+            var interveningWhitespace = this.interveningWhitespace;
+            var interveningWhitespacePos = this.interveningWhitespacePos;
+            var leftCurlyCount = this.leftCurlyCount;
+            var rightCurlyCount = this.rightCurlyCount;
+            var seenUnicodeChar = this.seenUnicodeChar;
+            var seenUnicodeCharInComment = this.seenUnicodeCharInComment;
+            var commentStackLength = this.commentStack.length;
+            var lookAheadToken = this.scan();
+            this.prevLine = prevLine;
+            this.line = line;
+            this.col = col;
+            this.pos = pos;
+            this.startPos = startPos;
+            this.startCol = startCol;
+            this.startLine = startLine;
+            this.ch = ch;
+            this.prevTok = prevTok;
+            this.lexState = lexState;
+            this.interveningWhitespace = interveningWhitespace;
+            this.interveningWhitespacePos = interveningWhitespacePos;
+            this.leftCurlyCount = leftCurlyCount;
+            this.rightCurlyCount = rightCurlyCount;
+            this.seenUnicodeChar = seenUnicodeChar;
+            this.seenUnicodeCharInComment = seenUnicodeCharInComment;
+            this.commentStack.length = commentStackLength;
+            return lookAheadToken;
         };
         Scanner.prototype.scan = function () {
             if((this.lexState == LexState.InMultilineComment) && (this.scanComments)) {
