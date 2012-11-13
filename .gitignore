@@ -4,7 +4,6 @@ tests/projects/*/*/*.js
 tests/projects/*/*/*/*.js
 diff-*.html
 test-args.txt
-*.sln
 *.suo
 ~*.docx
 tests/baselines/local/*
