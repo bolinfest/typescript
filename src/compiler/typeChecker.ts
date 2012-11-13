@@ -843,7 +843,7 @@ module TypeScript {
                     // Still, normalizing here alows any language services to be free of assumptions
                     var path = getRootFilePath(switchToForwardSlashes(currentFileName));
 
-                    while (symbol == null && path != "" && path != "/") {
+                    while (symbol == null && path != "") {
                         idText = normalizePath(path + strippedIdText + ".ts");
                         symbol = search(idText);
 
@@ -866,8 +866,12 @@ module TypeScript {
                         }
 
                         if (symbol == null) {
-                            path = normalizePath(path + "..");
-                            path = path && path != '/' ? path + '/' : path;
+							if(path === '/') {
+								path = '';
+							} else {
+								path = normalizePath(path + "..");
+								path = path && path != '/' ? path + '/' : path;
+							}
                         }
                     }
                 }
