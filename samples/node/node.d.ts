@@ -584,17 +584,17 @@ declare module "child_process" {
 
 declare module "url" {
     export interface Url {
-        href: string;
-        protocol: string;
-        auth: string;
-        hostname: string;
-        port: string;
-        host: string;
-        pathname: string;
-        search: string;
-        query: string;
-        slashes: bool;
-        hash: string;
+        href?: string;
+        protocol?: string;
+        auth?: string;
+        hostname?: string;
+        port?: string;
+        host?: string;
+        pathname?: string;
+        search?: string;
+        query?: string;
+        slashes?: bool;
+        hash?: string;
     }
 
     export function parse(urlStr: string, parseQueryString? , slashesDenoteHost? ): Url;
