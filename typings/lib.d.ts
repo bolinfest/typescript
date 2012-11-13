@@ -6350,8 +6350,8 @@ interface IDBCursor {
     key: any;
     primaryKey: any;
     advance(count: number): void;
-    delet(): IDBRequest;
-    continu(key?: any): void;
+    delete(): IDBRequest;
+    continue(key?: any): void;
     update(value: any): IDBRequest;
 }
 declare var IDBCursor: {
