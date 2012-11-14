@@ -235,7 +235,8 @@ interface JQueryStatic {
     /******
      EVENTS
     *******/
-    proxy(context: any, name: any): any;
+    proxy(func: Function, context: any): any;
+    proxy(context: any, name: string): any;
 
     /*********
      INTERNALS
@@ -289,7 +290,7 @@ interface JQueryStatic {
 
     now(): number;
 
-    parseJSON(json: string): Object;
+    parseJSON(json: string): any;
 
     //FIXME: This should return an XMLDocument
     parseXML(data: string): any;
@@ -372,7 +373,7 @@ interface JQuery {
     innerHeight(): number;
     innerWidth(): number;
 
-    offset(): Object;
+    offset(): { top: number; left: number; };
     offset(coordinates: any): JQuery;
     offset(func: (index: any, coords: any) => any): JQuery;
 
@@ -499,6 +500,9 @@ interface JQuery {
 
     mouseevent(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseevent(handler: (eventObject: JQueryEventObject) => any): JQuery;
+
+    mouseenter(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mouseenter(handler: (eventObject: JQueryEventObject) => any): JQuery;
 
     mouseleave(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseleave(handler: (eventObject: JQueryEventObject) => any): JQuery;
