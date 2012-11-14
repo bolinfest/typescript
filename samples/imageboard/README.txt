@@ -12,21 +12,30 @@ Notable features:
 
 === Running ===
 
-Start in the directory containing the README.
+Note: Perform steps 3 - 6 with your working directory set to the folder containing this README:
 
-Get mongodb running:
+1. Install MongoDB if necessary (see http://docs.mongodb.org/manual/installation/ )
+
+2. Run the following command to launch the MongoDB process:
 
 <mongoinstalldir>\bin\mongod
+
+3. Restore the sample app data to MongoDB with the following command:
+
 <mongoinstalldir>\bin\mongorestore dump
 
-Install node dependencies:
+4. Install the app's node dependencies with the following command:
 
 npm install
 
-Compile the app:
+5. Compile the app with the following command:
 
-tsc app.ts --module Node
+tsc app.ts
 
-Run the app:
+6. Launch the Node process to serve the app using the following command:
+
 node app.js
 
+7. Open your favorite browser and going to the following URL to access the app:
+
+http://localhost:3000/

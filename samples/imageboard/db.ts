@@ -5,7 +5,7 @@ var server = new mongodb.Server('localhost', 27017, {auto_reconnect: true}, {})
 var db = new mongodb.Db('mydb', server);
 db.open(function() {});
 
-interface User {
+export interface User {
     _id: string;
     email: string;
     first_name: string;
@@ -14,13 +14,13 @@ interface User {
     boards: Board[];
 }
 
-interface Board {
+export interface Board {
     title: string;
     description: string;
     images: mongodb.ObjectID[];
 }
 
-interface Image {
+export interface Image {
     _id: mongodb.ObjectID;
     user: string;
     caption: string;
