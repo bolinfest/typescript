@@ -290,7 +290,7 @@ interface JQueryStatic {
 
     now(): number;
 
-    parseJSON(json: string): Object;
+    parseJSON(json: string): any;
 
     //FIXME: This should return an XMLDocument
     parseXML(data: string): any;
@@ -373,7 +373,7 @@ interface JQuery {
     innerHeight(): number;
     innerWidth(): number;
 
-    offset(): Object;
+    offset(): { top: number; left: number; };
     offset(coordinates: any): JQuery;
     offset(func: (index: any, coords: any) => any): JQuery;
 

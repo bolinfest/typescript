@@ -16387,7 +16387,7 @@ var TypeScript;
                     idText = originalIdText;
                     var strippedIdText = TypeScript.stripQuotes(idText);
                     var path = TypeScript.getRootFilePath(TypeScript.switchToForwardSlashes(currentFileName));
-                    while(symbol == null && path != "" && path != "/") {
+                    while(symbol == null && path != "") {
                         idText = TypeScript.normalizePath(path + strippedIdText + ".ts");
                         symbol = search(idText);
                         if(symbol == null) {
@@ -16403,8 +16403,12 @@ var TypeScript;
                             symbol = search(idText);
                         }
                         if(symbol == null) {
-                            path = TypeScript.normalizePath(path + "..");
-                            path = path && path != '/' ? path + '/' : path;
+                            if(path === '/') {
+                                path = '';
+                            } else {
+                                path = TypeScript.normalizePath(path + "..");
+                                path = path && path != '/' ? path + '/' : path;
+                            }
                         }
                     }
                 }
