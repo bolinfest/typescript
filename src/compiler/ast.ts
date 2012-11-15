@@ -732,7 +732,7 @@ module TypeScript {
 
     export class NumberLiteral extends AST {
 
-        constructor (public value: number) {
+        constructor (public value: number, public hasEmptyFraction?: bool) {
             super(NodeType.NumberLit);
         }
 
@@ -742,8 +742,9 @@ module TypeScript {
             this.type = typeFlow.doubleType;
             return this;
         }
+
         public treeViewLabel() {
-            return "num: " + this.value;
+            return "num: " + this.printLabel();
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
@@ -754,6 +755,10 @@ module TypeScript {
             }
 
             emitter.writeToOutput(this.value.toString());
+
+            if (this.hasEmptyFraction)
+                emitter.writeToOutput(".0");
+
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -761,6 +766,9 @@ module TypeScript {
         public printLabel() {
             if (Math.floor(this.value) != this.value) {
                 return this.value.toFixed(2).toString();
+            }
+            else if (this.hasEmptyFraction) {
+                return this.value.toString() + ".0";
             }
             else {
                 return this.value.toString();

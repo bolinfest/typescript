@@ -36,7 +36,7 @@ var Vector = (function () {
 var Camera = (function () {
     function Camera(pos, lookAt) {
         this.pos = pos;
-        var down = new Vector(0, -1, 0);
+        var down = new Vector(0.0, -1.0, 0.0);
         this.forward = Vector.norm(Vector.minus(lookAt, this.pos));
         this.right = Vector.times(down, Vector.norm(Vector.cross(this.forward, down)));
         this.up = Vector.times(down, Vector.norm(Vector.cross(this.forward, this.right)));

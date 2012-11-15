@@ -361,11 +361,11 @@ module TypeScript {
     }
 
     export class NumberToken extends Token {
-        constructor (public value: number) {
+        constructor (public value: number, public hasEmptyFraction?: bool) {
             super(TokenID.NumberLit);
         }
         public getText(): string {
-            return this.value.toString();
+            return this.hasEmptyFraction ? this.value.toString() + ".0" : this.value.toString();
         }
         public classification(): TokenClass {
             return TokenClass.Literal;

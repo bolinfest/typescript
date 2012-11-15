@@ -2713,7 +2713,7 @@ module TypeScript {
                     case TokenID.NumberLit: {
                         var numTok = <NumberToken>this.tok;
                         this.tok = this.scanner.scan();
-                        ast = new NumberLiteral(numTok.value);
+                        ast = new NumberLiteral(numTok.value, numTok.hasEmptyFraction);
                         ast.minChar = minChar;
                         limChar = this.scanner.lastTokenLimChar();
                         break;

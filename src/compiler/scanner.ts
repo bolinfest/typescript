@@ -245,6 +245,7 @@ module TypeScript {
     export enum NumberScanState {
         Start,
         InFraction,
+        InEmptyFraction,
         InExponent
     }
 
@@ -717,19 +718,22 @@ module TypeScript {
             for (; ;) {
                 if (LexIsDigit(this.ch)) {
                     atLeastOneDigit = true;
+                    if (this.ch != LexCode_0 && state == NumberScanState.InEmptyFraction) {
+                        state = NumberScanState.InFraction;
+                    }
                     this.nextChar();
                 }
                 else if (this.ch == LexCodeDOT) {
                     if (state == NumberScanState.Start) {
                         // DecimalDigit* .
                         this.nextChar();
-                        state = NumberScanState.InFraction;
+                        state = NumberScanState.InEmptyFraction;
                     }
                     else {
                         // dot not part of number
                         if (atLeastOneDigit) {
                             // DecimalDigit* . DecimalDigit+
-                            return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                            return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
                         }
                         else {
                             this.pos = svPos;
@@ -740,7 +744,7 @@ module TypeScript {
                 } else if ((this.ch == LexCode_e) || (this.ch == LexCode_E)) {
                     if (state == NumberScanState.Start) {
                         if (atLeastOneDigit) {
-                            // DecimalDigit+ (. DecimalDigit+) [eE] [+-]DecimalDigit+
+                            // DecimalDigit+ (. DecimalDigit*) [eE] [+-]DecimalDigit+
                             atLeastOneDigit = false;
                             this.nextChar();
                             state = NumberScanState.InExponent;
@@ -751,7 +755,7 @@ module TypeScript {
                             return null;
                         }
                     }
-                    else if (state == NumberScanState.InFraction) {
+                    else if (state == NumberScanState.InFraction || state == NumberScanState.InEmptyFraction) {
                         // DecimalDigit+ . DecimalDigit* [eE]
                         this.nextChar();
                         state = NumberScanState.InExponent;
@@ -780,8 +784,9 @@ module TypeScript {
                             return null;
                         }
                     }
-                    else if (state == NumberScanState.InFraction) {
-                        return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                    else if (state == NumberScanState.InEmptyFraction || state == NumberScanState.InFraction) {
+                        // This case will not generate bad javascript if we miss the fractional part, but we just want to be consistent with the dot case
+                        return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
                     }
                     else {
                         if (!atLeastOneDigit) {
@@ -801,7 +806,7 @@ module TypeScript {
                         return null;
                     }
                     else {
-                        return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                        return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
                     }
                 }
             }
