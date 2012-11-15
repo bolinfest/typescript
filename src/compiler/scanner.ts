@@ -183,7 +183,7 @@ module TypeScript {
         autoToken[LexCodeLPR] = staticTokens[TokenID.LParen];
         autoToken[LexCodeRPR] = staticTokens[TokenID.RParen];
         autoToken[LexCodeCMA] = staticTokens[TokenID.Comma];
-        autoToken[LexCodeSMC] = staticTokens[TokenID.SColon];
+        autoToken[LexCodeSMC] = staticTokens[TokenID.SemiColon];
         autoToken[LexCodeLBR] = staticTokens[TokenID.LBrack];
         autoToken[LexCodeRBR] = staticTokens[TokenID.RBrack];
         autoToken[LexCodeTIL] = staticTokens[TokenID.Tilde];
@@ -1238,7 +1238,7 @@ module TypeScript {
                 }
                 else if (this.ch == LexCodeSMC) {
                     this.nextChar();
-                    return staticTokens[TokenID.SColon];
+                    return staticTokens[TokenID.SemiColon];
                 }
                 else if ((this.ch == LexCodeAPO) || (this.ch == LexCodeQUO)) {
                     var endCode = this.ch;

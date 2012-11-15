@@ -2280,7 +2280,7 @@ module Formatting {
                 case TypeScript.TokenID.WHILE: return AuthorTokenKind.atkWhile;
                 case TypeScript.TokenID.YIELD: return AuthorTokenKind.atkYield;
 
-                case TypeScript.TokenID.SColon: return AuthorTokenKind.atkSColon;
+                case TypeScript.TokenID.SemiColon: return AuthorTokenKind.atkSColon;
                 case TypeScript.TokenID.LParen: return AuthorTokenKind.atkLParen;
                 case TypeScript.TokenID.RParen: return AuthorTokenKind.atkRParen;
                 case TypeScript.TokenID.LBrack: return AuthorTokenKind.atkLBrack;

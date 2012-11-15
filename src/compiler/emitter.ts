@@ -736,7 +736,7 @@ module TypeScript {
                     this.writeCaptureThisStatement(moduleDecl);
                 }
 
-                this.emitJavascriptList(moduleDecl.members, null, TokenID.SColon, true, false, false);
+                this.emitJavascriptList(moduleDecl.members, null, TokenID.SemiColon, true, false, false);
                 if (!isDynamicMod || moduleGenTarget == ModuleGenTarget.Asynchronous) {
                     this.indenter.decreaseIndent();
                 }
@@ -1149,7 +1149,7 @@ module TypeScript {
                             this.writeLineToOutput(" {");
                             this.indenter.increaseIndent();
                         }
-                        this.emitJavascriptList(stmts, null, TokenID.SColon, true, false, false);
+                        this.emitJavascriptList(stmts, null, TokenID.SemiColon, true, false, false);
                         if (!hasOnlyBlockStatement) {
                             this.writeLineToOutput("");
                             this.indenter.decreaseIndent();
@@ -1160,7 +1160,7 @@ module TypeScript {
                     }
                 }
                 else {
-                    this.emitJavascript(stmts, TokenID.SColon, true);
+                    this.emitJavascript(stmts, TokenID.SemiColon, true);
                 }
             }
             else if (emitEmptyBod) {
@@ -1176,19 +1176,19 @@ module TypeScript {
                     if ((stmtList.members.length == 2) &&
                         (stmtList.members[0].nodeType == NodeType.Block) &&
                         (stmtList.members[1].nodeType == NodeType.EndCode)) {
-                        this.emitJavascript(stmtList.members[0], TokenID.SColon, true);
+                        this.emitJavascript(stmtList.members[0], TokenID.SemiColon, true);
                         this.writeLineToOutput("");
                     }
                     else {
-                        this.emitJavascriptList(stmts, null, TokenID.SColon, true, false, emitClassPropertiesAfterSuperCall);
+                        this.emitJavascriptList(stmts, null, TokenID.SemiColon, true, false, emitClassPropertiesAfterSuperCall);
                     }
                 }
                 else {
-                    this.emitJavascript(stmts, TokenID.SColon, true);
+                    this.emitJavascript(stmts, TokenID.SemiColon, true);
                 }
             }
             else {
-                this.emitJavascript(stmts, TokenID.SColon, true);
+                this.emitJavascript(stmts, TokenID.SemiColon, true);
             }
         }
 
@@ -1387,7 +1387,7 @@ module TypeScript {
                 this.writeToOutput(")");
             }
 
-            if ((tokenId == TokenID.SColon) && (ast.nodeType < NodeType.GeneralNode)) {
+            if ((tokenId == TokenID.SemiColon) && (ast.nodeType < NodeType.GeneralNode)) {
                 this.writeToOutput(";");
             }
         }

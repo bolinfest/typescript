@@ -59,7 +59,7 @@ module TypeScript {
         WITH,
         WHILE,
         YIELD,
-        SColon,
+        SemiColon,
         LParen,
         RParen,
         LBrack,
@@ -254,7 +254,7 @@ module TypeScript {
     setTokenInfo(TokenID.QString, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "qstring", ErrorRecoverySet.Literal);
 
     // Non-operator non-identifier tokens
-    setTokenInfo(TokenID.SColon, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, ";", ErrorRecoverySet.SColon); // ;
+    setTokenInfo(TokenID.SemiColon, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, ";", ErrorRecoverySet.SColon); // ;
     setTokenInfo(TokenID.RParen, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, ")", ErrorRecoverySet.RParen); // )
     setTokenInfo(TokenID.RBrack, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "]", ErrorRecoverySet.RBrack); // ]
     setTokenInfo(TokenID.LCurly, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "{", ErrorRecoverySet.LCurly); // {

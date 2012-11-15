@@ -227,7 +227,7 @@ module TypeScript {
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.recordSourceMappingStart(this);
-            emitter.emitJavascriptList(this, null, TokenID.SColon, startLine, false, false);
+            emitter.emitJavascriptList(this, null, TokenID.SemiColon, startLine, false, false);
             emitter.recordSourceMappingEnd(this);
         }
 
@@ -1177,7 +1177,7 @@ module TypeScript {
             if (this.emitRequired()) {
                 emitter.emitParensAndCommentsInPlace(this, true);
                 emitter.recordSourceMappingStart(this);
-                emitter.emitJavascriptList(this.bod, null, TokenID.SColon, true, false, false, true, this.requiresInherits);
+                emitter.emitJavascriptList(this.bod, null, TokenID.SemiColon, true, false, false, true, this.requiresInherits);
                 emitter.recordSourceMappingEnd(this);
                 emitter.emitParensAndCommentsInPlace(this, false);
             }
@@ -1398,7 +1398,7 @@ module TypeScript {
             }
             var temp = emitter.setInObjectLiteral(false);
             if (this.stmts) {
-                emitter.emitJavascriptList(this.stmts, null, TokenID.SColon, true, false, false);
+                emitter.emitJavascriptList(this.stmts, null, TokenID.SemiColon, true, false, false);
             }
             if (this.isStatementBlock) {
                 emitter.indenter.decreaseIndent();
@@ -1702,7 +1702,7 @@ module TypeScript {
             var temp = emitter.setInObjectLiteral(false);
             if (this.returnExpression) {
                 emitter.writeToOutput("return ");
-                emitter.emitJavascript(this.returnExpression, TokenID.SColon, false);
+                emitter.emitJavascript(this.returnExpression, TokenID.SemiColon, false);
             }
             else {
                 emitter.writeToOutput("return;");

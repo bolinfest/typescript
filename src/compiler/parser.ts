@@ -566,7 +566,7 @@ module TypeScript {
                             }
                             
                             // gobble up the ';' if there is one...
-                            if (this.tok.tokenId == TokenID.SColon) {
+                            if (this.tok.tokenId == TokenID.SemiColon) {
                                 limChar = this.scanner.pos;
                                 this.tok = this.scanner.scan();
                             }
@@ -583,7 +583,7 @@ module TypeScript {
                     this.reportParseError("Expected module name");
                     alias = new MissingIdentifier();
                     alias.minChar = this.scanner.startPos;
-                    if (this.tok.tokenId == TokenID.SColon) {
+                    if (this.tok.tokenId == TokenID.SemiColon) {
                         alias.limChar = this.scanner.startPos;
                     } else {
                         alias.limChar = this.scanner.pos;
@@ -738,7 +738,7 @@ module TypeScript {
                 return moduleDecl;
             }
 
-            public parseTypeReferenceTail(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST) {
+            public parseTypeReferenceTail(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST): TypeReference {
                 var result = new TypeReference(term, 0);
                 result.minChar = minChar;
                 while (this.tok.tokenId == TokenID.LBrack) {
@@ -751,7 +751,7 @@ module TypeScript {
                 return result;
             }
 
-
+            // TODO(cyrusn): Consider renaming to parseTypeName.
             public parseNamedType(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST, tail: bool): AST {
                 this.tok = this.scanner.scan();
                 if (this.tok.tokenId == TokenID.Dot) {
@@ -801,49 +801,36 @@ module TypeScript {
                 }
             }
 
+            // TODO(cyrusn): Reconsider renaming this to parseType to match the grammar.
             public parseTypeReference(errorRecoverySet: ErrorRecoverySet, allowVoid: bool): AST {
                 var minChar = this.scanner.startPos;
                 var isConstructorMember = false;
+
                 switch (this.tok.tokenId) {
                     case TokenID.VOID:
                         if (!allowVoid) {
                             this.reportParseError("void not a valid type in this context");
                         }
                     // Intentional fall-through
+                    case TokenID.ANY:
                     case TokenID.NUMBER:
                     case TokenID.BOOL:
-                    case TokenID.ANY:
                     case TokenID.STRING: {
                         var text = tokenTable[this.tok.tokenId].text;
-                        var primId = new Identifier(text);
-                        primId.minChar = minChar;
-                        primId.limChar = this.scanner.pos;
+                        var predefinedIdentifier = new Identifier(text);
+                        predefinedIdentifier.minChar = minChar;
+                        predefinedIdentifier.limChar = this.scanner.pos;
                         this.tok = this.scanner.scan();
-                        return this.parseTypeReferenceTail(errorRecoverySet, minChar,
-                                                      primId);
+                        return this.parseTypeReferenceTail(errorRecoverySet, minChar, predefinedIdentifier);
                     }
 
                     case TokenID.ID:
                         var ident = this.createRef(this.tok.getText(), (<IdentifierToken>this.tok).hasEscapeSequence, minChar);
                         ident.limChar = this.scanner.pos;
-                        return this.parseNamedType(errorRecoverySet, minChar,
-                                              ident, true);
+                        return this.parseNamedType(errorRecoverySet, minChar, ident, true);
 
                     case TokenID.LCurly:
-                        this.tok = this.scanner.scan();
-                        var members = new ASTList();
-                        members.minChar = minChar;
-                        var prevInInterfaceDecl = this.inInterfaceDecl;
-                        this.inInterfaceDecl = true;
-                        this.parseInterfaceMembers(errorRecoverySet | ErrorRecoverySet.RCurly,
-                                              members);
-                        this.inInterfaceDecl = prevInInterfaceDecl;
-                        this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
-                        var interfaceDecl = new TypeDecl(NodeType.Interface, this.anonId,
-                                                       members, null, null, null);
-                        interfaceDecl.minChar = minChar;
-                        interfaceDecl.limChar = members.limChar;    // "}"
-                        return this.parseTypeReferenceTail(errorRecoverySet, minChar, interfaceDecl);
+                        return this.parseObjectType(minChar, errorRecoverySet);
 
                     case TokenID.NEW:
                         this.tok = this.scanner.scan();
@@ -887,6 +874,27 @@ module TypeScript {
                         etr.limChar = this.scanner.pos;
                         return etr;
                 }
+            }
+
+            private parseObjectType(minChar: number, errorRecoverySet: ErrorRecoverySet): TypeReference {
+                this.tok = this.scanner.scan();
+
+                var members = new ASTList();
+                members.minChar = minChar;
+
+                var prevInInterfaceDecl = this.inInterfaceDecl;
+                this.inInterfaceDecl = true;
+                this.parseTypeMemberList(errorRecoverySet | ErrorRecoverySet.RCurly, members);
+                this.inInterfaceDecl = prevInInterfaceDecl;
+
+                this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+                var interfaceDecl = new TypeDecl(
+                    NodeType.Interface, this.anonId, members, /*args:*/ null, /*extends:*/ null, /*implementsL*/ null);
+
+                interfaceDecl.minChar = minChar;
+                interfaceDecl.limChar = members.limChar;    // "}"
+
+                return this.parseTypeReferenceTail(errorRecoverySet, minChar, interfaceDecl);
             }
 
             public parseFunctionStatements(   errorRecoverySet: ErrorRecoverySet,
@@ -957,7 +965,7 @@ module TypeScript {
                 var staticFuncDecl = false;
                 var limChar = this.scanner.pos;
                 if (requiresSignature) {
-                    this.chkCurTok(TokenID.SColon, this.tok.tokenId == TokenID.LCurly ? "Function declarations are not permitted within interfaces, ambient modules or classes" : "Expected ';'", errorRecoverySet);
+                    this.chkCurTok(TokenID.SemiColon, this.tok.tokenId == TokenID.LCurly ? "Function declarations are not permitted within interfaces, ambient modules or classes" : "Expected ';'", errorRecoverySet);
                 }
                 else {
                     if (!wasShorthand || isAnonLambda) {
@@ -1332,7 +1340,7 @@ module TypeScript {
                 // REVIEW:
                 // Currently, it's imperative that ambient functions *not* be marked as overloads.  At some point, we may
                 // want to unify the two concepts internally
-                if (isDecl && !(this.parsingDeclareFile || markedAsAmbient) && (!isMethod || !(this.ambientModule || this.ambientClass || this.inInterfaceDecl)) && this.tok.tokenId == TokenID.SColon) {
+                if (isDecl && !(this.parsingDeclareFile || markedAsAmbient) && (!isMethod || !(this.ambientModule || this.ambientClass || this.inInterfaceDecl)) && this.tok.tokenId == TokenID.SemiColon) {
                     isOverload = true;
                     isDecl = false;
                     requiresSignature = true;
@@ -1661,11 +1669,11 @@ module TypeScript {
                                 scanNext = false;
                             }
                         }
-                        else if (varDecl.init && varDecl.init.nodeType == NodeType.ObjectLit && this.tok.tokenId != TokenID.SColon) {
+                        else if (varDecl.init && varDecl.init.nodeType == NodeType.ObjectLit && this.tok.tokenId != TokenID.SemiColon) {
                             scanNext = false;
                             varDecl.init.flags |= ASTFlags.AutomaticSemicolon;
                         }
-                        else if (this.tok.tokenId != TokenID.SColon) {
+                        else if (this.tok.tokenId != TokenID.SemiColon) {
                             this.reportParseError("Expected ';'");
                             scanNext = false;
                         }
@@ -1683,7 +1691,7 @@ module TypeScript {
                     scanNext = false;
 
                 }  // mark anything else as an error
-                else if (this.tok.tokenId != TokenID.SColon) { // jettison semicolons
+                else if (this.tok.tokenId != TokenID.SemiColon) { // jettison semicolons
                     this.reportParseError("Unexpected '" + this.tok.getText() + "' in class definition");
                     resetModifiers = true;
                 }
@@ -1739,7 +1747,7 @@ module TypeScript {
                 }
             }
 
-            var requiresSignature = isAmbient || this.tok.tokenId == TokenID.SColon;
+            var requiresSignature = isAmbient || this.tok.tokenId == TokenID.SemiColon;
 
 
             if (requiresSignature) {
@@ -1947,27 +1955,33 @@ module TypeScript {
             return funcDecl;
         }
 
-        public parseInterfaceMember(errorRecoverySet: ErrorRecoverySet): AST {
+        private parseTypeMember(errorRecoverySet: ErrorRecoverySet): AST {
             var minChar = this.scanner.startPos;
-            var propertyDecl = this.parsePropertyDecl(errorRecoverySet, Modifiers.Public, true, false);
-            if (propertyDecl.nodeType == NodeType.VarDecl) {
-                this.chkCurTok(TokenID.SColon, "Expected ';'", errorRecoverySet);
-            }
+
+            var propertyDecl = this.parsePropertyDeclaration(
+                errorRecoverySet, Modifiers.Public, /*requireSignature:*/ true, /*isStatic:*/ false);
+
+            if (propertyDecl.nodeType == NodeType.VarDecl) {                 this.chkCurTok(TokenID.SemiColon, "Expected ';'", errorRecoverySet);            }
             if (propertyDecl) {
                 propertyDecl.minChar = minChar;
             }
+
             return propertyDecl;
         }
 
-        public parseInterfaceMembers(errorRecoverySet: ErrorRecoverySet, members: ASTList) {
-            for (; ;) {
+        public parseTypeMemberList(errorRecoverySet: ErrorRecoverySet, members: ASTList) {
+            errorRecoverySet |= ErrorRecoverySet.TypeScriptS;
+            while (true) {
                 switch (this.tok.tokenId) {
                     case TokenID.RCurly:
                     case TokenID.EOF:
                         members.limChar = this.scanner.pos;
                         return;
                 }
-                var element = this.parseInterfaceMember(errorRecoverySet | ErrorRecoverySet.TypeScriptS);
+
+                // TODO(cyrusn): This code looks suspect.  If parseTypeMember returns null, then 
+                // won't we just infinite loop?
+                var element = this.parseTypeMember(errorRecoverySet);
                 if (element) {
                     members.append(element);
                 }
@@ -2009,9 +2023,14 @@ module TypeScript {
             members.minChar = membersMinChar;
             var prevInInterfaceDecl = this.inInterfaceDecl;
             this.inInterfaceDecl = true;
-            this.parseInterfaceMembers(errorRecoverySet | ErrorRecoverySet.RCurly, members);
+            this.parseTypeMemberList(errorRecoverySet | ErrorRecoverySet.RCurly, members);
             this.inInterfaceDecl = prevInInterfaceDecl;
             this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+
+            // TODO(cyrusn): According to the grammar, a interface declaration should actually just
+            // have an 'ObjectType' and not a list of members.  We may want to consider making that
+            // change.  Note: it would mean breaking aparat TypeDecl into InterfaceDeclaration and 
+            // ClassDeclaration.
             var interfaceDecl = new TypeDecl(NodeType.Interface, name, members, null, interfaces, null);
             if (hasFlag(modifiers, Modifiers.Private)) {
                 interfaceDecl.varFlags |= VarFlags.Private;
@@ -2037,7 +2056,12 @@ module TypeScript {
             return varDecl;
         }
 
-        public parsePropertyDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers, requireSignature: bool, isStatic: bool): AST {
+        public parsePropertyDeclaration(
+            errorRecoverySet: ErrorRecoverySet,
+            modifiers: Modifiers,
+            requireSignature: bool,
+            isStatic: bool): AST {
+
             var text: Identifier = null;
             var minChar = this.scanner.startPos;
             var nameLimChar = minChar;
@@ -2049,6 +2073,7 @@ module TypeScript {
             if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Ambient)) {
                 requireSignature = true;
             }
+
             if (this.tok.tokenId == TokenID.LParen && !wasAccessorID) {
                 if (!requireSignature && !isStatic) {
                     this.reportParseError("Expected identifier in property declaration");
@@ -2064,9 +2089,9 @@ module TypeScript {
                     this.tok = this.scanner.scan();
                     if (this.tok.tokenId == TokenID.LParen) {
                         isNew = true;
-
                     }
                 }
+
                 if (!isNew) {
                     // is identifier
                     if (!requireSignature) {
@@ -2255,22 +2280,26 @@ module TypeScript {
             }
         }
 
-        public parseVarDecl(errorRecoverySet: ErrorRecoverySet,
+        public parseVariableDeclaration(
+            errorRecoverySet: ErrorRecoverySet,
             modifiers: Modifiers,
             allowIn: bool,
             isStatic: bool): AST {
+
             var isConst = hasFlag(modifiers, Modifiers.Readonly);
             var minChar = this.scanner.startPos;
-            this.tok = this.scanner.scan();
             var varDecl: VarDecl = null;
             var declList: ASTList = null;
             var multivar = false;
+
+            this.tok = this.scanner.scan();
             var varDeclPreComments = this.parseComments();
-            for (; ;) {
+
+            while (true) {
                 if ((this.tok.tokenId != TokenID.ID) && (!convertTokToID(this.tok, this.strictMode))) {
                     this.reportParseError("Expected identifier in variable declaration");
-                    if (this.errorRecovery) {
 
+                    if (this.errorRecovery) {
                         varDecl = new VarDecl(new MissingIdentifier(), this.nestingLevel);
                         varDecl.minChar = minChar;
                         this.skip(errorRecoverySet);
@@ -2279,10 +2308,12 @@ module TypeScript {
                         return varDecl;
                     }
                 }
+
                 var varDeclName = Identifier.fromToken(this.tok)
                 if (this.strictMode && (varDeclName.text == "eval")) {
                     this.reportParseError("'eval' may not name a variable in strict mode");
                 }
+
                 varDecl = this.makeVarDecl(varDeclName, this.nestingLevel);
                 varDecl.id.minChar = this.scanner.startPos;
                 varDecl.id.limChar = this.scanner.pos;
@@ -2304,15 +2335,15 @@ module TypeScript {
                 if (declList) {
                     declList.append(varDecl);
                 }
+
                 // move past ID; with error recovery need a test 
                 this.tok = this.scanner.scan();
                 if (this.tok.tokenId == TokenID.Colon) {
                     this.tok = this.scanner.scan();
                     var prevInFncDecl = this.inFncDecl;
                     this.inFncDecl = false;
-                    varDecl.typeExpr =
-                        this.parseTypeReference(errorRecoverySet | ErrorRecoverySet.Asg |
-                                           ErrorRecoverySet.Comma, false);
+                    varDecl.typeExpr = this.parseTypeReference(
+                        errorRecoverySet | ErrorRecoverySet.Asg | ErrorRecoverySet.Comma, /*allowVoid:*/ false);
                     this.inFncDecl = prevInFncDecl;
                 }
 
@@ -3319,7 +3350,7 @@ module TypeScript {
                         }
                         if (this.parsingDeclareFile || isAmbient() || this.ambientModule) {
                             this.tok = this.scanner.scan();
-                            fnOrVar = this.parsePropertyDecl(errorRecoverySet | ErrorRecoverySet.SColon,
+                            fnOrVar = this.parsePropertyDeclaration(errorRecoverySet | ErrorRecoverySet.SColon,
                                                       modifiers, true, false);
                             if (fnOrVar.nodeType == NodeType.VarDecl) {
                                 this.reportParseError("function keyword can only introduce function declaration");
@@ -3438,7 +3469,7 @@ module TypeScript {
                                         this.prevIDTok = null;
                                     }
                                 }
-                                fnOrVar = this.parsePropertyDecl(errorRecoverySet | ErrorRecoverySet.SColon,
+                                fnOrVar = this.parsePropertyDeclaration(errorRecoverySet | ErrorRecoverySet.SColon,
                                                           modifiers, isAmbient(), false);
                                 if ((fnOrVar.nodeType == NodeType.VarDecl) ||
                                     ((fnOrVar.nodeType == NodeType.FuncDecl) && (hasFlag((<FuncDecl>fnOrVar).fncFlags, FncFlags.IsFatArrowFunction)))) {
@@ -3509,7 +3540,7 @@ module TypeScript {
                                         this.prevIDTok = null;
                                     }
                                 }
-                                fnOrVar = this.parsePropertyDecl(errorRecoverySet | ErrorRecoverySet.SColon,
+                                fnOrVar = this.parsePropertyDeclaration(errorRecoverySet | ErrorRecoverySet.SColon,
                                                             modifiers, isAmbient(), false);
                                 if ((fnOrVar.nodeType == NodeType.VarDecl) ||
                                     ((fnOrVar.nodeType == NodeType.FuncDecl) && hasFlag((<FuncDecl>fnOrVar).fncFlags, FncFlags.IsFatArrowFunction))) {
@@ -3554,7 +3585,7 @@ module TypeScript {
                         }
                         break;
                     case TokenID.VAR:
-                        var declAst: AST = this.parseVarDecl(errorRecoverySet | ErrorRecoverySet.StmtStart, modifiers,
+                        var declAst: AST = this.parseVariableDeclaration(errorRecoverySet | ErrorRecoverySet.StmtStart, modifiers,
                                                      true, false);
                         if (declAst.nodeType == NodeType.VarDecl) {
                             ast = declAst;
@@ -3596,7 +3627,7 @@ module TypeScript {
                         if (isAmbient()) {
                             modifiers |= Modifiers.Ambient;
                         }
-                        fnOrVar = this.parsePropertyDecl(errorRecoverySet | ErrorRecoverySet.SColon,
+                        fnOrVar = this.parsePropertyDeclaration(errorRecoverySet | ErrorRecoverySet.SColon,
                                                   modifiers, this.parsingDeclareFile || (modifiers & Modifiers.Ambient) != Modifiers.None, true);
 
                         var staticsList = this.topStaticsList();
@@ -3622,10 +3653,10 @@ module TypeScript {
                         forInOk = true;
                         switch (this.tok.tokenId) {
                             case TokenID.VAR:
-                                temp = this.parseVarDecl(errorRecoverySet | ErrorRecoverySet.SColon |
+                                temp = this.parseVariableDeclaration(errorRecoverySet | ErrorRecoverySet.SColon |
                                                   ErrorRecoverySet.In, Modifiers.None, false, false);
                                 break;
-                            case TokenID.SColon:
+                            case TokenID.SemiColon:
                                 temp = null;
                                 this.state = ParseState.ForCondStart;
                                 break;
@@ -3669,8 +3700,8 @@ module TypeScript {
                         else {
                             var forStmt: ForStatement = new ForStatement(temp);
                             forStmt.minChar = minChar;
-                            this.chkCurTok(TokenID.SColon, "Expected ';'", errorRecoverySet);
-                            if (this.tok.tokenId == TokenID.SColon) {
+                            this.chkCurTok(TokenID.SemiColon, "Expected ';'", errorRecoverySet);
+                            if (this.tok.tokenId == TokenID.SemiColon) {
                                 forStmt.cond = null;
                             }
                             else {
@@ -3678,7 +3709,7 @@ module TypeScript {
                                                        ErrorRecoverySet.RParen,
                                                        OperatorPrecedence.No, true,
                                                        TypeContext.NoTypes);
-                                if (this.tok.tokenId != TokenID.SColon) {
+                                if (this.tok.tokenId != TokenID.SemiColon) {
                                     this.skip(errorRecoverySet | ErrorRecoverySet.StmtStart);
                                     ast = forStmt;
                                     ast.flags |= ASTFlags.Error;
@@ -3841,7 +3872,7 @@ module TypeScript {
                         this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet);
                         ast = doStmt;
                         // compatibility; more strict would be to require the ';'
-                        if (this.tok.tokenId == TokenID.SColon) {
+                        if (this.tok.tokenId == TokenID.SemiColon) {
                             this.tok = this.scanner.scan();
                         }
                         break;
@@ -3905,7 +3936,7 @@ module TypeScript {
                         ast = block;
                         break;
                     }
-                    case TokenID.SColon:
+                    case TokenID.SemiColon:
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("modifier can not appear here");
@@ -3944,7 +3975,7 @@ module TypeScript {
                         this.tok = this.scanner.scan();
                         var retStmt = new ReturnStatement();
                         retStmt.minChar = minChar;
-                        if ((this.tok.tokenId != TokenID.SColon) &&
+                        if ((this.tok.tokenId != TokenID.SemiColon) &&
                             (this.tok.tokenId != TokenID.RCurly) &&
                             (!(this.scanner.lastTokenHadNewline()))) {
                             retStmt.returnExpression = this.parseExpr(errorRecoverySet |
@@ -3964,7 +3995,7 @@ module TypeScript {
                         }
                         minChar = this.scanner.startPos;
                         this.tok = this.scanner.scan();
-                        if ((this.tok.tokenId != TokenID.SColon) &&
+                        if ((this.tok.tokenId != TokenID.SemiColon) &&
                             (this.tok.tokenId != TokenID.RCurly) &&
                             (!(this.scanner.lastTokenHadNewline()))) {
                             temp = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
@@ -4041,7 +4072,7 @@ module TypeScript {
             }
             if (needTerminator) {
                 switch (this.tok.tokenId) {
-                    case TokenID.SColon:
+                    case TokenID.SemiColon:
                         this.tok = this.scanner.scan();
                         ast.flags |= ASTFlags.ExplicitSemicolon;
                         break;

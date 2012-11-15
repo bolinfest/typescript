@@ -54,13 +54,13 @@ module Formatting {
             var firstToken = FirstOrDefault(this.tokens, (item) => true);
             if (firstToken == null) {
                 // Nothing on the line, assume we have a semicolon
-                firstToken = new TokenSpan(AuthorTokenKind.atkSColon, TypeScript.TokenID.SColon, this.snapshotSpan);
+                firstToken = new TokenSpan(AuthorTokenKind.atkSColon, TypeScript.TokenID.SemiColon, this.snapshotSpan);
             }
             else if (firstToken.Token != AuthorTokenKind.atkElse &&
                          firstToken.Token != AuthorTokenKind.atkWhile &&
                          firstToken.Token != AuthorTokenKind.atkLCurly &&
                          firstToken.Token != AuthorTokenKind.atkRCurly) {
-                firstToken = new TokenSpan(AuthorTokenKind.atkSColon, TypeScript.TokenID.SColon, this.snapshotSpan);
+                firstToken = new TokenSpan(AuthorTokenKind.atkSColon, TypeScript.TokenID.SemiColon, this.snapshotSpan);
             }
 
             if (this.CanDoSmartIndent(context, { token: firstToken })) {

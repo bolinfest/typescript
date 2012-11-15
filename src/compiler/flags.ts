@@ -43,6 +43,8 @@ module TypeScript {
         RLit = 1 << 27, // THIS, TRUE, FALSE, NULL
         Func = 1 << 28, // FUNCTION
         EOF = 1 << 29, // EOF
+
+        // TODO(cyrusn): Name this something clearer.
         TypeScriptS = 1 << 30, // PROPERTY, PRIVATE, STATIC, INTERFACE, CLASS, MODULE, EXPORT, IMPORT
         ExprStart = SColon | AddOp | LCurly | PreOp | RegExp | LParen | LBrack | ID | Prefix | RLit | Func | Literal,
         StmtStart = ExprStart | SColon | Var | Stmt | While | TypeScriptS,
