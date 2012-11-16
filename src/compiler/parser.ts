@@ -751,7 +751,7 @@ module TypeScript {
                 return result;
             }
 
-            // TODO(cyrusn): Consider renaming to parseTypeName.
+            // REVIEW: Consider renaming to parseTypeName.
             public parseNamedType(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST, tail: bool): AST {
                 this.tok = this.scanner.scan();
                 if (this.tok.tokenId == TokenID.Dot) {
@@ -801,7 +801,7 @@ module TypeScript {
                 }
             }
 
-            // TODO(cyrusn): Reconsider renaming this to parseType to match the grammar.
+            // REVIEW: Reconsider renaming this to parseType to match the grammar.
             public parseTypeReference(errorRecoverySet: ErrorRecoverySet, allowVoid: bool): AST {
                 var minChar = this.scanner.startPos;
                 var isConstructorMember = false;
@@ -1959,11 +1959,11 @@ module TypeScript {
             var minChar = this.scanner.startPos;
 
             var propertyDecl = this.parsePropertyDeclaration(
-                errorRecoverySet, Modifiers.Public, /*requireSignature:*/ true, /*isStatic:*/ false);
-
-            if (propertyDecl.nodeType == NodeType.VarDecl) {                 this.chkCurTok(TokenID.SemiColon, "Expected ';'", errorRecoverySet);            }
+                errorRecoverySet, Modifiers.Public, /*requireSignature:*/ true, /*isStatic:*/ false);
             if (propertyDecl) {
                 propertyDecl.minChar = minChar;
+
+                if (propertyDecl.nodeType == NodeType.VarDecl) {                     this.chkCurTok(TokenID.SemiColon, "Expected ';'", errorRecoverySet);                }
             }
 
             return propertyDecl;
@@ -1979,7 +1979,7 @@ module TypeScript {
                         return;
                 }
 
-                // TODO(cyrusn): This code looks suspect.  If parseTypeMember returns null, then 
+                // REVIEW: This code looks suspect.  If parseTypeMember returns null, then 
                 // won't we just infinite loop?
                 var element = this.parseTypeMember(errorRecoverySet);
                 if (element) {
@@ -2027,7 +2027,7 @@ module TypeScript {
             this.inInterfaceDecl = prevInInterfaceDecl;
             this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
 
-            // TODO(cyrusn): According to the grammar, a interface declaration should actually just
+            // REVIEW: According to the grammar, an interface declaration should actually just
             // have an 'ObjectType' and not a list of members.  We may want to consider making that
             // change.  Note: it would mean breaking aparat TypeDecl into InterfaceDeclaration and 
             // ClassDeclaration.
