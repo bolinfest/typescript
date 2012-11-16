@@ -2293,49 +2293,49 @@ module Formatting {
                 case TypeScript.TokenID.MinusEquals: return AuthorTokenKind.atkAsgSub;
                 case TypeScript.TokenID.AsterixEquals: return AuthorTokenKind.atkAsgMul;
                 case TypeScript.TokenID.SlashEquals: return AuthorTokenKind.atkAsgDiv;
-                case TypeScript.TokenID.AsgMod: return AuthorTokenKind.atkAsgMod;
-                case TypeScript.TokenID.AsgAnd: return AuthorTokenKind.atkAsgAnd;
-                case TypeScript.TokenID.AsgXor: return AuthorTokenKind.atkAsgXor;
-                case TypeScript.TokenID.AsgOr: return AuthorTokenKind.atkAsgOr;
-                case TypeScript.TokenID.AsgLsh: return AuthorTokenKind.atkAsgLsh;
-                case TypeScript.TokenID.AsgRsh: return AuthorTokenKind.atkAsgRsh;
-                case TypeScript.TokenID.AsgRs2: return AuthorTokenKind.atkAsgRs2;
-                case TypeScript.TokenID.QMark: return AuthorTokenKind.atkQMark;
+                case TypeScript.TokenID.PercentEquals: return AuthorTokenKind.atkAsgMod;
+                case TypeScript.TokenID.AmpersandEquals: return AuthorTokenKind.atkAsgAnd;
+                case TypeScript.TokenID.CaretEquals: return AuthorTokenKind.atkAsgXor;
+                case TypeScript.TokenID.BarEquals: return AuthorTokenKind.atkAsgOr;
+                case TypeScript.TokenID.LessThanLessThanEquals: return AuthorTokenKind.atkAsgLsh;
+                case TypeScript.TokenID.GreaterThanGreaterThanEquals: return AuthorTokenKind.atkAsgRsh;
+                case TypeScript.TokenID.GreaterThanGreaterThanGreaterThanEquals: return AuthorTokenKind.atkAsgRs2;
+                case TypeScript.TokenID.Question: return AuthorTokenKind.atkQMark;
                 case TypeScript.TokenID.Colon: return AuthorTokenKind.atkColon;
-                case TypeScript.TokenID.LogOr: return AuthorTokenKind.atkLogOr;
-                case TypeScript.TokenID.LogAnd: return AuthorTokenKind.atkLogAnd;
-                case TypeScript.TokenID.Or: return AuthorTokenKind.atkOr;
-                case TypeScript.TokenID.Xor: return AuthorTokenKind.atkXor;
+                case TypeScript.TokenID.BarBar: return AuthorTokenKind.atkLogOr;
+                case TypeScript.TokenID.AmpersandAmpersand: return AuthorTokenKind.atkLogAnd;
+                case TypeScript.TokenID.Bar: return AuthorTokenKind.atkOr;
+                case TypeScript.TokenID.Caret: return AuthorTokenKind.atkXor;
                 case TypeScript.TokenID.And: return AuthorTokenKind.atkAnd;
-                case TypeScript.TokenID.EQ: return AuthorTokenKind.atkEQ;
-                case TypeScript.TokenID.NE: return AuthorTokenKind.atkNE;
-                case TypeScript.TokenID.Eqv: return AuthorTokenKind.atkEqv;
-                case TypeScript.TokenID.NEqv: return AuthorTokenKind.atkNEqv;
-                case TypeScript.TokenID.LT: return AuthorTokenKind.atkLT;
-                case TypeScript.TokenID.LE: return AuthorTokenKind.atkLE;
-                case TypeScript.TokenID.GT: return AuthorTokenKind.atkGT;
-                case TypeScript.TokenID.GE: return AuthorTokenKind.atkGE;
-                case TypeScript.TokenID.Lsh: return AuthorTokenKind.atkLsh;
-                case TypeScript.TokenID.Rsh: return AuthorTokenKind.atkRsh;
-                case TypeScript.TokenID.Rs2: return AuthorTokenKind.atkRs2;
-                case TypeScript.TokenID.Add: return AuthorTokenKind.atkAdd;
-                case TypeScript.TokenID.Sub: return AuthorTokenKind.atkSub;
-                case TypeScript.TokenID.Mult: return AuthorTokenKind.atkMult;
-                case TypeScript.TokenID.Div: return AuthorTokenKind.atkDiv;
-                case TypeScript.TokenID.Pct: return AuthorTokenKind.atkPct;
+                case TypeScript.TokenID.EqualsEquals: return AuthorTokenKind.atkEQ;
+                case TypeScript.TokenID.ExclamationEquals: return AuthorTokenKind.atkNE;
+                case TypeScript.TokenID.EqualsEqualsEquals: return AuthorTokenKind.atkEqv;
+                case TypeScript.TokenID.ExclamationEqualsEquals: return AuthorTokenKind.atkNEqv;
+                case TypeScript.TokenID.LessThan: return AuthorTokenKind.atkLT;
+                case TypeScript.TokenID.LessThanEquals: return AuthorTokenKind.atkLE;
+                case TypeScript.TokenID.GreaterThan: return AuthorTokenKind.atkGT;
+                case TypeScript.TokenID.GreaterThanEquals: return AuthorTokenKind.atkGE;
+                case TypeScript.TokenID.LessThanLessThan: return AuthorTokenKind.atkLsh;
+                case TypeScript.TokenID.GreaterThanGreaterThan: return AuthorTokenKind.atkRsh;
+                case TypeScript.TokenID.GreaterThanGreaterThanGreaterThan: return AuthorTokenKind.atkRs2;
+                case TypeScript.TokenID.Plus: return AuthorTokenKind.atkAdd;
+                case TypeScript.TokenID.Minus: return AuthorTokenKind.atkSub;
+                case TypeScript.TokenID.Asterix: return AuthorTokenKind.atkMult;
+                case TypeScript.TokenID.Slash: return AuthorTokenKind.atkDiv;
+                case TypeScript.TokenID.Percent: return AuthorTokenKind.atkPct;
                 case TypeScript.TokenID.Tilde: return AuthorTokenKind.atkTilde;
-                case TypeScript.TokenID.Bang: return AuthorTokenKind.atkBang;
-                case TypeScript.TokenID.Inc: return AuthorTokenKind.atkInc;
-                case TypeScript.TokenID.Dec: return AuthorTokenKind.atkDec;
+                case TypeScript.TokenID.Exclamation: return AuthorTokenKind.atkBang;
+                case TypeScript.TokenID.PlusPlus: return AuthorTokenKind.atkInc;
+                case TypeScript.TokenID.MinusMinus: return AuthorTokenKind.atkDec;
                 case TypeScript.TokenID.Dot: return AuthorTokenKind.atkDot;
-                case TypeScript.TokenID.Ellipsis: return AuthorTokenKind.atkIdentifier; //TODO
+                case TypeScript.TokenID.DotDotDot: return AuthorTokenKind.atkIdentifier; //TODO
                 case TypeScript.TokenID.Error: return AuthorTokenKind.atkIdentifier;//TODO
-                case TypeScript.TokenID.EOF: return AuthorTokenKind.atkEnd;
-                case TypeScript.TokenID.Arrow: return AuthorTokenKind.atkIdentifier;//TODO
-                case TypeScript.TokenID.ID: return AuthorTokenKind.atkIdentifier;
-                case TypeScript.TokenID.QString: return AuthorTokenKind.atkString;
-                case TypeScript.TokenID.Regex: return AuthorTokenKind.atkRegexp;
-                case TypeScript.TokenID.NumberLit: return AuthorTokenKind.atkNumber;
+                case TypeScript.TokenID.EndOfFile: return AuthorTokenKind.atkEnd;
+                case TypeScript.TokenID.EqualsGreaterThan: return AuthorTokenKind.atkIdentifier;//TODO
+                case TypeScript.TokenID.Identifier: return AuthorTokenKind.atkIdentifier;
+                case TypeScript.TokenID.StringLiteral: return AuthorTokenKind.atkString;
+                case TypeScript.TokenID.RegularExpressionLiteral: return AuthorTokenKind.atkRegexp;
+                case TypeScript.TokenID.NumberLiteral: return AuthorTokenKind.atkNumber;
                 case TypeScript.TokenID.Whitespace: return AuthorTokenKind.atkIdentifier;//TODO
                 case TypeScript.TokenID.Comment: return AuthorTokenKind.atkComment;
                 default:

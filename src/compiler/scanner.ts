@@ -187,7 +187,7 @@ module TypeScript {
         autoToken[LexCodeLBR] = staticTokens[TokenID.OpenBracket];
         autoToken[LexCodeRBR] = staticTokens[TokenID.CloseBracket];
         autoToken[LexCodeTIL] = staticTokens[TokenID.Tilde];
-        autoToken[LexCodeQUE] = staticTokens[TokenID.QMark];
+        autoToken[LexCodeQUE] = staticTokens[TokenID.Question];
         autoToken[LexCodeLC] = staticTokens[TokenID.OpenBrace];
         autoToken[LexCodeRC] = staticTokens[TokenID.CloseBrace];
         autoToken[LexCodeCOL] = staticTokens[TokenID.Colon];
@@ -433,7 +433,7 @@ module TypeScript {
                     this.currentTokens = this.tokensByLine[this.line];
                 }
                 else {
-                    return staticTokens[TokenID.EOF];
+                    return staticTokens[TokenID.EndOfFile];
                 }
             }
             if (this.currentTokenIndex < this.currentTokens.length) {
@@ -448,7 +448,7 @@ module TypeScript {
                 return curToken;
             }
             else {
-                return staticTokens[TokenID.EOF];
+                return staticTokens[TokenID.EndOfFile];
             }
         }
         public startLine: number;
@@ -581,7 +581,7 @@ module TypeScript {
             }            
         }
 
-        private prevTok = staticTokens[TokenID.EOF];
+        private prevTok = staticTokens[TokenID.EndOfFile];
         public previousToken() { return this.prevTok; }
 
         public setSourceText(newSrc: ISourceText, textMode: number) {
@@ -631,7 +631,7 @@ module TypeScript {
             var result: Token[] = new Token[];
             this.setText(line, LexMode.Line);
             var t: Token = this.scan();
-            while (t.tokenId != TokenID.EOF) {
+            while (t.tokenId != TokenID.EndOfFile) {
                 result[result.length] = t;
                 t = this.scan();
             }
@@ -1077,7 +1077,7 @@ module TypeScript {
                     return new CommentToken(TokenID.Comment, commentText,/*isBlock*/true, this.startPos, commentLine,/*endsLine*/true);
                 }
                 else {
-                    return staticTokens[TokenID.EOF];
+                    return staticTokens[TokenID.EndOfFile];
                 }
             }
             this.prevLine = this.line;
@@ -1231,7 +1231,7 @@ module TypeScript {
                                 return staticTokens[TokenID.SlashEquals];
                             }
                             else {
-                                return staticTokens[TokenID.Div];
+                                return staticTokens[TokenID.Slash];
                             }
                         }
                     }
@@ -1317,7 +1317,7 @@ module TypeScript {
                         if (this.ch == LexCodeNWL) {
                             this.newLine();
                             if (this.mode == LexMode.Line) {
-                                return staticTokens[TokenID.EOF];
+                                return staticTokens[TokenID.EndOfFile];
                             }
                         }
                         if (!this.interveningWhitespace) {
@@ -1331,7 +1331,7 @@ module TypeScript {
                         if (this.peekCharAt(this.pos + 1) == LexCodeDOT) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeDOT) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.Ellipsis];
+                                return staticTokens[TokenID.DotDotDot];
                             }
                             else {
                                 this.nextChar();
@@ -1354,16 +1354,16 @@ module TypeScript {
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeEQ) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.Eqv];
+                                return staticTokens[TokenID.EqualsEqualsEquals];
                             }
                             else {
                                 this.advanceChar(2);
-                                return staticTokens[TokenID.EQ];
+                                return staticTokens[TokenID.EqualsEquals];
                             }
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeGT) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.Arrow];
+                            return staticTokens[TokenID.EqualsGreaterThan];
                         }
                         else {
                             this.nextChar();
@@ -1374,16 +1374,16 @@ module TypeScript {
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeEQ) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.NEqv];
+                                return staticTokens[TokenID.ExclamationEqualsEquals];
                             }
                             else {
                                 this.advanceChar(2);
-                                return staticTokens[TokenID.NE];
+                                return staticTokens[TokenID.ExclamationEquals];
                             }
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Bang];
+                            return staticTokens[TokenID.Exclamation];
                         }
                     // break;
                     case LexCodePLS:
@@ -1393,11 +1393,11 @@ module TypeScript {
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodePLS) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.Inc];
+                            return staticTokens[TokenID.PlusPlus];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Add];
+                            return staticTokens[TokenID.Plus];
                         }
                     // break;
                     case LexCodeMIN:
@@ -1407,11 +1407,11 @@ module TypeScript {
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeMIN) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.Dec];
+                            return staticTokens[TokenID.MinusMinus];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Sub];
+                            return staticTokens[TokenID.Minus];
                         }
                     // break;
                     case LexCodeMUL:
@@ -1421,101 +1421,101 @@ module TypeScript {
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Mult];
+                            return staticTokens[TokenID.Asterix];
                         }
                     // break;
                     case LexCodePCT:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgMod];
+                            return staticTokens[TokenID.PercentEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Pct];
+                            return staticTokens[TokenID.Percent];
                         }
                     // break;
                     case LexCodeLT:
                         if (this.peekCharAt(this.pos + 1) == LexCodeLT) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeEQ) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.AsgLsh];
+                                return staticTokens[TokenID.LessThanLessThanEquals];
                             }
                             else {
                                 this.advanceChar(2);
-                                return staticTokens[TokenID.Lsh];
+                                return staticTokens[TokenID.LessThanLessThan];
                             }
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.LE];
+                            return staticTokens[TokenID.LessThanEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.LT];
+                            return staticTokens[TokenID.LessThan];
                         }
                     //  break;
                     case LexCodeGT:
                         if (this.peekCharAt(this.pos + 1) == LexCodeGT) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeEQ) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.AsgRsh];
+                                return staticTokens[TokenID.GreaterThanGreaterThanEquals];
                             }
                             else if (this.peekCharAt(this.pos + 2) == LexCodeGT) {
                                 if (this.peekCharAt(this.pos + 3) == LexCodeEQ) {
                                     this.advanceChar(4);
-                                    return staticTokens[TokenID.AsgRs2];
+                                    return staticTokens[TokenID.GreaterThanGreaterThanGreaterThanEquals];
                                 }
                                 else {
                                     this.advanceChar(3);
-                                    return staticTokens[TokenID.Rs2];
+                                    return staticTokens[TokenID.GreaterThanGreaterThanGreaterThan];
                                 }
                             }
                             else {
                                 this.advanceChar(2);
-                                return staticTokens[TokenID.Rsh];
+                                return staticTokens[TokenID.GreaterThanGreaterThan];
                             }
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.GE];
+                            return staticTokens[TokenID.GreaterThanEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.GT];
+                            return staticTokens[TokenID.GreaterThan];
                         }
                     // break;
                     case LexCodeXOR:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgXor];
+                            return staticTokens[TokenID.CaretEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Xor];
+                            return staticTokens[TokenID.Caret];
                         }
                     //  break;
                     case LexCodeBAR:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgOr];
+                            return staticTokens[TokenID.BarEquals];
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeBAR) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.LogOr];
+                            return staticTokens[TokenID.BarBar];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Or];
+                            return staticTokens[TokenID.Bar];
                         }
                     //  break;
                     case LexCodeAMP:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgAnd];
+                            return staticTokens[TokenID.AmpersandEquals];
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeAMP) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.LogAnd];
+                            return staticTokens[TokenID.AmpersandAmpersand];
                         }
                         else {
                             this.nextChar();
@@ -1530,7 +1530,7 @@ module TypeScript {
                         continue start;
                 }
             }
-            return staticTokens[TokenID.EOF];
+            return staticTokens[TokenID.EndOfFile];
         }
 
         private reportScannerError(message: string) { 

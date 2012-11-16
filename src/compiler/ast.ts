@@ -430,15 +430,15 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
             switch (this.nty) {
                 case NodeType.IncPost:
-                    emitter.emitJavascript(this.operand, TokenID.Inc, false);
+                    emitter.emitJavascript(this.operand, TokenID.PlusPlus, false);
                     emitter.writeToOutput("++");
                     break;
                 case NodeType.LogNot:
                     emitter.writeToOutput("!");
-                    emitter.emitJavascript(this.operand, TokenID.Bang, false);
+                    emitter.emitJavascript(this.operand, TokenID.Exclamation, false);
                     break;
                 case NodeType.DecPost:
-                    emitter.emitJavascript(this.operand, TokenID.Dec, false);
+                    emitter.emitJavascript(this.operand, TokenID.MinusMinus, false);
                     emitter.writeToOutput("--");
                     break;
                 case NodeType.ObjectLit:
@@ -456,22 +456,22 @@ module TypeScript {
                     if (this.operand.nodeType == NodeType.Neg) {
                         this.operand.isParenthesized = true;
                     }
-                    emitter.emitJavascript(this.operand, TokenID.Sub, false);
+                    emitter.emitJavascript(this.operand, TokenID.Minus, false);
                     break;
                 case NodeType.Pos:
                     emitter.writeToOutput("+");
                     if (this.operand.nodeType == NodeType.Pos) {
                         this.operand.isParenthesized = true;
                     }
-                    emitter.emitJavascript(this.operand, TokenID.Add, false);
+                    emitter.emitJavascript(this.operand, TokenID.Plus, false);
                     break;
                 case NodeType.IncPre:
                     emitter.writeToOutput("++");
-                    emitter.emitJavascript(this.operand, TokenID.Inc, false);
+                    emitter.emitJavascript(this.operand, TokenID.PlusPlus, false);
                     break;
                 case NodeType.DecPre:
                     emitter.writeToOutput("--");
-                    emitter.emitJavascript(this.operand, TokenID.Dec, false);
+                    emitter.emitJavascript(this.operand, TokenID.MinusMinus, false);
                     break;
                 case NodeType.Throw:
                     emitter.writeToOutput("throw ");
@@ -720,11 +720,11 @@ module TypeScript {
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            emitter.emitJavascript(this.operand1, TokenID.QMark, false);
+            emitter.emitJavascript(this.operand1, TokenID.Question, false);
             emitter.writeToOutput(" ? ");
-            emitter.emitJavascript(this.operand2, TokenID.QMark, false);
+            emitter.emitJavascript(this.operand2, TokenID.Question, false);
             emitter.writeToOutput(" : ");
-            emitter.emitJavascript(this.operand3, TokenID.QMark, false);
+            emitter.emitJavascript(this.operand3, TokenID.Question, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -1993,7 +1993,7 @@ module TypeScript {
             var temp = emitter.setInObjectLiteral(false);
             emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("switch(");
-            emitter.emitJavascript(this.val, TokenID.ID, false);
+            emitter.emitJavascript(this.val, TokenID.Identifier, false);
             emitter.writeToOutput(")"); 
             emitter.recordSourceMappingEnd(this.statement);
             emitter.writeLineToOutput(" {");
@@ -2065,7 +2065,7 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
             if (this.expr) {
                 emitter.writeToOutput("case ");
-                emitter.emitJavascript(this.expr, TokenID.ID, false);
+                emitter.emitJavascript(this.expr, TokenID.Identifier, false);
             }
             else {
                 emitter.writeToOutput("default");

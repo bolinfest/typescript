@@ -70,7 +70,7 @@ module Services {
 
         public moveNext(): bool {
             this.currentToken = this.scanner.scan();
-            if (this.currentToken.tokenId === TypeScript.TokenID.EOF) {
+            if (this.currentToken.tokenId === TypeScript.TokenID.EndOfFile) {
                 return false;
             }
             return true;

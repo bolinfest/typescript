@@ -403,9 +403,9 @@ module Formatting {
                     // TypeScript: Special case for "?" tokens: We don't want to format them as 
                     //         as binary operators unless they are in the initialiation expression
                     var tokenSpan: Span = null;
-                    if (context.tokenSpan.tokenID === TypeScript.TokenID.QMark)
+                    if (context.tokenSpan.tokenID === TypeScript.TokenID.Question)
                         tokenSpan = context.tokenSpan.Span.span;
-                    else if (context.nextTokenSpan.tokenID === TypeScript.TokenID.QMark)
+                    else if (context.nextTokenSpan.tokenID === TypeScript.TokenID.Question)
                         tokenSpan = context.nextTokenSpan.Span.span;
 
                     // TypeScript: Special case for ":" tokens: We don't want to format them as 

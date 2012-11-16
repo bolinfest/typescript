@@ -1,6 +1,6 @@
-token: 49 var (Var)token: 110   (Whitespace)token: 106 x (ID)token: 62 = (Equals)token: 110   (Whitespace)token: 111 /* 
+token: 49 var (Var)token: 110   (Whitespace)token: 106 x (Identifier)token: 62 = (Equals)token: 110   (Whitespace)token: 111 /* 
  (Comment)token: 111 /* 
- (Comment)token: 111 */ (Comment)token: 110   (Whitespace)token: 109 10 (NumberLit)token: 54 ; (Semicolon)token: 110   (Whitespace)token: 111 /* comment
+ (Comment)token: 111 */ (Comment)token: 110   (Whitespace)token: 109 10 (NumberLiteral)token: 54 ; (Semicolon)token: 110   (Whitespace)token: 111 /* comment
  (Comment)token: 111 /* comment
  (Comment)token: 111 comment
  (Comment)token: 111 */ (Comment)

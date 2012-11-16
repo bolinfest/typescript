@@ -74,53 +74,53 @@ module TypeScript {
         MinusEquals,
         AsterixEquals,
         SlashEquals,
-        AsgMod,
-        AsgAnd,
-        AsgXor,
-        AsgOr,
-        AsgLsh,
-        AsgRsh,
-        AsgRs2,
-        QMark,
+        PercentEquals,
+        AmpersandEquals,
+        CaretEquals,
+        BarEquals,
+        LessThanLessThanEquals,
+        GreaterThanGreaterThanEquals,
+        GreaterThanGreaterThanGreaterThanEquals,
+        Question,
         Colon,
-        LogOr,
-        LogAnd,
-        Or,
-        Xor,
+        BarBar,
+        AmpersandAmpersand,
+        Bar,
+        Caret,
         And,
-        EQ,
-        NE,
-        Eqv,
-        NEqv,
-        LT,
-        LE,
-        GT,
-        GE,
-        Lsh,
-        Rsh,
-        Rs2,
-        Add,
-        Sub,
-        Mult,
-        Div,
-        Pct,
+        EqualsEquals,
+        ExclamationEquals,
+        EqualsEqualsEquals,
+        ExclamationEqualsEquals,
+        LessThan,
+        LessThanEquals,
+        GreaterThan,
+        GreaterThanEquals,
+        LessThanLessThan,
+        GreaterThanGreaterThan,
+        GreaterThanGreaterThanGreaterThan,
+        Plus,
+        Minus,
+        Asterix,
+        Slash,
+        Percent,
         Tilde,
-        Bang,
-        Inc,
-        Dec,
+        Exclamation,
+        PlusPlus,
+        MinusMinus,
         Dot,
-        Ellipsis,
+        DotDotDot,
         Error,
-        EOF,
-        Arrow,
-        ID,
-        QString,
-        Regex,
-        NumberLit,
+        EndOfFile,
+        EqualsGreaterThan,
+        Identifier,
+        StringLiteral,
+        RegularExpressionLiteral,
+        NumberLiteral,
         Whitespace,
         Comment,
         Lim,
-        LimFixed = Arrow,
+        LimFixed = EqualsGreaterThan,
         LimKeyword = Yield,
     }
 
@@ -129,13 +129,13 @@ module TypeScript {
     export var nodeTypeToTokTable = new number[];
     export var noRegexTable = new bool[];
 
-    noRegexTable[TokenID.ID] = true;
-    noRegexTable[TokenID.QString] = true;
-    noRegexTable[TokenID.NumberLit] = true;
-    noRegexTable[TokenID.Regex] = true;
+    noRegexTable[TokenID.Identifier] = true;
+    noRegexTable[TokenID.StringLiteral] = true;
+    noRegexTable[TokenID.NumberLiteral] = true;
+    noRegexTable[TokenID.RegularExpressionLiteral] = true;
     noRegexTable[TokenID.This] = true;
-    noRegexTable[TokenID.Inc] = true;
-    noRegexTable[TokenID.Dec] = true;
+    noRegexTable[TokenID.PlusPlus] = true;
+    noRegexTable[TokenID.MinusMinus] = true;
     noRegexTable[TokenID.CloseParen] = true;
     noRegexTable[TokenID.CloseBracket] = true;
     noRegexTable[TokenID.CloseBrace] = true;
@@ -250,10 +250,10 @@ module TypeScript {
     setTokenInfo(TokenID.While, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "while", ErrorRecoverySet.While);
     setTokenInfo(TokenID.Yield, Reservation.JavascriptFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "yield", ErrorRecoverySet.None);
 
-    setTokenInfo(TokenID.ID, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "identifier", ErrorRecoverySet.ID);
-    setTokenInfo(TokenID.NumberLit, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "numberLiteral", ErrorRecoverySet.Literal);
-    setTokenInfo(TokenID.Regex, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "regex", ErrorRecoverySet.RegExp);
-    setTokenInfo(TokenID.QString, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "qstring", ErrorRecoverySet.Literal);
+    setTokenInfo(TokenID.Identifier, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "identifier", ErrorRecoverySet.ID);
+    setTokenInfo(TokenID.NumberLiteral, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "numberLiteral", ErrorRecoverySet.Literal);
+    setTokenInfo(TokenID.RegularExpressionLiteral, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "regex", ErrorRecoverySet.RegExp);
+    setTokenInfo(TokenID.StringLiteral, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "qstring", ErrorRecoverySet.Literal);
 
     // Non-operator non-identifier tokens
     setTokenInfo(TokenID.Semicolon, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, ";", ErrorRecoverySet.SColon); // ;
@@ -261,7 +261,7 @@ module TypeScript {
     setTokenInfo(TokenID.CloseBracket, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "]", ErrorRecoverySet.RBrack); // ]
     setTokenInfo(TokenID.OpenBrace, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "{", ErrorRecoverySet.LCurly); // {
     setTokenInfo(TokenID.CloseBrace, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "}", ErrorRecoverySet.RCurly); // }
-    setTokenInfo(TokenID.Ellipsis, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "...", ErrorRecoverySet.None); // ...
+    setTokenInfo(TokenID.DotDotDot, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "...", ErrorRecoverySet.None); // ...
 
     // Operator non-identifier tokens
     setTokenInfo(TokenID.Comma, Reservation.None, OperatorPrecedence.Cma, NodeType.Comma, OperatorPrecedence.No, NodeType.None, ",", ErrorRecoverySet.Comma); // ,
@@ -273,45 +273,45 @@ module TypeScript {
 
 
     setTokenInfo(TokenID.SlashEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgDiv, OperatorPrecedence.No, NodeType.None, "/=", ErrorRecoverySet.BinOp); // /=
-    setTokenInfo(TokenID.AsgMod, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgMod, OperatorPrecedence.No, NodeType.None, "%=", ErrorRecoverySet.BinOp); // %=
-    setTokenInfo(TokenID.AsgAnd, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgAnd, OperatorPrecedence.No, NodeType.None, "&=", ErrorRecoverySet.BinOp); // &=
-    setTokenInfo(TokenID.AsgXor, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgXor, OperatorPrecedence.No, NodeType.None, "^=", ErrorRecoverySet.BinOp); // ^=
-    setTokenInfo(TokenID.AsgOr, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgOr, OperatorPrecedence.No, NodeType.None, "|=", ErrorRecoverySet.BinOp); // |=
-    setTokenInfo(TokenID.AsgLsh, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgLsh, OperatorPrecedence.No, NodeType.None, "<<=", ErrorRecoverySet.BinOp); // <<=
-    setTokenInfo(TokenID.AsgRsh, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgRsh, OperatorPrecedence.No, NodeType.None, ">>=", ErrorRecoverySet.BinOp); // >>=
-    setTokenInfo(TokenID.AsgRs2, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgRs2, OperatorPrecedence.No, NodeType.None, ">>>=", ErrorRecoverySet.BinOp); // >>>=
-    setTokenInfo(TokenID.QMark, Reservation.None, OperatorPrecedence.Que, NodeType.QMark, OperatorPrecedence.No, NodeType.None, "?", ErrorRecoverySet.BinOp); // ?
+    setTokenInfo(TokenID.PercentEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgMod, OperatorPrecedence.No, NodeType.None, "%=", ErrorRecoverySet.BinOp); // %=
+    setTokenInfo(TokenID.AmpersandEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgAnd, OperatorPrecedence.No, NodeType.None, "&=", ErrorRecoverySet.BinOp); // &=
+    setTokenInfo(TokenID.CaretEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgXor, OperatorPrecedence.No, NodeType.None, "^=", ErrorRecoverySet.BinOp); // ^=
+    setTokenInfo(TokenID.BarEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgOr, OperatorPrecedence.No, NodeType.None, "|=", ErrorRecoverySet.BinOp); // |=
+    setTokenInfo(TokenID.LessThanLessThanEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgLsh, OperatorPrecedence.No, NodeType.None, "<<=", ErrorRecoverySet.BinOp); // <<=
+    setTokenInfo(TokenID.GreaterThanGreaterThanEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgRsh, OperatorPrecedence.No, NodeType.None, ">>=", ErrorRecoverySet.BinOp); // >>=
+    setTokenInfo(TokenID.GreaterThanGreaterThanGreaterThanEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgRs2, OperatorPrecedence.No, NodeType.None, ">>>=", ErrorRecoverySet.BinOp); // >>>=
+    setTokenInfo(TokenID.Question, Reservation.None, OperatorPrecedence.Que, NodeType.QMark, OperatorPrecedence.No, NodeType.None, "?", ErrorRecoverySet.BinOp); // ?
     setTokenInfo(TokenID.Colon, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, ":", ErrorRecoverySet.Colon); // :
-    setTokenInfo(TokenID.LogOr, Reservation.None, OperatorPrecedence.Lor, NodeType.LogOr, OperatorPrecedence.No, NodeType.None, "||", ErrorRecoverySet.BinOp); // ||
-    setTokenInfo(TokenID.LogAnd, Reservation.None, OperatorPrecedence.Lan, NodeType.LogAnd, OperatorPrecedence.No, NodeType.None, "&&", ErrorRecoverySet.BinOp); // &&
-    setTokenInfo(TokenID.Or, Reservation.None, OperatorPrecedence.Bor, NodeType.Or, OperatorPrecedence.No, NodeType.None, "|", ErrorRecoverySet.BinOp); // |
-    setTokenInfo(TokenID.Xor, Reservation.None, OperatorPrecedence.Xor, NodeType.Xor, OperatorPrecedence.No, NodeType.None, "^", ErrorRecoverySet.BinOp); // ^
+    setTokenInfo(TokenID.BarBar, Reservation.None, OperatorPrecedence.Lor, NodeType.LogOr, OperatorPrecedence.No, NodeType.None, "||", ErrorRecoverySet.BinOp); // ||
+    setTokenInfo(TokenID.AmpersandAmpersand, Reservation.None, OperatorPrecedence.Lan, NodeType.LogAnd, OperatorPrecedence.No, NodeType.None, "&&", ErrorRecoverySet.BinOp); // &&
+    setTokenInfo(TokenID.Bar, Reservation.None, OperatorPrecedence.Bor, NodeType.Or, OperatorPrecedence.No, NodeType.None, "|", ErrorRecoverySet.BinOp); // |
+    setTokenInfo(TokenID.Caret, Reservation.None, OperatorPrecedence.Xor, NodeType.Xor, OperatorPrecedence.No, NodeType.None, "^", ErrorRecoverySet.BinOp); // ^
     setTokenInfo(TokenID.And, Reservation.None, OperatorPrecedence.Ban, NodeType.And, OperatorPrecedence.No, NodeType.None, "&", ErrorRecoverySet.BinOp); // &
-    setTokenInfo(TokenID.EQ, Reservation.None, OperatorPrecedence.Equ, NodeType.Eq, OperatorPrecedence.No, NodeType.None, "==", ErrorRecoverySet.BinOp); // ==
-    setTokenInfo(TokenID.NE, Reservation.None, OperatorPrecedence.Equ, NodeType.Ne, OperatorPrecedence.No, NodeType.None, "!=", ErrorRecoverySet.BinOp); // !=
-    setTokenInfo(TokenID.Eqv, Reservation.None, OperatorPrecedence.Equ, NodeType.Eqv, OperatorPrecedence.No, NodeType.None, "===", ErrorRecoverySet.BinOp); // ===
-    setTokenInfo(TokenID.NEqv, Reservation.None, OperatorPrecedence.Equ, NodeType.NEqv, OperatorPrecedence.No, NodeType.None, "!==", ErrorRecoverySet.BinOp); // !==
-    setTokenInfo(TokenID.LT, Reservation.None, OperatorPrecedence.Cmp, NodeType.Lt, OperatorPrecedence.No, NodeType.None, "<", ErrorRecoverySet.BinOp); // <
-    setTokenInfo(TokenID.LE, Reservation.None, OperatorPrecedence.Cmp, NodeType.Le, OperatorPrecedence.No, NodeType.None, "<=", ErrorRecoverySet.BinOp); // <=
-    setTokenInfo(TokenID.GT, Reservation.None, OperatorPrecedence.Cmp, NodeType.Gt, OperatorPrecedence.No, NodeType.None, ">", ErrorRecoverySet.BinOp); // >
-    setTokenInfo(TokenID.GE, Reservation.None, OperatorPrecedence.Cmp, NodeType.Ge, OperatorPrecedence.No, NodeType.None, ">=", ErrorRecoverySet.BinOp); // >=
-    setTokenInfo(TokenID.Lsh, Reservation.None, OperatorPrecedence.Shf, NodeType.Lsh, OperatorPrecedence.No, NodeType.None, "<<", ErrorRecoverySet.BinOp); // <<
-    setTokenInfo(TokenID.Rsh, Reservation.None, OperatorPrecedence.Shf, NodeType.Rsh, OperatorPrecedence.No, NodeType.None, ">>", ErrorRecoverySet.BinOp); // >>
-    setTokenInfo(TokenID.Rs2, Reservation.None, OperatorPrecedence.Shf, NodeType.Rs2, OperatorPrecedence.No, NodeType.None, ">>>", ErrorRecoverySet.BinOp); // >>>
-    setTokenInfo(TokenID.Add, Reservation.None, OperatorPrecedence.Add, NodeType.Add, OperatorPrecedence.Uni, NodeType.Pos, "+", ErrorRecoverySet.AddOp); // +
-    setTokenInfo(TokenID.Sub, Reservation.None, OperatorPrecedence.Add, NodeType.Sub, OperatorPrecedence.Uni, NodeType.Neg, "-", ErrorRecoverySet.AddOp); // -
-    setTokenInfo(TokenID.Mult, Reservation.None, OperatorPrecedence.Mul, NodeType.Mul, OperatorPrecedence.No, NodeType.None, "*", ErrorRecoverySet.BinOp); // *
-    setTokenInfo(TokenID.Div, Reservation.None, OperatorPrecedence.Mul, NodeType.Div, OperatorPrecedence.No, NodeType.None, "/", ErrorRecoverySet.BinOp); // /
-    setTokenInfo(TokenID.Pct, Reservation.None, OperatorPrecedence.Mul, NodeType.Mod, OperatorPrecedence.No, NodeType.None, "%", ErrorRecoverySet.BinOp); // %
+    setTokenInfo(TokenID.EqualsEquals, Reservation.None, OperatorPrecedence.Equ, NodeType.Eq, OperatorPrecedence.No, NodeType.None, "==", ErrorRecoverySet.BinOp); // ==
+    setTokenInfo(TokenID.ExclamationEquals, Reservation.None, OperatorPrecedence.Equ, NodeType.Ne, OperatorPrecedence.No, NodeType.None, "!=", ErrorRecoverySet.BinOp); // !=
+    setTokenInfo(TokenID.EqualsEqualsEquals, Reservation.None, OperatorPrecedence.Equ, NodeType.Eqv, OperatorPrecedence.No, NodeType.None, "===", ErrorRecoverySet.BinOp); // ===
+    setTokenInfo(TokenID.ExclamationEqualsEquals, Reservation.None, OperatorPrecedence.Equ, NodeType.NEqv, OperatorPrecedence.No, NodeType.None, "!==", ErrorRecoverySet.BinOp); // !==
+    setTokenInfo(TokenID.LessThan, Reservation.None, OperatorPrecedence.Cmp, NodeType.Lt, OperatorPrecedence.No, NodeType.None, "<", ErrorRecoverySet.BinOp); // <
+    setTokenInfo(TokenID.LessThanEquals, Reservation.None, OperatorPrecedence.Cmp, NodeType.Le, OperatorPrecedence.No, NodeType.None, "<=", ErrorRecoverySet.BinOp); // <=
+    setTokenInfo(TokenID.GreaterThan, Reservation.None, OperatorPrecedence.Cmp, NodeType.Gt, OperatorPrecedence.No, NodeType.None, ">", ErrorRecoverySet.BinOp); // >
+    setTokenInfo(TokenID.GreaterThanEquals, Reservation.None, OperatorPrecedence.Cmp, NodeType.Ge, OperatorPrecedence.No, NodeType.None, ">=", ErrorRecoverySet.BinOp); // >=
+    setTokenInfo(TokenID.LessThanLessThan, Reservation.None, OperatorPrecedence.Shf, NodeType.Lsh, OperatorPrecedence.No, NodeType.None, "<<", ErrorRecoverySet.BinOp); // <<
+    setTokenInfo(TokenID.GreaterThanGreaterThan, Reservation.None, OperatorPrecedence.Shf, NodeType.Rsh, OperatorPrecedence.No, NodeType.None, ">>", ErrorRecoverySet.BinOp); // >>
+    setTokenInfo(TokenID.GreaterThanGreaterThanGreaterThan, Reservation.None, OperatorPrecedence.Shf, NodeType.Rs2, OperatorPrecedence.No, NodeType.None, ">>>", ErrorRecoverySet.BinOp); // >>>
+    setTokenInfo(TokenID.Plus, Reservation.None, OperatorPrecedence.Add, NodeType.Add, OperatorPrecedence.Uni, NodeType.Pos, "+", ErrorRecoverySet.AddOp); // +
+    setTokenInfo(TokenID.Minus, Reservation.None, OperatorPrecedence.Add, NodeType.Sub, OperatorPrecedence.Uni, NodeType.Neg, "-", ErrorRecoverySet.AddOp); // -
+    setTokenInfo(TokenID.Asterix, Reservation.None, OperatorPrecedence.Mul, NodeType.Mul, OperatorPrecedence.No, NodeType.None, "*", ErrorRecoverySet.BinOp); // *
+    setTokenInfo(TokenID.Slash, Reservation.None, OperatorPrecedence.Mul, NodeType.Div, OperatorPrecedence.No, NodeType.None, "/", ErrorRecoverySet.BinOp); // /
+    setTokenInfo(TokenID.Percent, Reservation.None, OperatorPrecedence.Mul, NodeType.Mod, OperatorPrecedence.No, NodeType.None, "%", ErrorRecoverySet.BinOp); // %
     setTokenInfo(TokenID.Tilde, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.Not, "~", ErrorRecoverySet.PreOp); // ~
-    setTokenInfo(TokenID.Bang, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.LogNot, "!", ErrorRecoverySet.PreOp); // !
-    setTokenInfo(TokenID.Inc, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.IncPre, "++", ErrorRecoverySet.PreOp); // ++
-    setTokenInfo(TokenID.Dec, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.DecPre, "--", ErrorRecoverySet.PreOp); // --
+    setTokenInfo(TokenID.Exclamation, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.LogNot, "!", ErrorRecoverySet.PreOp); // !
+    setTokenInfo(TokenID.PlusPlus, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.IncPre, "++", ErrorRecoverySet.PreOp); // ++
+    setTokenInfo(TokenID.MinusMinus, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.DecPre, "--", ErrorRecoverySet.PreOp); // --
     setTokenInfo(TokenID.OpenParen, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "(", ErrorRecoverySet.LParen); // (
     setTokenInfo(TokenID.OpenBracket, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "[", ErrorRecoverySet.LBrack); // [
     setTokenInfo(TokenID.Dot, Reservation.None, OperatorPrecedence.Uni, NodeType.None, OperatorPrecedence.No, NodeType.None, ".", ErrorRecoverySet.Dot); // .
-    setTokenInfo(TokenID.EOF, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "<EOF>", ErrorRecoverySet.EOF); // EOF
-    setTokenInfo(TokenID.Arrow, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "=>", ErrorRecoverySet.None); // =>
+    setTokenInfo(TokenID.EndOfFile, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "<EOF>", ErrorRecoverySet.EOF); // EOF
+    setTokenInfo(TokenID.EqualsGreaterThan, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "=>", ErrorRecoverySet.None); // =>
 
     export function lookupToken(tokenId: TokenID): TokenInfo {
         return tokenTable[tokenId];
@@ -364,7 +364,7 @@ module TypeScript {
 
     export class NumberToken extends Token {
         constructor (public value: number, public hasEmptyFraction?: bool) {
-            super(TokenID.NumberLit);
+            super(TokenID.NumberLiteral);
         }
         public getText(): string {
             return this.hasEmptyFraction ? this.value.toString() + ".0" : this.value.toString();
@@ -376,7 +376,7 @@ module TypeScript {
 
     export class StringToken extends Token {
         constructor (public value: string) {
-            super(TokenID.QString);
+            super(TokenID.StringLiteral);
         }
         public getText(): string {
             return this.value;
@@ -389,7 +389,7 @@ module TypeScript {
 
     export class IdentifierToken extends Token {
         constructor (public value: string, public hasEscapeSequence : bool) {
-            super(TokenID.ID);
+            super(TokenID.Identifier);
         }
         public getText(): string {
             return this.value;
@@ -433,7 +433,7 @@ module TypeScript {
 
     export class RegexToken extends Token {
         constructor(public regex) {
-            super(TokenID.Regex);
+            super(TokenID.RegularExpressionLiteral);
         }
         public getText(): string {
             return this.regex.toString();

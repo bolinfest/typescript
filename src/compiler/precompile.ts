@@ -222,13 +222,13 @@ module TypeScript {
         // only search out dynamic mods
         // if you find a dynamic mod, ignore every other mod inside, until you balance rcurlies
 
-        while (tok.tokenId != TokenID.EOF) {
+        while (tok.tokenId != TokenID.EndOfFile) {
 
             if (readImportFiles && tok.tokenId == TokenID.Import) {
 
                 tok = scanner.scan();
 
-                if (tok.tokenId == TokenID.ID || convertTokToID(tok, false)) {
+                if (tok.tokenId == TokenID.Identifier || convertTokToID(tok, false)) {
                     tok = scanner.scan();
 
                     if (tok.tokenId == TokenID.Equals) {
@@ -240,7 +240,7 @@ module TypeScript {
                                 tok = scanner.scan();
 
                                 // import foo = module("foo")
-                                if (tok.tokenId == TokenID.QString) {
+                                if (tok.tokenId == TokenID.StringLiteral) {
                                     var ref = { minChar: scanner.startPos, limChar: scanner.pos, path: stripQuotes(switchToForwardSlashes(tok.getText())), isResident: false };
                                     importedFiles.push(ref);
                                 }
