@@ -396,7 +396,7 @@ module TypeScript {
 
                 if (this.tok.tokenId == TokenID.Equals) {
                     this.tok = this.scanner.scan();
-                    memberValue = this.parseExpr(errorRecoverySet, OperatorPrecedence.Cma, true,
+                    memberValue = this.parseExpr(errorRecoverySet, OperatorPrecedence.Comma, true,
                                           TypeContext.NoTypes);
                     lastValue = <NumberLiteral>memberValue;
                     limChar = memberValue.limChar;
@@ -551,7 +551,7 @@ module TypeScript {
                                 }
                                 else {
                                     alias = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
-                                              OperatorPrecedence.Asg, true,
+                                              OperatorPrecedence.Assignment, true,
                                               TypeContext.NoTypes);
                                     
                                     alias.preComments = aliasPreComments;
@@ -574,7 +574,7 @@ module TypeScript {
                     }
                     else {
                         alias = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
-                                              OperatorPrecedence.Asg, true,
+                                              OperatorPrecedence.Assignment, true,
                                               TypeContext.NoTypes);
                         limChar = this.scanner.pos; // Include semicolon if needed
                     }
@@ -928,7 +928,7 @@ module TypeScript {
                     }
                     if (wasShorthand && this.tok.tokenId != TokenID.OpenBrace) {
                         var retExpr = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
-                                              OperatorPrecedence.Asg, true,
+                                              OperatorPrecedence.Assignment, true,
                                               TypeContext.NoTypes);
                         var retStmt = new ReturnStatement();
                         retStmt.returnExpression = retExpr;
@@ -1203,7 +1203,7 @@ module TypeScript {
                             hasOptional = true;
                             this.tok = this.scanner.scan();
                             arg.init = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
-                                                OperatorPrecedence.Cma, false,
+                                                OperatorPrecedence.Comma, false,
                                                 TypeContext.NoTypes);
 
                         }
@@ -1425,7 +1425,7 @@ module TypeScript {
                             break;
                         }
                         var arg = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
-                                          OperatorPrecedence.Cma, false, TypeContext.NoTypes);
+                                          OperatorPrecedence.Comma, false, TypeContext.NoTypes);
                         args.append(arg);
                         if (this.tok.tokenId != TokenID.Comma) {
                             break;
@@ -1843,7 +1843,7 @@ module TypeScript {
                 this.tok = this.scanner.scan();
 
                 varDecl.init = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
-                                        OperatorPrecedence.Cma, true, TypeContext.NoTypes);
+                                        OperatorPrecedence.Comma, true, TypeContext.NoTypes);
 
                 varDecl.limChar = varDecl.init.limChar;
 
@@ -2252,7 +2252,7 @@ module TypeScript {
                     // TODO: note assignment for language service
                     this.tok = this.scanner.scan();
                     varDecl.init = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
-                                           OperatorPrecedence.Cma, true, TypeContext.NoTypes);
+                                           OperatorPrecedence.Comma, true, TypeContext.NoTypes);
                     varDecl.limChar = varDecl.init.limChar;
                     if (varDecl.init.nodeType == NodeType.FuncDecl) {
                         var funcDecl = <FuncDecl>varDecl.init;
@@ -2357,7 +2357,7 @@ module TypeScript {
                     // TODO: note assignment for language service
                     this.tok = this.scanner.scan();
                     varDecl.init = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
-                                           OperatorPrecedence.Cma, allowIn,
+                                           OperatorPrecedence.Comma, allowIn,
                                            TypeContext.NoTypes);
                     varDecl.limChar = varDecl.init.limChar;
                     if (varDecl.init.nodeType == NodeType.FuncDecl) {
@@ -2515,7 +2515,7 @@ module TypeScript {
                 else if (this.tok.tokenId == TokenID.Colon) {
                     this.tok = this.scanner.scan();
                     memberExpr = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
-                                         OperatorPrecedence.Cma, true, TypeContext.NoTypes);
+                                         OperatorPrecedence.Comma, true, TypeContext.NoTypes);
                     // If the memberExpr is a type reference, we can be certain that it was an
                     // array type declaraion that lacked a "new".  We can realistically only
                     // expect call and name ASTs to be the result of this call to parseExpr.
@@ -2584,7 +2584,7 @@ module TypeScript {
                 }
                 else {
                     arg = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
-                                  OperatorPrecedence.Cma, true, TypeContext.NoTypes);
+                                  OperatorPrecedence.Comma, true, TypeContext.NoTypes);
                 }
                 elements.append(arg);
                 if (this.tok.tokenId != TokenID.Comma) {
@@ -2724,7 +2724,7 @@ module TypeScript {
                         }
                         else {
                             ast = this.parseExpr(errorRecoverySet | ErrorRecoverySet.RParen,
-                                          OperatorPrecedence.No, true, TypeContext.NoTypes, couldBeLambda);
+                                          OperatorPrecedence.None, true, TypeContext.NoTypes, couldBeLambda);
                             limChar = this.scanner.lastTokenLimChar();
                             parseAsLambda = couldBeLambda && (ast.nodeType == NodeType.Name || ast.nodeType == NodeType.Comma) &&
                                             (this.tok.tokenId == TokenID.Colon || this.tok.tokenId == TokenID.Question);
@@ -2792,7 +2792,7 @@ module TypeScript {
                         this.tok = this.scanner.scan();
                         var term: AST = this.parseTypeReference(ErrorRecoverySet.BinOp, false);
                         this.chkCurTok(TokenID.GreaterThan, "Expected '>'", errorRecoverySet);
-                        ast = new UnaryExpression(NodeType.TypeAssertion, this.parseExpr(errorRecoverySet, OperatorPrecedence.Uni, false, TypeContext.NoTypes));
+                        ast = new UnaryExpression(NodeType.TypeAssertion, this.parseExpr(errorRecoverySet, OperatorPrecedence.Unary, false, TypeContext.NoTypes));
                         (<UnaryExpression>ast).castTerm = term;
                         break;
 
@@ -2989,7 +2989,7 @@ module TypeScript {
                 if ((!allowIn) && (tokenInfo.binopNodeType == NodeType.In)) {
                     break;
                 }
-                if (tokenInfo.binopPrecedence == OperatorPrecedence.Asg) {
+                if (tokenInfo.binopPrecedence == OperatorPrecedence.Assignment) {
                     if (tokenInfo.binopPrecedence < minPrecedence) {
                         break;
                     }
@@ -3023,7 +3023,7 @@ module TypeScript {
                     else {
                         this.prevExpr = ast;
                         var qmarkNode = this.parseExpr(errorRecoverySet | ErrorRecoverySet.Colon,
-                                                OperatorPrecedence.Asg, allowIn,
+                                                OperatorPrecedence.Assignment, allowIn,
                                                 TypeContext.NoTypes);
 
                         // Do not hold onto the prevExpr handle
@@ -3033,7 +3033,7 @@ module TypeScript {
                         ast = new TrinaryExpression(NodeType.QMark, ast, qmarkNode,
                                                   this.parseExpr(errorRecoverySet |
                                                             ErrorRecoverySet.BinOp,
-                                                            OperatorPrecedence.Asg,
+                                                            OperatorPrecedence.Assignment,
                                                             allowIn, TypeContext.NoTypes));
                     }
                 }
@@ -3125,7 +3125,7 @@ module TypeScript {
 
                         ast = new BinaryExpression(NodeType.Index, ast,
                                                  this.parseExpr(errorRecoverySet | ErrorRecoverySet.RBrack,
-                                                           OperatorPrecedence.No, true,
+                                                           OperatorPrecedence.None, true,
                                                            TypeContext.NoTypes));
                         ast.minChar = lhsMinChar;
                         ast.limChar = this.scanner.pos; // ']'
@@ -3665,7 +3665,7 @@ module TypeScript {
                                 break;
                             default:
                                 temp = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon |
-                                               ErrorRecoverySet.In, OperatorPrecedence.No, false,
+                                               ErrorRecoverySet.In, OperatorPrecedence.None, false,
                                                TypeContext.NoTypes);
                                 break;
                         }
@@ -3684,7 +3684,7 @@ module TypeScript {
                                 var forInStmt = new ForInStatement(temp,
                                                                  this.parseExpr(ErrorRecoverySet.RParen |
                                                                            errorRecoverySet,
-                                                                           OperatorPrecedence.Cma,
+                                                                           OperatorPrecedence.Comma,
                                                                            false,
                                                                            TypeContext.NoTypes));
 
@@ -3710,7 +3710,7 @@ module TypeScript {
                             else {
                                 forStmt.cond = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon |
                                                        ErrorRecoverySet.RParen,
-                                                       OperatorPrecedence.No, true,
+                                                       OperatorPrecedence.None, true,
                                                        TypeContext.NoTypes);
                                 if (this.tok.tokenId != TokenID.Semicolon) {
                                     this.skip(errorRecoverySet | ErrorRecoverySet.StmtStart);
@@ -3725,7 +3725,7 @@ module TypeScript {
                             else {
                                 forStmt.incr = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon |
                                                        ErrorRecoverySet.RParen,
-                                                       OperatorPrecedence.No, true,
+                                                       OperatorPrecedence.None, true,
                                                        TypeContext.NoTypes);
                             }
                             this.chkCurTok(TokenID.CloseParen, "Expected ')'",
@@ -3755,7 +3755,7 @@ module TypeScript {
                                   ErrorRecoverySet.ExprStart | ErrorRecoverySet.Var);
 
                         var expr = this.parseExpr(errorRecoverySet | ErrorRecoverySet.Colon,
-                                                            OperatorPrecedence.No, true,
+                                                            OperatorPrecedence.None, true,
                                                             TypeContext.NoTypes);
                         this.chkCurTok(TokenID.CloseParen, "Expected ')'",
                                       errorRecoverySet | ErrorRecoverySet.LCurly);
@@ -3777,7 +3777,7 @@ module TypeScript {
 
                         var switchStmt = new SwitchStatement(this.parseExpr(errorRecoverySet |
                                                                      ErrorRecoverySet.RParen,
-                                                                     OperatorPrecedence.No,
+                                                                     OperatorPrecedence.None,
                                                                      true,
                                                                      TypeContext.NoTypes));
                         switchStmt.statement.minChar = minChar;
@@ -3803,7 +3803,7 @@ module TypeScript {
                                 }
                                 else {
                                     caseStmt.expr = this.parseExpr(errorRecoverySet | ErrorRecoverySet.Colon,
-                                                            OperatorPrecedence.No, true,
+                                                            OperatorPrecedence.None, true,
                                                             TypeContext.NoTypes);
                                 }
                                 this.chkCurTok(TokenID.Colon, "Expected ':'", errorRecoverySet |
@@ -3837,7 +3837,7 @@ module TypeScript {
                                   errorRecoverySet);
                         var whileStmt = new WhileStatement(this.parseExpr(errorRecoverySet |
                                                                    ErrorRecoverySet.RParen,
-                                                                   OperatorPrecedence.No,
+                                                                   OperatorPrecedence.None,
                                                                    true, TypeContext.NoTypes));
                         whileStmt.minChar = minChar;
                         this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet |
@@ -3870,7 +3870,7 @@ module TypeScript {
                         this.chkCurTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
                                   ErrorRecoverySet.ExprStart);
                         doStmt.cond = this.parseExpr(errorRecoverySet | ErrorRecoverySet.RParen,
-                                              OperatorPrecedence.No, true, TypeContext.NoTypes);
+                                              OperatorPrecedence.None, true, TypeContext.NoTypes);
                         doStmt.limChar = this.scanner.pos;
                         this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet);
                         ast = doStmt;
@@ -3890,7 +3890,7 @@ module TypeScript {
                                   ErrorRecoverySet.ExprStart);
                         var ifStmt = new IfStatement(this.parseExpr(errorRecoverySet |
                                                              ErrorRecoverySet.LParen,
-                                                             OperatorPrecedence.No, true,
+                                                             OperatorPrecedence.None, true,
                                                              TypeContext.NoTypes));
                         ifStmt.minChar = minChar;
                         ifStmt.statement.minChar = minChar;
@@ -3983,7 +3983,7 @@ module TypeScript {
                             (!(this.scanner.lastTokenHadNewline()))) {
                             retStmt.returnExpression = this.parseExpr(errorRecoverySet |
                                                                ErrorRecoverySet.SColon,
-                                                               OperatorPrecedence.No,
+                                                               OperatorPrecedence.None,
                                                                true, TypeContext.NoTypes);
                         }
                         needTerminator = true;
@@ -4002,7 +4002,7 @@ module TypeScript {
                             (this.tok.tokenId != TokenID.CloseBrace) &&
                             (!(this.scanner.lastTokenHadNewline()))) {
                             temp = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
-                                           OperatorPrecedence.No, true, TypeContext.NoTypes);
+                                           OperatorPrecedence.None, true, TypeContext.NoTypes);
                         }
                         else {
                             this.reportParseError("throw with no target");
@@ -4047,7 +4047,7 @@ module TypeScript {
                         minChar = this.scanner.startPos;
                         var svPos = this.scanner.pos;
                         temp = this.parseExpr(ErrorRecoverySet.Colon | ErrorRecoverySet.StmtStart |
-                                       errorRecoverySet, OperatorPrecedence.No, true,
+                                       errorRecoverySet, OperatorPrecedence.None, true,
                                        TypeContext.NoTypes);
                         if (this.scanner.pos == svPos) {
                             // no progress

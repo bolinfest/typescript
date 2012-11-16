@@ -143,21 +143,21 @@ module TypeScript {
     noRegexTable[TokenID.False] = true;
 
     export enum OperatorPrecedence {
-        No,
-        Cma,
-        Asg,
-        Que,
-        Lor,
-        Lan,
-        Bor,
-        Xor,
-        Ban,
-        Equ,
-        Cmp,
-        Shf,
-        Add,
-        Mul,
-        Uni,
+        None,
+        Comma,
+        Assignment,
+        Conditional,
+        LogicalOr,
+        LogicalAnd,
+        BitwiseOr,
+        BitwiseExclusiveOr,
+        BitwiseAnd,
+        Equality,
+        Relational,
+        Shift,
+        Additive,
+        Multiplicative,
+        Unary,
         Lim
     }
 
@@ -195,123 +195,121 @@ module TypeScript {
         }
     }
 
-    setTokenInfo(TokenID.Any, Reservation.TypeScript, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "any", ErrorRecoverySet.PrimType);
-    setTokenInfo(TokenID.Bool, Reservation.TypeScript, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "bool", ErrorRecoverySet.PrimType);
-    setTokenInfo(TokenID.Break, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "break", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.Case, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "case", ErrorRecoverySet.SCase);
-    setTokenInfo(TokenID.Catch, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "catch", ErrorRecoverySet.Catch);
-    setTokenInfo(TokenID.Class, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "class", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.Const, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "const", ErrorRecoverySet.Var);
-    setTokenInfo(TokenID.Continue, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "continue", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.Debugger, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.Debugger, "debugger", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.Default, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "default", ErrorRecoverySet.SCase);
-    setTokenInfo(TokenID.Delete, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.Delete, "delete", ErrorRecoverySet.Prefix);
-    setTokenInfo(TokenID.Do, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "do", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.Else, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "else", ErrorRecoverySet.Else);
-    setTokenInfo(TokenID.Enum, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "enum", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.Export, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "export", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.Extends, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "extends", ErrorRecoverySet.None);
-    setTokenInfo(TokenID.Declare, Reservation.TypeScript, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "declare", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.False, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "false", ErrorRecoverySet.RLit);
-    setTokenInfo(TokenID.Finally, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "finally", ErrorRecoverySet.Catch);
-    setTokenInfo(TokenID.For, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "for", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.Function, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "function", ErrorRecoverySet.Func);
-    setTokenInfo(TokenID.Constructor, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "constructor", ErrorRecoverySet.Func);
-    setTokenInfo(TokenID.Get, Reservation.TypeScript, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "get", ErrorRecoverySet.Func);
-    setTokenInfo(TokenID.Set, Reservation.TypeScript, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "set", ErrorRecoverySet.Func);
-    setTokenInfo(TokenID.If, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "if", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.Implements, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "implements", ErrorRecoverySet.None);
-    setTokenInfo(TokenID.Import, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "import", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.In, Reservation.TypeScriptAndJS, OperatorPrecedence.Cmp, NodeType.In, OperatorPrecedence.No, NodeType.None, "in", ErrorRecoverySet.None);
-    setTokenInfo(TokenID.InstanceOf, Reservation.TypeScriptAndJS, OperatorPrecedence.Cmp, NodeType.InstOf, OperatorPrecedence.No, NodeType.None, "instanceof", ErrorRecoverySet.BinOp);
-    setTokenInfo(TokenID.Interface, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "interface", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.Let, Reservation.JavascriptFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "let", ErrorRecoverySet.None);
-    setTokenInfo(TokenID.Module, Reservation.TypeScript, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "module", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.New, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "new", ErrorRecoverySet.PreOp);
-    setTokenInfo(TokenID.Number, Reservation.TypeScript, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "number", ErrorRecoverySet.PrimType);
-    setTokenInfo(TokenID.Null, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "null", ErrorRecoverySet.RLit);
-    setTokenInfo(TokenID.Package, Reservation.JavascriptFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "package", ErrorRecoverySet.None);
-    setTokenInfo(TokenID.Private, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "private", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.Protected, Reservation.JavascriptFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "protected", ErrorRecoverySet.None);
-    setTokenInfo(TokenID.Public, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "public", ErrorRecoverySet.TypeScriptS);
-    setTokenInfo(TokenID.Return, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "return", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.Static, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "static", ErrorRecoverySet.None);
-    setTokenInfo(TokenID.String, Reservation.TypeScript, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "string", ErrorRecoverySet.PrimType);
-    setTokenInfo(TokenID.Super, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "super", ErrorRecoverySet.RLit);
-    setTokenInfo(TokenID.Switch, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "switch", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.This, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "this", ErrorRecoverySet.RLit);
-    setTokenInfo(TokenID.Throw, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "throw", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.True, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "true", ErrorRecoverySet.RLit);
-    setTokenInfo(TokenID.Try, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "try", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.TypeOf, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.Typeof, "typeof", ErrorRecoverySet.Prefix);
-    setTokenInfo(TokenID.Var, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "var", ErrorRecoverySet.Var);
-    setTokenInfo(TokenID.Void, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.Void, "void", ErrorRecoverySet.Prefix);
-    setTokenInfo(TokenID.With, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.With, "with", ErrorRecoverySet.Stmt);
-    setTokenInfo(TokenID.While, Reservation.TypeScriptAndJS, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "while", ErrorRecoverySet.While);
-    setTokenInfo(TokenID.Yield, Reservation.JavascriptFutureStrict, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "yield", ErrorRecoverySet.None);
+    setTokenInfo(TokenID.Any, Reservation.TypeScript, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "any", ErrorRecoverySet.PrimType);
+    setTokenInfo(TokenID.Bool, Reservation.TypeScript, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "bool", ErrorRecoverySet.PrimType);
+    setTokenInfo(TokenID.Break, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "break", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.Case, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "case", ErrorRecoverySet.SCase);
+    setTokenInfo(TokenID.Catch, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "catch", ErrorRecoverySet.Catch);
+    setTokenInfo(TokenID.Class, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "class", ErrorRecoverySet.TypeScriptS);
+    setTokenInfo(TokenID.Const, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "const", ErrorRecoverySet.Var);
+    setTokenInfo(TokenID.Continue, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "continue", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.Debugger, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.Debugger, "debugger", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.Default, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "default", ErrorRecoverySet.SCase);
+    setTokenInfo(TokenID.Delete, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.Unary, NodeType.Delete, "delete", ErrorRecoverySet.Prefix);
+    setTokenInfo(TokenID.Do, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "do", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.Else, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "else", ErrorRecoverySet.Else);
+    setTokenInfo(TokenID.Enum, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "enum", ErrorRecoverySet.TypeScriptS);
+    setTokenInfo(TokenID.Export, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "export", ErrorRecoverySet.TypeScriptS);
+    setTokenInfo(TokenID.Extends, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "extends", ErrorRecoverySet.None);
+    setTokenInfo(TokenID.Declare, Reservation.TypeScript, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "declare", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.False, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "false", ErrorRecoverySet.RLit);
+    setTokenInfo(TokenID.Finally, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "finally", ErrorRecoverySet.Catch);
+    setTokenInfo(TokenID.For, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "for", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.Function, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "function", ErrorRecoverySet.Func);
+    setTokenInfo(TokenID.Constructor, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "constructor", ErrorRecoverySet.Func);
+    setTokenInfo(TokenID.Get, Reservation.TypeScript, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "get", ErrorRecoverySet.Func);
+    setTokenInfo(TokenID.Set, Reservation.TypeScript, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "set", ErrorRecoverySet.Func);
+    setTokenInfo(TokenID.If, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "if", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.Implements, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "implements", ErrorRecoverySet.None);
+    setTokenInfo(TokenID.Import, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "import", ErrorRecoverySet.TypeScriptS);
+    setTokenInfo(TokenID.In, Reservation.TypeScriptAndJS, OperatorPrecedence.Relational, NodeType.In, OperatorPrecedence.None, NodeType.None, "in", ErrorRecoverySet.None);
+    setTokenInfo(TokenID.InstanceOf, Reservation.TypeScriptAndJS, OperatorPrecedence.Relational, NodeType.InstOf, OperatorPrecedence.None, NodeType.None, "instanceof", ErrorRecoverySet.BinOp);
+    setTokenInfo(TokenID.Interface, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "interface", ErrorRecoverySet.TypeScriptS);
+    setTokenInfo(TokenID.Let, Reservation.JavascriptFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "let", ErrorRecoverySet.None);
+    setTokenInfo(TokenID.Module, Reservation.TypeScript, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "module", ErrorRecoverySet.TypeScriptS);
+    setTokenInfo(TokenID.New, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "new", ErrorRecoverySet.PreOp);
+    setTokenInfo(TokenID.Number, Reservation.TypeScript, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "number", ErrorRecoverySet.PrimType);
+    setTokenInfo(TokenID.Null, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "null", ErrorRecoverySet.RLit);
+    setTokenInfo(TokenID.Package, Reservation.JavascriptFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "package", ErrorRecoverySet.None);
+    setTokenInfo(TokenID.Private, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "private", ErrorRecoverySet.TypeScriptS);
+    setTokenInfo(TokenID.Protected, Reservation.JavascriptFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "protected", ErrorRecoverySet.None);
+    setTokenInfo(TokenID.Public, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "public", ErrorRecoverySet.TypeScriptS);
+    setTokenInfo(TokenID.Return, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "return", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.Static, Reservation.TypeScriptAndJSFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "static", ErrorRecoverySet.None);
+    setTokenInfo(TokenID.String, Reservation.TypeScript, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "string", ErrorRecoverySet.PrimType);
+    setTokenInfo(TokenID.Super, Reservation.TypeScriptAndJSFuture, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "super", ErrorRecoverySet.RLit);
+    setTokenInfo(TokenID.Switch, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "switch", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.This, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "this", ErrorRecoverySet.RLit);
+    setTokenInfo(TokenID.Throw, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "throw", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.True, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "true", ErrorRecoverySet.RLit);
+    setTokenInfo(TokenID.Try, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "try", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.TypeOf, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.Unary, NodeType.Typeof, "typeof", ErrorRecoverySet.Prefix);
+    setTokenInfo(TokenID.Var, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "var", ErrorRecoverySet.Var);
+    setTokenInfo(TokenID.Void, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.Unary, NodeType.Void, "void", ErrorRecoverySet.Prefix);
+    setTokenInfo(TokenID.With, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.With, "with", ErrorRecoverySet.Stmt);
+    setTokenInfo(TokenID.While, Reservation.TypeScriptAndJS, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "while", ErrorRecoverySet.While);
+    setTokenInfo(TokenID.Yield, Reservation.JavascriptFutureStrict, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "yield", ErrorRecoverySet.None);
 
-    setTokenInfo(TokenID.Identifier, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "identifier", ErrorRecoverySet.ID);
-    setTokenInfo(TokenID.NumberLiteral, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "numberLiteral", ErrorRecoverySet.Literal);
-    setTokenInfo(TokenID.RegularExpressionLiteral, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "regex", ErrorRecoverySet.RegExp);
-    setTokenInfo(TokenID.StringLiteral, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "qstring", ErrorRecoverySet.Literal);
+    setTokenInfo(TokenID.Identifier, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "identifier", ErrorRecoverySet.ID);
+    setTokenInfo(TokenID.NumberLiteral, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "numberLiteral", ErrorRecoverySet.Literal);
+    setTokenInfo(TokenID.RegularExpressionLiteral, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "regex", ErrorRecoverySet.RegExp);
+    setTokenInfo(TokenID.StringLiteral, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "qstring", ErrorRecoverySet.Literal);
 
     // Non-operator non-identifier tokens
-    setTokenInfo(TokenID.Semicolon, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, ";", ErrorRecoverySet.SColon); // ;
-    setTokenInfo(TokenID.CloseParen, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, ")", ErrorRecoverySet.RParen); // )
-    setTokenInfo(TokenID.CloseBracket, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "]", ErrorRecoverySet.RBrack); // ]
-    setTokenInfo(TokenID.OpenBrace, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "{", ErrorRecoverySet.LCurly); // {
-    setTokenInfo(TokenID.CloseBrace, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "}", ErrorRecoverySet.RCurly); // }
-    setTokenInfo(TokenID.DotDotDot, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "...", ErrorRecoverySet.None); // ...
+    setTokenInfo(TokenID.Semicolon, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, ";", ErrorRecoverySet.SColon); // ;
+    setTokenInfo(TokenID.CloseParen, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, ")", ErrorRecoverySet.RParen); // )
+    setTokenInfo(TokenID.CloseBracket, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "]", ErrorRecoverySet.RBrack); // ]
+    setTokenInfo(TokenID.OpenBrace, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "{", ErrorRecoverySet.LCurly); // {
+    setTokenInfo(TokenID.CloseBrace, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "}", ErrorRecoverySet.RCurly); // }
+    setTokenInfo(TokenID.DotDotDot, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "...", ErrorRecoverySet.None); // ...
 
     // Operator non-identifier tokens
-    setTokenInfo(TokenID.Comma, Reservation.None, OperatorPrecedence.Cma, NodeType.Comma, OperatorPrecedence.No, NodeType.None, ",", ErrorRecoverySet.Comma); // ,
-    setTokenInfo(TokenID.Equals, Reservation.None, OperatorPrecedence.Asg, NodeType.Asg, OperatorPrecedence.No, NodeType.None, "=", ErrorRecoverySet.Asg); // =
-    setTokenInfo(TokenID.PlusEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgAdd, OperatorPrecedence.No, NodeType.None, "+=", ErrorRecoverySet.BinOp); // +=
-    setTokenInfo(TokenID.MinusEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgSub, OperatorPrecedence.No, NodeType.None, "-=", ErrorRecoverySet.BinOp); // -=
-    setTokenInfo(TokenID.AsteriskEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgMul, OperatorPrecedence.No, NodeType.None, "*=", ErrorRecoverySet.BinOp); // *=
+    setTokenInfo(TokenID.Comma, Reservation.None, OperatorPrecedence.Comma, NodeType.Comma, OperatorPrecedence.None, NodeType.None, ",", ErrorRecoverySet.Comma); // ,
+    setTokenInfo(TokenID.Equals, Reservation.None, OperatorPrecedence.Assignment, NodeType.Asg, OperatorPrecedence.None, NodeType.None, "=", ErrorRecoverySet.Asg); // =
+    setTokenInfo(TokenID.PlusEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgAdd, OperatorPrecedence.None, NodeType.None, "+=", ErrorRecoverySet.BinOp); // +=
+    setTokenInfo(TokenID.MinusEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgSub, OperatorPrecedence.None, NodeType.None, "-=", ErrorRecoverySet.BinOp); // -=
+    setTokenInfo(TokenID.AsteriskEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgMul, OperatorPrecedence.None, NodeType.None, "*=", ErrorRecoverySet.BinOp); // *=
 
-
-
-    setTokenInfo(TokenID.SlashEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgDiv, OperatorPrecedence.No, NodeType.None, "/=", ErrorRecoverySet.BinOp); // /=
-    setTokenInfo(TokenID.PercentEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgMod, OperatorPrecedence.No, NodeType.None, "%=", ErrorRecoverySet.BinOp); // %=
-    setTokenInfo(TokenID.AmpersandEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgAnd, OperatorPrecedence.No, NodeType.None, "&=", ErrorRecoverySet.BinOp); // &=
-    setTokenInfo(TokenID.CaretEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgXor, OperatorPrecedence.No, NodeType.None, "^=", ErrorRecoverySet.BinOp); // ^=
-    setTokenInfo(TokenID.BarEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgOr, OperatorPrecedence.No, NodeType.None, "|=", ErrorRecoverySet.BinOp); // |=
-    setTokenInfo(TokenID.LessThanLessThanEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgLsh, OperatorPrecedence.No, NodeType.None, "<<=", ErrorRecoverySet.BinOp); // <<=
-    setTokenInfo(TokenID.GreaterThanGreaterThanEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgRsh, OperatorPrecedence.No, NodeType.None, ">>=", ErrorRecoverySet.BinOp); // >>=
-    setTokenInfo(TokenID.GreaterThanGreaterThanGreaterThanEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgRs2, OperatorPrecedence.No, NodeType.None, ">>>=", ErrorRecoverySet.BinOp); // >>>=
-    setTokenInfo(TokenID.Question, Reservation.None, OperatorPrecedence.Que, NodeType.QMark, OperatorPrecedence.No, NodeType.None, "?", ErrorRecoverySet.BinOp); // ?
-    setTokenInfo(TokenID.Colon, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, ":", ErrorRecoverySet.Colon); // :
-    setTokenInfo(TokenID.BarBar, Reservation.None, OperatorPrecedence.Lor, NodeType.LogOr, OperatorPrecedence.No, NodeType.None, "||", ErrorRecoverySet.BinOp); // ||
-    setTokenInfo(TokenID.AmpersandAmpersand, Reservation.None, OperatorPrecedence.Lan, NodeType.LogAnd, OperatorPrecedence.No, NodeType.None, "&&", ErrorRecoverySet.BinOp); // &&
-    setTokenInfo(TokenID.Bar, Reservation.None, OperatorPrecedence.Bor, NodeType.Or, OperatorPrecedence.No, NodeType.None, "|", ErrorRecoverySet.BinOp); // |
-    setTokenInfo(TokenID.Caret, Reservation.None, OperatorPrecedence.Xor, NodeType.Xor, OperatorPrecedence.No, NodeType.None, "^", ErrorRecoverySet.BinOp); // ^
-    setTokenInfo(TokenID.And, Reservation.None, OperatorPrecedence.Ban, NodeType.And, OperatorPrecedence.No, NodeType.None, "&", ErrorRecoverySet.BinOp); // &
-    setTokenInfo(TokenID.EqualsEquals, Reservation.None, OperatorPrecedence.Equ, NodeType.Eq, OperatorPrecedence.No, NodeType.None, "==", ErrorRecoverySet.BinOp); // ==
-    setTokenInfo(TokenID.ExclamationEquals, Reservation.None, OperatorPrecedence.Equ, NodeType.Ne, OperatorPrecedence.No, NodeType.None, "!=", ErrorRecoverySet.BinOp); // !=
-    setTokenInfo(TokenID.EqualsEqualsEquals, Reservation.None, OperatorPrecedence.Equ, NodeType.Eqv, OperatorPrecedence.No, NodeType.None, "===", ErrorRecoverySet.BinOp); // ===
-    setTokenInfo(TokenID.ExclamationEqualsEquals, Reservation.None, OperatorPrecedence.Equ, NodeType.NEqv, OperatorPrecedence.No, NodeType.None, "!==", ErrorRecoverySet.BinOp); // !==
-    setTokenInfo(TokenID.LessThan, Reservation.None, OperatorPrecedence.Cmp, NodeType.Lt, OperatorPrecedence.No, NodeType.None, "<", ErrorRecoverySet.BinOp); // <
-    setTokenInfo(TokenID.LessThanEquals, Reservation.None, OperatorPrecedence.Cmp, NodeType.Le, OperatorPrecedence.No, NodeType.None, "<=", ErrorRecoverySet.BinOp); // <=
-    setTokenInfo(TokenID.GreaterThan, Reservation.None, OperatorPrecedence.Cmp, NodeType.Gt, OperatorPrecedence.No, NodeType.None, ">", ErrorRecoverySet.BinOp); // >
-    setTokenInfo(TokenID.GreaterThanEquals, Reservation.None, OperatorPrecedence.Cmp, NodeType.Ge, OperatorPrecedence.No, NodeType.None, ">=", ErrorRecoverySet.BinOp); // >=
-    setTokenInfo(TokenID.LessThanLessThan, Reservation.None, OperatorPrecedence.Shf, NodeType.Lsh, OperatorPrecedence.No, NodeType.None, "<<", ErrorRecoverySet.BinOp); // <<
-    setTokenInfo(TokenID.GreaterThanGreaterThan, Reservation.None, OperatorPrecedence.Shf, NodeType.Rsh, OperatorPrecedence.No, NodeType.None, ">>", ErrorRecoverySet.BinOp); // >>
-    setTokenInfo(TokenID.GreaterThanGreaterThanGreaterThan, Reservation.None, OperatorPrecedence.Shf, NodeType.Rs2, OperatorPrecedence.No, NodeType.None, ">>>", ErrorRecoverySet.BinOp); // >>>
-    setTokenInfo(TokenID.Plus, Reservation.None, OperatorPrecedence.Add, NodeType.Add, OperatorPrecedence.Uni, NodeType.Pos, "+", ErrorRecoverySet.AddOp); // +
-    setTokenInfo(TokenID.Minus, Reservation.None, OperatorPrecedence.Add, NodeType.Sub, OperatorPrecedence.Uni, NodeType.Neg, "-", ErrorRecoverySet.AddOp); // -
-    setTokenInfo(TokenID.Asterisk, Reservation.None, OperatorPrecedence.Mul, NodeType.Mul, OperatorPrecedence.No, NodeType.None, "*", ErrorRecoverySet.BinOp); // *
-    setTokenInfo(TokenID.Slash, Reservation.None, OperatorPrecedence.Mul, NodeType.Div, OperatorPrecedence.No, NodeType.None, "/", ErrorRecoverySet.BinOp); // /
-    setTokenInfo(TokenID.Percent, Reservation.None, OperatorPrecedence.Mul, NodeType.Mod, OperatorPrecedence.No, NodeType.None, "%", ErrorRecoverySet.BinOp); // %
-    setTokenInfo(TokenID.Tilde, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.Not, "~", ErrorRecoverySet.PreOp); // ~
-    setTokenInfo(TokenID.Exclamation, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.LogNot, "!", ErrorRecoverySet.PreOp); // !
-    setTokenInfo(TokenID.PlusPlus, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.IncPre, "++", ErrorRecoverySet.PreOp); // ++
-    setTokenInfo(TokenID.MinusMinus, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.DecPre, "--", ErrorRecoverySet.PreOp); // --
-    setTokenInfo(TokenID.OpenParen, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "(", ErrorRecoverySet.LParen); // (
-    setTokenInfo(TokenID.OpenBracket, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "[", ErrorRecoverySet.LBrack); // [
-    setTokenInfo(TokenID.Dot, Reservation.None, OperatorPrecedence.Uni, NodeType.None, OperatorPrecedence.No, NodeType.None, ".", ErrorRecoverySet.Dot); // .
-    setTokenInfo(TokenID.EndOfFile, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "<EOF>", ErrorRecoverySet.EOF); // EOF
-    setTokenInfo(TokenID.EqualsGreaterThan, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.No, NodeType.None, "=>", ErrorRecoverySet.None); // =>
+    setTokenInfo(TokenID.SlashEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgDiv, OperatorPrecedence.None, NodeType.None, "/=", ErrorRecoverySet.BinOp); // /=
+    setTokenInfo(TokenID.PercentEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgMod, OperatorPrecedence.None, NodeType.None, "%=", ErrorRecoverySet.BinOp); // %=
+    setTokenInfo(TokenID.AmpersandEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgAnd, OperatorPrecedence.None, NodeType.None, "&=", ErrorRecoverySet.BinOp); // &=
+    setTokenInfo(TokenID.CaretEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgXor, OperatorPrecedence.None, NodeType.None, "^=", ErrorRecoverySet.BinOp); // ^=
+    setTokenInfo(TokenID.BarEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgOr, OperatorPrecedence.None, NodeType.None, "|=", ErrorRecoverySet.BinOp); // |=
+    setTokenInfo(TokenID.LessThanLessThanEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgLsh, OperatorPrecedence.None, NodeType.None, "<<=", ErrorRecoverySet.BinOp); // <<=
+    setTokenInfo(TokenID.GreaterThanGreaterThanEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgRsh, OperatorPrecedence.None, NodeType.None, ">>=", ErrorRecoverySet.BinOp); // >>=
+    setTokenInfo(TokenID.GreaterThanGreaterThanGreaterThanEquals, Reservation.None, OperatorPrecedence.Assignment, NodeType.AsgRs2, OperatorPrecedence.None, NodeType.None, ">>>=", ErrorRecoverySet.BinOp); // >>>=
+    setTokenInfo(TokenID.Question, Reservation.None, OperatorPrecedence.Conditional, NodeType.QMark, OperatorPrecedence.None, NodeType.None, "?", ErrorRecoverySet.BinOp); // ?
+    setTokenInfo(TokenID.Colon, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, ":", ErrorRecoverySet.Colon); // :
+    setTokenInfo(TokenID.BarBar, Reservation.None, OperatorPrecedence.LogicalOr, NodeType.LogOr, OperatorPrecedence.None, NodeType.None, "||", ErrorRecoverySet.BinOp); // ||
+    setTokenInfo(TokenID.AmpersandAmpersand, Reservation.None, OperatorPrecedence.LogicalAnd, NodeType.LogAnd, OperatorPrecedence.None, NodeType.None, "&&", ErrorRecoverySet.BinOp); // &&
+    setTokenInfo(TokenID.Bar, Reservation.None, OperatorPrecedence.BitwiseOr, NodeType.Or, OperatorPrecedence.None, NodeType.None, "|", ErrorRecoverySet.BinOp); // |
+    setTokenInfo(TokenID.Caret, Reservation.None, OperatorPrecedence.BitwiseExclusiveOr, NodeType.Xor, OperatorPrecedence.None, NodeType.None, "^", ErrorRecoverySet.BinOp); // ^
+    setTokenInfo(TokenID.And, Reservation.None, OperatorPrecedence.BitwiseAnd, NodeType.And, OperatorPrecedence.None, NodeType.None, "&", ErrorRecoverySet.BinOp); // &
+    setTokenInfo(TokenID.EqualsEquals, Reservation.None, OperatorPrecedence.Equality, NodeType.Eq, OperatorPrecedence.None, NodeType.None, "==", ErrorRecoverySet.BinOp); // ==
+    setTokenInfo(TokenID.ExclamationEquals, Reservation.None, OperatorPrecedence.Equality, NodeType.Ne, OperatorPrecedence.None, NodeType.None, "!=", ErrorRecoverySet.BinOp); // !=
+    setTokenInfo(TokenID.EqualsEqualsEquals, Reservation.None, OperatorPrecedence.Equality, NodeType.Eqv, OperatorPrecedence.None, NodeType.None, "===", ErrorRecoverySet.BinOp); // ===
+    setTokenInfo(TokenID.ExclamationEqualsEquals, Reservation.None, OperatorPrecedence.Equality, NodeType.NEqv, OperatorPrecedence.None, NodeType.None, "!==", ErrorRecoverySet.BinOp); // !==
+    setTokenInfo(TokenID.LessThan, Reservation.None, OperatorPrecedence.Relational, NodeType.Lt, OperatorPrecedence.None, NodeType.None, "<", ErrorRecoverySet.BinOp); // <
+    setTokenInfo(TokenID.LessThanEquals, Reservation.None, OperatorPrecedence.Relational, NodeType.Le, OperatorPrecedence.None, NodeType.None, "<=", ErrorRecoverySet.BinOp); // <=
+    setTokenInfo(TokenID.GreaterThan, Reservation.None, OperatorPrecedence.Relational, NodeType.Gt, OperatorPrecedence.None, NodeType.None, ">", ErrorRecoverySet.BinOp); // >
+    setTokenInfo(TokenID.GreaterThanEquals, Reservation.None, OperatorPrecedence.Relational, NodeType.Ge, OperatorPrecedence.None, NodeType.None, ">=", ErrorRecoverySet.BinOp); // >=
+    setTokenInfo(TokenID.LessThanLessThan, Reservation.None, OperatorPrecedence.Shift, NodeType.Lsh, OperatorPrecedence.None, NodeType.None, "<<", ErrorRecoverySet.BinOp); // <<
+    setTokenInfo(TokenID.GreaterThanGreaterThan, Reservation.None, OperatorPrecedence.Shift, NodeType.Rsh, OperatorPrecedence.None, NodeType.None, ">>", ErrorRecoverySet.BinOp); // >>
+    setTokenInfo(TokenID.GreaterThanGreaterThanGreaterThan, Reservation.None, OperatorPrecedence.Shift, NodeType.Rs2, OperatorPrecedence.None, NodeType.None, ">>>", ErrorRecoverySet.BinOp); // >>>
+    setTokenInfo(TokenID.Plus, Reservation.None, OperatorPrecedence.Additive, NodeType.Add, OperatorPrecedence.Unary, NodeType.Pos, "+", ErrorRecoverySet.AddOp); // +
+    setTokenInfo(TokenID.Minus, Reservation.None, OperatorPrecedence.Additive, NodeType.Sub, OperatorPrecedence.Unary, NodeType.Neg, "-", ErrorRecoverySet.AddOp); // -
+    setTokenInfo(TokenID.Asterisk, Reservation.None, OperatorPrecedence.Multiplicative, NodeType.Mul, OperatorPrecedence.None, NodeType.None, "*", ErrorRecoverySet.BinOp); // *
+    setTokenInfo(TokenID.Slash, Reservation.None, OperatorPrecedence.Multiplicative, NodeType.Div, OperatorPrecedence.None, NodeType.None, "/", ErrorRecoverySet.BinOp); // /
+    setTokenInfo(TokenID.Percent, Reservation.None, OperatorPrecedence.Multiplicative, NodeType.Mod, OperatorPrecedence.None, NodeType.None, "%", ErrorRecoverySet.BinOp); // %
+    setTokenInfo(TokenID.Tilde, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.Unary, NodeType.Not, "~", ErrorRecoverySet.PreOp); // ~
+    setTokenInfo(TokenID.Exclamation, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.Unary, NodeType.LogNot, "!", ErrorRecoverySet.PreOp); // !
+    setTokenInfo(TokenID.PlusPlus, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.Unary, NodeType.IncPre, "++", ErrorRecoverySet.PreOp); // ++
+    setTokenInfo(TokenID.MinusMinus, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.Unary, NodeType.DecPre, "--", ErrorRecoverySet.PreOp); // --
+    setTokenInfo(TokenID.OpenParen, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "(", ErrorRecoverySet.LParen); // (
+    setTokenInfo(TokenID.OpenBracket, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "[", ErrorRecoverySet.LBrack); // [
+    setTokenInfo(TokenID.Dot, Reservation.None, OperatorPrecedence.Unary, NodeType.None, OperatorPrecedence.None, NodeType.None, ".", ErrorRecoverySet.Dot); // .
+    setTokenInfo(TokenID.EndOfFile, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "<EOF>", ErrorRecoverySet.EOF); // EOF
+    setTokenInfo(TokenID.EqualsGreaterThan, Reservation.None, OperatorPrecedence.None, NodeType.None, OperatorPrecedence.None, NodeType.None, "=>", ErrorRecoverySet.None); // =>
 
     export function lookupToken(tokenId: TokenID): TokenInfo {
         return tokenTable[tokenId];
