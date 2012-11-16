@@ -2457,7 +2457,7 @@ module TypeScript {
                 }
                     // TODO: allow reserved words
                 else if (this.tok.tokenId == TokenID.NumberLiteral) {
-                    var ntok = <NumberToken>this.tok;
+                    var ntok = <NumberLiteralToken>this.tok;
                     idHint = ntok.value.toString();
                     memberName = new StringLiteral(idHint);
                     memberName.minChar = this.scanner.startPos;
@@ -2745,7 +2745,7 @@ module TypeScript {
 
                         break;
                     case TokenID.NumberLiteral: {
-                        var numTok = <NumberToken>this.tok;
+                        var numTok = <NumberLiteralToken>this.tok;
                         this.tok = this.scanner.scan();
                         ast = new NumberLiteral(numTok.value, numTok.hasEmptyFraction);
                         ast.minChar = minChar;
@@ -2759,7 +2759,7 @@ module TypeScript {
                         limChar = this.scanner.lastTokenLimChar();
                         break;
                     case TokenID.RegularExpressionLiteral: {
-                        var rtok = <RegexToken>this.tok;
+                        var rtok = <RegularExpressionLiteralToken>this.tok;
                         ast = new RegexLiteral(rtok.regex);
                         this.tok = this.scanner.scan();
                         ast.minChar = minChar;

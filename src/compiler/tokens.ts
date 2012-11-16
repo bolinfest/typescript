@@ -363,7 +363,7 @@ module TypeScript {
         }
     }
 
-    export class NumberToken extends Token {
+    export class NumberLiteralToken extends Token {
         constructor (public value: number, public hasEmptyFraction?: bool) {
             super(TokenID.NumberLiteral);
         }
@@ -377,7 +377,7 @@ module TypeScript {
         }
     }
 
-    export class StringToken extends Token {
+    export class StringLiteralToken extends Token {
         constructor (public value: string) {
             super(TokenID.StringLiteral);
         }
@@ -431,7 +431,7 @@ module TypeScript {
         }
     }
 
-    export class RegexToken extends Token {
+    export class RegularExpressionLiteralToken extends Token {
         constructor(public regex) {
             super(TokenID.RegularExpressionLiteral);
         }

@@ -682,7 +682,7 @@ module TypeScript {
                 }
                 else {
                     if (atLeastOneDigit) {
-                        return new NumberToken(parseInt(this.src.substring(this.startPos, this.pos)));
+                        return new NumberLiteralToken(parseInt(this.src.substring(this.startPos, this.pos)));
                     }
                     else {
                         return null;
@@ -701,7 +701,7 @@ module TypeScript {
                 }
                 else {
                     if (atLeastOneDigit) {
-                        return new NumberToken(parseInt(this.src.substring(this.startPos, this.pos)));
+                        return new NumberLiteralToken(parseInt(this.src.substring(this.startPos, this.pos)));
                     }
                     else {
                         return null;
@@ -733,7 +733,7 @@ module TypeScript {
                         // dot not part of number
                         if (atLeastOneDigit) {
                             // DecimalDigit* . DecimalDigit+
-                            return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
+                            return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
                         }
                         else {
                             this.pos = svPos;
@@ -764,7 +764,7 @@ module TypeScript {
                     else {
                         // DecimalDigit+ . DecimalDigit* [eE] DecimalDigit+
                         if (atLeastOneDigit) {
-                            return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                            return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)));
                         }
                         else {
                             this.pos = svPos;
@@ -786,7 +786,7 @@ module TypeScript {
                     }
                     else if (state == NumberScanState.InEmptyFraction || state == NumberScanState.InFraction) {
                         // This case will not generate bad javascript if we miss the fractional part, but we just want to be consistent with the dot case
-                        return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
+                        return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
                     }
                     else {
                         if (!atLeastOneDigit) {
@@ -795,7 +795,7 @@ module TypeScript {
                             return null;
                         }
                         else {
-                            return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                            return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)));
                         }
                     }
                 }
@@ -806,7 +806,7 @@ module TypeScript {
                         return null;
                     }
                     else {
-                        return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
+                        return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
                     }
                 }
             }
@@ -989,7 +989,7 @@ module TypeScript {
                 if (regex) {
                     // no line boundary in regex string
                     this.col = svCol + (this.pos - this.startPos);
-                    return new RegexToken(regex);
+                    return new RegularExpressionLiteralToken(regex);
                 }
             }
             this.pos = svPos;
@@ -1264,7 +1264,7 @@ module TypeScript {
                         // skip past end code
                         this.nextChar();
                     }
-                    return new StringToken(this.src.substring(this.startPos, this.pos));
+                    return new StringLiteralToken(this.src.substring(this.startPos, this.pos));
                 }
                 else if (autoToken[this.ch]) {
                     var atok = autoToken[this.ch];
