@@ -72,7 +72,7 @@ module TypeScript {
         Equals,
         PlusEquals,
         MinusEquals,
-        AsterixEquals,
+        AsteriskEquals,
         SlashEquals,
         PercentEquals,
         AmpersandEquals,
@@ -101,7 +101,7 @@ module TypeScript {
         GreaterThanGreaterThanGreaterThan,
         Plus,
         Minus,
-        Asterix,
+        Asterisk,
         Slash,
         Percent,
         Tilde,
@@ -268,7 +268,7 @@ module TypeScript {
     setTokenInfo(TokenID.Equals, Reservation.None, OperatorPrecedence.Asg, NodeType.Asg, OperatorPrecedence.No, NodeType.None, "=", ErrorRecoverySet.Asg); // =
     setTokenInfo(TokenID.PlusEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgAdd, OperatorPrecedence.No, NodeType.None, "+=", ErrorRecoverySet.BinOp); // +=
     setTokenInfo(TokenID.MinusEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgSub, OperatorPrecedence.No, NodeType.None, "-=", ErrorRecoverySet.BinOp); // -=
-    setTokenInfo(TokenID.AsterixEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgMul, OperatorPrecedence.No, NodeType.None, "*=", ErrorRecoverySet.BinOp); // *=
+    setTokenInfo(TokenID.AsteriskEquals, Reservation.None, OperatorPrecedence.Asg, NodeType.AsgMul, OperatorPrecedence.No, NodeType.None, "*=", ErrorRecoverySet.BinOp); // *=
 
 
 
@@ -300,7 +300,7 @@ module TypeScript {
     setTokenInfo(TokenID.GreaterThanGreaterThanGreaterThan, Reservation.None, OperatorPrecedence.Shf, NodeType.Rs2, OperatorPrecedence.No, NodeType.None, ">>>", ErrorRecoverySet.BinOp); // >>>
     setTokenInfo(TokenID.Plus, Reservation.None, OperatorPrecedence.Add, NodeType.Add, OperatorPrecedence.Uni, NodeType.Pos, "+", ErrorRecoverySet.AddOp); // +
     setTokenInfo(TokenID.Minus, Reservation.None, OperatorPrecedence.Add, NodeType.Sub, OperatorPrecedence.Uni, NodeType.Neg, "-", ErrorRecoverySet.AddOp); // -
-    setTokenInfo(TokenID.Asterix, Reservation.None, OperatorPrecedence.Mul, NodeType.Mul, OperatorPrecedence.No, NodeType.None, "*", ErrorRecoverySet.BinOp); // *
+    setTokenInfo(TokenID.Asterisk, Reservation.None, OperatorPrecedence.Mul, NodeType.Mul, OperatorPrecedence.No, NodeType.None, "*", ErrorRecoverySet.BinOp); // *
     setTokenInfo(TokenID.Slash, Reservation.None, OperatorPrecedence.Mul, NodeType.Div, OperatorPrecedence.No, NodeType.None, "/", ErrorRecoverySet.BinOp); // /
     setTokenInfo(TokenID.Percent, Reservation.None, OperatorPrecedence.Mul, NodeType.Mod, OperatorPrecedence.No, NodeType.None, "%", ErrorRecoverySet.BinOp); // %
     setTokenInfo(TokenID.Tilde, Reservation.None, OperatorPrecedence.No, NodeType.None, OperatorPrecedence.Uni, NodeType.Not, "~", ErrorRecoverySet.PreOp); // ~

@@ -1417,11 +1417,11 @@ module TypeScript {
                     case LexCodeMUL:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsterixEquals];
+                            return staticTokens[TokenID.AsteriskEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Asterix];
+                            return staticTokens[TokenID.Asterisk];
                         }
                     // break;
                     case LexCodePCT:

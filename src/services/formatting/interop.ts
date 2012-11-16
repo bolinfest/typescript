@@ -2291,7 +2291,7 @@ module Formatting {
                 case TypeScript.TokenID.Equals: return AuthorTokenKind.atkAsg;
                 case TypeScript.TokenID.PlusEquals: return AuthorTokenKind.atkAsgAdd;
                 case TypeScript.TokenID.MinusEquals: return AuthorTokenKind.atkAsgSub;
-                case TypeScript.TokenID.AsterixEquals: return AuthorTokenKind.atkAsgMul;
+                case TypeScript.TokenID.AsteriskEquals: return AuthorTokenKind.atkAsgMul;
                 case TypeScript.TokenID.SlashEquals: return AuthorTokenKind.atkAsgDiv;
                 case TypeScript.TokenID.PercentEquals: return AuthorTokenKind.atkAsgMod;
                 case TypeScript.TokenID.AmpersandEquals: return AuthorTokenKind.atkAsgAnd;
@@ -2320,7 +2320,7 @@ module Formatting {
                 case TypeScript.TokenID.GreaterThanGreaterThanGreaterThan: return AuthorTokenKind.atkRs2;
                 case TypeScript.TokenID.Plus: return AuthorTokenKind.atkAdd;
                 case TypeScript.TokenID.Minus: return AuthorTokenKind.atkSub;
-                case TypeScript.TokenID.Asterix: return AuthorTokenKind.atkMult;
+                case TypeScript.TokenID.Asterisk: return AuthorTokenKind.atkMult;
                 case TypeScript.TokenID.Slash: return AuthorTokenKind.atkDiv;
                 case TypeScript.TokenID.Percent: return AuthorTokenKind.atkPct;
                 case TypeScript.TokenID.Tilde: return AuthorTokenKind.atkTilde;
