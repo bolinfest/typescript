@@ -330,7 +330,9 @@ module TypeScript {
     }
 
     export class Token {
-        constructor (public tokenId: TokenID) { }
+        constructor (public tokenId: TokenID) {
+        }
+
         public toString() {
             return "token: " + this.tokenId + " " + this.getText() + " (" + (<any>TokenID)._map[this.tokenId] + ")";
         }
@@ -356,6 +358,7 @@ module TypeScript {
                     }
                 }
             }
+
             return TokenClass.Punctuation;
         }
     }
@@ -364,9 +367,11 @@ module TypeScript {
         constructor (public value: number, public hasEmptyFraction?: bool) {
             super(TokenID.NumberLiteral);
         }
+
         public getText(): string {
             return this.hasEmptyFraction ? this.value.toString() + ".0" : this.value.toString();
         }
+
         public classification(): TokenClass {
             return TokenClass.Literal;
         }
@@ -376,6 +381,7 @@ module TypeScript {
         constructor (public value: string) {
             super(TokenID.StringLiteral);
         }
+
         public getText(): string {
             return this.value;
         }
@@ -398,10 +404,8 @@ module TypeScript {
     }
 
     export class WhitespaceToken extends Token {
-        public tokenId: TokenID;
         constructor (tokenId: TokenID, public value: string) {
             super(tokenId);
-            this.tokenId = tokenId;
         }
 
         public getText(): string {
@@ -414,10 +418,8 @@ module TypeScript {
     }
 
     export class CommentToken extends Token {
-        public tokenID: TokenID;
         constructor (tokenID: TokenID, public value: string, public isBlock: bool, public startPos: number, public line: number, public endsLine: bool) {
             super(tokenID);
-            this.tokenID = tokenID;
         }
 
         public getText(): string {
@@ -433,6 +435,7 @@ module TypeScript {
         constructor(public regex) {
             super(TokenID.RegularExpressionLiteral);
         }
+
         public getText(): string {
             return this.regex.toString();
         }
