@@ -227,7 +227,7 @@ module TypeScript {
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.recordSourceMappingStart(this);
-            emitter.emitJavascriptList(this, null, TokenID.SemiColon, startLine, false, false);
+            emitter.emitJavascriptList(this, null, TokenID.Semicolon, startLine, false, false);
             emitter.recordSourceMappingEnd(this);
         }
 
@@ -1177,7 +1177,7 @@ module TypeScript {
             if (this.emitRequired()) {
                 emitter.emitParensAndCommentsInPlace(this, true);
                 emitter.recordSourceMappingStart(this);
-                emitter.emitJavascriptList(this.bod, null, TokenID.SemiColon, true, false, false, true, this.requiresInherits);
+                emitter.emitJavascriptList(this.bod, null, TokenID.Semicolon, true, false, false, true, this.requiresInherits);
                 emitter.recordSourceMappingEnd(this);
                 emitter.emitParensAndCommentsInPlace(this, false);
             }
@@ -1398,7 +1398,7 @@ module TypeScript {
             }
             var temp = emitter.setInObjectLiteral(false);
             if (this.stmts) {
-                emitter.emitJavascriptList(this.stmts, null, TokenID.SemiColon, true, false, false);
+                emitter.emitJavascriptList(this.stmts, null, TokenID.Semicolon, true, false, false);
             }
             if (this.isStatementBlock) {
                 emitter.indenter.decreaseIndent();
@@ -1505,7 +1505,7 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
             emitter.writeToOutput("while(");
-            emitter.emitJavascript(this.cond, TokenID.WHILE, false);
+            emitter.emitJavascript(this.cond, TokenID.While, false);
             emitter.writeToOutput(")");
             emitter.emitJavascriptStatements(this.body, false, false);
             emitter.setInObjectLiteral(temp);
@@ -1567,7 +1567,7 @@ module TypeScript {
             emitter.writeToOutput("while");
             emitter.recordSourceMappingEnd(this.whileAST);
             emitter.writeToOutput('(');
-            emitter.emitJavascript(this.cond, TokenID.RParen, false);
+            emitter.emitJavascript(this.cond, TokenID.CloseParen, false);
             emitter.writeToOutput(")");
             emitter.setInObjectLiteral(temp);
             emitter.recordSourceMappingEnd(this);
@@ -1623,7 +1623,7 @@ module TypeScript {
             var temp = emitter.setInObjectLiteral(false);
             emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("if(");
-            emitter.emitJavascript(this.cond, TokenID.IF, false);
+            emitter.emitJavascript(this.cond, TokenID.If, false);
             emitter.writeToOutput(")");
             emitter.recordSourceMappingEnd(this.statement);
             emitter.emitJavascriptStatements(this.thenBod, true, false);
@@ -1702,7 +1702,7 @@ module TypeScript {
             var temp = emitter.setInObjectLiteral(false);
             if (this.returnExpression) {
                 emitter.writeToOutput("return ");
-                emitter.emitJavascript(this.returnExpression, TokenID.SemiColon, false);
+                emitter.emitJavascript(this.returnExpression, TokenID.Semicolon, false);
             }
             else {
                 emitter.writeToOutput("return;");
@@ -1797,9 +1797,9 @@ module TypeScript {
             var temp = emitter.setInObjectLiteral(false);
             emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("for(");
-            emitter.emitJavascript(this.lval, TokenID.FOR, false);
+            emitter.emitJavascript(this.lval, TokenID.For, false);
             emitter.writeToOutput(" in ");
-            emitter.emitJavascript(this.obj, TokenID.FOR, false);
+            emitter.emitJavascript(this.obj, TokenID.For, false);
             emitter.writeToOutput(")");
             emitter.recordSourceMappingEnd(this.statement);
             emitter.emitJavascriptStatements(this.body, true, false);
@@ -1866,17 +1866,17 @@ module TypeScript {
             emitter.writeToOutput("for(");
             if (this.init) {
                 if (this.init.nodeType != NodeType.List) {
-                    emitter.emitJavascript(this.init, TokenID.FOR, false);
+                    emitter.emitJavascript(this.init, TokenID.For, false);
                 }
                 else {
                     emitter.setInVarBlock((<ASTList>this.init).members.length); 
-                    emitter.emitJavascriptList(this.init, null, TokenID.FOR, false, false, false);
+                    emitter.emitJavascriptList(this.init, null, TokenID.For, false, false, false);
                 }
             }
             emitter.writeToOutput("; ");
-            emitter.emitJavascript(this.cond, TokenID.FOR, false);
+            emitter.emitJavascript(this.cond, TokenID.For, false);
             emitter.writeToOutput("; ");
-            emitter.emitJavascript(this.incr, TokenID.FOR, false);
+            emitter.emitJavascript(this.incr, TokenID.For, false);
             emitter.writeToOutput(")");
             emitter.emitJavascriptStatements(this.body, true, false);
             emitter.setInObjectLiteral(temp);
@@ -1961,7 +1961,7 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput("with (");
             if (this.expr) {
-                emitter.emitJavascript(this.expr, TokenID.WITH, false);
+                emitter.emitJavascript(this.expr, TokenID.With, false);
             }
 
             emitter.writeToOutput(")");
@@ -2001,7 +2001,7 @@ module TypeScript {
             var casesLen = this.caseList.members.length;
             for (var i = 0; i < casesLen; i++) {
                 var caseExpr = this.caseList.members[i];
-                emitter.emitJavascript(caseExpr, TokenID.CASE, true);
+                emitter.emitJavascript(caseExpr, TokenID.Case, true);
                 emitter.writeLineToOutput("");
             }
             emitter.indenter.decreaseIndent();
@@ -2153,8 +2153,8 @@ module TypeScript {
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.recordSourceMappingStart(this);
-            emitter.emitJavascript(this.tryNode, TokenID.TRY, false);
-            emitter.emitJavascript(this.finallyNode, TokenID.FINALLY, false);
+            emitter.emitJavascript(this.tryNode, TokenID.Try, false);
+            emitter.emitJavascript(this.finallyNode, TokenID.Finally, false);
             emitter.recordSourceMappingEnd(this);
         }
 
@@ -2201,8 +2201,8 @@ module TypeScript {
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            emitter.emitJavascript(this.tryNode, TokenID.TRY, false);
-            emitter.emitJavascript(this.catchNode, TokenID.CATCH, false);
+            emitter.emitJavascript(this.tryNode, TokenID.Try, false);
+            emitter.emitJavascript(this.catchNode, TokenID.Catch, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -2252,7 +2252,7 @@ module TypeScript {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput("try ");
-            emitter.emitJavascript(this.body, TokenID.TRY, false);
+            emitter.emitJavascript(this.body, TokenID.Try, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -2288,10 +2288,10 @@ module TypeScript {
             emitter.writeToOutput(" ");
             emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("catch (");
-            emitter.emitJavascript(this.param, TokenID.LParen, false);
+            emitter.emitJavascript(this.param, TokenID.OpenParen, false);
             emitter.writeToOutput(")");
             emitter.recordSourceMappingEnd(this.statement);
-            emitter.emitJavascript(this.body, TokenID.CATCH, false);
+            emitter.emitJavascript(this.body, TokenID.Catch, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -2360,7 +2360,7 @@ module TypeScript {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput("finally");
-            emitter.emitJavascript(this.body, TokenID.FINALLY, false);
+            emitter.emitJavascript(this.body, TokenID.Finally, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }

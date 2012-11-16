@@ -213,11 +213,11 @@ module TypeScript {
             }
             var pendingRightCurlies = 0;
             while (((ersTok & errorRecoverySet) == ErrorRecoverySet.None) ||
-                   (this.tok.tokenId == TokenID.RCurly) && (pendingRightCurlies > 0)) {
-                if (this.tok.tokenId == TokenID.LCurly) {
+                   (this.tok.tokenId == TokenID.CloseBrace) && (pendingRightCurlies > 0)) {
+                if (this.tok.tokenId == TokenID.OpenBrace) {
                     pendingRightCurlies++;
                 }
-                else if (this.tok.tokenId == TokenID.RCurly) {
+                else if (this.tok.tokenId == TokenID.CloseBrace) {
                     pendingRightCurlies--;
                 }
                 this.tok = this.scanner.scan();
@@ -350,7 +350,7 @@ module TypeScript {
             }
 
             var membersMinChar = this.scanner.startPos;
-            this.chkCurTok(TokenID.LCurly, "Expected '{'", errorRecoverySet | ErrorRecoverySet.ID);
+            this.chkCurTok(TokenID.OpenBrace, "Expected '{'", errorRecoverySet | ErrorRecoverySet.ID);
             this.pushDeclLists();
             var members = new ASTList();
             members.minChar = membersMinChar;
@@ -376,7 +376,7 @@ module TypeScript {
                     memberName.minChar = this.scanner.startPos;
                     memberName.limChar = this.scanner.pos;
                 }
-                else if (this.tok.tokenId == TokenID.RCurly) {
+                else if (this.tok.tokenId == TokenID.CloseBrace) {
                     break;
                 }
                 else {
@@ -394,7 +394,7 @@ module TypeScript {
                 this.tok = this.scanner.scan();
                 postComments = this.parseComments();
 
-                if (this.tok.tokenId == TokenID.Asg) {
+                if (this.tok.tokenId == TokenID.Equals) {
                     this.tok = this.scanner.scan();
                     memberValue = this.parseExpr(errorRecoverySet, OperatorPrecedence.Cma, true,
                                           TypeContext.NoTypes);
@@ -447,7 +447,7 @@ module TypeScript {
             endingToken.minChar = this.scanner.startPos;
             endingToken.limChar = this.scanner.pos;
 
-            this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+            this.chkCurTok(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
             members.limChar = this.scanner.lastTokenLimChar();
             var modDecl = new ModuleDecl(name, members, this.topVarList(), this.topScopeList(), endingToken);
             modDecl.modFlags |= ModuleFlags.IsEnum;
@@ -514,17 +514,17 @@ module TypeScript {
 
                 this.tok = this.scanner.scan();
 
-                this.chkCurTok(TokenID.Asg, "Expected =", errorRecoverySet | ErrorRecoverySet.ID);
+                this.chkCurTok(TokenID.Equals, "Expected =", errorRecoverySet | ErrorRecoverySet.ID);
 
                 var aliasPreComments = this.parseComments();
 
                 var limChar;
                 if (this.tok.tokenId == TokenID.ID || convertTokToID(this.tok, this.strictMode)) {
 
-                    if (this.tok.tokenId == TokenID.MODULE) {
+                    if (this.tok.tokenId == TokenID.Module) {
                         limChar = this.scanner.pos;
                         this.tok = this.scanner.scan();
-                        if (this.tok.tokenId == TokenID.LParen) {
+                        if (this.tok.tokenId == TokenID.OpenParen) {
                             this.tok = this.scanner.scan();
 
                             if (this.tok.tokenId == TokenID.QString || this.tok.tokenId == TokenID.ID || convertTokToID(this.tok, this.strictMode)) {
@@ -559,14 +559,14 @@ module TypeScript {
                             }
 
                             limChar = this.scanner.pos;
-                            this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.ID);
+                            this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.ID);
                             
                             if (alias) {
                                 alias.postComments = this.parseComments();
                             }
                             
                             // gobble up the ';' if there is one...
-                            if (this.tok.tokenId == TokenID.SemiColon) {
+                            if (this.tok.tokenId == TokenID.Semicolon) {
                                 limChar = this.scanner.pos;
                                 this.tok = this.scanner.scan();
                             }
@@ -583,7 +583,7 @@ module TypeScript {
                     this.reportParseError("Expected module name");
                     alias = new MissingIdentifier();
                     alias.minChar = this.scanner.startPos;
-                    if (this.tok.tokenId == TokenID.SemiColon) {
+                    if (this.tok.tokenId == TokenID.Semicolon) {
                         alias.limChar = this.scanner.startPos;
                     } else {
                         alias.limChar = this.scanner.pos;
@@ -641,7 +641,7 @@ module TypeScript {
 
                     this.tok = this.scanner.scan();
                 }
-                else if (this.tok.tokenId == TokenID.LCurly) {
+                else if (this.tok.tokenId == TokenID.OpenBrace) {
                     this.reportParseError("Module name missing");
                     name = new Identifier("");
                     // "fake" position of where the ID would be
@@ -660,7 +660,7 @@ module TypeScript {
 
                 var moduleBody = new ASTList();
                 var bodyMinChar = this.scanner.startPos;
-                this.chkCurTok(TokenID.LCurly, "Expected '{'", errorRecoverySet | ErrorRecoverySet.ID);
+                this.chkCurTok(TokenID.OpenBrace, "Expected '{'", errorRecoverySet | ErrorRecoverySet.ID);
                 this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly, moduleBody, true, true,
                                 AllowedElements.ModuleMembers, modifiers);
                 moduleBody.minChar = bodyMinChar;
@@ -669,7 +669,7 @@ module TypeScript {
                 var endingToken = new ASTSpan();
                 endingToken.minChar = this.scanner.startPos;
                 endingToken.limChar = this.scanner.pos;
-                this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+                this.chkCurTok(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
 
                 var limChar = this.scanner.pos;
                 var moduleDecl: ModuleDecl;
@@ -741,10 +741,10 @@ module TypeScript {
             public parseTypeReferenceTail(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST): TypeReference {
                 var result = new TypeReference(term, 0);
                 result.minChar = minChar;
-                while (this.tok.tokenId == TokenID.LBrack) {
+                while (this.tok.tokenId == TokenID.OpenBracket) {
                     this.tok = this.scanner.scan();
                     result.arrayCount++;
-                    this.chkCurTok(TokenID.RBrack, "Expected ']'",
+                    this.chkCurTok(TokenID.CloseBracket, "Expected ']'",
                               errorRecoverySet | ErrorRecoverySet.LBrack);
                 }
                 result.limChar = this.scanner.lastTokenLimChar();
@@ -807,15 +807,15 @@ module TypeScript {
                 var isConstructorMember = false;
 
                 switch (this.tok.tokenId) {
-                    case TokenID.VOID:
+                    case TokenID.Void:
                         if (!allowVoid) {
                             this.reportParseError("void not a valid type in this context");
                         }
                     // Intentional fall-through
-                    case TokenID.ANY:
-                    case TokenID.NUMBER:
-                    case TokenID.BOOL:
-                    case TokenID.STRING: {
+                    case TokenID.Any:
+                    case TokenID.Number:
+                    case TokenID.Bool:
+                    case TokenID.String: {
                         var text = tokenTable[this.tok.tokenId].text;
                         var predefinedIdentifier = new Identifier(text);
                         predefinedIdentifier.minChar = minChar;
@@ -829,13 +829,13 @@ module TypeScript {
                         ident.limChar = this.scanner.pos;
                         return this.parseNamedType(errorRecoverySet, minChar, ident, true);
 
-                    case TokenID.LCurly:
+                    case TokenID.OpenBrace:
                         return this.parseObjectType(minChar, errorRecoverySet);
 
-                    case TokenID.NEW:
+                    case TokenID.New:
                         this.tok = this.scanner.scan();
                         // can't use chkCurrentTok, since we don't want to advance the token
-                        if (this.tok.tokenId != TokenID.LParen) {
+                        if (this.tok.tokenId != TokenID.OpenParen) {
                             this.reportParseError("Expected '('");
                         }
                         else {
@@ -843,7 +843,7 @@ module TypeScript {
                             // fall through...
                         }
 
-                    case TokenID.LParen: {
+                    case TokenID.OpenParen: {
                         // ( formals ) => type
                         var formals = new ASTList();
                         var variableArgList =
@@ -887,7 +887,7 @@ module TypeScript {
                 this.parseTypeMemberList(errorRecoverySet | ErrorRecoverySet.RCurly, members);
                 this.inInterfaceDecl = prevInInterfaceDecl;
 
-                this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+                this.chkCurTok(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
                 var interfaceDecl = new TypeDecl(
                     NodeType.Interface, this.anonId, members, /*args:*/ null, /*extends:*/ null, /*implementsL*/ null);
 
@@ -926,7 +926,7 @@ module TypeScript {
                         wasShorthand = true;
                         this.tok = this.scanner.scan();
                     }
-                    if (wasShorthand && this.tok.tokenId != TokenID.LCurly) {
+                    if (wasShorthand && this.tok.tokenId != TokenID.OpenBrace) {
                         var retExpr = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
                                               OperatorPrecedence.Asg, true,
                                               TypeContext.NoTypes);
@@ -939,7 +939,7 @@ module TypeScript {
                     }
                     else {
                         this.state = ParseState.StartStmtList;
-                        this.chkCurTok(TokenID.LCurly, "Expected '{'", errorRecoverySet |
+                        this.chkCurTok(TokenID.OpenBrace, "Expected '{'", errorRecoverySet |
                                   ErrorRecoverySet.StmtStart);
                         var svInFnc = this.inFnc;
                         isAnonLambda = wasShorthand;
@@ -965,14 +965,14 @@ module TypeScript {
                 var staticFuncDecl = false;
                 var limChar = this.scanner.pos;
                 if (requiresSignature) {
-                    this.chkCurTok(TokenID.SemiColon, this.tok.tokenId == TokenID.LCurly ? "Function declarations are not permitted within interfaces, ambient modules or classes" : "Expected ';'", errorRecoverySet);
+                    this.chkCurTok(TokenID.Semicolon, this.tok.tokenId == TokenID.OpenBrace ? "Function declarations are not permitted within interfaces, ambient modules or classes" : "Expected ';'", errorRecoverySet);
                 }
                 else {
                     if (!wasShorthand || isAnonLambda) {
                         funcDecl.endingToken = new ASTSpan();
                         funcDecl.endingToken.minChar = this.scanner.startPos;
                         funcDecl.endingToken.limChar = this.scanner.pos;
-                        this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+                        this.chkCurTok(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
 
                         if (isAnonLambda) {
                             funcDecl.fncFlags |= FncFlags.IsFatArrowFunction;
@@ -1066,7 +1066,7 @@ module TypeScript {
                     this.tok = this.scanner.scan();
                 }
                 else if (!isLambda) {
-                    this.chkCurTok(TokenID.LParen, "Expected '('",
+                    this.chkCurTok(TokenID.OpenParen, "Expected '('",
                               errorRecoverySet | ErrorRecoverySet.RParen);
                 }
                 var sawEllipsis = false;
@@ -1086,7 +1086,7 @@ module TypeScript {
                     var argFlags = VarFlags.None;
                     var argMinChar = this.scanner.startPos;
 
-                    if (this.inferPropertiesFromThisAssignment && this.tok.tokenId == TokenID.THIS) {
+                    if (this.inferPropertiesFromThisAssignment && this.tok.tokenId == TokenID.This) {
                         if (!isClassConstr) {
                             this.reportParseError("Instance property declarations using 'this' may only be used in class constructors");
                         }
@@ -1097,21 +1097,21 @@ module TypeScript {
                             this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
                         }
                     }
-                    if (this.tok.tokenId == TokenID.PUBLIC) {
+                    if (this.tok.tokenId == TokenID.Public) {
                         argFlags |= (VarFlags.Public | VarFlags.Property);
 
                         if (this.currentClassDefinition) {
                             this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
                         }
                     }
-                    else if (this.tok.tokenId == TokenID.PRIVATE) {
+                    else if (this.tok.tokenId == TokenID.Private) {
                         argFlags |= (VarFlags.Private | VarFlags.Property);
 
                         if (this.currentClassDefinition) {
                             this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
                         }
                     }
-                    else if (this.tok.tokenId == TokenID.STATIC && isClassConstr) {
+                    else if (this.tok.tokenId == TokenID.Static && isClassConstr) {
                         this.reportParseError("Static properties can not be declared as parameter properties");
                         this.tok = this.scanner.scan();
                     }
@@ -1127,7 +1127,7 @@ module TypeScript {
                             this.tok = this.scanner.scan();
                         }
 
-                        if (this.inferPropertiesFromThisAssignment && this.tok.tokenId == TokenID.THIS) {
+                        if (this.inferPropertiesFromThisAssignment && this.tok.tokenId == TokenID.This) {
                             if (!isClassConstr) {
                                 this.reportParseError("Instance property declarations using 'this' may only be used in class constructors");
                             }
@@ -1195,7 +1195,7 @@ module TypeScript {
                         // check for default parameter
                         // REVIEW: In the case of a typed reference, assume that parseTypeReference or one
                         // of its children in the call graph advanced tok
-                        if (this.tok.tokenId == TokenID.Asg) {
+                        if (this.tok.tokenId == TokenID.Equals) {
                             if (isSig) {
                                 this.reportParseError("Arguments in signatures may not have default values");
                             }
@@ -1253,10 +1253,10 @@ module TypeScript {
                 }
 
                 if (isIndexer) {
-                    this.chkCurTok(TokenID.RBrack, "Expected ']'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
+                    this.chkCurTok(TokenID.CloseBracket, "Expected ']'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
                 }
                 else if (expectClosingRParen) {
-                    this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
+                    this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
                 }
                 formals.limChar = this.scanner.lastTokenLimChar(); // ')' or ']'
                 return sawEllipsis;
@@ -1318,7 +1318,7 @@ module TypeScript {
                 var isOverload = false;
                 var isGetter = hasFlag(modifiers, Modifiers.Getter);
                 var isSetter = hasFlag(modifiers, Modifiers.Setter);
-                if ((this.tok.tokenId == TokenID.LParen) || (indexer && (this.tok.tokenId == TokenID.LBrack)) || (lambdaArgContext && (lambdaArgContext.preProcessedLambdaArgs || this.tok.tokenId == TokenID.Ellipsis))) {
+                if ((this.tok.tokenId == TokenID.OpenParen) || (indexer && (this.tok.tokenId == TokenID.OpenBracket)) || (lambdaArgContext && (lambdaArgContext.preProcessedLambdaArgs || this.tok.tokenId == TokenID.Ellipsis))) {
                     // arg list
                     variableArgList = this.parseFormalParameterList(errorRecoverySet, args, false, requiresSignature, indexer, isGetter, isSetter, !!lambdaArgContext, lambdaArgContext ? lambdaArgContext.preProcessedLambdaArgs : null, expectClosingRParen);
                 }
@@ -1340,7 +1340,7 @@ module TypeScript {
                 // REVIEW:
                 // Currently, it's imperative that ambient functions *not* be marked as overloads.  At some point, we may
                 // want to unify the two concepts internally
-                if (isDecl && !(this.parsingDeclareFile || markedAsAmbient) && (!isMethod || !(this.ambientModule || this.ambientClass || this.inInterfaceDecl)) && this.tok.tokenId == TokenID.SemiColon) {
+                if (isDecl && !(this.parsingDeclareFile || markedAsAmbient) && (!isMethod || !(this.ambientModule || this.ambientClass || this.inInterfaceDecl)) && this.tok.tokenId == TokenID.Semicolon) {
                     isOverload = true;
                     isDecl = false;
                     requiresSignature = true;
@@ -1418,7 +1418,7 @@ module TypeScript {
                 // skip left paren
                 this.tok = this.scanner.scan();
 
-                if (this.tok.tokenId !== TokenID.RParen) {
+                if (this.tok.tokenId !== TokenID.CloseParen) {
                     while (true) {
                         if (args.members.length > 0xffff) {
                             this.reportParseError("max number of args exceeded");
@@ -1443,7 +1443,7 @@ module TypeScript {
             var currentList = extendsList;
             for (; ;) {
                 if (keyword) {
-                    if (this.tok.tokenId == TokenID.IMPLEMENTS) {
+                    if (this.tok.tokenId == TokenID.Implements) {
                         if (interfaceOnly) {
                             this.reportParseError("interfaces can not implement other types");
                         }
@@ -1470,7 +1470,7 @@ module TypeScript {
                         baseName.flags |= ASTFlags.Error;
                     }
                 }
-                if (this.tok.tokenId == TokenID.LParen) {
+                if (this.tok.tokenId == TokenID.OpenParen) {
                     if (isClass) {
                         this.reportParseError("Base classes may only be initialized via a 'super' call within the constructor body");
                     }
@@ -1490,8 +1490,8 @@ module TypeScript {
                     this.tok = this.scanner.scan();
                     continue;
                 }
-                else if ((this.tok.tokenId == TokenID.EXTENDS) ||
-                         (this.tok.tokenId == TokenID.IMPLEMENTS)) {
+                else if ((this.tok.tokenId == TokenID.Extends) ||
+                         (this.tok.tokenId == TokenID.Implements)) {
                     currentList = extendsList;
                     keyword = true;
                     continue;
@@ -1541,8 +1541,8 @@ module TypeScript {
             var interfacesImplemented: ASTList = null;
             var requiresSignature = false;
 
-            if ((this.tok.tokenId == TokenID.EXTENDS) ||
-                (this.tok.tokenId == TokenID.IMPLEMENTS)) {
+            if ((this.tok.tokenId == TokenID.Extends) ||
+                (this.tok.tokenId == TokenID.Implements)) {
                 baseClass = new ASTList();
                 interfacesImplemented = new ASTList();
                 this.parseBaseList(baseClass, interfacesImplemented, errorRecoverySet, false, true);
@@ -1578,19 +1578,19 @@ module TypeScript {
             var resetModifiers = false;
 
             var membersMinChar = this.scanner.startPos;
-            this.chkCurTok(TokenID.LCurly, "Expected '{'", errorRecoverySet);
+            this.chkCurTok(TokenID.OpenBrace, "Expected '{'", errorRecoverySet);
 
             this.nestingLevel++;
 
             var currentMemberMinChar = this.scanner.startPos;
             var wasGetOrSetId = false;
 
-            while (!(this.tok.tokenId == TokenID.RCurly || this.tok.tokenId == TokenID.EOF)) {
+            while (!(this.tok.tokenId == TokenID.CloseBrace || this.tok.tokenId == TokenID.EOF)) {
                 var scanNext = true;
                 var publicOrPrivateFlags = Modifiers.Public | Modifiers.Private;
 
                 // modifiers
-                if (this.tok.tokenId == TokenID.GET) {
+                if (this.tok.tokenId == TokenID.Get) {
                     if (modifiers & Modifiers.Getter) {
                         this.reportParseError("Duplicate 'get' declaration in class body");
                     }
@@ -1599,7 +1599,7 @@ module TypeScript {
                     }
                     modifiers |= Modifiers.Getter;
                 }
-                else if (this.tok.tokenId == TokenID.SET) {
+                else if (this.tok.tokenId == TokenID.Set) {
                     if (modifiers & Modifiers.Setter) {
                         this.reportParseError("Duplicate 'set' declaration in class body");
                     }
@@ -1609,25 +1609,25 @@ module TypeScript {
                     modifiers |= Modifiers.Setter;
 
                 }
-                else if (this.tok.tokenId == TokenID.PRIVATE) {
+                else if (this.tok.tokenId == TokenID.Private) {
                     if (modifiers & publicOrPrivateFlags) {
                         this.reportParseError("Multiple modifiers may not be applied to class members");
                     }
                     modifiers |= Modifiers.Private;
                 }
-                else if (this.tok.tokenId == TokenID.PUBLIC) {
+                else if (this.tok.tokenId == TokenID.Public) {
                     if (modifiers & publicOrPrivateFlags) {
                         this.reportParseError("Multiple modifiers may not be applied to class members");
                     }
                     modifiers |= Modifiers.Public;
                 }
-                else if (this.tok.tokenId == TokenID.STATIC) {
+                else if (this.tok.tokenId == TokenID.Static) {
                     if (modifiers & Modifiers.Static) { // only check for double instances of static
                         this.reportParseError("Multiple modifiers may not be applied to class members");
                     }
                     modifiers |= Modifiers.Static;
                 }  // constructors
-                else if (this.tok.tokenId == TokenID.CONSTRUCTOR) {
+                else if (this.tok.tokenId == TokenID.Constructor) {
 
                     if (modifiers != parentModifiers) {
                         this.reportParseError("Constructors may not have modifiers");
@@ -1653,7 +1653,7 @@ module TypeScript {
                         this.tok = this.scanner.scan();
                     }
 
-                    if (this.tok.tokenId == TokenID.LParen) {
+                    if (this.tok.tokenId == TokenID.OpenParen) {
                         this.parseClassMemberFunctionDeclaration(id, currentMemberMinChar, errorRecoverySet, modifiers);
                         scanNext = false; // parsing functions advances the token for us
                     }
@@ -1665,15 +1665,15 @@ module TypeScript {
                         var varDecl = this.parseClassMemberVariableDeclaration(id, currentMemberMinChar, false, errorRecoverySet, modifiers);
 
                         if (varDecl.init && varDecl.init.nodeType == NodeType.FuncDecl) {
-                            if (this.tok.tokenId == TokenID.RCurly) {
+                            if (this.tok.tokenId == TokenID.CloseBrace) {
                                 scanNext = false;
                             }
                         }
-                        else if (varDecl.init && varDecl.init.nodeType == NodeType.ObjectLit && this.tok.tokenId != TokenID.SemiColon) {
+                        else if (varDecl.init && varDecl.init.nodeType == NodeType.ObjectLit && this.tok.tokenId != TokenID.Semicolon) {
                             scanNext = false;
                             varDecl.init.flags |= ASTFlags.AutomaticSemicolon;
                         }
-                        else if (this.tok.tokenId != TokenID.SemiColon) {
+                        else if (this.tok.tokenId != TokenID.Semicolon) {
                             this.reportParseError("Expected ';'");
                             scanNext = false;
                         }
@@ -1681,17 +1681,17 @@ module TypeScript {
 
                     resetModifiers = true;
                 } // catch errant uses of 'super'
-                else if (this.tok.tokenId == TokenID.SUPER) {
+                else if (this.tok.tokenId == TokenID.Super) {
                     this.reportParseError("Base class initializers must be the first statement in a class definition");
                 }
                 else if (!wasGetOrSetId && ((modifiers & Modifiers.Getter) || (modifiers & Modifiers.Setter)) &&
-                         (this.tok.tokenId == TokenID.LParen) || (this.tok.tokenId == TokenID.Asg)) {
+                         (this.tok.tokenId == TokenID.OpenParen) || (this.tok.tokenId == TokenID.Equals)) {
                              // catch a 'get' or 'set' used as an identifier
                     wasGetOrSetId = true;
                     scanNext = false;
 
                 }  // mark anything else as an error
-                else if (this.tok.tokenId != TokenID.SemiColon) { // jettison semicolons
+                else if (this.tok.tokenId != TokenID.Semicolon) { // jettison semicolons
                     this.reportParseError("Unexpected '" + this.tok.getText() + "' in class definition");
                     resetModifiers = true;
                 }
@@ -1708,7 +1708,7 @@ module TypeScript {
             }
 
             var membersLimChar = this.scanner.pos;
-            if (this.tok.tokenId == TokenID.RCurly) {
+            if (this.tok.tokenId == TokenID.CloseBrace) {
                 classDecl.endingToken = new ASTSpan();
                 classDecl.endingToken.minChar = this.scanner.startPos;
                 classDecl.endingToken.limChar = this.scanner.pos;
@@ -1740,14 +1740,14 @@ module TypeScript {
 
             this.tok = this.scanner.scan(); // scan past the 'constructor' token
 
-            if (this.tok.tokenId == TokenID.LParen) {
+            if (this.tok.tokenId == TokenID.OpenParen) {
                 variableArgList = this.parseFormalParameterList(errorRecoverySet, args, true, isAmbient, false, false, false, false, null, true);
                 if (args.members.length > 0) {
                     var lastArg = args.members[args.members.length - 1];
                 }
             }
 
-            var requiresSignature = isAmbient || this.tok.tokenId == TokenID.SemiColon;
+            var requiresSignature = isAmbient || this.tok.tokenId == TokenID.Semicolon;
 
 
             if (requiresSignature) {
@@ -1828,7 +1828,7 @@ module TypeScript {
                     this.parseTypeReference(errorRecoverySet | ErrorRecoverySet.Asg | ErrorRecoverySet.Comma, false);
             }
 
-            if (this.tok.tokenId == TokenID.Asg) {
+            if (this.tok.tokenId == TokenID.Equals) {
                 if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
                     this.reportParseError("context does not permit variable initializer");
                     if (this.errorRecovery) {
@@ -1959,11 +1959,14 @@ module TypeScript {
             var minChar = this.scanner.startPos;
 
             var propertyDecl = this.parsePropertyDeclaration(
-                errorRecoverySet, Modifiers.Public, /*requireSignature:*/ true, /*isStatic:*/ false);
+                errorRecoverySet, Modifiers.Public, /*requireSignature:*/ true, /*isStatic:*/ false);
+
             if (propertyDecl) {
                 propertyDecl.minChar = minChar;
 
-                if (propertyDecl.nodeType == NodeType.VarDecl) {                     this.chkCurTok(TokenID.SemiColon, "Expected ';'", errorRecoverySet);                }
+                if (propertyDecl.nodeType == NodeType.VarDecl) {
+                     this.chkCurTok(TokenID.Semicolon, "Expected ';'", errorRecoverySet);
+                }
             }
 
             return propertyDecl;
@@ -1973,7 +1976,7 @@ module TypeScript {
             errorRecoverySet |= ErrorRecoverySet.TypeScriptS;
             while (true) {
                 switch (this.tok.tokenId) {
-                    case TokenID.RCurly:
+                    case TokenID.CloseBrace:
                     case TokenID.EOF:
                         members.limChar = this.scanner.pos;
                         return;
@@ -2011,21 +2014,21 @@ module TypeScript {
                 }
             }
             var interfaces: ASTList = null;
-            if (this.tok.tokenId == TokenID.EXTENDS) {
+            if (this.tok.tokenId == TokenID.Extends) {
                 interfaces = new ASTList();
                 interfaces.minChar = this.scanner.startPos;
                 this.parseBaseList(interfaces, null, errorRecoverySet, true, false);
             }
 
             var membersMinChar = this.scanner.startPos;
-            this.chkCurTok(TokenID.LCurly, "Expected '{'", errorRecoverySet | ErrorRecoverySet.TypeScriptS);
+            this.chkCurTok(TokenID.OpenBrace, "Expected '{'", errorRecoverySet | ErrorRecoverySet.TypeScriptS);
             var members = new ASTList();
             members.minChar = membersMinChar;
             var prevInInterfaceDecl = this.inInterfaceDecl;
             this.inInterfaceDecl = true;
             this.parseTypeMemberList(errorRecoverySet | ErrorRecoverySet.RCurly, members);
             this.inInterfaceDecl = prevInInterfaceDecl;
-            this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+            this.chkCurTok(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
 
             // REVIEW: According to the grammar, an interface declaration should actually just
             // have an 'ObjectType' and not a list of members.  We may want to consider making that
@@ -2074,7 +2077,7 @@ module TypeScript {
                 requireSignature = true;
             }
 
-            if (this.tok.tokenId == TokenID.LParen && !wasAccessorID) {
+            if (this.tok.tokenId == TokenID.OpenParen && !wasAccessorID) {
                 if (!requireSignature && !isStatic) {
                     this.reportParseError("Expected identifier in property declaration");
                     if (this.errorRecovery) {
@@ -2084,10 +2087,10 @@ module TypeScript {
                     }
                 }
             }
-            else if (this.tok.tokenId == TokenID.NEW) {
+            else if (this.tok.tokenId == TokenID.New) {
                 if (requireSignature) {
                     this.tok = this.scanner.scan();
-                    if (this.tok.tokenId == TokenID.LParen) {
+                    if (this.tok.tokenId == TokenID.OpenParen) {
                         isNew = true;
                     }
                 }
@@ -2103,7 +2106,7 @@ module TypeScript {
                     nameLimChar = this.scanner.pos;
                 }
             }
-            else if ((this.tok.tokenId == TokenID.LBrack) && requireSignature) {
+            else if ((this.tok.tokenId == TokenID.OpenBracket) && requireSignature) {
                 // indexer signature
                 isIndexer = true;
                 //REVIEW: Should we use a special "compiler reserved" identifier node?
@@ -2166,8 +2169,8 @@ module TypeScript {
                 this.tok = this.scanner.scan();
             }
 
-            if ((this.tok.tokenId == TokenID.LParen) ||
-                (isIndexer && (this.tok.tokenId == TokenID.LBrack))) {
+            if ((this.tok.tokenId == TokenID.OpenParen) ||
+                (isIndexer && (this.tok.tokenId == TokenID.OpenBracket))) {
                 var ers = errorRecoverySet | ErrorRecoverySet.RParen;
                 if (isIndexer) {
                     ers = errorRecoverySet | ErrorRecoverySet.RBrack;
@@ -2236,7 +2239,7 @@ module TypeScript {
                         this.parseTypeReference(errorRecoverySet | ErrorRecoverySet.Asg |
                                            ErrorRecoverySet.Comma, false);
                 }
-                if (this.tok.tokenId == TokenID.Asg) {
+                if (this.tok.tokenId == TokenID.Equals) {
                     if (requireSignature) {
                         this.reportParseError("context does not permit variable initializer");
                         if (this.errorRecovery) {
@@ -2347,7 +2350,7 @@ module TypeScript {
                     this.inFncDecl = prevInFncDecl;
                 }
 
-                if (this.tok.tokenId == TokenID.Asg) {
+                if (this.tok.tokenId == TokenID.Equals) {
                     if (hasFlag(varDecl.varFlags, VarFlags.Ambient)) {
                         this.reportParseError("Ambient variable can not have an initializer");
                     }
@@ -2395,7 +2398,7 @@ module TypeScript {
 
         public parseMemberList(errorRecoverySet: ErrorRecoverySet): ASTList {
             var elements = new ASTList();
-            if (this.tok.tokenId == TokenID.RCurly) {
+            if (this.tok.tokenId == TokenID.CloseBrace) {
                 return elements;
             }
 
@@ -2412,8 +2415,8 @@ module TypeScript {
 
             for (; ;) {
                 var accessorPattern = false;
-                if (this.tok.tokenId == TokenID.GET || this.tok.tokenId == TokenID.SET) {
-                    isSet = this.tok.tokenId == TokenID.SET;
+                if (this.tok.tokenId == TokenID.Get || this.tok.tokenId == TokenID.Set) {
+                    isSet = this.tok.tokenId == TokenID.Set;
                     getSetTok = this.tok;
                     getSetStartPos = this.scanner.startPos;
                     getSetPos = this.scanner.pos;
@@ -2550,7 +2553,7 @@ module TypeScript {
                 }
 
                 // trailing comma allowed
-                if (this.tok.tokenId == TokenID.RCurly) {
+                if (this.tok.tokenId == TokenID.CloseBrace) {
                     break;
                 }
             }
@@ -2564,7 +2567,7 @@ module TypeScript {
 
         public parseArrayList(errorRecoverySet: ErrorRecoverySet): ASTList {
             var elements: ASTList = null;
-            if (this.tok.tokenId == TokenID.RBrack) {
+            if (this.tok.tokenId == TokenID.CloseBracket) {
                 return elements;
             }
             else {
@@ -2576,7 +2579,7 @@ module TypeScript {
 
             for (; ;) {
                 if ((this.tok.tokenId == TokenID.Comma) ||
-                    (this.tok.tokenId == TokenID.RBrack)) {
+                    (this.tok.tokenId == TokenID.CloseBracket)) {
                     arg = new AST(NodeType.EmptyExpr);
                 }
                 else {
@@ -2611,10 +2614,10 @@ module TypeScript {
 
             // keywords first
             switch (this.tok.tokenId) {
-                case TokenID.NUMBER:
-                case TokenID.BOOL:
-                case TokenID.ANY:
-                case TokenID.STRING:
+                case TokenID.Number:
+                case TokenID.Bool:
+                case TokenID.Any:
+                case TokenID.String:
                     var tid = new Identifier(tokenTable[this.tok.tokenId].text);
                     if (hasFlag(typeContext, TypeContext.Primitive)) {
                         ast = new TypeReference(tid, 0);
@@ -2628,34 +2631,34 @@ module TypeScript {
                     this.tok = this.scanner.scan();
                     limChar = this.scanner.lastTokenLimChar();
                     break;
-                case TokenID.THIS:
+                case TokenID.This:
                     ast = new AST(NodeType.This);
                     ast.minChar = minChar;
                     this.tok = this.scanner.scan();
                     limChar = this.scanner.lastTokenLimChar();
                     break;
-                case TokenID.SUPER:
+                case TokenID.Super:
                     ast = new AST(NodeType.Super);
                     ast.minChar = minChar;
                     this.tok = this.scanner.scan();
                     limChar = this.scanner.lastTokenLimChar();
                     break;
-                case TokenID.TRUE:
+                case TokenID.True:
                     ast = new AST(NodeType.True);
                     this.tok = this.scanner.scan();
                     ast.minChar = minChar;
                     break;
-                case TokenID.FALSE:
+                case TokenID.False:
                     ast = new AST(NodeType.False);
                     this.tok = this.scanner.scan();
                     ast.minChar = minChar;
                     break;
-                case TokenID.NULL:
+                case TokenID.Null:
                     ast = new AST(NodeType.Null);
                     this.tok = this.scanner.scan();
                     ast.minChar = minChar;
                     break;
-                case TokenID.NEW:
+                case TokenID.New:
                     minChar = this.scanner.pos;
                     this.tok = this.scanner.scan();
                     ast = new CallExpression(NodeType.New, this.parseTerm(errorRecoverySet, false,
@@ -2665,7 +2668,7 @@ module TypeScript {
                     limChar = this.scanner.lastTokenLimChar();
                     inNew = true;
                     break;
-                case TokenID.FUNCTION:
+                case TokenID.Function:
                     minChar = this.scanner.pos;
                     ast = this.parseFncDecl(errorRecoverySet, false, false, false, null, false, false, false, Modifiers.None, null, true);
                     (<FuncDecl>ast).fncFlags |= FncFlags.IsFunctionExpression;
@@ -2699,18 +2702,18 @@ module TypeScript {
 
             if (ast == null) {
                 switch (this.tok.tokenId) {
-                    case TokenID.LParen:
+                    case TokenID.OpenParen:
                         minChar = this.scanner.pos;
                         var prevTokId = this.scanner.previousToken().tokenId;
                         this.tok = this.scanner.scan();
 
-                        var couldBeLambda = prevTokId == TokenID.LParen || // foo(()=>{});
+                        var couldBeLambda = prevTokId == TokenID.OpenParen || // foo(()=>{});
                                             prevTokId == TokenID.Comma || // foo(x,()=>{});
                                             prevTokId == TokenID.EQ || // var foo = ()=>{};
                                             prevTokId == TokenID.Colon;    // var x = { foo: ()=> {} };
 
 
-                        if (couldBeLambda && this.tok.tokenId == TokenID.RParen) {
+                        if (couldBeLambda && this.tok.tokenId == TokenID.CloseParen) {
                             parseAsLambda = true;
                             expectlambdaRParen = false;
                             this.tok = this.scanner.scan();
@@ -2736,7 +2739,7 @@ module TypeScript {
                                 ast.flags = ast.flags & (~(ASTFlags.SkipNextRParen)); 
                                 break;
                             }
-                            this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet);
+                            this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet);
                             ast.isParenthesized = true;
                         }
 
@@ -2763,20 +2766,20 @@ module TypeScript {
                         limChar = this.scanner.lastTokenLimChar();
                         break;
                     }
-                    case TokenID.LBrack:
+                    case TokenID.OpenBracket:
                         minChar = this.scanner.startPos;
                         this.tok = this.scanner.scan();
                         ast = this.parseArrayLiteral(ErrorRecoverySet.RBrack | errorRecoverySet);
                         ast.minChar = minChar;
                         limChar = this.scanner.pos; // ']'
-                        this.chkCurTok(TokenID.RBrack, "Expected ']'", errorRecoverySet);
+                        this.chkCurTok(TokenID.CloseBracket, "Expected ']'", errorRecoverySet);
                         break;
                     // TODO: rescan regex for TokenID.Div and AsgDiv
-                    case TokenID.LCurly:
+                        case TokenID.OpenBrace:
                         minChar = this.scanner.startPos;
                         this.tok = this.scanner.scan();
                         var members = this.parseMemberList(ErrorRecoverySet.RCurly | errorRecoverySet)
-                        this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+                        this.chkCurTok(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
                         ast = new UnaryExpression(NodeType.ObjectLit, members);
                         ast.minChar = minChar;
                         limChar = this.scanner.lastTokenLimChar();
@@ -2828,7 +2831,7 @@ module TypeScript {
                 if (
                     this.tok.tokenId == TokenID.Colon ||
                     this.tok.tokenId == TokenID.Comma ||
-                    this.tok.tokenId == TokenID.RParen ||
+                    this.tok.tokenId == TokenID.CloseParen ||
                     this.tok.tokenId == TokenID.Ellipsis) {
 
                         // We won't scan in the ':' case, since keeping the ':' simplifies argument handling in parseFormalParameterList
@@ -2941,7 +2944,7 @@ module TypeScript {
                     var subsumedExpr = false;
 
                     if (this.inferPropertiesFromThisAssignment && 
-                        (this.tok.tokenId == TokenID.Colon || this.tok.tokenId == TokenID.Asg) &&
+                        (this.tok.tokenId == TokenID.Colon || this.tok.tokenId == TokenID.Equals) &&
                          this.parsingClassConstructorDefinition &&
                          this.nestingLevel == this.currentClassDefinition.constructorNestingLevel && // this nesting level means we're at the top-level in the constructor
                          (<BinaryExpression>ast).operand1.nodeType == NodeType.This) {
@@ -3012,7 +3015,7 @@ module TypeScript {
                 canAssign = false;
                 if (tokenInfo.binopNodeType == NodeType.QMark) {
                     if (possiblyInLambda && 
-                        ( this.tok.tokenId == TokenID.Asg || this.tok.tokenId == TokenID.Colon || this.tok.tokenId == TokenID.RParen || this.tok.tokenId == TokenID.Comma)) {
+                        ( this.tok.tokenId == TokenID.Equals || this.tok.tokenId == TokenID.Colon || this.tok.tokenId == TokenID.CloseParen || this.tok.tokenId == TokenID.Comma)) {
                         // The QMark is not a ternary expression, it is a marker for optional parameter in a lambda expression.
                         exprIsAnonLambda = true;
                         canAssign = true;
@@ -3086,7 +3089,7 @@ module TypeScript {
 
             for (; ;) {
                 switch (this.tok.tokenId) {
-                    case TokenID.LParen:
+                    case TokenID.OpenParen:
                         if (inNew) {
                             var callExpr = <CallExpression>ast;
                             callExpr.args = this.parseArgList(errorRecoverySet);
@@ -3101,11 +3104,11 @@ module TypeScript {
                             ast.minChar = lhsMinChar;
                         }
                         ast.limChar = this.scanner.pos; // ')'
-                        this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet);
+                        this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet);
                         break;
-                    case TokenID.LBrack:
+                    case TokenID.OpenBracket:
                         this.tok = this.scanner.scan();
-                        if (this.tok.tokenId == TokenID.RBrack) {
+                        if (this.tok.tokenId == TokenID.CloseBracket) {
                             if (hasFlag(typeContext, TypeContext.ArraySuffix)) {
                                 this.tok = this.scanner.scan();
                                 if (ast.nodeType == NodeType.TypeRef) {
@@ -3126,7 +3129,7 @@ module TypeScript {
                                                            TypeContext.NoTypes));
                         ast.minChar = lhsMinChar;
                         ast.limChar = this.scanner.pos; // ']'
-                        this.chkCurTok(TokenID.RBrack, "Expected ']'", errorRecoverySet);
+                        this.chkCurTok(TokenID.CloseBracket, "Expected ']'", errorRecoverySet);
                         break;
                     case TokenID.Dot: {
                         var name: Identifier = null;
@@ -3173,7 +3176,7 @@ module TypeScript {
             var minChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.tok = this.scanner.scan();
-            if (this.tok.tokenId != TokenID.LCurly) {
+            if (this.tok.tokenId != TokenID.OpenBrace) {
                 this.reportParseError("Expected '{'");
                 if (this.errorRecovery) {
                     var etryNode = tryNode;
@@ -3195,7 +3198,7 @@ module TypeScript {
             var catchMinChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.tok = this.scanner.scan();
-            this.chkCurTok(TokenID.LParen, "Expected '('", errorRecoverySet |
+            this.chkCurTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
                         ErrorRecoverySet.ExprStart);
             if ((this.tok.tokenId != TokenID.ID) || convertTokToID(this.tok, this.strictMode)) {
                 this.reportParseError("Expected identifier in catch header");
@@ -3219,9 +3222,9 @@ module TypeScript {
             param.limChar = param.id.limChar;
             this.tok = this.scanner.scan();
             var statementPos = this.scanner.pos;
-            this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet |
+            this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet |
                         ErrorRecoverySet.StmtStart);
-            if (this.tok.tokenId != TokenID.LCurly) {
+            if (this.tok.tokenId != TokenID.OpenBrace) {
                 this.reportParseError("Expected '{' to start catch body");
                 if (this.errorRecovery) {
                     this.skip(errorRecoverySet);
@@ -3252,7 +3255,7 @@ module TypeScript {
             var finMinChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.tok = this.scanner.scan();
-            if (this.tok.tokenId != TokenID.LCurly) {
+            if (this.tok.tokenId != TokenID.OpenBrace) {
                 this.reportParseError("Expected '{' to start body of finally statement");
                 if (this.errorRecovery) {
                     this.skip(errorRecoverySet);
@@ -3280,13 +3283,13 @@ module TypeScript {
             this.popStmt();
             var tc: TryCatch = null;
             var tf: TryFinally = null;
-            if (this.tok.tokenId == TokenID.CATCH) {
+            if (this.tok.tokenId == TokenID.Catch) {
                 var catchPart = this.parseCatch(errorRecoverySet | ErrorRecoverySet.Catch, allowedElements, parentModifiers);
                 tc = new TryCatch(<Try>tryPart, catchPart);
                 tc.minChar = tryPart.minChar;
                 tc.limChar = catchPart.limChar;
             }
-            if (this.tok.tokenId != TokenID.FINALLY) {
+            if (this.tok.tokenId != TokenID.Finally) {
                 if (tc == null) {
                     this.reportParseError("try with neither catch nor finally");
                     if (this.errorRecovery) {
@@ -3344,7 +3347,7 @@ module TypeScript {
                         ast.minChar = minChar;
                         ast.limChar = this.scanner.pos;
                         break;
-                    case TokenID.FUNCTION:
+                    case TokenID.Function:
                         if (this.inStaticFnc) {
                             this.reportParseError("Ambient static function delarations may only contain other ambient static function declarations");
                         }
@@ -3376,7 +3379,7 @@ module TypeScript {
                             }
                         }
                         break;
-                    case TokenID.MODULE:
+                    case TokenID.Module:
                         if ((allowedElements & AllowedElements.ModuleDecls) == AllowedElements.None) {
                             this.reportParseError("module not allowed in this context");
                             this.tok = this.scanner.scan();
@@ -3388,7 +3391,7 @@ module TypeScript {
                             ast = this.parseModuleDecl(errorRecoverySet, modifiers);
                         }
                         break;
-                    case TokenID.IMPORT:
+                    case TokenID.Import:
                         if ((allowedElements & AllowedElements.ModuleDecls) == AllowedElements.None) {
                             this.reportParseError("module not allowed in this context");
                             this.tok = this.scanner.scan();
@@ -3401,7 +3404,7 @@ module TypeScript {
                             needTerminator = true;
                         }
                         break;
-                    case TokenID.EXPORT:
+                    case TokenID.Export:
                         if ((allowedElements & AllowedElements.ModuleDecls) == AllowedElements.None) {
                             this.reportParseError("'export' statements are only allowed at the global and module levels");
                             this.tok = this.scanner.scan();
@@ -3415,7 +3418,7 @@ module TypeScript {
                         modifiers |= Modifiers.Exported;
                         this.tok = this.scanner.scan();
                         break;
-                    case TokenID.PRIVATE:
+                    case TokenID.Private:
                         modifiers |= Modifiers.Private;
 
                         this.tok = this.scanner.scan();
@@ -3427,7 +3430,7 @@ module TypeScript {
                             }
 
                             minChar = this.scanner.pos;
-                            if (this.inferPropertiesFromThisAssignment && (this.tok.tokenId != TokenID.THIS || (this.tok = this.scanner.scan()).tokenId != TokenID.Dot)) {
+                            if (this.inferPropertiesFromThisAssignment && (this.tok.tokenId != TokenID.This || (this.tok = this.scanner.scan()).tokenId != TokenID.Dot)) {
                                 this.reportParseError("Expected 'this.' for property declaration");
                                 this.tok = this.scanner.scan();
                                 ast = new AST(NodeType.Error);
@@ -3446,8 +3449,8 @@ module TypeScript {
                             }
                         }
                         else {
-                            if (this.tok.tokenId != TokenID.INTERFACE) {
-                                if (this.tok.tokenId == TokenID.GET) {
+                            if (this.tok.tokenId != TokenID.Interface) {
+                                if (this.tok.tokenId == TokenID.Get) {
                                     this.prevIDTok = this.tok;
                                     this.tok = this.scanner.scan();
                                     if (codeGenTarget < CodeGenTarget.ES5) {
@@ -3458,7 +3461,7 @@ module TypeScript {
                                         this.prevIDTok = null;
                                     }
                                 }
-                                else if (this.tok.tokenId == TokenID.SET) {
+                                else if (this.tok.tokenId == TokenID.Set) {
                                     this.prevIDTok = this.tok;
                                     this.tok = this.scanner.scan();
                                     if (codeGenTarget < CodeGenTarget.ES5) {
@@ -3479,7 +3482,7 @@ module TypeScript {
                             }
                         }
                         break;
-                    case TokenID.PUBLIC:
+                    case TokenID.Public:
                         if (this.parsingClassConstructorDefinition) {
 
                             if (!this.inferPropertiesFromThisAssignment) {
@@ -3489,7 +3492,7 @@ module TypeScript {
                             this.tok = this.scanner.scan(); 
                             minChar = this.scanner.pos;
                             modifiers |= Modifiers.Public;
-                            if (this.inferPropertiesFromThisAssignment && (this.tok.tokenId != TokenID.THIS || (this.tok = this.scanner.scan()).tokenId != TokenID.Dot)) {
+                            if (this.inferPropertiesFromThisAssignment && (this.tok.tokenId != TokenID.This || (this.tok = this.scanner.scan()).tokenId != TokenID.Dot)) {
                                 this.reportParseError("Expected 'this.' for property declaration");
                                 this.tok = this.scanner.scan();
                                 ast = new AST(NodeType.Error);
@@ -3518,7 +3521,7 @@ module TypeScript {
                             else {
                                 modifiers |= Modifiers.Public;
                                 this.tok = this.scanner.scan();
-                                if (this.tok.tokenId == TokenID.GET) {
+                                if (this.tok.tokenId == TokenID.Get) {
                                     this.prevIDTok = this.tok;
                                     this.tok = this.scanner.scan();
                                     if (codeGenTarget < CodeGenTarget.ES5) {
@@ -3529,7 +3532,7 @@ module TypeScript {
                                         this.prevIDTok = null;
                                     }
                                 }
-                                else if (this.tok.tokenId == TokenID.SET) {
+                                else if (this.tok.tokenId == TokenID.Set) {
                                     this.prevIDTok = this.tok;
                                     this.tok = this.scanner.scan();
                                     if (codeGenTarget < CodeGenTarget.ES5) {
@@ -3550,7 +3553,7 @@ module TypeScript {
                             }
                         }
                         break;
-                    case TokenID.DECLARE:
+                    case TokenID.Declare:
                         if (!(allowedElements & AllowedElements.AmbientDecls)) {
                             this.reportParseError("Ambient declarations are only allowed at the top-level or module scopes")
                         }
@@ -3560,7 +3563,7 @@ module TypeScript {
                         modifiers |= Modifiers.Ambient;
                         this.tok = this.scanner.scan();
                         break;
-                    case TokenID.CLASS:
+                    case TokenID.Class:
                         if ((allowedElements & AllowedElements.ClassDecls) == AllowedElements.None) {
                             this.reportParseError("class not allowed in this context");
                             this.tok = this.scanner.scan();
@@ -3572,7 +3575,7 @@ module TypeScript {
                             ast = this.parseClassDecl(errorRecoverySet, minChar, modifiers);
                         }
                         break;
-                    case TokenID.INTERFACE:
+                    case TokenID.Interface:
                         if ((allowedElements & AllowedElements.InterfaceDecls) == AllowedElements.None) {
                             this.reportParseError("interface not allowed in this context");
                             this.tok = this.scanner.scan();
@@ -3584,7 +3587,7 @@ module TypeScript {
                             ast = this.parseInterfaceDecl(errorRecoverySet, modifiers);
                         }
                         break;
-                    case TokenID.VAR:
+                    case TokenID.Var:
                         var declAst: AST = this.parseVariableDeclaration(errorRecoverySet | ErrorRecoverySet.StmtStart, modifiers,
                                                      true, false);
                         if (declAst.nodeType == NodeType.VarDecl) {
@@ -3595,7 +3598,7 @@ module TypeScript {
                         }
                         needTerminator = true;
                         break;
-                    case TokenID.STATIC:
+                    case TokenID.Static:
 
                         if (this.currentClassDecl == null) {
                             this.reportParseError("Statics may only be class members");
@@ -3604,7 +3607,7 @@ module TypeScript {
                         mayNotBeExported();
                         modifiers |= Modifiers.Public;
                         this.tok = this.scanner.scan();
-                        if (this.tok.tokenId == TokenID.GET) {
+                        if (this.tok.tokenId == TokenID.Get) {
                             this.prevIDTok = this.tok;
                             this.tok = this.scanner.scan();
                             if (codeGenTarget < CodeGenTarget.ES5) {
@@ -3615,7 +3618,7 @@ module TypeScript {
                                 this.prevIDTok = null;
                             }
                         }
-                        else if (this.tok.tokenId == TokenID.SET) {
+                        else if (this.tok.tokenId == TokenID.Set) {
                             this.tok = this.scanner.scan();
                             if (codeGenTarget < CodeGenTarget.ES5) {
                                 this.reportParseError("Property accessors are only available when targeting ES5 or greater");
@@ -3641,22 +3644,22 @@ module TypeScript {
 
                         ast = fnOrVar;
                         break;
-                    case TokenID.FOR:
+                    case TokenID.For:
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("syntax error: for statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        this.chkNxtTok(TokenID.LParen, "Expected '('", errorRecoverySet |
+                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
                                   ErrorRecoverySet.ExprStart | ErrorRecoverySet.Var);
                         this.state = ParseState.ForInit;
                         forInOk = true;
                         switch (this.tok.tokenId) {
-                            case TokenID.VAR:
+                            case TokenID.Var:
                                 temp = this.parseVariableDeclaration(errorRecoverySet | ErrorRecoverySet.SColon |
                                                   ErrorRecoverySet.In, Modifiers.None, false, false);
                                 break;
-                            case TokenID.SemiColon:
+                            case TokenID.Semicolon:
                                 temp = null;
                                 this.state = ParseState.ForCondStart;
                                 break;
@@ -3667,7 +3670,7 @@ module TypeScript {
                                 break;
                         }
                         this.state = ParseState.ForInitAfterVar;
-                        if (this.tok.tokenId == TokenID.IN) {
+                        if (this.tok.tokenId == TokenID.In) {
                             if ((temp == null) || (!forInOk)) {
                                 this.reportParseError("malformed for statement");
                                 if (this.errorRecovery) {
@@ -3688,7 +3691,7 @@ module TypeScript {
                                 forInStmt.limChar = this.scanner.pos;
                                 forInStmt.statement.minChar = minChar;
                                 forInStmt.statement.limChar = this.scanner.pos;
-                                this.chkCurTok(TokenID.RParen, "Expected ')'", ErrorRecoverySet.StmtStart |
+                                this.chkCurTok(TokenID.CloseParen, "Expected ')'", ErrorRecoverySet.StmtStart |
                                           errorRecoverySet);
                                 this.pushStmt(forInStmt, labelList);
                                 forInStmt.body = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
@@ -3700,8 +3703,8 @@ module TypeScript {
                         else {
                             var forStmt: ForStatement = new ForStatement(temp);
                             forStmt.minChar = minChar;
-                            this.chkCurTok(TokenID.SemiColon, "Expected ';'", errorRecoverySet);
-                            if (this.tok.tokenId == TokenID.SemiColon) {
+                            this.chkCurTok(TokenID.Semicolon, "Expected ';'", errorRecoverySet);
+                            if (this.tok.tokenId == TokenID.Semicolon) {
                                 forStmt.cond = null;
                             }
                             else {
@@ -3709,14 +3712,14 @@ module TypeScript {
                                                        ErrorRecoverySet.RParen,
                                                        OperatorPrecedence.No, true,
                                                        TypeContext.NoTypes);
-                                if (this.tok.tokenId != TokenID.SemiColon) {
+                                if (this.tok.tokenId != TokenID.Semicolon) {
                                     this.skip(errorRecoverySet | ErrorRecoverySet.StmtStart);
                                     ast = forStmt;
                                     ast.flags |= ASTFlags.Error;
                                 }
                             }
                             this.tok = this.scanner.scan();
-                            if (this.tok.tokenId == TokenID.RParen) {
+                            if (this.tok.tokenId == TokenID.CloseParen) {
                                 forStmt.incr = null;
                             }
                             else {
@@ -3725,7 +3728,7 @@ module TypeScript {
                                                        OperatorPrecedence.No, true,
                                                        TypeContext.NoTypes);
                             }
-                            this.chkCurTok(TokenID.RParen, "Expected ')'",
+                            this.chkCurTok(TokenID.CloseParen, "Expected ')'",
                                       errorRecoverySet | ErrorRecoverySet.LCurly);
                             this.pushStmt(forStmt, labelList);
                             forStmt.body = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
@@ -3734,7 +3737,7 @@ module TypeScript {
                             ast = forStmt;
                         }
                         break;
-                    case TokenID.WITH: {
+                    case TokenID.With: {
                         if (codeGenTarget < CodeGenTarget.ES5) {
                             this.reportParseError("'with' statements are only available in ES5 codegen mode or better");
                         }
@@ -3748,13 +3751,13 @@ module TypeScript {
                             this.reportParseError("'with' statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        this.chkNxtTok(TokenID.LParen, "Expected '('", errorRecoverySet |
+                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
                                   ErrorRecoverySet.ExprStart | ErrorRecoverySet.Var);
 
                         var expr = this.parseExpr(errorRecoverySet | ErrorRecoverySet.Colon,
                                                             OperatorPrecedence.No, true,
                                                             TypeContext.NoTypes);
-                        this.chkCurTok(TokenID.RParen, "Expected ')'",
+                        this.chkCurTok(TokenID.CloseParen, "Expected ')'",
                                       errorRecoverySet | ErrorRecoverySet.LCurly);
 
                         var withStmt = new WithStatement(expr);
@@ -3764,12 +3767,12 @@ module TypeScript {
                         ast = withStmt;
                     }
                         break;
-                    case TokenID.SWITCH: {
+                    case TokenID.Switch: {
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("'switch' statement does not take modifiers");
                         }
-                        this.chkNxtTok(TokenID.LParen, "Expected '('", errorRecoverySet |
+                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
                                   ErrorRecoverySet.ExprStart);
 
                         var switchStmt = new SwitchStatement(this.parseExpr(errorRecoverySet |
@@ -3779,19 +3782,19 @@ module TypeScript {
                                                                      TypeContext.NoTypes));
                         switchStmt.statement.minChar = minChar;
                         switchStmt.statement.limChar = this.scanner.pos;
-                        this.chkCurTok(TokenID.RParen, "Expected ')'",
+                        this.chkCurTok(TokenID.CloseParen, "Expected ')'",
                                   errorRecoverySet | ErrorRecoverySet.LCurly);
                         var caseListMinChar = this.scanner.startPos;
-                        this.chkCurTok(TokenID.LCurly, "Expected '{'",
+                         this.chkCurTok(TokenID.OpenBrace, "Expected '{'",
                                   errorRecoverySet | ErrorRecoverySet.SCase);
                         switchStmt.defaultCase = null;
                         switchStmt.caseList = new ASTList();
                         var caseStmt: CaseStatement = null;
                         this.pushStmt(switchStmt, labelList);
                         for (; ;) {
-                            if ((this.tok.tokenId == TokenID.CASE) ||
-                                (this.tok.tokenId == TokenID.DEFAULT)) {
-                                var isDefault = (this.tok.tokenId == TokenID.DEFAULT);
+                            if ((this.tok.tokenId == TokenID.Case) ||
+                                (this.tok.tokenId == TokenID.Default)) {
+                                var isDefault = (this.tok.tokenId == TokenID.Default);
                                 caseStmt = new CaseStatement();
                                 caseStmt.minChar = this.scanner.startPos;
                                 this.tok = this.scanner.scan();
@@ -3819,25 +3822,25 @@ module TypeScript {
                         switchStmt.caseList.minChar = caseListMinChar;
                         switchStmt.caseList.limChar = this.scanner.pos;
                         switchStmt.limChar = switchStmt.caseList.limChar;
-                        this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+                        this.chkCurTok(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
                         this.popStmt();
                         ast = switchStmt;
                         break;
                     }
-                    case TokenID.WHILE: {
+                    case TokenID.While: {
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("'while' statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        this.chkNxtTok(TokenID.LParen, "Expected '('", ErrorRecoverySet.ExprStart |
+                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", ErrorRecoverySet.ExprStart |
                                   errorRecoverySet);
                         var whileStmt = new WhileStatement(this.parseExpr(errorRecoverySet |
                                                                    ErrorRecoverySet.RParen,
                                                                    OperatorPrecedence.No,
                                                                    true, TypeContext.NoTypes));
                         whileStmt.minChar = minChar;
-                        this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet |
+                        this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet |
                                   ErrorRecoverySet.StmtStart);
                         this.pushStmt(whileStmt, labelList);
                         whileStmt.body = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
@@ -3846,7 +3849,7 @@ module TypeScript {
                         ast = whileStmt;
                         break;
                     }
-                    case TokenID.DO: {
+                    case TokenID.Do: {
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("'do' statement does not take modifiers");
@@ -3861,29 +3864,29 @@ module TypeScript {
                         this.popStmt();
                         doStmt.whileAST = new Identifier("while");
                         doStmt.whileAST.minChar = this.scanner.startPos;
-                        this.chkCurTok(TokenID.WHILE, "Expected 'while'", errorRecoverySet |
+                        this.chkCurTok(TokenID.While, "Expected 'while'", errorRecoverySet |
                                   ErrorRecoverySet.LParen);
                         doStmt.whileAST.limChar = doStmt.whileAST.minChar + 5;
-                        this.chkCurTok(TokenID.LParen, "Expected '('", errorRecoverySet |
+                        this.chkCurTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
                                   ErrorRecoverySet.ExprStart);
                         doStmt.cond = this.parseExpr(errorRecoverySet | ErrorRecoverySet.RParen,
                                               OperatorPrecedence.No, true, TypeContext.NoTypes);
                         doStmt.limChar = this.scanner.pos;
-                        this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet);
+                        this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet);
                         ast = doStmt;
                         // compatibility; more strict would be to require the ';'
-                        if (this.tok.tokenId == TokenID.SemiColon) {
+                        if (this.tok.tokenId == TokenID.Semicolon) {
                             this.tok = this.scanner.scan();
                         }
                         break;
                     }
-                    case TokenID.IF: {
+                    case TokenID.If: {
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("if statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        this.chkNxtTok(TokenID.LParen, "Expected '('", errorRecoverySet |
+                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
                                   ErrorRecoverySet.ExprStart);
                         var ifStmt = new IfStatement(this.parseExpr(errorRecoverySet |
                                                              ErrorRecoverySet.LParen,
@@ -3892,13 +3895,13 @@ module TypeScript {
                         ifStmt.minChar = minChar;
                         ifStmt.statement.minChar = minChar;
                         ifStmt.statement.limChar = this.scanner.pos;
-                        this.chkCurTok(TokenID.RParen, "Expected ')'", errorRecoverySet |
+                        this.chkCurTok(TokenID.CloseParen, "Expected ')'", errorRecoverySet |
                                   ErrorRecoverySet.StmtStart);
                         this.pushStmt(ifStmt, labelList);
                         ifStmt.thenBod = this.parseStatement(ErrorRecoverySet.Else | errorRecoverySet,
                                                       allowedElements, parentModifiers);
                         ifStmt.limChar = ifStmt.thenBod.limChar;
-                        if (this.tok.tokenId == TokenID.ELSE) {
+                        if (this.tok.tokenId == TokenID.Else) {
                             this.tok = this.scanner.scan();
                             ifStmt.elseBod = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
                             ifStmt.limChar = ifStmt.elseBod.limChar;
@@ -3907,7 +3910,7 @@ module TypeScript {
                         ast = ifStmt;
                         break;
                     }
-                    case TokenID.TRY: {
+                    case TokenID.Try: {
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("try statement does not take modifiers");
@@ -3916,7 +3919,7 @@ module TypeScript {
                         ast = this.parseTryCatchFinally(errorRecoverySet, AllowedElements.FunctionBody, parentModifiers, labelList);
                         break;
                     }
-                    case TokenID.LCurly: {
+                    case TokenID.OpenBrace: {
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("block does not take modifiers");
@@ -3932,11 +3935,11 @@ module TypeScript {
                         block.stmts.limChar = this.scanner.pos;
                         block.minChar = block.stmts.minChar;
                         block.limChar = block.stmts.limChar;
-                        this.chkCurTok(TokenID.RCurly, "Expected '}'", errorRecoverySet);
+                        this.chkCurTok(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
                         ast = block;
                         break;
                     }
-                    case TokenID.SemiColon:
+                    case TokenID.Semicolon:
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("modifier can not appear here");
@@ -3944,14 +3947,14 @@ module TypeScript {
                         ast = new AST(NodeType.Empty);
                         this.tok = this.scanner.scan();
                         break;
-                    case TokenID.BREAK:
-                    case TokenID.CONTINUE: {
+                    case TokenID.Break:
+                    case TokenID.Continue: {
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("modifiers can not appear before jump statement");
                         }
                         var jump =
-                            new Jump((this.tok.tokenId == TokenID.BREAK) ? NodeType.Break : NodeType.Continue);
+                            new Jump((this.tok.tokenId == TokenID.Break) ? NodeType.Break : NodeType.Continue);
                         this.tok = this.scanner.scan();
                         if ((this.tok.tokenId == TokenID.ID) && (!this.scanner.lastTokenHadNewline())) {
                             // Labeled break or continue.
@@ -3963,7 +3966,7 @@ module TypeScript {
                         needTerminator = true;
                         break;
                     }
-                    case TokenID.RETURN: {
+                    case TokenID.Return: {
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("modifiers can not appear before return statement");
@@ -3975,8 +3978,8 @@ module TypeScript {
                         this.tok = this.scanner.scan();
                         var retStmt = new ReturnStatement();
                         retStmt.minChar = minChar;
-                        if ((this.tok.tokenId != TokenID.SemiColon) &&
-                            (this.tok.tokenId != TokenID.RCurly) &&
+                        if ((this.tok.tokenId != TokenID.Semicolon) &&
+                            (this.tok.tokenId != TokenID.CloseBrace) &&
                             (!(this.scanner.lastTokenHadNewline()))) {
                             retStmt.returnExpression = this.parseExpr(errorRecoverySet |
                                                                ErrorRecoverySet.SColon,
@@ -3988,15 +3991,15 @@ module TypeScript {
                         ast = retStmt;
                         break;
                     }
-                    case TokenID.THROW:
+                    case TokenID.Throw:
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("modifiers can not appear before a throw statement");
                         }
                         minChar = this.scanner.startPos;
                         this.tok = this.scanner.scan();
-                        if ((this.tok.tokenId != TokenID.SemiColon) &&
-                            (this.tok.tokenId != TokenID.RCurly) &&
+                        if ((this.tok.tokenId != TokenID.Semicolon) &&
+                            (this.tok.tokenId != TokenID.CloseBrace) &&
                             (!(this.scanner.lastTokenHadNewline()))) {
                             temp = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
                                            OperatorPrecedence.No, true, TypeContext.NoTypes);
@@ -4009,7 +4012,7 @@ module TypeScript {
                         ast.limChar = this.scanner.lastTokenLimChar();
                         needTerminator = true;
                         break;
-                    case TokenID.ENUM:
+                    case TokenID.Enum:
                         // TODO: check module allowed here
                         //minChar=scanner.startPos;
                         this.tok = this.scanner.scan();
@@ -4023,7 +4026,7 @@ module TypeScript {
                             (<ModuleDecl>ast).modFlags |= ModuleFlags.Exported;
                         }
                         break;
-                    case TokenID.DEBUGGER:
+                    case TokenID.Debugger:
                         mayNotBeExported();
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("modifiers can not appear before debugger statement");
@@ -4072,7 +4075,7 @@ module TypeScript {
             }
             if (needTerminator) {
                 switch (this.tok.tokenId) {
-                    case TokenID.SemiColon:
+                    case TokenID.Semicolon:
                         this.tok = this.scanner.scan();
                         ast.flags |= ASTFlags.ExplicitSemicolon;
                         break;
@@ -4080,8 +4083,8 @@ module TypeScript {
                         // Extend any incomplete statements to include EOF token. This makes sure that this node is in the path 
                         // when completion or parameter help is requested.
                         ast.limChar = this.scanner.pos;
-                        // Intentional fallthrough
-                    case TokenID.RCurly:
+                        // IntentionaCloseBracethrough
+                    case TokenID.CloseBrace:
                         ast.flags |= ASTFlags.AutomaticSemicolon;
                         if (this.style_requireSemi) {
                             this.reportParseStyleError("no automatic semicolon");
@@ -4143,10 +4146,10 @@ module TypeScript {
             var oldStrictMode = this.strictMode;
             this.nestingLevel++;
             for (; ;) {
-                if ((this.tok.tokenId == TokenID.RCurly) ||
-                    (noLeadingCase && ((this.tok.tokenId == TokenID.CASE) || (this.tok.tokenId == TokenID.DEFAULT))) ||
-                    (innerStmts && (this.tok.tokenId == TokenID.EXPORT)) ||
-                    (classNope && (this.tok.tokenId == TokenID.CLASS)) ||
+                if ((this.tok.tokenId == TokenID.CloseBrace) ||
+                    (noLeadingCase && ((this.tok.tokenId == TokenID.Case) || (this.tok.tokenId == TokenID.Default))) ||
+                    (innerStmts && (this.tok.tokenId == TokenID.Export)) ||
+                    (classNope && (this.tok.tokenId == TokenID.Class)) ||
                     (this.tok.tokenId == TokenID.EOF)) {
                     this.state = ParseState.EndStmtList;
                     stmts.limChar = limChar;

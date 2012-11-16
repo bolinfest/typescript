@@ -180,16 +180,16 @@ module TypeScript {
     }
     export function LexInitialize() {
         initializeStaticTokens();
-        autoToken[LexCodeLPR] = staticTokens[TokenID.LParen];
-        autoToken[LexCodeRPR] = staticTokens[TokenID.RParen];
+        autoToken[LexCodeLPR] = staticTokens[TokenID.OpenParen];
+        autoToken[LexCodeRPR] = staticTokens[TokenID.CloseParen];
         autoToken[LexCodeCMA] = staticTokens[TokenID.Comma];
-        autoToken[LexCodeSMC] = staticTokens[TokenID.SemiColon];
-        autoToken[LexCodeLBR] = staticTokens[TokenID.LBrack];
-        autoToken[LexCodeRBR] = staticTokens[TokenID.RBrack];
+        autoToken[LexCodeSMC] = staticTokens[TokenID.Semicolon];
+        autoToken[LexCodeLBR] = staticTokens[TokenID.OpenBracket];
+        autoToken[LexCodeRBR] = staticTokens[TokenID.CloseBracket];
         autoToken[LexCodeTIL] = staticTokens[TokenID.Tilde];
         autoToken[LexCodeQUE] = staticTokens[TokenID.QMark];
-        autoToken[LexCodeLC] = staticTokens[TokenID.LCurly];
-        autoToken[LexCodeRC] = staticTokens[TokenID.RCurly];
+        autoToken[LexCodeLC] = staticTokens[TokenID.OpenBrace];
+        autoToken[LexCodeRC] = staticTokens[TokenID.CloseBrace];
         autoToken[LexCodeCOL] = staticTokens[TokenID.Colon];
         LexKeywordTable = new StringHashTable();
         for (var i in (<any>TokenID)._map) {
@@ -1228,7 +1228,7 @@ module TypeScript {
                         else {
                             if (this.peekCharAt(this.pos) == LexCodeEQ) {
                                 this.nextChar();
-                                return staticTokens[TokenID.AsgDiv];
+                                return staticTokens[TokenID.SlashEquals];
                             }
                             else {
                                 return staticTokens[TokenID.Div];
@@ -1238,7 +1238,7 @@ module TypeScript {
                 }
                 else if (this.ch == LexCodeSMC) {
                     this.nextChar();
-                    return staticTokens[TokenID.SemiColon];
+                    return staticTokens[TokenID.Semicolon];
                 }
                 else if ((this.ch == LexCodeAPO) || (this.ch == LexCodeQUO)) {
                     var endCode = this.ch;
@@ -1268,10 +1268,10 @@ module TypeScript {
                 }
                 else if (autoToken[this.ch]) {
                     var atok = autoToken[this.ch];
-                    if (atok.tokenId == TokenID.LCurly) {
+                    if (atok.tokenId == TokenID.OpenBrace) {
                         this.leftCurlyCount++;
                     }
-                    else if (atok.tokenId == TokenID.RCurly) {
+                    else if (atok.tokenId == TokenID.CloseBrace) {
                         this.rightCurlyCount++;
                     }
                     this.nextChar();
@@ -1367,7 +1367,7 @@ module TypeScript {
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Asg];
+                            return staticTokens[TokenID.Equals];
                         }
                     // break;
                     case LexCodeBNG:
@@ -1389,7 +1389,7 @@ module TypeScript {
                     case LexCodePLS:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgAdd];
+                            return staticTokens[TokenID.PlusEquals];
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodePLS) {
                             this.advanceChar(2);
@@ -1403,7 +1403,7 @@ module TypeScript {
                     case LexCodeMIN:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgSub];
+                            return staticTokens[TokenID.MinusEquals];
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeMIN) {
                             this.advanceChar(2);
@@ -1417,7 +1417,7 @@ module TypeScript {
                     case LexCodeMUL:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgMul];
+                            return staticTokens[TokenID.AsterixEquals];
                         }
                         else {
                             this.nextChar();
@@ -1625,10 +1625,10 @@ module TypeScript {
     // Return true if the token is a primitive type
     export function isPrimitiveTypeToken(token: Token) {
         switch (token.tokenId) {
-            case TokenID.ANY:
-            case TokenID.BOOL:
-            case TokenID.NUMBER:
-            case TokenID.STRING:
+            case TokenID.Any:
+            case TokenID.Bool:
+            case TokenID.Number:
+            case TokenID.String:
                 return true;
         }
         return false;
@@ -1637,9 +1637,9 @@ module TypeScript {
     // Return true if the token is a primitive type
     export function isModifier(token: Token) {
         switch (token.tokenId) {
-            case TokenID.PUBLIC:
-            case TokenID.PRIVATE:
-            case TokenID.STATIC:
+            case TokenID.Public:
+            case TokenID.Private:
+            case TokenID.Static:
                 return true;
         }
         return false;

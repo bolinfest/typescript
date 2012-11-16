@@ -1434,7 +1434,7 @@ module Services {
             var isNameArea = false;
             var cancelSearch = false;
 
-            if (!tokenStream.expect(TypeScript.TokenID.LCurly))
+            if (!tokenStream.expect(TypeScript.TokenID.OpenBrace))
                 return false;
 
             memberList.members.forEach((x, i) => {
@@ -1490,7 +1490,7 @@ module Services {
             if (isNameArea)
                 return true;
 
-            if (tokenStream.tokenId() !== TypeScript.TokenID.RCurly)
+            if (tokenStream.tokenId() !== TypeScript.TokenID.CloseBrace)
                 return false;
 
             return (nameAreaMinChar <= pos) && (pos <= tokenStream.tokenStartPos());

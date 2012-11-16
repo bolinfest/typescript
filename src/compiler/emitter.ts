@@ -280,7 +280,7 @@ module TypeScript {
                     if (target.nodeType == NodeType.FuncDecl && !target.isParenthesized) {
                         this.writeToOutput("(");
                     }
-                    this.emitJavascript(target, TokenID.LParen, false);
+                    this.emitJavascript(target, TokenID.OpenParen, false);
                     if (target.nodeType == NodeType.FuncDecl && !target.isParenthesized) {
                         this.writeToOutput(")");
                     }
@@ -416,7 +416,7 @@ module TypeScript {
                     if (arg.init) {
                         defaultArgs.push(arg);
                     }
-                    this.emitJavascript(arg, TokenID.LParen, false);
+                    this.emitJavascript(arg, TokenID.OpenParen, false);
                     if (i < (printLen - 1)) {
                         this.writeToOutput(", ");
                     }
@@ -446,7 +446,7 @@ module TypeScript {
                 this.writeToOutput(arg.id.actualText);
                 this.recordSourceMappingEnd(arg.id);
                 this.writeToOutput(" = ");
-                this.emitJavascript(arg.init, TokenID.LParen, false);
+                this.emitJavascript(arg.init, TokenID.OpenParen, false);
                 this.writeLineToOutput("; }")
                 this.recordSourceMappingEnd(arg);
             }
@@ -736,7 +736,7 @@ module TypeScript {
                     this.writeCaptureThisStatement(moduleDecl);
                 }
 
-                this.emitJavascriptList(moduleDecl.members, null, TokenID.SemiColon, true, false, false);
+                this.emitJavascriptList(moduleDecl.members, null, TokenID.Semicolon, true, false, false);
                 if (!isDynamicMod || moduleGenTarget == ModuleGenTarget.Asynchronous) {
                     this.indenter.decreaseIndent();
                 }
@@ -986,7 +986,7 @@ module TypeScript {
                     }
                     else {
                         // function, constructor, method etc.
-                        if (tokenId != TokenID.LParen) {
+                        if (tokenId != TokenID.OpenParen) {
                             if (hasFlag(sym.flags, SymbolFlags.Exported) && sym.container == this.checker.gloMod) {
                                 this.writeToOutput("this.");
                             }
@@ -997,7 +997,7 @@ module TypeScript {
                     }
                 }
                 else {
-                    if (tokenId != TokenID.LParen) {
+                    if (tokenId != TokenID.OpenParen) {
                         this.emitVarDeclVar();
                     }
                 }
@@ -1014,10 +1014,10 @@ module TypeScript {
                     this.writeToOutput(this.defaultValue(varDecl.type));
                 }
                 this.onEmitVar();
-                if ((tokenId != TokenID.LParen)) {
+                if ((tokenId != TokenID.OpenParen)) {
                     if (this.varListCount < 0) {
                         this.writeToOutput(", ");
-                    } else if (tokenId != TokenID.FOR) {
+                    } else if (tokenId != TokenID.For) {
                         this.writeToOutputTrimmable(";");
                     }
                 }
@@ -1149,7 +1149,7 @@ module TypeScript {
                             this.writeLineToOutput(" {");
                             this.indenter.increaseIndent();
                         }
-                        this.emitJavascriptList(stmts, null, TokenID.SemiColon, true, false, false);
+                        this.emitJavascriptList(stmts, null, TokenID.Semicolon, true, false, false);
                         if (!hasOnlyBlockStatement) {
                             this.writeLineToOutput("");
                             this.indenter.decreaseIndent();
@@ -1160,7 +1160,7 @@ module TypeScript {
                     }
                 }
                 else {
-                    this.emitJavascript(stmts, TokenID.SemiColon, true);
+                    this.emitJavascript(stmts, TokenID.Semicolon, true);
                 }
             }
             else if (emitEmptyBod) {
@@ -1176,19 +1176,19 @@ module TypeScript {
                     if ((stmtList.members.length == 2) &&
                         (stmtList.members[0].nodeType == NodeType.Block) &&
                         (stmtList.members[1].nodeType == NodeType.EndCode)) {
-                        this.emitJavascript(stmtList.members[0], TokenID.SemiColon, true);
+                        this.emitJavascript(stmtList.members[0], TokenID.Semicolon, true);
                         this.writeLineToOutput("");
                     }
                     else {
-                        this.emitJavascriptList(stmts, null, TokenID.SemiColon, true, false, emitClassPropertiesAfterSuperCall);
+                        this.emitJavascriptList(stmts, null, TokenID.Semicolon, true, false, emitClassPropertiesAfterSuperCall);
                     }
                 }
                 else {
-                    this.emitJavascript(stmts, TokenID.SemiColon, true);
+                    this.emitJavascript(stmts, TokenID.Semicolon, true);
                 }
             }
             else {
-                this.emitJavascript(stmts, TokenID.SemiColon, true);
+                this.emitJavascript(stmts, TokenID.Semicolon, true);
             }
         }
 
@@ -1387,7 +1387,7 @@ module TypeScript {
                 this.writeToOutput(")");
             }
 
-            if ((tokenId == TokenID.SemiColon) && (ast.nodeType < NodeType.GeneralNode)) {
+            if ((tokenId == TokenID.Semicolon) && (ast.nodeType < NodeType.GeneralNode)) {
                 this.writeToOutput(";");
             }
         }
@@ -1457,7 +1457,7 @@ module TypeScript {
                     this.writeToOutput(className + ".prototype." + varDecl.id.actualText);
                     this.recordSourceMappingEnd(varDecl.id);
                     this.writeToOutput(" = ");
-                    this.emitJavascript(varDecl.init, TokenID.Asg, false);
+                    this.emitJavascript(varDecl.init, TokenID.Equals, false);
                     this.recordSourceMappingEnd(varDecl);
                     this.writeLineToOutput(";");
                 }
@@ -1547,7 +1547,7 @@ module TypeScript {
                 // output constructor
                 if (constrDecl) {
                     // declared constructor
-                    this.emitJavascript(classDecl.constructorDecl, TokenID.LParen, false);
+                    this.emitJavascript(classDecl.constructorDecl, TokenID.OpenParen, false);
 
                 }
                 else {
@@ -1630,7 +1630,7 @@ module TypeScript {
                             this.recordSourceMappingStart(varDecl);
                             this.writeToOutput(classDecl.name.actualText + "." + varDecl.id.actualText + " = ");
                             if (varDecl.init) {
-                                this.emitJavascript(varDecl.init, TokenID.Asg, false);
+                                this.emitJavascript(varDecl.init, TokenID.Equals, false);
                                 this.writeLineToOutput(";");
                             }
                             else {
@@ -1703,7 +1703,7 @@ module TypeScript {
             if (callEx.target.nodeType == NodeType.Dot) {
                 var dotNode = <BinaryExpression>callEx.target;
                 if (dotNode.operand1.nodeType == NodeType.Super) {
-                    this.emitJavascript(dotNode, TokenID.LParen, false);
+                    this.emitJavascript(dotNode, TokenID.OpenParen, false);
                     this.writeToOutput(".call(this");
                     if (callEx.args && callEx.args.members.length > 0) {
                         this.writeToOutput(", ");

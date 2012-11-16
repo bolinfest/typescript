@@ -224,19 +224,19 @@ module TypeScript {
 
         while (tok.tokenId != TokenID.EOF) {
 
-            if (readImportFiles && tok.tokenId == TokenID.IMPORT) {
+            if (readImportFiles && tok.tokenId == TokenID.Import) {
 
                 tok = scanner.scan();
 
                 if (tok.tokenId == TokenID.ID || convertTokToID(tok, false)) {
                     tok = scanner.scan();
 
-                    if (tok.tokenId == TokenID.Asg) {
+                    if (tok.tokenId == TokenID.Equals) {
                         tok = scanner.scan();
 
-                        if (tok.tokenId == TokenID.MODULE) {
+                        if (tok.tokenId == TokenID.Module) {
                             tok = scanner.scan();
-                            if (tok.tokenId == TokenID.LParen) {
+                            if (tok.tokenId == TokenID.OpenParen) {
                                 tok = scanner.scan();
 
                                 // import foo = module("foo")
@@ -250,11 +250,11 @@ module TypeScript {
                 }
             }
 
-            if (tok.tokenId == TokenID.LCurly) {
+            if (tok.tokenId == TokenID.OpenBrace) {
                 leftCurlies.push(tok);
             }
 
-            if (tok.tokenId == TokenID.RCurly) {
+            if (tok.tokenId == TokenID.CloseBrace) {
                 leftCurlies.pop();
             }
 
