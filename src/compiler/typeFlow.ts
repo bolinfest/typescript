@@ -1624,7 +1624,7 @@ module TypeScript {
             return binex;
         }
 
-        public typeCheckQMark(trinex: TrinaryExpression): TrinaryExpression {
+        public typeCheckQMark(trinex: ConditionalExpression): ConditionalExpression {
             trinex.operand1 = this.typeCheck(trinex.operand1);
             trinex.operand2 = this.typeCheck(trinex.operand2);
             trinex.operand3 = this.typeCheck(trinex.operand3);

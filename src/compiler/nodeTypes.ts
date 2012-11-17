@@ -48,7 +48,7 @@ module TypeScript {
         AsgLsh,
         AsgRsh,
         AsgRs2,
-        QMark,
+        ConditionalExpression,
         LogOr,
         LogAnd,
         Or,

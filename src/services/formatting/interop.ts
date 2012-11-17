@@ -187,7 +187,7 @@ module Formatting {
                 case TypeScript.NodeType.AsgLsh: return AuthorParseNodeKind.apnkAsgLsh;
                 case TypeScript.NodeType.AsgRsh: return AuthorParseNodeKind.apnkAsgRsh;
                 case TypeScript.NodeType.AsgRs2: return AuthorParseNodeKind.apnkAsgRs2;
-                case TypeScript.NodeType.QMark: return AuthorParseNodeKind.apnkQmark;
+                case TypeScript.NodeType.ConditionalExpression: return AuthorParseNodeKind.apnkQmark;
                 case TypeScript.NodeType.LogOr: return AuthorParseNodeKind.apnkLogOr;
                 case TypeScript.NodeType.LogAnd: return AuthorParseNodeKind.apnkLogAnd;
                 case TypeScript.NodeType.Or: return AuthorParseNodeKind.apnkOr;

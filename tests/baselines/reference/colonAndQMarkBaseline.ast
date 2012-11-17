@@ -32,7 +32,7 @@
                 {"nodeType": "EndCode", "minChar": 69, "limChar": 69, "startLine": 2, "startCol": 57, "endLine": 2, "endCol": 57, "children": []}]}]},
             {"nodeType": "VarDecl", "minChar": 75, "limChar": 96, "startLine": 3, "startCol": 5, "endLine": 3, "endCol": 26, "children": [
               {"nodeType": "Name", "minChar": 75, "limChar": 76, "startLine": 3, "startCol": 5, "endLine": 3, "endCol": 6, "children": []},
-              {"nodeType": "QMark", "minChar": 87, "limChar": 96, "startLine": 3, "startCol": 17, "endLine": 3, "endCol": 26, "children": [
+              {"nodeType": "ConditionalExpression", "minChar": 87, "limChar": 96, "startLine": 3, "startCol": 17, "endLine": 3, "endCol": 26, "children": [
                 {"nodeType": "NumberLit", "minChar": 87, "limChar": 88, "startLine": 3, "startCol": 17, "endLine": 3, "endCol": 18, "children": []},
                 {"nodeType": "NumberLit", "minChar": 91, "limChar": 92, "startLine": 3, "startCol": 21, "endLine": 3, "endCol": 22, "children": []},
                 {"nodeType": "NumberLit", "minChar": 95, "limChar": 96, "startLine": 3, "startCol": 25, "endLine": 3, "endCol": 26, "children": []}]},

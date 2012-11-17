@@ -133,7 +133,7 @@ module TypeScript {
             this.childrenWalkers[NodeType.AsgLsh] = ChildrenWalkers.walkBinaryExpressionChildren;
             this.childrenWalkers[NodeType.AsgRsh] = ChildrenWalkers.walkBinaryExpressionChildren;
             this.childrenWalkers[NodeType.AsgRs2] = ChildrenWalkers.walkBinaryExpressionChildren;
-            this.childrenWalkers[NodeType.QMark] = ChildrenWalkers.walkTrinaryExpressionChildren;
+            this.childrenWalkers[NodeType.ConditionalExpression] = ChildrenWalkers.walkTrinaryExpressionChildren;
             this.childrenWalkers[NodeType.LogOr] = ChildrenWalkers.walkBinaryExpressionChildren;
             this.childrenWalkers[NodeType.LogAnd] = ChildrenWalkers.walkBinaryExpressionChildren;
             this.childrenWalkers[NodeType.Or] = ChildrenWalkers.walkBinaryExpressionChildren;
@@ -285,7 +285,7 @@ module TypeScript {
             }
         }
 
-        export function walkTrinaryExpressionChildren(preAst: TrinaryExpression, parent: AST, walker: IAstWalker): void {
+        export function walkTrinaryExpressionChildren(preAst: ConditionalExpression, parent: AST, walker: IAstWalker): void {
             if (preAst.operand1) {
                 preAst.operand1 = walker.walk(preAst.operand1, preAst);
             }

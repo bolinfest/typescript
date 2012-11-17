@@ -665,7 +665,7 @@ module Services {
                                      containerASTs.length == 0 ||
                                      (!containerASTs[containerASTs.length - 1].isExpression() &&
                                       containerASTs[containerASTs.length - 1].nodeType != TypeScript.NodeType.VarDecl ||
-                                      containerASTs[containerASTs.length - 1].nodeType == TypeScript.NodeType.QMark))) {
+                                      containerASTs[containerASTs.length - 1].nodeType == TypeScript.NodeType.ConditionalExpression))) {
                                     containerASTs.push(cur);
                                 }
                                 break;

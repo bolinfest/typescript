@@ -692,12 +692,11 @@ module TypeScript {
 
     }
 
-    export class TrinaryExpression extends AST {
-        constructor (nodeType: NodeType,
-                     public operand1: AST,
+    export class ConditionalExpression extends AST {
+        constructor (public operand1: AST,
                      public operand2: AST,
                      public operand3: AST) {
-            super(nodeType);
+            super(NodeType.ConditionalExpression);
         }
 
         public isExpression() { return true; }

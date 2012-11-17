@@ -3013,7 +3013,7 @@ module TypeScript {
                 // Precedence is high enough. Consume the operator token.
                 this.tok = this.scanner.scan();
                 canAssign = false;
-                if (tokenInfo.binopNodeType == NodeType.QMark) {
+                if (tokenInfo.binopNodeType == NodeType.ConditionalExpression) {
                     if (possiblyInLambda && 
                         ( this.tok.tokenId == TokenID.Equals || this.tok.tokenId == TokenID.Colon || this.tok.tokenId == TokenID.CloseParen || this.tok.tokenId == TokenID.Comma)) {
                         // The QMark is not a ternary expression, it is a marker for optional parameter in a lambda expression.
@@ -3022,19 +3022,16 @@ module TypeScript {
                     }
                     else {
                         this.prevExpr = ast;
-                        var qmarkNode = this.parseExpr(errorRecoverySet | ErrorRecoverySet.Colon,
-                                                OperatorPrecedence.Assignment, allowIn,
-                                                TypeContext.NoTypes);
+                        var whenTrue = this.parseExpr(
+                            errorRecoverySet | ErrorRecoverySet.Colon, OperatorPrecedence.Assignment, allowIn, TypeContext.NoTypes);
 
                         // Do not hold onto the prevExpr handle
                         this.prevExpr = null;
-                        this.chkCurTok(TokenID.Colon, "Expected :", errorRecoverySet |
-                                  ErrorRecoverySet.ExprStart);
-                        ast = new TrinaryExpression(NodeType.QMark, ast, qmarkNode,
-                                                  this.parseExpr(errorRecoverySet |
-                                                            ErrorRecoverySet.BinOp,
-                                                            OperatorPrecedence.Assignment,
-                                                            allowIn, TypeContext.NoTypes));
+                        this.chkCurTok(TokenID.Colon, "Expected :", errorRecoverySet | ErrorRecoverySet.ExprStart);
+
+                        var whenFalse = this.parseExpr(
+                            errorRecoverySet | ErrorRecoverySet.BinOp, OperatorPrecedence.Assignment, allowIn, TypeContext.NoTypes)
+                        ast = new ConditionalExpression(ast, whenTrue, whenFalse);
                     }
                 }
                 else {
