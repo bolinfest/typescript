@@ -26,8 +26,11 @@ module TypeScript {
         }
 
         public isExpression() { return false; }
+
         public isStatementOrExpression() { return false; }
+
         public isCompoundStatement() { return false; }
+
         public isLeaf() { return this.isStatementOrExpression() && (!this.isCompoundStatement()); }
 
         public typeCheck(typeFlow: TypeFlow) {
@@ -249,14 +252,18 @@ module TypeScript {
         public cloId = -1;
         public text: string;
 
-        // 'actualText' is the text that the user has entered for the identifier. the text might include any Unicode escape sequences (e.g.: \u0041 for 'A').
-        // 'text', however, contains the resolved value of any escape sequences in the actual text; so in the previous example, actualText = '\u0041', text = 'A'.
+        // 'actualText' is the text that the user has entered for the identifier. the text might 
+        // include any Unicode escape sequences (e.g.: \u0041 for 'A'). 'text', however, contains 
+        // the resolved value of any escape sequences in the actual text; so in the previous 
+        // example, actualText = '\u0041', text = 'A'.
         //
-        // For purposes of finding a symbol, use text, as this will allow you to match all variations of the variable text.
-        // For full-fidelity translation of the user input, such as emitting, use the actualText field.
+        // For purposes of finding a symbol, use text, as this will allow you to match all 
+        // variations of the variable text. For full-fidelity translation of the user input, such
+        // as emitting, use the actualText field.
         // 
         // Note: 
-        //    To change text, and to avoid running into a situation where 'actualText' does not match 'text', always use setText.
+        //    To change text, and to avoid running into a situation where 'actualText' does not 
+        //    match 'text', always use setText.
         constructor (public actualText: string, public hasEscapeSequence?: bool) {
             super(NodeType.Name);
             this.setText(actualText, hasEscapeSequence);
@@ -334,19 +341,25 @@ module TypeScript {
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
-
     }
-    
-    export class UnaryExpression extends AST {
+
+    export class Expression extends AST {
+        constructor (nodeType: NodeType) {
+            super(nodeType);
+        }
+
+        public isExpression() { return true; }
+
+        public isStatementOrExpression() { return true; }
+    }
+
+    export class UnaryExpression extends Expression {
         public targetType: Type = null; // Target type for an object literal (null if no target type)
         public castTerm: AST = null;
 
         constructor (nodeType: NodeType, public operand: AST) {
             super(nodeType);
         }
-
-        public isExpression() { return true; }
-        public isStatementOrExpression() { return true; }
 
         public addToControlFlow(context: ControlFlowContext): void {
             super.addToControlFlow(context);
@@ -496,18 +509,16 @@ module TypeScript {
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
-
     }
 
-    export class CallExpression extends AST {
+    export class CallExpression extends Expression {
         constructor (nodeType: NodeType, public target: AST, public args: ASTList) {
             super(nodeType);
             this.minChar = this.target.minChar;
         }
 
         public signature: Signature = null;
-        public isExpression() { return true; }
-        public isStatementOrExpression() { return true; }
+
         public typeCheck(typeFlow: TypeFlow) {
             if (this.nodeType == NodeType.New) {
                 return typeFlow.typeCheckNew(this);
@@ -533,13 +544,10 @@ module TypeScript {
         }
     }
 
-    export class BinaryExpression extends AST {
+    export class BinaryExpression extends Expression {
         constructor (nodeType: NodeType, public operand1: AST, public operand2: AST) {
             super(nodeType);
         }
-
-        public isStatementOrExpression() { return true; }
-        public isExpression() { return true; }
 
         public typeCheck(typeFlow: TypeFlow) {
             switch (this.nodeType) {
@@ -689,18 +697,15 @@ module TypeScript {
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
-
     }
 
-    export class ConditionalExpression extends AST {
+    export class ConditionalExpression extends Expression {
         constructor (public operand1: AST,
                      public operand2: AST,
                      public operand3: AST) {
             super(NodeType.ConditionalExpression);
         }
 
-        public isExpression() { return true; }
-        public isStatementOrExpression() { return true; }
         public typeCheck(typeFlow: TypeFlow) {
             return typeFlow.typeCheckQMark(this);
         }
