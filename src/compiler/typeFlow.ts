@@ -1876,12 +1876,17 @@ module TypeScript {
             return foundSuper;
         }
 
-        private baseListPrivacyErrorReporter(bases: ASTList, i: number, declSymbol: Symbol, extendsList: bool, typeName: string) {
+        private baseListPrivacyErrorReporter(bases: ASTList, i: number, declSymbol: Symbol, extendsList: bool, typeName: string, isModuleName: bool) {
             var baseSymbol = bases.members[i].type.symbol;
             var declTypeString = (declSymbol.declAST.nodeType == NodeType.Interface) ? "interface" : "class";
             var baseListTypeString = extendsList ? "extends" : "implements";
             var baseTypeString = (baseSymbol.declAST.nodeType == NodeType.Interface) ? "interface" : "class";
-            this.checker.errorReporter.simpleError(bases.members[i], "exported " + declTypeString + " '" + declSymbol.name + "' " + baseListTypeString + " private " + baseTypeString + " '" + typeName + "'");
+            if (isModuleName) {
+                baseTypeString = " " + baseTypeString + " from private module";
+            } else {
+                baseTypeString = " private " + baseTypeString;
+            }
+            this.checker.errorReporter.simpleError(bases.members[i], "exported " + declTypeString + " '" + declSymbol.name + "' " + baseListTypeString + baseTypeString + " '" + typeName + "'");
         }
 
         // Check if declSymbol can satisfy baselist privacy
@@ -1894,16 +1899,42 @@ module TypeScript {
                         continue;
                     }
 
-                    this.checkSymbolPrivacy(bases.members[i].type.symbol, declSymbol, (typeName: string) => this.baseListPrivacyErrorReporter(bases, i, declSymbol, extendsList, typeName));
+                    this.checkSymbolPrivacy(bases.members[i].type.symbol, declSymbol, (typeName: string, isModuleName?: bool) => this.baseListPrivacyErrorReporter(bases, i, declSymbol, extendsList, typeName, isModuleName));
                 }
             }
         }
 
         // Checks if the privacy is satisfied by typeSymbol that is used in the declaration inside container
-        private checkSymbolPrivacy(typeSymbol: TypeSymbol, declSymbol: Symbol, errorCallback: (typeName: string) =>void ) {
+        private checkSymbolPrivacy(typeSymbol: TypeSymbol, declSymbol: Symbol, errorCallback: (typeName: string, isModuleName? : bool) =>void ) {
+            var isImportedTypeSymbol = false;
+            var declSymbolPath: Symbol[] = null;
+            var declSymbolPathLength = 0;
+            var topTypeSymbol: TypeSymbol = null;
+
             // Type is visible type, so this can be used by anyone.
             if (typeSymbol.isExternallyVisible(this.checker)) {
-                return;
+                // Symbol could be visible externally but it might not be visible in declSymbol Scope
+                // if the top most parent of the symbol is dynamically imported symbol
+                var typeSymbolPath = typeSymbol.pathToRoot();
+                declSymbolPath = declSymbol.pathToRoot();
+                var typeSymbolLength = typeSymbolPath.length;
+                declSymbolPathLength = declSymbolPath.length;
+
+                if (typeSymbolLength > 0 && declSymbolPathLength > 0) {
+                    topTypeSymbol = <TypeSymbol>typeSymbolPath[typeSymbolLength - 1];
+                    var topDeclSymbol = declSymbolPath[declSymbolPathLength - 1];
+                    if (topTypeSymbol != topDeclSymbol && 
+                        topTypeSymbol.getType().isModuleType() && 
+                        isQuoted(topTypeSymbol.prettyName)) {
+                        // The typeSymbol is imported from different module, 
+                        // so we would need to go ahead and look up later to see if it is really exported 
+                        isImportedTypeSymbol = true;
+                    }
+                }
+
+                if (!isImportedTypeSymbol) {
+                    return;
+                }
             }
 
             // Interface symbol doesn't reflect correct Exported state so use AST instead
@@ -1935,13 +1966,41 @@ module TypeScript {
 
             // If the container is visible from global scrope it is error
             if (checkVisibilitySymbol.isExternallyVisible(this.checker)) {
+                var privateSymbolName = typeSymbol.name;
+
+                // If imported typeSymbol check if it is externally visible in the declaration symbols scope
+                if (isImportedTypeSymbol) {
+                    var ignoreSymbols: Symbol[] = [];
+                    privateSymbolName = null;
+
+                    // Check in exported module members in each scope
+                    for (var i = 0; i < declSymbolPathLength; i++) {
+                        var symbolType = declSymbolPath[i].getType();
+                        if (symbolType.isModuleType()) {
+                            ignoreSymbols.push(declSymbolPath[i]);
+                            var moduleType = <ModuleType>symbolType;
+                            var prettyName = moduleType.findDynamicModuleName(<ModuleType>topTypeSymbol.type, "", true, ignoreSymbols);
+                            if (prettyName != null) {
+                                // Was able to find the publically visible moduleType name
+                                // This means the typeSymbol is visible externally from top decl Symbol scope
+                                return;
+                            }
+
+                            if (privateSymbolName == null) {
+                                privateSymbolName = moduleType.findDynamicModuleName(<ModuleType>topTypeSymbol.type, "", false, ignoreSymbols);
+                            }
+                        }
+                    }
+                }
+           
+
                 // Visible declaration using non visible type.
-                errorCallback(typeSymbol.name);
+                errorCallback(privateSymbolName, typeSymbol.name != privateSymbolName);
             }
         }
 
         // Checks if the privacy is satisfied by type that is used in the declaration inside container
-        private checkTypePrivacy(type: Type, declSymbol: Symbol, errorCallback: (typeName: string) =>void ) {
+        private checkTypePrivacy(type: Type, declSymbol: Symbol, errorCallback: (typeName: string, isModuleName? : bool) =>void ) {
             // Primitive types
             if (!(type && type.primitiveTypeClass == Primitive.None)) {
                 return;
@@ -1976,7 +2035,7 @@ module TypeScript {
         }
 
         // Checks if the privacy is satisfied by typeSymbol that is used in the declaration inside container
-        private checkSignatureGroupPrivacy(sgroup: SignatureGroup, declSymbol: Symbol, errorCallback: (typeName: string) =>void ) {
+        private checkSignatureGroupPrivacy(sgroup: SignatureGroup, declSymbol: Symbol, errorCallback: (typeName: string, isModuleName? : bool) =>void ) {
             if (sgroup) {
                 var len = sgroup.signatures.length;
                 for (var i = 0; i < sgroup.signatures.length; i++) {

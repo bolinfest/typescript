@@ -117,7 +117,11 @@ module TypeScript {
             else {
                 return aPath;
             }
+        }
 
+        // Gets the pretty Name for the symbol withing the scope
+        public getPrettyName(scopeSymbol: Symbol, searchTillRoot: bool) {
+            return this.name;
         }
 
         public scopeRelativeName(scope: SymbolScope): string {
@@ -397,6 +401,31 @@ module TypeScript {
             }
         }
 
+        // Gets the pretty name of the symbol with respect to symbol of the scope (scopeSymbol)
+        // searchTillRoot specifies if the name need to searched in the root path of the scope
+        public getPrettyName(scopeSymbol: Symbol, searchTillRoot: bool) {
+            if (isQuoted(this.prettyName) && this.type.isModuleType()) {
+                // Its a dynamic module - and need to be specialized with the scope
+                var scopePath = searchTillRoot ? scopeSymbol.pathToRoot() : [scopeSymbol];
+                var ignoreSymbols: Symbol[] = [];
+
+                // Check in exported module members in each scope
+                for (var i = 0; i < scopePath.length; i++) {
+                    var symbolType = scopePath[i].getType();
+                    if (symbolType.isModuleType()) {
+                        ignoreSymbols.push(scopePath[i]);
+                        var moduleType = <ModuleType>symbolType;
+                        var prettyName = moduleType.findDynamicModuleName(<ModuleType>this.type, "", false, ignoreSymbols);
+                        if (prettyName != null) {
+                            return prettyName;
+                        }
+                    }
+                }
+            }
+
+            return this.prettyName;
+        }
+
         public scopeRelativeName(scope: SymbolScope): string {
             if (scope == null) {
                 return this.prettyName + this.getOptionalNameString();
@@ -404,10 +433,10 @@ module TypeScript {
             var lca = this.findCommonAncestorPath(scope.container);
             var builder = "";
             for (var i = 0, len = lca.length; i < len; i++) {
-                var prettyName = (lca[i].kind() == SymbolKind.Type ? (<TypeSymbol>lca[i]).prettyName : lca[i].name);
+                var prettyName = lca[i].getPrettyName(i == len - 1 ? scope.container : lca[i + 1], i == len - 1);
                 builder = prettyName + "." + builder;
             }
-            builder += this.prettyName + this.getOptionalNameString();
+            builder += this.getPrettyName(len == 0 ? scope.container : lca[0], len == 0) + this.getOptionalNameString();
             return builder;
         }
     }
