@@ -1336,6 +1336,8 @@ module TypeScript {
 
         public isLoop() { return false; }
 
+        public isStatementOrExpression() { return true; }
+
         public isCompoundStatement() { return this.isLoop(); }
 
         public typeCheck(typeFlow: TypeFlow) {
@@ -1486,7 +1488,6 @@ module TypeScript {
     }
 
     export class WhileStatement extends Statement {
-        public isStatementOrExpression() { return true; }
         public body: AST = null;
 
         constructor (public cond: AST) {
@@ -1542,7 +1543,6 @@ module TypeScript {
     }
 
     export class DoWhileStatement extends Statement {
-        public isStatementOrExpression() { return true; }
         public body: AST = null;
         public whileAST: AST = null;
         public cond: AST = null;
@@ -1601,7 +1601,6 @@ module TypeScript {
     }
 
     export class IfStatement extends Statement {
-        public isStatementOrExpression() { return true; }
         public thenBod: AST;
         public elseBod: AST = null;
         public statement: ASTSpan = new ASTSpan();
@@ -1689,8 +1688,6 @@ module TypeScript {
             super(NodeType.Return);
         }
 
-        public isStatementOrExpression() { return true; }
-        
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
@@ -1732,7 +1729,7 @@ module TypeScript {
         }
         public statement: ASTSpan = new ASTSpan();
         public body: AST;
-        public isStatementOrExpression() { return true; }
+
         public isLoop() { return true; }
 
         public isFiltered() {
@@ -1851,7 +1848,6 @@ module TypeScript {
             super(NodeType.For);
         }
 
-        public isStatementOrExpression() { return true; }
         public isLoop() { return true; }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
@@ -1943,8 +1939,9 @@ module TypeScript {
 
     export class WithStatement extends Statement {
         public body: AST;
-        public isStatementOrExpression() { return true; }
+
         public isCompoundStatement() { return true; }
+
         public withSym: WithSymbol = null;
 
         constructor (public expr: AST) {
@@ -1979,7 +1976,6 @@ module TypeScript {
             super(NodeType.Switch);
         }
 
-        public isStatementOrExpression() { return true; }
         public isCompoundStatement() { return true; }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
@@ -2143,7 +2139,6 @@ module TypeScript {
             super(NodeType.TryFinally);
         }
 
-        public isStatementOrExpression() { return true; }
         public isCompoundStatement() { return true; }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
@@ -2190,7 +2185,6 @@ module TypeScript {
             super(NodeType.TryCatch);
         }
 
-        public isStatementOrExpression() { return true; }
         public isCompoundStatement() { return true; }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
@@ -2242,7 +2236,6 @@ module TypeScript {
             super(NodeType.Try);
         }
 
-        public isStatementOrExpression() { return true; }
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
