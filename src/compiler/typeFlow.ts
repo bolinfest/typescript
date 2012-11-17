@@ -1018,7 +1018,7 @@ module TypeScript {
             if (this.thisFnc == null) {
                 // 'this' in class bodies should bind to 'any'
                 if (this.thisType) {
-                    if (this.thisClassNode && this.thisClassNode.nty == NodeType.Class) {
+                    if (this.thisClassNode && this.thisClassNode.nodeType == NodeType.Class) {
                         illegalThisRef = true;
                         ast.type = this.anyType;
                     }

@@ -338,14 +338,11 @@ module TypeScript {
     }
     
     export class UnaryExpression extends AST {
-
         public targetType: Type = null; // Target type for an object literal (null if no target type)
         public castTerm: AST = null;
-        public nty: NodeType;
 
-        constructor (nty: number, public operand: AST) {
-            super(nty);
-            this.nty = nty;
+        constructor (nodeType: NodeType, public operand: AST) {
+            super(nodeType);
         }
 
         public isExpression() { return true; }
@@ -360,7 +357,7 @@ module TypeScript {
         }
 
         public typeCheck(typeFlow: TypeFlow) {
-            switch (this.nty) {
+            switch (this.nodeType) {
                 case NodeType.Not:
                     return typeFlow.typeCheckBitNot(this);
 
@@ -428,7 +425,7 @@ module TypeScript {
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            switch (this.nty) {
+            switch (this.nodeType) {
                 case NodeType.IncPost:
                     emitter.emitJavascript(this.operand, TokenID.PlusPlus, false);
                     emitter.writeToOutput("++");
@@ -503,12 +500,8 @@ module TypeScript {
     }
 
     export class CallExpression extends AST {
-
-        public nty: NodeType;
-
-        constructor (nty: number, public target: AST, public args: ASTList) {
-            super(nty);
-            this.nty = nty;
+        constructor (nodeType: NodeType, public target: AST, public args: ASTList) {
+            super(nodeType);
             this.minChar = this.target.minChar;
         }
 
@@ -516,7 +509,7 @@ module TypeScript {
         public isExpression() { return true; }
         public isStatementOrExpression() { return true; }
         public typeCheck(typeFlow: TypeFlow) {
-            if (this.nty == NodeType.New) {
+            if (this.nodeType == NodeType.New) {
                 return typeFlow.typeCheckNew(this);
             }
             else {
@@ -528,7 +521,7 @@ module TypeScript {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
 
-            if (this.nty == NodeType.New) {
+            if (this.nodeType == NodeType.New) {
                 emitter.emitNew(this.target, this.args);
             }
             else {
@@ -541,18 +534,15 @@ module TypeScript {
     }
 
     export class BinaryExpression extends AST {
-        public nty: NodeType;
-
-        constructor (nty: number, public operand1: AST, public operand2: AST) {
-            super(nty);
-            this.nty = nty;
+        constructor (nodeType: NodeType, public operand1: AST, public operand2: AST) {
+            super(nodeType);
         }
 
         public isStatementOrExpression() { return true; }
         public isExpression() { return true; }
 
         public typeCheck(typeFlow: TypeFlow) {
-            switch (this.nty) {
+            switch (this.nodeType) {
                 case NodeType.Dot:
                     return typeFlow.typeCheckDotOperator(this);
                 case NodeType.Asg:
@@ -571,11 +561,11 @@ module TypeScript {
                 case NodeType.Eq:
                     var text: string;
                     if (typeFlow.checker.styleSettings.eqeqeq) {
-                        text = nodeTypeTable[this.nty];
+                        text = nodeTypeTable[this.nodeType];
                         typeFlow.checker.errorReporter.styleError(this, "use of " + text);
                     }
                     else if (typeFlow.checker.styleSettings.eqnull) {
-                        text = nodeTypeTable[this.nty];
+                        text = nodeTypeTable[this.nodeType];
                         if ((this.operand2 !== null) && (this.operand2.nodeType == NodeType.Null)) {
                             typeFlow.checker.errorReporter.styleError(this, "use of " + text + " to compare with null");
                         }
@@ -651,7 +641,7 @@ module TypeScript {
                 emitter.emitJavascript(this.operand2, binTokenId, false);
             }
             else {
-                switch (this.nty) {
+                switch (this.nodeType) {
                     case NodeType.Dot:
                         if (!emitter.tryEmitConstant(this)) {
                             emitter.emitJavascript(this.operand1, TokenID.Dot, false);
@@ -703,12 +693,11 @@ module TypeScript {
     }
 
     export class TrinaryExpression extends AST {
-        public nty: NodeType;
-
-        constructor (nty: number, public operand1: AST, public operand2: AST,
-                            public operand3: AST) {
-            super(nty);
-            this.nty = nty;
+        constructor (nodeType: NodeType,
+                     public operand1: AST,
+                     public operand2: AST,
+                     public operand3: AST) {
+            super(nodeType);
         }
 
         public isExpression() { return true; }
@@ -1186,10 +1175,10 @@ module TypeScript {
     }
 
     export class Record extends AST {
-        public nty: NodeType;
-        constructor (nty: number, public name: AST, public members: AST) {
-            super(nty);
-            this.nty = nty;
+        constructor (nodeType: NodeType,
+                     public name: AST,
+                     public members: AST) {
+            super(nodeType);
         }
     }
 
@@ -1248,8 +1237,8 @@ module TypeScript {
         public name: Identifier;
         public members: AST;
 
-        constructor (nty: NodeType, name: Identifier, public extendsList: ASTList, public implementsList: ASTList, members: AST) {
-            super(nty, name, members);
+        constructor (nodeType: NodeType, name: Identifier, public extendsList: ASTList, public implementsList: ASTList, members: AST) {
+            super(nodeType, name, members);
             this.name = name;
             this.members = members;
         }
@@ -1297,17 +1286,19 @@ module TypeScript {
         public isOverload = false;
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
-        public nty: NodeType;
         public name: Identifier;
         public extendsList: ASTList;
         public implementsList: ASTList;
         public members: AST;
 
-        constructor (nty: NodeType, name: Identifier, members: AST, public args: ASTList, extendsList: ASTList,
+        constructor (nodeType: NodeType,
+                     name: Identifier,
+                     members: AST,
+                     public args: ASTList,
+                     extendsList: ASTList,
             implementsList: ASTList) {
-            super(nty, name, extendsList, implementsList, members);
+            super(nodeType, name, extendsList, implementsList, members);
 
-            this.nty = nty;
             this.name = name;
             this.extendsList = extendsList;
             this.implementsList = implementsList;
@@ -1318,29 +1309,31 @@ module TypeScript {
         public isAmbient() { return hasFlag(this.varFlags, VarFlags.Ambient); }
 
         public typeCheck(typeFlow: TypeFlow) {
-            if (this.nty == NodeType.Interface) {
+            if (this.nodeType == NodeType.Interface) {
                 return typeFlow.typeCheckInterface(this);
             }
             else {
-                throw new Error("please implement type check for node type" + this.nty);
+                throw new Error("please implement type check for node type " + this.nodeType);
             }
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
-            if (this.nty != NodeType.Interface) {
-                throw new Error("please implement emit for node type" + this.nty);
+            if (this.nodeType != NodeType.Interface) {
+                throw new Error("please implement emit for node type " + this.nodeType);
             }
         }
     }
 
     export class Statement extends AST {
-
-        constructor (nty: number) {
-            super(nty);
+        constructor (nodeType: NodeType) {
+            super(nodeType);
             this.flags |= ASTFlags.IsStatement;
         }
+
         public isLoop() { return false; }
+
         public isCompoundStatement() { return this.isLoop(); }
+
         public typeCheck(typeFlow: TypeFlow) {
             this.type = typeFlow.voidType;
             return this;
@@ -1439,11 +1432,9 @@ module TypeScript {
         public target: string = null;
         public hasExplicitTarget() { return (this.target); }
         public resolvedTarget: Statement = null;
-        public nty;
 
-        constructor (nty: number) {
-            super(nty);
-            this.nty = nty;
+        constructor (nodeType: NodeType) {
+            super(nodeType);
         }
 
         public setResolvedTarget(parser: Parser, stmt: Statement): bool {
@@ -1451,7 +1442,7 @@ module TypeScript {
                 this.resolvedTarget = stmt;
                 return true;
             }
-            if (this.nty === NodeType.Continue) {
+            if (this.nodeType === NodeType.Continue) {
                 parser.reportParseError("continue statement applies only to loops");
                 return false;
             }
@@ -1469,13 +1460,13 @@ module TypeScript {
 
         public addToControlFlow(context: ControlFlowContext): void {
             super.addToControlFlow(context);
-            context.unconditionalBranch(this.resolvedTarget, (this.nty == NodeType.Continue));
+            context.unconditionalBranch(this.resolvedTarget, (this.nodeType == NodeType.Continue));
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            if (this.nty == NodeType.Break) {
+            if (this.nodeType == NodeType.Break) {
                 emitter.writeToOutput("break");
             }
             else {
