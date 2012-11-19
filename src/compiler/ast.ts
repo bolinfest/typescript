@@ -729,6 +729,7 @@ module TypeScript {
             super(NodeType.NumberLit);
         }
 
+        // REVIEW: NumberLiteral is a "statement or expression" but is not an "expression"?
         public isStatementOrExpression() { return true; }
         public isNegativeZero = false;
         public typeCheck(typeFlow: TypeFlow) {
@@ -774,7 +775,8 @@ module TypeScript {
         constructor (public regex) {
             super(NodeType.Regex);
         }
-
+        
+        // REVIEW: RegexLiteral is a "statement or expression" but is not an "expression"?
         public isStatementOrExpression() { return true; }
         public typeCheck(typeFlow: TypeFlow) {
             this.type = typeFlow.regexType;
@@ -795,8 +797,10 @@ module TypeScript {
         constructor (public text: string) {
             super(NodeType.QString);
         }
-
+        
+        // REVIEW: StringLiteral is a "statement or expression" but is not an "expression"?
         public isStatementOrExpression() { return true; }
+
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
