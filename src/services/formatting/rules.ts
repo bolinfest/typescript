@@ -19,10 +19,11 @@ module Formatting {
         public IgnoreBeforeComment: Rule;
         public IgnoreAfterLineComment: Rule;
 
-        // Space after keyword but not before ; or : or ?
+        // Space after keyword but not before ; or : or ? or after constructor 
         public NoSpaceBeforeSemicolon: Rule;
         public NoSpaceBeforeColon: Rule;
         public NoSpaceBeforeQMark: Rule;
+        public NoSpaceAfterConstructor: Rule;
         public SpaceAfterColon: Rule;
         public SpaceAfterQMark: Rule;
         public SpaceAfterSemicolon: Rule;
@@ -171,6 +172,7 @@ module Formatting {
             this.NoSpaceBeforeSemicolon = new Rule(RuleDescriptor.create2(Shared.TokenRange.Any, AuthorTokenKind.atkSColon), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotForContext), RuleAction.Delete));
             this.NoSpaceBeforeColon = new Rule(RuleDescriptor.create2(Shared.TokenRange.Any, AuthorTokenKind.atkColon), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotBinaryOpContext), RuleAction.Delete));
             this.NoSpaceBeforeQMark = new Rule(RuleDescriptor.create2(Shared.TokenRange.Any, AuthorTokenKind.atkQMark), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotBinaryOpContext), RuleAction.Delete));
+            this.NoSpaceAfterConstructor = new Rule(RuleDescriptor.create1(AuthorTokenKind.atkConstructor, AuthorTokenKind.atkLParen), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Delete));
             this.SpaceAfterColon = new Rule(RuleDescriptor.create3(AuthorTokenKind.atkColon, Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotBinaryOpContext), RuleAction.Space));
             this.SpaceAfterQMark = new Rule(RuleDescriptor.create3(AuthorTokenKind.atkQMark, Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotBinaryOpContext), RuleAction.Space));
             this.SpaceAfterSemicolon = new Rule(RuleDescriptor.create3(AuthorTokenKind.atkSColon, Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Space));
@@ -254,7 +256,7 @@ module Formatting {
             this.HighPriorityCommonRules =
             [
                 this.IgnoreBeforeComment, this.IgnoreAfterLineComment,
-                this.NoSpaceBeforeSemicolon, this.NoSpaceBeforeColon, this.SpaceAfterColon, this.NoSpaceBeforeQMark, this.SpaceAfterQMark, this.NewLineAfterCloseCurly,
+                this.NoSpaceBeforeSemicolon, this.NoSpaceBeforeColon, this.SpaceAfterColon, this.NoSpaceBeforeQMark, this.NoSpaceAfterConstructor, this.SpaceAfterQMark, this.NewLineAfterCloseCurly,
                 this.NoSpaceBeforeDot, this.NoSpaceAfterDot,
                 this.NoSpaceAfterUnaryPrefixOperator,
                 this.NoSpaceAfterUnaryPreincrementOperator, this.NoSpaceAfterUnaryPredecrementOperator,

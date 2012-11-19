@@ -66,5 +66,8 @@ describe('getFormattingEditsForRange', function() {
                 TypeScript.moduleGenTarget = svGenTarget;
             }
         });
+        it("formats constructor statements correctelly", function() {
+            getFormattingEditsForRange('spaceAfterConstructor');
+        });
     });
 });

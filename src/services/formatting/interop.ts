@@ -1761,6 +1761,9 @@ module Formatting {
         // The token is the "with" keyword.
         atkWith,
 
+        // TypeScript: constructor
+        atkConstructor,
+
         // The token is the future reserved keyword "implements".
         atkImplements,
 
@@ -2245,7 +2248,7 @@ module Formatting {
                 case TypeScript.TokenID.False: return AuthorTokenKind.atkFalse;
                 case TypeScript.TokenID.Finally: return AuthorTokenKind.atkFinally;
                 case TypeScript.TokenID.For: return AuthorTokenKind.atkFor;
-                case TypeScript.TokenID.Constructor: return AuthorTokenKind.atkFunction;//TODO
+                case TypeScript.TokenID.Constructor: return AuthorTokenKind.atkConstructor;//TODO
                 case TypeScript.TokenID.Function: return AuthorTokenKind.atkFunction;
                 case TypeScript.TokenID.Get: return AuthorTokenKind.atkIdentifier;//TODO
                 case TypeScript.TokenID.If: return AuthorTokenKind.atkIf;
