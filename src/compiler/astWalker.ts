@@ -383,8 +383,8 @@ module TypeScript {
         }
 
         export function walkBlockChildren(preAst: Block, parent: AST, walker: IAstWalker): void {
-            if (preAst.stmts) {
-                preAst.stmts = <ASTList>walker.walk(preAst.stmts, preAst);
+            if (preAst.statements) {
+                preAst.statements = <ASTList>walker.walk(preAst.statements, preAst);
             }
         }
 

@@ -3927,13 +3927,13 @@ module TypeScript {
                         this.tok = this.scanner.scan();
                         var block = new Block(new ASTList(), true);
                         this.pushStmt(block, labelList);
-                        this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly, block.stmts, false, false,
+                        this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly, block.statements, false, false,
                                       AllowedElements.Block, modifiers);
                         this.popStmt();
-                        block.stmts.minChar = minChar;
-                        block.stmts.limChar = this.scanner.pos;
-                        block.minChar = block.stmts.minChar;
-                        block.limChar = block.stmts.limChar;
+                        block.statements.minChar = minChar;
+                        block.statements.limChar = this.scanner.pos;
+                        block.minChar = block.statements.minChar;
+                        block.limChar = block.statements.limChar;
                         this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
                         ast = block;
                         break;

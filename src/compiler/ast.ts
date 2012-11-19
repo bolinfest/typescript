@@ -1387,8 +1387,8 @@ module TypeScript {
     }
 
     export class Block extends Statement {
-
-        constructor (public stmts: ASTList, public isStatementBlock: bool) {
+        constructor (public statements: ASTList,
+                     public isStatementBlock: bool) {
             super(NodeType.Block);
         }
 
@@ -1399,11 +1399,11 @@ module TypeScript {
                 emitter.writeLineToOutput(" {");
                 emitter.indenter.increaseIndent();
             } else {
-                emitter.setInVarBlock(this.stmts.members.length);
+                emitter.setInVarBlock(this.statements.members.length);
             }
             var temp = emitter.setInObjectLiteral(false);
-            if (this.stmts) {
-                emitter.emitJavascriptList(this.stmts, null, TokenID.Semicolon, true, false, false);
+            if (this.statements) {
+                emitter.emitJavascriptList(this.statements, null, TokenID.Semicolon, true, false, false);
             }
             if (this.isStatementBlock) {
                 emitter.indenter.decreaseIndent();
@@ -1418,8 +1418,8 @@ module TypeScript {
         public addToControlFlow(context: ControlFlowContext) {
             var afterIfNeeded = new BasicBlock();
             context.pushStatement(this, context.current, afterIfNeeded);
-            if (this.stmts) {
-                context.walk(this.stmts, this);
+            if (this.statements) {
+                context.walk(this.statements, this);
             }
             context.walker.options.goChildren = false;
             context.popStatement();
@@ -1431,11 +1431,12 @@ module TypeScript {
 
         public typeCheck(typeFlow: TypeFlow) {
             if (!typeFlow.checker.styleSettings.emptyBlocks) {
-                if ((this.stmts === null) || (this.stmts.members.length == 0)) {
+                if ((this.statements === null) || (this.statements.members.length == 0)) {
                     typeFlow.checker.errorReporter.styleError(this, "empty block");
                 }
             }
-            typeFlow.typeCheck(this.stmts);
+
+            typeFlow.typeCheck(this.statements);
             return this;
         }
     }
@@ -1754,8 +1755,8 @@ module TypeScript {
                 if (singleItem !== null) {
                     if (singleItem.nodeType == NodeType.Block) {
                         var block = <Block>singleItem;
-                        if ((block.stmts !== null) && (block.stmts.members.length == 1)) {
-                            singleItem = block.stmts.members[0];
+                        if ((block.statements !== null) && (block.statements.members.length == 1)) {
+                            singleItem = block.statements.members[0];
                         }
                     }
                     if (singleItem.nodeType == NodeType.If) {

@@ -586,7 +586,7 @@ module Formatting {
             return path.count() >= 2 &&
                 asts[top - 1].nodeType === TypeScript.NodeType.Case &&
                 asts[top - 0].nodeType === TypeScript.NodeType.Block &&
-                (<TypeScript.CaseStatement>asts[top - 1]).body == (<TypeScript.Block>asts[top - 0]).stmts;
+                (<TypeScript.CaseStatement>asts[top - 1]).body == (<TypeScript.Block>asts[top - 0]).statements;
         }
 
         private mapBodyOfCase(body: TypeScript.ASTList) {

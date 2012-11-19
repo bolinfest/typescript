@@ -258,7 +258,7 @@ module TypeScript {
         public BlockCallback(pre: bool, block: Block): bool {
             if (!block.isStatementBlock) {
                 if (pre) {
-                    this.varListCount = block.stmts.members.length;
+                    this.varListCount = block.statements.members.length;
                 } else {
                     this.varListCount = 0;
                 }

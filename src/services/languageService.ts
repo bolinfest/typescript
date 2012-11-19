@@ -592,7 +592,7 @@ module Services {
             var astList: TypeScript.ASTList = null;
             if (ast.nodeType == TypeScript.NodeType.Block) {
                 var block = <TypeScript.Block>ast;
-                astList = block.stmts;
+                astList = block.statements;
             } else if (ast.nodeType == TypeScript.NodeType.List) {
                 astList = <TypeScript.ASTList>ast;
             } else {

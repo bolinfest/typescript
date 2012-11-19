@@ -239,7 +239,7 @@ module TypeScript {
         public isBodyOfBlock(): bool {
             return this.count() >= 2 &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.Block &&
-                (<TypeScript.Block>this.asts[this.top - 1]).stmts == this.asts[this.top - 0];
+                (<TypeScript.Block>this.asts[this.top - 1]).statements == this.asts[this.top - 0];
         }
 
         public isBodyOfFor(): bool {
