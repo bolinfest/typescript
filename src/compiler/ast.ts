@@ -512,7 +512,9 @@ module TypeScript {
     }
 
     export class CallExpression extends Expression {
-        constructor (nodeType: NodeType, public target: AST, public args: ASTList) {
+        constructor (nodeType: NodeType,
+                     public target: AST,
+                     public arguments: ASTList) {
             super(nodeType);
             this.minChar = this.target.minChar;
         }
@@ -533,10 +535,10 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
 
             if (this.nodeType == NodeType.New) {
-                emitter.emitNew(this.target, this.args);
+                emitter.emitNew(this.target, this.arguments);
             }
             else {
-                emitter.emitCall(this, this.target, this.args);
+                emitter.emitCall(this, this.target, this.arguments);
             }
 
             emitter.recordSourceMappingEnd(this);
@@ -981,7 +983,7 @@ module TypeScript {
         public endingToken: ASTSpan = null;
 
         constructor (public name: Identifier, public bod: ASTList, public isConstructor: bool,
-                    public args: ASTList, public vars: ASTList, public scopes: ASTList, public statics: ASTList,
+                     public arguments: ASTList, public vars: ASTList, public scopes: ASTList, public statics: ASTList,
             nodeType: number) {
 
             super(nodeType);
@@ -1767,7 +1769,7 @@ module TypeScript {
                                     ((<Identifier>binex.operand1).actualText == (<Identifier>this.obj).actualText)) {
                                     var prop = <Identifier>binex.operand2;
                                     if (prop.actualText == "hasOwnProperty") {
-                                        var args = (<CallExpression>cond).args;
+                                        var args = (<CallExpression>cond).arguments;
                                         if ((args !== null) && (args.members.length == 1)) {
                                             var arg = args.members[0];
                                             if ((arg.nodeType == NodeType.Name) &&

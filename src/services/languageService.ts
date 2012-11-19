@@ -951,14 +951,14 @@ module Services {
                 if (!TypeScript.isValidAstNode(ast))
                     return null;
 
-                if (!TypeScript.isValidAstNode(ast.args))
+                if (!TypeScript.isValidAstNode(ast.arguments))
                     return null;
 
                 var result = new ActualSignatureInfo();
                 result.currentParameter = -1;
-                result.openParenMinChar = ast.args.minChar;
-                result.closeParenLimChar = Math.max(ast.args.minChar, ast.args.limChar);
-                ast.args.members.forEach((arg, index) => {
+                result.openParenMinChar = ast.arguments.minChar;
+                result.closeParenLimChar = Math.max(ast.arguments.minChar, ast.arguments.limChar);
+                ast.arguments.members.forEach((arg, index) => {
                     var parameter = new ActualParameterInfo();
                     parameter.minChar = arg.minChar;
                     parameter.limChar = Math.max(arg.minChar, arg.limChar);
@@ -1713,7 +1713,7 @@ module Services {
                 var result = ast.minChar;
                 switch (ast.nodeType) {
                     case TypeScript.NodeType.FuncDecl:
-                        result = maxLim(result, (<TypeScript.FuncDecl>ast).name, (<TypeScript.FuncDecl>ast).args, (<TypeScript.FuncDecl>ast).returnTypeAnnotation);
+                        result = maxLim(result, (<TypeScript.FuncDecl>ast).name, (<TypeScript.FuncDecl>ast).arguments, (<TypeScript.FuncDecl>ast).returnTypeAnnotation);
                         break
 
                     case TypeScript.NodeType.Module:

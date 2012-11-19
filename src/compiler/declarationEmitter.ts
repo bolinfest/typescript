@@ -210,7 +210,9 @@ module TypeScript {
             if (pre && this.canEmitSignature(ToDeclFlags(varDecl.varFlags), false)) {
                 var interfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
                 if (!interfaceMember) {
-                    // If it is var list of form var a, b, c = emit it only if count > 0 - which will be when emitting first var                    // If it is var list of form  var a = varList count will be 0                    if (this.varListCount >= 0) {
+                    // If it is var list of form var a, b, c = emit it only if count > 0 - which will be when emitting first var
+                    // If it is var list of form  var a = varList count will be 0
+                    if (this.varListCount >= 0) {
                         this.emitDeclFlags(ToDeclFlags(varDecl.varFlags), "var");
                         this.varListCount = -this.varListCount;
                     }
@@ -241,7 +243,10 @@ module TypeScript {
                 }
                
                 // emitted one var decl
-                if (this.varListCount > 0) { this.varListCount--; } else if (this.varListCount < 0) { this.varListCount++; }                // Write ; or ,                if (this.varListCount < 0) {
+                if (this.varListCount > 0) { this.varListCount--; } else if (this.varListCount < 0) { this.varListCount++; }
+
+                // Write ; or ,
+                if (this.varListCount < 0) {
                     this.declFile.Write(", ");
                 } else {
                     this.declFile.WriteLine(";");
@@ -341,13 +346,13 @@ module TypeScript {
                 this.declFile.Write("[");
             }
 
-            if (funcDecl.args) {
-                var argsLen = funcDecl.args.members.length;
+            if (funcDecl.arguments) {
+                var argsLen = funcDecl.arguments.members.length;
                 if (funcDecl.variableArgList) {
                     argsLen--;
                 }
                 for (var i = 0; i < argsLen; i++) {
-                    var argDecl = <ArgDecl>funcDecl.args.members[i];
+                    var argDecl = <ArgDecl>funcDecl.arguments.members[i];
                     this.emitArgDecl(argDecl, funcDecl);
                     if (i < (argsLen - 1)) {
                         this.declFile.Write(", ");
@@ -356,8 +361,8 @@ module TypeScript {
             }
 
             if (funcDecl.variableArgList) {
-                var lastArg = <ArgDecl>funcDecl.args.members[funcDecl.args.members.length - 1];
-                if (funcDecl.args.members.length > 1) {
+                var lastArg = <ArgDecl>funcDecl.arguments.members[funcDecl.arguments.members.length - 1];
+                if (funcDecl.arguments.members.length > 1) {
                     this.declFile.Write(", ...");
                 }
                 else {
@@ -425,10 +430,11 @@ module TypeScript {
         }
 
         private emitClassMembersFromConstructorDefinition(funcDecl: FuncDecl) {
-            if (funcDecl.args) {
-                var argsLen = funcDecl.args.members.length; if (funcDecl.variableArgList) { argsLen--; }
+            if (funcDecl.arguments) {
+                var argsLen = funcDecl.arguments.members.length; if (funcDecl.variableArgList) { argsLen--; }
+
                 for (var i = 0; i < argsLen; i++) {
-                    var argDecl = <ArgDecl>funcDecl.args.members[i];
+                    var argDecl = <ArgDecl>funcDecl.arguments.members[i];
                     if (hasFlag(argDecl.varFlags, VarFlags.Property)) {
                         this.emitDeclFlags(ToDeclFlags(argDecl.varFlags), "var");
                         this.declFile.Write(argDecl.id.text);

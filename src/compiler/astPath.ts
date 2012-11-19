@@ -174,7 +174,7 @@ module TypeScript {
                 this.asts[this.top - 3].nodeType === TypeScript.NodeType.List &&
                 this.asts[this.top - 4].nodeType === TypeScript.NodeType.Class &&
                 ((<TypeScript.FuncDecl>this.asts[this.top - 2]).isConstructor) &&
-                ((<TypeScript.FuncDecl>this.asts[this.top - 2]).args === this.asts[this.top - 1]) &&
+                ((<TypeScript.FuncDecl>this.asts[this.top - 2]).arguments === this.asts[this.top - 1]) &&
                 ((<TypeScript.ClassDecl>this.asts[this.top - 4]).constructorDecl === this.asts[this.top - 2]);
         }
 
@@ -398,28 +398,28 @@ module TypeScript {
             return this.count() >= 2 &&
                 this.asts[this.top - 0].nodeType === TypeScript.NodeType.List &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.FuncDecl &&
-                (<TypeScript.FuncDecl>this.asts[this.top - 1]).args === this.asts[this.top - 0];
+                (<TypeScript.FuncDecl>this.asts[this.top - 1]).arguments === this.asts[this.top - 0];
         }
 
         public isArgumentOfFunction(): bool {
             return this.count() >= 3 &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.List &&
                 this.asts[this.top - 2].nodeType === TypeScript.NodeType.FuncDecl &&
-                (<TypeScript.FuncDecl>this.asts[this.top - 2]).args === this.asts[this.top - 1];
+                (<TypeScript.FuncDecl>this.asts[this.top - 2]).arguments === this.asts[this.top - 1];
         }
 
         public isArgumentListOfCall(): bool {
             return this.count() >= 2 &&
                 this.asts[this.top - 0].nodeType === TypeScript.NodeType.List &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.Call &&
-                (<TypeScript.CallExpression>this.asts[this.top - 1]).args === this.asts[this.top - 0];
+                (<TypeScript.CallExpression>this.asts[this.top - 1]).arguments === this.asts[this.top - 0];
         }
 
         public isArgumentListOfNew(): bool {
             return this.count() >= 2 &&
                 this.asts[this.top - 0].nodeType === TypeScript.NodeType.List &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.New &&
-                (<TypeScript.CallExpression>this.asts[this.top - 1]).args === this.asts[this.top - 0];
+                (<TypeScript.CallExpression>this.asts[this.top - 1]).arguments === this.asts[this.top - 0];
         }
 
         public isSynthesizedBlock(): bool {

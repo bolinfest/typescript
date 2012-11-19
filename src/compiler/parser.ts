@@ -3091,7 +3091,7 @@ module TypeScript {
                     case TokenID.OpenParen:
                         if (inNew) {
                             var callExpr = <CallExpression>ast;
-                            callExpr.args = this.parseArgList(errorRecoverySet);
+                            callExpr.arguments = this.parseArgList(errorRecoverySet);
                             inNew = false;
                         }
                         else {

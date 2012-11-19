@@ -342,7 +342,7 @@ module TypeScript {
                 if (baseExpr.nodeType == NodeType.Call) {
                     this.emitIndent();
                     this.writeToOutput("_super.call(this");
-                    var args = (<CallExpression>baseExpr).args;
+                    var args = (<CallExpression>baseExpr).arguments;
                     if (args && (args.members.length > 0)) {
                         this.writeToOutput(", ");
                         this.emitJavascriptList(args, ", ", TokenID.Comma, false, false, false);
@@ -404,15 +404,15 @@ module TypeScript {
             var i = 0;
             var arg: ArgDecl;
             var defaultArgs: ArgDecl[] = [];
-            if (funcDecl.args) {
+            if (funcDecl.arguments) {
                 var tempContainer = this.setContainer(EmitContainer.Args);
-                argsLen = funcDecl.args.members.length;
+                argsLen = funcDecl.arguments.members.length;
                 var printLen = argsLen;
                 if (funcDecl.variableArgList) {
                     printLen--;
                 }
                 for (i = 0; i < printLen; i++) {
-                    arg = <ArgDecl>funcDecl.args.members[i];
+                    arg = <ArgDecl>funcDecl.arguments.members[i];
                     if (arg.init) {
                         defaultArgs.push(arg);
                     }
@@ -456,10 +456,10 @@ module TypeScript {
             }
 
             if (funcDecl.isConstructor && !classPropertiesMustComeAfterSuperCall) {
-                if (funcDecl.args) {
-                    argsLen = funcDecl.args.members.length;
+                if (funcDecl.arguments) {
+                    argsLen = funcDecl.arguments.members.length;
                     for (i = 0; i < argsLen; i++) {
-                        arg = <ArgDecl>funcDecl.args.members[i];
+                        arg = <ArgDecl>funcDecl.arguments.members[i];
                         if ((arg.varFlags & VarFlags.Property) != VarFlags.None) {
                             this.emitIndent();
                             this.recordSourceMappingStart(arg);
@@ -485,8 +485,8 @@ module TypeScript {
                 this.writeCaptureThisStatement(funcDecl);
             }
             if (funcDecl.variableArgList) {
-                argsLen = funcDecl.args.members.length;
-                var lastArg = <ArgDecl>funcDecl.args.members[argsLen - 1];
+                argsLen = funcDecl.arguments.members.length;
+                var lastArg = <ArgDecl>funcDecl.arguments.members[argsLen - 1];
                 this.emitIndent();
                 this.recordSourceMappingStart(lastArg);
                 this.writeToOutput("var ");
@@ -1287,10 +1287,10 @@ module TypeScript {
                         // emit any parameter properties first
                         var constructorDecl = (<ClassDecl>this.thisClassNode).constructorDecl;
 
-                        if (constructorDecl && constructorDecl.args) {
-                            var argsLen = constructorDecl.args.members.length;
+                        if (constructorDecl && constructorDecl.arguments) {
+                            var argsLen = constructorDecl.arguments.members.length;
                             for (var iArg = 0; iArg < argsLen; iArg++) {
-                                var arg = <BoundDecl>constructorDecl.args.members[iArg];
+                                var arg = <BoundDecl>constructorDecl.arguments.members[iArg];
                                 if ((arg.varFlags & VarFlags.Property) != VarFlags.None) {
                                     this.emitIndent();
                                     this.recordSourceMappingStart(arg);
@@ -1705,9 +1705,9 @@ module TypeScript {
                 if (dotNode.operand1.nodeType == NodeType.Super) {
                     this.emitJavascript(dotNode, TokenID.OpenParen, false);
                     this.writeToOutput(".call(this");
-                    if (callEx.args && callEx.args.members.length > 0) {
+                    if (callEx.arguments && callEx.arguments.members.length > 0) {
                         this.writeToOutput(", ");
-                        this.emitJavascriptList(callEx.args, ", ", TokenID.Comma, false, false, false);
+                        this.emitJavascriptList(callEx.arguments, ", ", TokenID.Comma, false, false, false);
                     }
                     this.writeToOutput(")");
                     return true;

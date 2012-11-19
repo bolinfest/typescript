@@ -730,8 +730,8 @@ module Formatting {
                             }
 
                         case AuthorParseNodeProperty.apnpRParenMin:
-                            if (funcDecl.args != null) {
-                                return funcDecl.args.limChar - 1; // need to return *starting* position of curly
+                            if (funcDecl.arguments != null) {
+                                return funcDecl.arguments.limChar - 1; // need to return *starting* position of curly
                             }
                     }
                 }

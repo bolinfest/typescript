@@ -2065,19 +2065,19 @@ module TypeScript {
             var isContainerInterface = funcDecl.type.symbol.getInterfaceDeclFromSymbol(this.checker) != null;
             if (!isContainerInterface) {
                 if (funcDecl.isConstructor) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported class's constructor parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.arguments.members[p], "exported class's constructor parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 } else if (isSetter) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], (isPublicFunc ? "public" : "exported") + " setter parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.arguments.members[p], (isPublicFunc ? "public" : "exported") + " setter parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 } else if (!isGetter) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], (isPublicFunc ? "public" : "exported") + " function parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.arguments.members[p], (isPublicFunc ? "public" : "exported") + " function parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 }
             } else {
                 if (funcDecl.isConstructMember()) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported interface's constructor parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.arguments.members[p], "exported interface's constructor parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 } else if (funcDecl.isCallMember()) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported interface's call parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.arguments.members[p], "exported interface's call parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 } else if (!funcDecl.isIndexerMember()) {
-                    this.checker.errorReporter.simpleError(funcDecl.args.members[p], "exported interface's function parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
+                    this.checker.errorReporter.simpleError(funcDecl.arguments.members[p], "exported interface's function parameter '" + paramSymbol.name + "' has or is using private type '" + typeName + "'");
                 }
             }
         }
@@ -2398,16 +2398,16 @@ module TypeScript {
                 this.scope = tmpParamScope;
             }
             else {
-                this.typeCheck(funcDecl.args)
+                this.typeCheck(funcDecl.arguments)
 
                 // Because some terms were not yet type-checkable during binding, ensure that
                 // param symbols are updated with the proper argument types
                 for (var p = 0; p < paramLen; p++) {
-                    signature.parameters[p].parameter.typeLink.type = funcDecl.args.members[p].type;
+                    signature.parameters[p].parameter.typeLink.type = funcDecl.arguments.members[p].type;
                     // Verify the parameter for the privacy
                     this.checkTypePrivacy(signature.parameters[p].getType(), container, (typeName: string) => this.functionArgumentPrivacyErrorReporter(funcDecl, p, signature.parameters[p], typeName));
-                    if ((<ArgDecl>funcDecl.args.members[p]).parameterPropertySym) {
-                        (<ArgDecl>funcDecl.args.members[p]).parameterPropertySym.setType(funcDecl.args.members[p].type);
+                    if ((<ArgDecl>funcDecl.arguments.members[p]).parameterPropertySym) {
+                        (<ArgDecl>funcDecl.arguments.members[p]).parameterPropertySym.setType(funcDecl.arguments.members[p].type);
                     }
                 }
 
@@ -2415,14 +2415,14 @@ module TypeScript {
                     if (!paramLen || paramLen > 1) {
                         this.checker.errorReporter.simpleError(funcDecl, "Index signatures may take one and only one parameter");
                     }
-                    else if (funcDecl.args.members[0].type == this.checker.numberType) {
+                    else if (funcDecl.arguments.members[0].type == this.checker.numberType) {
                         fnType.index.flags |= SignatureFlags.IsNumberIndexer;
                     }
-                    else if (funcDecl.args.members[0].type == this.checker.stringType) {
+                    else if (funcDecl.arguments.members[0].type == this.checker.stringType) {
                         fnType.index.flags |= SignatureFlags.IsStringIndexer;
                     }
                     else {
-                        this.checker.errorReporter.simpleError(funcDecl.args.members[0], "Index signatures may only take 'string' or 'number' as their parameter");
+                        this.checker.errorReporter.simpleError(funcDecl.arguments.members[0], "Index signatures may only take 'string' or 'number' as their parameter");
                     }
 
                 }
@@ -2434,7 +2434,7 @@ module TypeScript {
                     this.addFormals(container, signature, funcTable);
                 }
                 else {
-                    this.addConstructorLocalArgs(funcDecl.type.symbol, funcDecl.args, funcTable, hasFlag(funcDecl.fncFlags, FncFlags.ClassMethod));
+                    this.addConstructorLocalArgs(funcDecl.type.symbol, funcDecl.arguments, funcTable, hasFlag(funcDecl.fncFlags, FncFlags.ClassMethod));
 
                     if (this.thisClassNode && this.thisClassNode.extendsList) {
                         var tmpScope = this.scope;
@@ -2587,7 +2587,7 @@ module TypeScript {
                 }
                 if (accessorType) {
                     if ((hasFlag(funcDecl.fncFlags, FncFlags.GetAccessor) && accessorType != signature.returnType.type) ||
-                        (funcDecl.args.members.length > 0 && accessorType != funcDecl.args.members[0].type)) {
+                        (funcDecl.arguments.members.length > 0 && accessorType != funcDecl.arguments.members[0].type)) {
                         this.checker.errorReporter.simpleError(funcDecl, "Getter and setter types do not agree");
                     }
                 }
@@ -2596,11 +2596,11 @@ module TypeScript {
                         funcDecl.accessorSymbol.setType(signature.returnType.type);
                     }
                     else {
-                        if (funcDecl.args.members.length != 1) {
+                        if (funcDecl.arguments.members.length != 1) {
                             this.checker.errorReporter.simpleError(funcDecl, "Setters may have one and only one argument");
                         }
                         else {
-                            funcDecl.accessorSymbol.setType(funcDecl.args.members[0].type);
+                            funcDecl.accessorSymbol.setType(funcDecl.arguments.members[0].type);
                         }
                     }
                 }
@@ -2813,7 +2813,7 @@ module TypeScript {
                 var ssb = <SymbolScopeBuilder>this.scope;
                 var funcTable = ssb.valueMembers.allMembers;
 
-                this.addConstructorLocalArgs(classDecl.constructorDecl.type.symbol, classDecl.constructorDecl.args, funcTable, true);
+                this.addConstructorLocalArgs(classDecl.constructorDecl.type.symbol, classDecl.constructorDecl.arguments, funcTable, true);
             }
 
             this.typeCheck(classDecl.members);
@@ -3515,12 +3515,12 @@ module TypeScript {
 
             if (application.nodeType == NodeType.Call || application.nodeType == NodeType.New) {
                 var callEx = <CallExpression>application;
-                args = callEx.args;
+                args = callEx.arguments;
                 target = callEx.target;
-                if (callEx.args) {
-                    var len = callEx.args.members.length;
+                if (callEx.arguments) {
+                    var len = callEx.arguments.members.length;
                     for (var i = 0; i < len; i++) {
-                        actuals[i] = callEx.args.members[i].type;
+                        actuals[i] = callEx.arguments.members[i].type;
                     }
                 }
             }
@@ -3590,15 +3590,15 @@ module TypeScript {
             callEx.target = this.typeCheck(callEx.target);
             var target = callEx.target;
             if (target.type.construct || target.type.call) {
-                this.preTypeCheckCallArgs(callEx.args);
+                this.preTypeCheckCallArgs(callEx.arguments);
             }
             else {
-                callEx.args = <ASTList>this.typeCheck(callEx.args);
+                callEx.arguments = <ASTList>this.typeCheck(callEx.arguments);
             }
 
             if (target.type == this.anyType) {
                 callEx.type = this.anyType;
-                callEx.args = <ASTList>this.typeCheck(callEx.args);
+                callEx.arguments = <ASTList>this.typeCheck(callEx.arguments);
             }
             else {
                 if (target.type.construct) {
@@ -3672,24 +3672,24 @@ module TypeScript {
             if (callEx.target &&
                 callEx.target.type &&
                 callEx.signature &&
-                callEx.args) {
+                callEx.arguments) {
                 var sig = callEx.signature;
 
-                if (sig && callEx.args.members.length >= sig.nonOptionalParameterCount) {
+                if (sig && callEx.arguments.members.length >= sig.nonOptionalParameterCount) {
                     acceptedTargetType = true;
                     var targetType: Type = null;
-                    var len = callEx.args.members.length < sig.parameters.length ? callEx.args.members.length : sig.parameters.length;
+                    var len = callEx.arguments.members.length < sig.parameters.length ? callEx.arguments.members.length : sig.parameters.length;
 
                     for (i = 0; i < len; i++) {
                         targetType = sig.parameters[i].getType();
                         if (targetType && sig.hasVariableArgList && i >= sig.nonOptionalParameterCount - 1) {
                             targetType = targetType.elementType;
                         }
-                        switch (callEx.args.members[i].nodeType) {
+                        switch (callEx.arguments.members[i].nodeType) {
                             case NodeType.FuncDecl:
                             case NodeType.ObjectLit:
                             case NodeType.ArrayLit:
-                                this.checker.typeCheckWithContextualType(targetType, this.checker.inProvisionalTypecheckMode(), !sig.parameters[i].declAST.isParenthesized, callEx.args.members[i]);
+                                this.checker.typeCheckWithContextualType(targetType, this.checker.inProvisionalTypecheckMode(), !sig.parameters[i].declAST.isParenthesized, callEx.arguments.members[i]);
                                 break;
                             default:
                                 continue;
@@ -3698,15 +3698,15 @@ module TypeScript {
                 }
             }
 
-            if (!acceptedTargetType && callEx.args) {
+            if (!acceptedTargetType && callEx.arguments) {
                 this.checker.killCurrentContextualType();
 
-                for (i = 0; i < callEx.args.members.length; i++) {
-                    switch (callEx.args.members[i].nodeType) {
+                for (i = 0; i < callEx.arguments.members.length; i++) {
+                    switch (callEx.arguments.members[i].nodeType) {
                         case NodeType.FuncDecl:
                         case NodeType.ObjectLit:
                         case NodeType.ArrayLit:
-                            this.typeCheck(callEx.args.members[i]);
+                            this.typeCheck(callEx.arguments.members[i]);
                             break;
                         default:
                             continue;
@@ -3739,7 +3739,7 @@ module TypeScript {
             }
 
             callEx.target = this.typeCheck(callEx.target);
-            this.preTypeCheckCallArgs(callEx.args);
+            this.preTypeCheckCallArgs(callEx.arguments);
 
             var target = callEx.target;
 

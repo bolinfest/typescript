@@ -455,7 +455,7 @@ module TypeScript {
 
             signature.hasVariableArgList = funcDecl.variableArgList;
 
-            var sigData = this.getParameterList(funcDecl.args, container);
+            var sigData = this.getParameterList(funcDecl.arguments, container);
 
             signature.parameters = sigData.parameters;
             signature.nonOptionalParameterCount = sigData.nonOptionalParameterCount;

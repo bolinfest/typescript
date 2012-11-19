@@ -277,8 +277,8 @@ module TypeScript {
             if (!walker.options.reverseSiblings) {
                 preAst.target = walker.walk(preAst.target, preAst);
             }
-            if (preAst.args && (walker.options.goNextSibling)) {
-                preAst.args = <ASTList> walker.walk(preAst.args, preAst);
+            if (preAst.arguments && (walker.options.goNextSibling)) {
+                preAst.arguments = <ASTList> walker.walk(preAst.arguments, preAst);
             }
             if ((walker.options.reverseSiblings) && (walker.options.goNextSibling)) {
                 preAst.target = walker.walk(preAst.target, preAst);
@@ -301,8 +301,8 @@ module TypeScript {
             if (preAst.name) {
                 preAst.name = <Identifier>walker.walk(preAst.name, preAst);
             }
-            if (preAst.args && (preAst.args.members.length > 0) && (walker.options.goNextSibling)) {
-                preAst.args = <ASTList>walker.walk(preAst.args, preAst);
+            if (preAst.arguments && (preAst.arguments.members.length > 0) && (walker.options.goNextSibling)) {
+                preAst.arguments = <ASTList>walker.walk(preAst.arguments, preAst);
             }
             if (preAst.returnTypeAnnotation && (walker.options.goNextSibling)) {
                 preAst.returnTypeAnnotation = walker.walk(preAst.returnTypeAnnotation, preAst);
@@ -483,7 +483,7 @@ module TypeScript {
         export function walkTypeDeclChildren(preAst: TypeDecl, parent: AST, walker: IAstWalker): void {
             walkNamedTypeChildren(preAst, parent, walker);
 
-            // walked args as part of members
+            // walked arguments as part of members
             if (walker.options.goNextSibling && preAst.extendsList) {
                 preAst.extendsList = <ASTList>walker.walk(preAst.extendsList, preAst);
             }
