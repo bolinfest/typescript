@@ -491,957 +491,957 @@ module TypeScript {
             return true;
         }
 
-            public parseImportDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ImportDeclaration {
+        public parseImportDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ImportDeclaration {
 
-                var name: Identifier = null;
-                var alias: AST = null;
-                var importDecl: ImportDeclaration = null;
-                var minChar = this.scanner.startPos;
-                var isDynamicImport = false;
+            var name: Identifier = null;
+            var alias: AST = null;
+            var importDecl: ImportDeclaration = null;
+            var minChar = this.scanner.startPos;
+            var isDynamicImport = false;
 
-                this.tok = this.scanner.scan();
+            this.tok = this.scanner.scan();
 
-                if (this.tok.tokenId == TokenID.Identifier || convertTokToID(this.tok, this.strictMode)) {
-                    name = Identifier.fromToken(this.tok);
+            if (this.tok.tokenId == TokenID.Identifier || convertTokToID(this.tok, this.strictMode)) {
+                name = Identifier.fromToken(this.tok);
+            }
+            else {
+                this.reportParseError("Expected identifer after 'import'");
+                name = new MissingIdentifier();
+            }
+
+            name.minChar = this.scanner.startPos;
+            name.limChar = this.scanner.pos;
+
+            this.tok = this.scanner.scan();
+
+            this.checkCurrentToken(TokenID.Equals, "Expected =", errorRecoverySet | ErrorRecoverySet.ID);
+
+            var aliasPreComments = this.parseComments();
+
+            var limChar;
+            if (this.tok.tokenId == TokenID.Identifier || convertTokToID(this.tok, this.strictMode)) {
+
+                if (this.tok.tokenId == TokenID.Module) {
+                    limChar = this.scanner.pos;
+                    this.tok = this.scanner.scan();
+                    if (this.tok.tokenId == TokenID.OpenParen) {
+                        this.tok = this.scanner.scan();
+
+                        if (this.tok.tokenId == TokenID.StringLiteral || this.tok.tokenId == TokenID.Identifier || convertTokToID(this.tok, this.strictMode)) {
+
+                            if (this.tok.tokenId == TokenID.StringLiteral) {
+
+                                if (this.topLevel) {
+                                    this.hasTopLevelImportOrExport = true;
+                                }
+
+                                var aliasText = this.tok.getText();
+                                alias = Identifier.fromToken(this.tok);
+                                alias.minChar = this.scanner.startPos;
+                                alias.limChar = this.scanner.pos;
+
+                                if (!this.isValidImportPath((<Identifier>alias).text)) {
+                                    this.reportParseError("Invalid import path");
+                                }
+
+                                isDynamicImport = true;
+                                this.tok = this.scanner.scan();
+                                    
+                                alias.preComments = aliasPreComments;
+                            }
+                            else {
+                                alias = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
+                                            OperatorPrecedence.Assignment, true,
+                                            TypeContext.NoTypes);
+                                    
+                                alias.preComments = aliasPreComments;
+                            }
+                        }
+
+                        limChar = this.scanner.pos;
+                        this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.ID);
+                            
+                        if (alias) {
+                            alias.postComments = this.parseComments();
+                        }
+                            
+                        // gobble up the ';' if there is one...
+                        if (this.tok.tokenId == TokenID.Semicolon) {
+                            limChar = this.scanner.pos;
+                            this.tok = this.scanner.scan();
+                        }
+                    }
                 }
                 else {
-                    this.reportParseError("Expected identifer after 'import'");
-                    name = new MissingIdentifier();
+                    alias = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
+                                            OperatorPrecedence.Assignment, true,
+                                            TypeContext.NoTypes);
+                    limChar = this.scanner.pos; // Include semicolon if needed
+                }
+            }
+            else {
+                this.reportParseError("Expected module name");
+                alias = new MissingIdentifier();
+                alias.minChar = this.scanner.startPos;
+                if (this.tok.tokenId == TokenID.Semicolon) {
+                    alias.limChar = this.scanner.startPos;
+                } else {
+                    alias.limChar = this.scanner.pos;
+                    this.tok = this.scanner.scan();
+                }
+                alias.flags |= ASTFlags.Error;
+                limChar = alias.limChar;
+            }
+
+            importDecl = new ImportDeclaration(name, alias);
+            importDecl.isDynamicImport = isDynamicImport;
+
+            if (hasFlag(modifiers, Modifiers.Exported)) {
+                importDecl.varFlags |= VarFlags.Exported;
+            }
+
+            importDecl.minChar = minChar;
+            importDecl.limChar = limChar;
+
+            return importDecl;
+        }
+
+        public parseModuleDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDecl {
+            var leftCurlyCount = this.scanner.leftCurlyCount;
+            var rightCurlyCount = this.scanner.rightCurlyCount;
+
+            var svAmbient = this.ambientModule;
+            var svTopLevel = this.topLevel;
+            this.topLevel = false;
+            if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
+                this.ambientModule = true;
+            }
+
+            this.tok = this.scanner.scan();
+            var name: AST = null;
+            var enclosedList: AST[] = null;
+            this.pushDeclLists();
+            var modulePreComments = this.parseComments();
+            var minChar = this.scanner.startPos;
+            var isDynamicMod = false;
+
+            if ((this.tok.tokenId == TokenID.Identifier) || (this.tok.tokenId == TokenID.StringLiteral) || (!isPrimitiveTypeToken(this.tok) && convertTokToID(this.tok, this.strictMode))) {
+                var nameText = this.tok.getText();
+
+                if (this.tok.tokenId == TokenID.StringLiteral) {
+                    isDynamicMod = true;
+                    if (!this.ambientModule) {
+                        this.reportParseError("Only ambient dynamic modules may have string literal names");
+                    }
                 }
 
+                name = Identifier.fromToken(this.tok);
                 name.minChar = this.scanner.startPos;
                 name.limChar = this.scanner.pos;
 
                 this.tok = this.scanner.scan();
-
-                this.checkCurrentToken(TokenID.Equals, "Expected =", errorRecoverySet | ErrorRecoverySet.ID);
-
-                var aliasPreComments = this.parseComments();
-
-                var limChar;
-                if (this.tok.tokenId == TokenID.Identifier || convertTokToID(this.tok, this.strictMode)) {
-
-                    if (this.tok.tokenId == TokenID.Module) {
-                        limChar = this.scanner.pos;
-                        this.tok = this.scanner.scan();
-                        if (this.tok.tokenId == TokenID.OpenParen) {
-                            this.tok = this.scanner.scan();
-
-                            if (this.tok.tokenId == TokenID.StringLiteral || this.tok.tokenId == TokenID.Identifier || convertTokToID(this.tok, this.strictMode)) {
-
-                                if (this.tok.tokenId == TokenID.StringLiteral) {
-
-                                    if (this.topLevel) {
-                                        this.hasTopLevelImportOrExport = true;
-                                    }
-
-                                    var aliasText = this.tok.getText();
-                                    alias = Identifier.fromToken(this.tok);
-                                    alias.minChar = this.scanner.startPos;
-                                    alias.limChar = this.scanner.pos;
-
-                                    if (!this.isValidImportPath((<Identifier>alias).text)) {
-                                        this.reportParseError("Invalid import path");
-                                    }
-
-                                    isDynamicImport = true;
-                                    this.tok = this.scanner.scan();
-                                    
-                                    alias.preComments = aliasPreComments;
-                                }
-                                else {
-                                    alias = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
-                                              OperatorPrecedence.Assignment, true,
-                                              TypeContext.NoTypes);
-                                    
-                                    alias.preComments = aliasPreComments;
-                                }
-                            }
-
-                            limChar = this.scanner.pos;
-                            this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.ID);
-                            
-                            if (alias) {
-                                alias.postComments = this.parseComments();
-                            }
-                            
-                            // gobble up the ';' if there is one...
-                            if (this.tok.tokenId == TokenID.Semicolon) {
-                                limChar = this.scanner.pos;
-                                this.tok = this.scanner.scan();
-                            }
-                        }
-                    }
-                    else {
-                        alias = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
-                                              OperatorPrecedence.Assignment, true,
-                                              TypeContext.NoTypes);
-                        limChar = this.scanner.pos; // Include semicolon if needed
-                    }
-                }
-                else {
-                    this.reportParseError("Expected module name");
-                    alias = new MissingIdentifier();
-                    alias.minChar = this.scanner.startPos;
-                    if (this.tok.tokenId == TokenID.Semicolon) {
-                        alias.limChar = this.scanner.startPos;
-                    } else {
-                        alias.limChar = this.scanner.pos;
-                        this.tok = this.scanner.scan();
-                    }
-                    alias.flags |= ASTFlags.Error;
-                    limChar = alias.limChar;
-                }
-
-                importDecl = new ImportDeclaration(name, alias);
-                importDecl.isDynamicImport = isDynamicImport;
-
-                if (hasFlag(modifiers, Modifiers.Exported)) {
-                    importDecl.varFlags |= VarFlags.Exported;
-                }
-
-                importDecl.minChar = minChar;
-                importDecl.limChar = limChar;
-
-                return importDecl;
+            }
+            else if (this.tok.tokenId == TokenID.OpenBrace) {
+                this.reportParseError("Module name missing");
+                name = new Identifier("");
+                // "fake" position of where the ID would be
+                name.minChar = minChar;
+                name.limChar = minChar;
             }
 
-            public parseModuleDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDecl {
-                var leftCurlyCount = this.scanner.leftCurlyCount;
-                var rightCurlyCount = this.scanner.rightCurlyCount;
+            if (this.tok.tokenId == TokenID.Dot) {
+                enclosedList = new AST[];
+                this.parseDottedName(enclosedList);
+            }
 
-                var svAmbient = this.ambientModule;
-                var svTopLevel = this.topLevel;
-                this.topLevel = false;
+            if (name == null) {
+                name = new MissingIdentifier();
+            }
+
+            var moduleBody = new ASTList();
+            var bodyMinChar = this.scanner.startPos;
+            this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'", errorRecoverySet | ErrorRecoverySet.ID);
+            this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly, moduleBody, true, true,
+                            AllowedElements.ModuleMembers, modifiers);
+            moduleBody.minChar = bodyMinChar;
+            moduleBody.limChar = this.scanner.pos;
+
+            var endingToken = new ASTSpan();
+            endingToken.minChar = this.scanner.startPos;
+            endingToken.limChar = this.scanner.pos;
+            this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+
+            var limChar = this.scanner.pos;
+            var moduleDecl: ModuleDecl;
+            if (enclosedList && (enclosedList.length > 0)) {
+                var len = enclosedList.length;
+                var innerName = <Identifier>enclosedList[len - 1];
+                var innerDecl = new ModuleDecl(innerName, moduleBody, this.topVarList(),
+                                                this.topScopeList(), endingToken);
+
                 if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
-                    this.ambientModule = true;
+                    innerDecl.modFlags |= ModuleFlags.Ambient;
                 }
 
-                this.tok = this.scanner.scan();
-                var name: AST = null;
-                var enclosedList: AST[] = null;
-                this.pushDeclLists();
-                var modulePreComments = this.parseComments();
-                var minChar = this.scanner.startPos;
-                var isDynamicMod = false;
+                innerDecl.modFlags |= ModuleFlags.Exported;
 
-                if ((this.tok.tokenId == TokenID.Identifier) || (this.tok.tokenId == TokenID.StringLiteral) || (!isPrimitiveTypeToken(this.tok) && convertTokToID(this.tok, this.strictMode))) {
-                    var nameText = this.tok.getText();
+                // REVIEW: will also possibly need to re-parent comments as well
+                innerDecl.minChar = minChar;
+                innerDecl.limChar = limChar;
 
-                    if (this.tok.tokenId == TokenID.StringLiteral) {
-                        isDynamicMod = true;
-                        if (!this.ambientModule) {
-                            this.reportParseError("Only ambient dynamic modules may have string literal names");
-                        }
-                    }
-
-                    name = Identifier.fromToken(this.tok);
-                    name.minChar = this.scanner.startPos;
-                    name.limChar = this.scanner.pos;
-
-                    this.tok = this.scanner.scan();
-                }
-                else if (this.tok.tokenId == TokenID.OpenBrace) {
-                    this.reportParseError("Module name missing");
-                    name = new Identifier("");
-                    // "fake" position of where the ID would be
-                    name.minChar = minChar;
-                    name.limChar = minChar;
-                }
-
-                if (this.tok.tokenId == TokenID.Dot) {
-                    enclosedList = new AST[];
-                    this.parseDottedName(enclosedList);
-                }
-
-                if (name == null) {
-                    name = new MissingIdentifier();
-                }
-
-                var moduleBody = new ASTList();
-                var bodyMinChar = this.scanner.startPos;
-                this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'", errorRecoverySet | ErrorRecoverySet.ID);
-                this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly, moduleBody, true, true,
-                                AllowedElements.ModuleMembers, modifiers);
-                moduleBody.minChar = bodyMinChar;
-                moduleBody.limChar = this.scanner.pos;
-
-                var endingToken = new ASTSpan();
-                endingToken.minChar = this.scanner.startPos;
-                endingToken.limChar = this.scanner.pos;
-                this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
-
-                var limChar = this.scanner.pos;
-                var moduleDecl: ModuleDecl;
-                if (enclosedList && (enclosedList.length > 0)) {
-                    var len = enclosedList.length;
-                    var innerName = <Identifier>enclosedList[len - 1];
-                    var innerDecl = new ModuleDecl(innerName, moduleBody, this.topVarList(),
-                                                    this.topScopeList(), endingToken);
+                this.popDeclLists();
+                var outerModBod: ASTList;
+                for (var i = len - 2; i >= 0; i--) {
+                    outerModBod = new ASTList();
+                    outerModBod.append(innerDecl);
+                    innerName = <Identifier>enclosedList[i];
+                    innerDecl = new ModuleDecl(innerName, outerModBod, new ASTList(),
+                                                new ASTList(), endingToken);
+                    outerModBod.minChar = innerDecl.minChar = minChar;
+                    outerModBod.limChar = innerDecl.limChar = limChar;
 
                     if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
                         innerDecl.modFlags |= ModuleFlags.Ambient;
                     }
 
                     innerDecl.modFlags |= ModuleFlags.Exported;
-
-                    // REVIEW: will also possibly need to re-parent comments as well
-                    innerDecl.minChar = minChar;
-                    innerDecl.limChar = limChar;
-
-                    this.popDeclLists();
-                    var outerModBod: ASTList;
-                    for (var i = len - 2; i >= 0; i--) {
-                        outerModBod = new ASTList();
-                        outerModBod.append(innerDecl);
-                        innerName = <Identifier>enclosedList[i];
-                        innerDecl = new ModuleDecl(innerName, outerModBod, new ASTList(),
-                                                    new ASTList(), endingToken);
-                        outerModBod.minChar = innerDecl.minChar = minChar;
-                        outerModBod.limChar = innerDecl.limChar = limChar;
-
-                        if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
-                            innerDecl.modFlags |= ModuleFlags.Ambient;
-                        }
-
-                        innerDecl.modFlags |= ModuleFlags.Exported;
-                    }
-                    outerModBod = new ASTList();
-                    outerModBod.append(innerDecl);
-                    outerModBod.minChar = minChar;
-                    outerModBod.limChar = limChar;
-                    moduleDecl = new ModuleDecl(<Identifier>name, outerModBod, new ASTList(),
-                                                new ASTList(), endingToken);
                 }
-                else {
-                    moduleDecl = new ModuleDecl(<Identifier>name, moduleBody, this.topVarList(), this.topScopeList(), endingToken);
-                    this.popDeclLists();
-                }
-
-                if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
-                    moduleDecl.modFlags |= ModuleFlags.Ambient;
-                }
-                if (this.parsingDeclareFile || svAmbient || hasFlag(modifiers, Modifiers.Exported)) {
-                    moduleDecl.modFlags |= ModuleFlags.Exported;
-                }
-                if (isDynamicMod) {
-                    moduleDecl.modFlags |= ModuleFlags.IsDynamic;
-                }
-
-                moduleDecl.preComments = modulePreComments;
-                moduleDecl.postComments = this.parseComments();
-                this.ambientModule = svAmbient;
-
-                this.topLevel = svTopLevel;
-                moduleDecl.leftCurlyCount = this.scanner.leftCurlyCount - leftCurlyCount;
-                moduleDecl.rightCurlyCount = this.scanner.rightCurlyCount - rightCurlyCount;
-                return moduleDecl;
+                outerModBod = new ASTList();
+                outerModBod.append(innerDecl);
+                outerModBod.minChar = minChar;
+                outerModBod.limChar = limChar;
+                moduleDecl = new ModuleDecl(<Identifier>name, outerModBod, new ASTList(),
+                                            new ASTList(), endingToken);
+            }
+            else {
+                moduleDecl = new ModuleDecl(<Identifier>name, moduleBody, this.topVarList(), this.topScopeList(), endingToken);
+                this.popDeclLists();
             }
 
-            public parseTypeReferenceTail(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST): TypeReference {
-                var result = new TypeReference(term, 0);
-                result.minChar = minChar;
-                while (this.tok.tokenId == TokenID.OpenBracket) {
-                    this.tok = this.scanner.scan();
-                    result.arrayCount++;
-                    this.checkCurrentToken(TokenID.CloseBracket, "Expected ']'",
-                              errorRecoverySet | ErrorRecoverySet.LBrack);
-                }
-                result.limChar = this.scanner.lastTokenLimChar();
-                return result;
+            if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
+                moduleDecl.modFlags |= ModuleFlags.Ambient;
+            }
+            if (this.parsingDeclareFile || svAmbient || hasFlag(modifiers, Modifiers.Exported)) {
+                moduleDecl.modFlags |= ModuleFlags.Exported;
+            }
+            if (isDynamicMod) {
+                moduleDecl.modFlags |= ModuleFlags.IsDynamic;
             }
 
-            // REVIEW: Consider renaming to parseTypeName.
-            public parseNamedType(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST, tail: bool): AST {
+            moduleDecl.preComments = modulePreComments;
+            moduleDecl.postComments = this.parseComments();
+            this.ambientModule = svAmbient;
+
+            this.topLevel = svTopLevel;
+            moduleDecl.leftCurlyCount = this.scanner.leftCurlyCount - leftCurlyCount;
+            moduleDecl.rightCurlyCount = this.scanner.rightCurlyCount - rightCurlyCount;
+            return moduleDecl;
+        }
+
+        public parseTypeReferenceTail(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST): TypeReference {
+            var result = new TypeReference(term, 0);
+            result.minChar = minChar;
+            while (this.tok.tokenId == TokenID.OpenBracket) {
                 this.tok = this.scanner.scan();
-                if (this.tok.tokenId == TokenID.Dot) {
-                    var curpos = this.scanner.pos;
-                    this.tok = this.scanner.scan();
-                    // Don't allow reserved words if immediately after a new line and error recovery is enabled
-                    if ((this.tok.tokenId == TokenID.Identifier) || ((!this.errorRecovery || !this.scanner.lastTokenHadNewline()) && convertTokToID(this.tok, this.strictMode))) {
-                        var op2 = Identifier.fromToken(this.tok);
-                        op2.minChar = this.scanner.startPos;
-                        op2.limChar = this.scanner.pos;
-                        var dotNode = new BinaryExpression(NodeType.Dot, term, op2);
-                        dotNode.minChar = term.minChar;
-                        dotNode.limChar = op2.limChar;
-                        return this.parseNamedType(errorRecoverySet, minChar,
-                                              dotNode, tail);
-                    }
-                    else {
-                        this.reportParseError("need identifier after '.'");
-                        if (this.errorRecovery) {
-                            term.flags |= ASTFlags.DotLHS;
-                            // We set "limChar" to be slightly innacurate for completion list behavior
-                            // (last AST node from "quickParse" will match DotLHS and be at end of file position)
-                            // This is to match the behavior of TokenId.Dot processing in parsePostfixOperators.
-                            term.limChar = this.scanner.lastTokenLimChar();
-                            return term;
-                        }
-                        else {
-                            var eop2 = new MissingIdentifier();
-                            eop2.minChar = this.scanner.pos;
-                            eop2.limChar = this.scanner.pos;
-                            var edotNode = new BinaryExpression(NodeType.Dot, term, eop2);
-                            edotNode.flags |= ASTFlags.Error;
-                            edotNode.minChar = term.minChar;
-                            edotNode.limChar = eop2.limChar;
-                            return this.parseNamedType(errorRecoverySet, minChar,
-                                                  edotNode, tail);
-                        }
-                    }
+                result.arrayCount++;
+                this.checkCurrentToken(TokenID.CloseBracket, "Expected ']'",
+                            errorRecoverySet | ErrorRecoverySet.LBrack);
+            }
+            result.limChar = this.scanner.lastTokenLimChar();
+            return result;
+        }
+
+        // REVIEW: Consider renaming to parseTypeName.
+        public parseNamedType(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST, tail: bool): AST {
+            this.tok = this.scanner.scan();
+            if (this.tok.tokenId == TokenID.Dot) {
+                var curpos = this.scanner.pos;
+                this.tok = this.scanner.scan();
+                // Don't allow reserved words if immediately after a new line and error recovery is enabled
+                if ((this.tok.tokenId == TokenID.Identifier) || ((!this.errorRecovery || !this.scanner.lastTokenHadNewline()) && convertTokToID(this.tok, this.strictMode))) {
+                    var op2 = Identifier.fromToken(this.tok);
+                    op2.minChar = this.scanner.startPos;
+                    op2.limChar = this.scanner.pos;
+                    var dotNode = new BinaryExpression(NodeType.Dot, term, op2);
+                    dotNode.minChar = term.minChar;
+                    dotNode.limChar = op2.limChar;
+                    return this.parseNamedType(errorRecoverySet, minChar,
+                                            dotNode, tail);
                 }
                 else {
-                    if (tail) {
-                        return this.parseTypeReferenceTail(errorRecoverySet, minChar, term);
-                    }
-                    else {
+                    this.reportParseError("need identifier after '.'");
+                    if (this.errorRecovery) {
+                        term.flags |= ASTFlags.DotLHS;
+                        // We set "limChar" to be slightly innacurate for completion list behavior
+                        // (last AST node from "quickParse" will match DotLHS and be at end of file position)
+                        // This is to match the behavior of TokenId.Dot processing in parsePostfixOperators.
+                        term.limChar = this.scanner.lastTokenLimChar();
                         return term;
                     }
-                }
-            }
-
-            // REVIEW: Reconsider renaming this to parseType to match the grammar.
-            public parseTypeReference(errorRecoverySet: ErrorRecoverySet, allowVoid: bool): AST {
-                var minChar = this.scanner.startPos;
-                var isConstructorMember = false;
-
-                switch (this.tok.tokenId) {
-                    case TokenID.Void:
-                        if (!allowVoid) {
-                            this.reportParseError("void not a valid type in this context");
-                        }
-                    // Intentional fall-through
-                    case TokenID.Any:
-                    case TokenID.Number:
-                    case TokenID.Bool:
-                    case TokenID.String: {
-                        var text = tokenTable[this.tok.tokenId].text;
-                        var predefinedIdentifier = new Identifier(text);
-                        predefinedIdentifier.minChar = minChar;
-                        predefinedIdentifier.limChar = this.scanner.pos;
-                        this.tok = this.scanner.scan();
-                        return this.parseTypeReferenceTail(errorRecoverySet, minChar, predefinedIdentifier);
-                    }
-
-                    case TokenID.Identifier:
-                        var ident = this.createRef(this.tok.getText(), (<IdentifierToken>this.tok).hasEscapeSequence, minChar);
-                        ident.limChar = this.scanner.pos;
-                        return this.parseNamedType(errorRecoverySet, minChar, ident, true);
-
-                    case TokenID.OpenBrace:
-                        return this.parseObjectType(minChar, errorRecoverySet);
-
-                    case TokenID.New:
-                        this.tok = this.scanner.scan();
-                        // can't use chkCurrentTok, since we don't want to advance the token
-                        if (this.tok.tokenId != TokenID.OpenParen) {
-                            this.reportParseError("Expected '('");
-                        }
-                        else {
-                            isConstructorMember = true;
-                            // fall through...
-                        }
-
-                    case TokenID.OpenParen: {
-                        // ( formals ) => type
-                        var formals = new ASTList();
-                        var variableArgList =
-                            this.parseFormalParameterList(errorRecoverySet | ErrorRecoverySet.RParen,
-                                              formals, false, true, false, false, false, false, null, true);
-                        this.checkCurrentToken(TokenID.EqualsGreaterThan, "Expected '=>'", errorRecoverySet);
-                        var returnType = this.parseTypeReference(errorRecoverySet, true);
-                        var funcDecl = new FuncDecl(null, null, false, formals, null, null, null,
-                                                  NodeType.FuncDecl);
-                        funcDecl.returnTypeAnnotation = returnType;
-                        funcDecl.variableArgList = variableArgList;
-                        funcDecl.fncFlags |= FncFlags.Signature;
-
-                        if (isConstructorMember) {
-                            funcDecl.fncFlags |= FncFlags.ConstructMember;
-                            funcDecl.hint = "_construct";
-                            funcDecl.classDecl = null;
-                        }
-                        funcDecl.minChar = minChar;
-                        return this.parseTypeReferenceTail(errorRecoverySet, minChar, funcDecl);
-                    }
-
-                    default:
-                        this.reportParseError("Expected type name");
-                        var etr = new TypeReference(null, 0);
-                        etr.flags |= ASTFlags.Error;
-                        etr.minChar = this.scanner.pos;
-                        etr.limChar = this.scanner.pos;
-                        return etr;
-                }
-            }
-
-            private parseObjectType(minChar: number, errorRecoverySet: ErrorRecoverySet): TypeReference {
-                this.tok = this.scanner.scan();
-
-                var members = new ASTList();
-                members.minChar = minChar;
-
-                var prevInInterfaceDecl = this.inInterfaceDecl;
-                this.inInterfaceDecl = true;
-                this.parseTypeMemberList(errorRecoverySet | ErrorRecoverySet.RCurly, members);
-                this.inInterfaceDecl = prevInInterfaceDecl;
-
-                this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
-
-                // REVIEW: We're parsing an ObjectType, but we give a NodeType of Interface here.
-                var interfaceDecl = new TypeDecl(
-                    NodeType.Interface, this.anonId, members, /*args:*/ null, /*extends:*/ null, /*implementsL*/ null);
-
-                interfaceDecl.minChar = minChar;
-                interfaceDecl.limChar = members.limChar;    // "}"
-
-                return this.parseTypeReferenceTail(errorRecoverySet, minChar, interfaceDecl);
-            }
-
-            public parseFunctionStatements(   errorRecoverySet: ErrorRecoverySet,
-                                                name: Identifier,
-                                                isConstructor: bool,
-                                                isMethod: bool,
-                                                args: ASTList,
-                                                allowedElements: AllowedElements,
-                                                minChar: number,
-                                                requiresSignature: bool,
-                                                parentModifiers: Modifiers) {
-
-                this.pushDeclLists();
-                // start new statement stack
-                var svStmtStack = this.stmtStack;
-                this.resetStmtStack();
-
-                var bod: ASTList = null;
-                var wasShorthand = false;
-                var isAnonLambda = false;
-
-                if (!requiresSignature) {
-                    bod = new ASTList();
-                    var bodMinChar = this.scanner.startPos;
-                    if (this.tok.tokenId == TokenID.EqualsGreaterThan) {
-                        if (isMethod) {
-                            this.reportParseError("'=>' may not be used for class methods");
-                        }
-                        wasShorthand = true;
-                        this.tok = this.scanner.scan();
-                    }
-                    if (wasShorthand && this.tok.tokenId != TokenID.OpenBrace) {
-                        var retExpr = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
-                                              OperatorPrecedence.Assignment, true,
-                                              TypeContext.NoTypes);
-                        var retStmt = new ReturnStatement();
-                        retStmt.returnExpression = retExpr;
-                        retStmt.minChar = retExpr.minChar;
-                        retStmt.limChar = retExpr.limChar;
-                        bod.minChar = bodMinChar;
-                        bod.append(retStmt);
-                    }
                     else {
-                        this.state = ParseState.StartStmtList;
-                        this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'", errorRecoverySet |
-                                  ErrorRecoverySet.StmtStart);
-                        var svInFnc = this.inFnc;
-                        isAnonLambda = wasShorthand;
-                        this.inFnc = true;
-                        this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly |
-                                      ErrorRecoverySet.StmtStart,
-                                      bod, true, false, allowedElements, parentModifiers);
-                        bod.minChar = bodMinChar;
-                        bod.limChar = this.scanner.pos;
-                        this.inFnc = svInFnc;
-                        var ec = new EndCode();
-                        ec.minChar = bod.limChar;
-                        ec.limChar = ec.minChar;
-                        bod.append(ec);
+                        var eop2 = new MissingIdentifier();
+                        eop2.minChar = this.scanner.pos;
+                        eop2.limChar = this.scanner.pos;
+                        var edotNode = new BinaryExpression(NodeType.Dot, term, eop2);
+                        edotNode.flags |= ASTFlags.Error;
+                        edotNode.minChar = term.minChar;
+                        edotNode.limChar = eop2.limChar;
+                        return this.parseNamedType(errorRecoverySet, minChar,
+                                                edotNode, tail);
                     }
                 }
-
-                var funcDecl = new FuncDecl(name, bod, isConstructor, args, this.topVarList(),
-                                          this.topScopeList(), this.topStaticsList(), NodeType.FuncDecl);
-                this.popDeclLists();
-                var scopeList = this.topScopeList();
-                scopeList.append(funcDecl);
-                var staticFuncDecl = false;
-                var limChar = this.scanner.pos;
-                if (requiresSignature) {
-                    this.checkCurrentToken(TokenID.Semicolon, this.tok.tokenId == TokenID.OpenBrace ? "Function declarations are not permitted within interfaces, ambient modules or classes" : "Expected ';'", errorRecoverySet);
+            }
+            else {
+                if (tail) {
+                    return this.parseTypeReferenceTail(errorRecoverySet, minChar, term);
                 }
                 else {
-                    if (!wasShorthand || isAnonLambda) {
-                        funcDecl.endingToken = new ASTSpan();
-                        funcDecl.endingToken.minChar = this.scanner.startPos;
-                        funcDecl.endingToken.limChar = this.scanner.pos;
-                        this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
-
-                        if (isAnonLambda) {
-                            funcDecl.fncFlags |= FncFlags.IsFatArrowFunction;
-                        }
-                    }
-                    else {
-                        funcDecl.fncFlags |= FncFlags.IsFatArrowFunction;
-                        funcDecl.endingToken = new ASTSpan();
-
-                        funcDecl.endingToken.minChar = bod.members[0].minChar;
-                        funcDecl.endingToken.limChar = bod.members[0].limChar;
-                    }
-                }
-                funcDecl.minChar = minChar;
-                funcDecl.limChar = limChar;
-
-                if (!requiresSignature) {
-                    funcDecl.fncFlags |= FncFlags.Definition;
-                }
-
-                this.stmtStack = svStmtStack;
-                return funcDecl;
-            }
-
-            public transformAnonymousArgsIntoFormals(formals: ASTList, argList: AST) : bool {
-
-                var translateBinExOperand = (operand: AST) : bool => {
-                    if (operand.nodeType == NodeType.Comma) {
-                        return this.transformAnonymousArgsIntoFormals(formals, operand);
-                    }
-                    else if (operand.nodeType == NodeType.Name || operand.nodeType == NodeType.Asg) {
-                        var opArg = operand.nodeType == NodeType.Asg ? (<BinaryExpression>operand).operand1 : operand;
-
-                        var arg = new ArgDecl(<Identifier>opArg);
-                        arg.preComments = opArg.preComments;
-                        arg.postComments = opArg.postComments;
-                        arg.minChar = opArg.minChar;
-                        arg.limChar = opArg.limChar;
-
-                        if (hasFlag(opArg.flags, ASTFlags.PossibleOptionalParameter)) {
-                            arg.isOptional = true;
-                        }
-
-                        if (operand.nodeType == NodeType.Asg) {
-                            arg.init = (<BinaryExpression>operand).operand2;
-                        }
-
-                        formals.append(arg);
-
-                        return arg.isOptional;
-                    }
-                    else {
-                        this.reportParseError("Invalid lambda argument");
-                    }
-                    return false;
-                }
-
-                if (argList) {
-                    if (argList.nodeType == NodeType.Comma) {
-                        var commaList = <BinaryExpression> argList;
-                        if (commaList.operand1.isParenthesized) { 
-                            this.reportParseError("Invalid lambda argument", commaList.operand1.minChar, commaList.operand1.limChar);
-                        }
-                        if (commaList.operand2.isParenthesized) { 
-                            this.reportParseError("Invalid lambda argument", commaList.operand2.minChar, commaList.operand2.limChar);
-                        }
-                        var isOptional = translateBinExOperand(commaList.operand1);
-                        isOptional = translateBinExOperand(commaList.operand2) || isOptional;
-                        return isOptional;
-                    }
-                    else {
-                        return translateBinExOperand(argList);
-                    }
+                    return term;
                 }
             }
+        }
 
-            public parseFormalParameterList(errorRecoverySet: ErrorRecoverySet,
-                                                formals: ASTList,
-                                                isClassConstr: bool,
-                                                isSig: bool,
-                                                isIndexer: bool,
-                                                isGetter: bool,
-                                                isSetter: bool,
-                                                isLambda: bool,
-                                                preProcessedLambdaArgs: AST,
-                                                expectClosingRParen: bool): bool 
-            {
+        // REVIEW: Reconsider renaming this to parseType to match the grammar.
+        public parseTypeReference(errorRecoverySet: ErrorRecoverySet, allowVoid: bool): AST {
+            var minChar = this.scanner.startPos;
+            var isConstructorMember = false;
 
-                formals.minChar = this.scanner.startPos; // '(' or '['
-                if (isIndexer) {
+            switch (this.tok.tokenId) {
+                case TokenID.Void:
+                    if (!allowVoid) {
+                        this.reportParseError("void not a valid type in this context");
+                    }
+                // Intentional fall-through
+                case TokenID.Any:
+                case TokenID.Number:
+                case TokenID.Bool:
+                case TokenID.String: {
+                    var text = tokenTable[this.tok.tokenId].text;
+                    var predefinedIdentifier = new Identifier(text);
+                    predefinedIdentifier.minChar = minChar;
+                    predefinedIdentifier.limChar = this.scanner.pos;
+                    this.tok = this.scanner.scan();
+                    return this.parseTypeReferenceTail(errorRecoverySet, minChar, predefinedIdentifier);
+                }
+
+                case TokenID.Identifier:
+                    var ident = this.createRef(this.tok.getText(), (<IdentifierToken>this.tok).hasEscapeSequence, minChar);
+                    ident.limChar = this.scanner.pos;
+                    return this.parseNamedType(errorRecoverySet, minChar, ident, true);
+
+                case TokenID.OpenBrace:
+                    return this.parseObjectType(minChar, errorRecoverySet);
+
+                case TokenID.New:
+                    this.tok = this.scanner.scan();
+                    // can't use chkCurrentTok, since we don't want to advance the token
+                    if (this.tok.tokenId != TokenID.OpenParen) {
+                        this.reportParseError("Expected '('");
+                    }
+                    else {
+                        isConstructorMember = true;
+                        // fall through...
+                    }
+
+                case TokenID.OpenParen: {
+                    // ( formals ) => type
+                    var formals = new ASTList();
+                    var variableArgList =
+                        this.parseFormalParameterList(errorRecoverySet | ErrorRecoverySet.RParen,
+                                            formals, false, true, false, false, false, false, null, true);
+                    this.checkCurrentToken(TokenID.EqualsGreaterThan, "Expected '=>'", errorRecoverySet);
+                    var returnType = this.parseTypeReference(errorRecoverySet, true);
+                    var funcDecl = new FuncDecl(null, null, false, formals, null, null, null,
+                                                NodeType.FuncDecl);
+                    funcDecl.returnTypeAnnotation = returnType;
+                    funcDecl.variableArgList = variableArgList;
+                    funcDecl.fncFlags |= FncFlags.Signature;
+
+                    if (isConstructorMember) {
+                        funcDecl.fncFlags |= FncFlags.ConstructMember;
+                        funcDecl.hint = "_construct";
+                        funcDecl.classDecl = null;
+                    }
+                    funcDecl.minChar = minChar;
+                    return this.parseTypeReferenceTail(errorRecoverySet, minChar, funcDecl);
+                }
+
+                default:
+                    this.reportParseError("Expected type name");
+                    var etr = new TypeReference(null, 0);
+                    etr.flags |= ASTFlags.Error;
+                    etr.minChar = this.scanner.pos;
+                    etr.limChar = this.scanner.pos;
+                    return etr;
+            }
+        }
+
+        private parseObjectType(minChar: number, errorRecoverySet: ErrorRecoverySet): TypeReference {
+            this.tok = this.scanner.scan();
+
+            var members = new ASTList();
+            members.minChar = minChar;
+
+            var prevInInterfaceDecl = this.inInterfaceDecl;
+            this.inInterfaceDecl = true;
+            this.parseTypeMemberList(errorRecoverySet | ErrorRecoverySet.RCurly, members);
+            this.inInterfaceDecl = prevInInterfaceDecl;
+
+            this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+
+            // REVIEW: We're parsing an ObjectType, but we give a NodeType of Interface here.
+            var interfaceDecl = new TypeDecl(
+                NodeType.Interface, this.anonId, members, /*args:*/ null, /*extends:*/ null, /*implementsL*/ null);
+
+            interfaceDecl.minChar = minChar;
+            interfaceDecl.limChar = members.limChar;    // "}"
+
+            return this.parseTypeReferenceTail(errorRecoverySet, minChar, interfaceDecl);
+        }
+
+        public parseFunctionStatements(   errorRecoverySet: ErrorRecoverySet,
+                                            name: Identifier,
+                                            isConstructor: bool,
+                                            isMethod: bool,
+                                            args: ASTList,
+                                            allowedElements: AllowedElements,
+                                            minChar: number,
+                                            requiresSignature: bool,
+                                            parentModifiers: Modifiers) {
+
+            this.pushDeclLists();
+            // start new statement stack
+            var svStmtStack = this.stmtStack;
+            this.resetStmtStack();
+
+            var bod: ASTList = null;
+            var wasShorthand = false;
+            var isAnonLambda = false;
+
+            if (!requiresSignature) {
+                bod = new ASTList();
+                var bodMinChar = this.scanner.startPos;
+                if (this.tok.tokenId == TokenID.EqualsGreaterThan) {
+                    if (isMethod) {
+                        this.reportParseError("'=>' may not be used for class methods");
+                    }
+                    wasShorthand = true;
                     this.tok = this.scanner.scan();
                 }
-                else if (!isLambda) {
-                    this.checkCurrentToken(TokenID.OpenParen, "Expected '('",
-                              errorRecoverySet | ErrorRecoverySet.RParen);
+                if (wasShorthand && this.tok.tokenId != TokenID.OpenBrace) {
+                    var retExpr = this.parseExpr(errorRecoverySet | ErrorRecoverySet.SColon,
+                                            OperatorPrecedence.Assignment, true,
+                                            TypeContext.NoTypes);
+                    var retStmt = new ReturnStatement();
+                    retStmt.returnExpression = retExpr;
+                    retStmt.minChar = retExpr.minChar;
+                    retStmt.limChar = retExpr.limChar;
+                    bod.minChar = bodMinChar;
+                    bod.append(retStmt);
                 }
-                var sawEllipsis = false;
-                var firstArg = true;
-                var hasOptional = false;
-                var haveFirstArgID = false;
+                else {
+                    this.state = ParseState.StartStmtList;
+                    this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'", errorRecoverySet |
+                                ErrorRecoverySet.StmtStart);
+                    var svInFnc = this.inFnc;
+                    isAnonLambda = wasShorthand;
+                    this.inFnc = true;
+                    this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly |
+                                    ErrorRecoverySet.StmtStart,
+                                    bod, true, false, allowedElements, parentModifiers);
+                    bod.minChar = bodMinChar;
+                    bod.limChar = this.scanner.pos;
+                    this.inFnc = svInFnc;
+                    var ec = new EndCode();
+                    ec.minChar = bod.limChar;
+                    ec.limChar = ec.minChar;
+                    bod.append(ec);
+                }
+            }
 
-                // if preProcessedLambdaArgs is "true", we either have a typeless argument list, or we have
-                // a single identifier node and the current token is the ':' before a typereference
-                if (isLambda && preProcessedLambdaArgs && preProcessedLambdaArgs.nodeType != NodeType.EmptyExpr) {
-                    hasOptional = this.transformAnonymousArgsIntoFormals(formals, preProcessedLambdaArgs);
-                    haveFirstArgID = true;
+            var funcDecl = new FuncDecl(name, bod, isConstructor, args, this.topVarList(),
+                                        this.topScopeList(), this.topStaticsList(), NodeType.FuncDecl);
+            this.popDeclLists();
+            var scopeList = this.topScopeList();
+            scopeList.append(funcDecl);
+            var staticFuncDecl = false;
+            var limChar = this.scanner.pos;
+            if (requiresSignature) {
+                this.checkCurrentToken(TokenID.Semicolon, this.tok.tokenId == TokenID.OpenBrace ? "Function declarations are not permitted within interfaces, ambient modules or classes" : "Expected ';'", errorRecoverySet);
+            }
+            else {
+                if (!wasShorthand || isAnonLambda) {
+                    funcDecl.endingToken = new ASTSpan();
+                    funcDecl.endingToken.minChar = this.scanner.startPos;
+                    funcDecl.endingToken.limChar = this.scanner.pos;
+                    this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+
+                    if (isAnonLambda) {
+                        funcDecl.fncFlags |= FncFlags.IsFatArrowFunction;
+                    }
+                }
+                else {
+                    funcDecl.fncFlags |= FncFlags.IsFatArrowFunction;
+                    funcDecl.endingToken = new ASTSpan();
+
+                    funcDecl.endingToken.minChar = bod.members[0].minChar;
+                    funcDecl.endingToken.limChar = bod.members[0].limChar;
+                }
+            }
+            funcDecl.minChar = minChar;
+            funcDecl.limChar = limChar;
+
+            if (!requiresSignature) {
+                funcDecl.fncFlags |= FncFlags.Definition;
+            }
+
+            this.stmtStack = svStmtStack;
+            return funcDecl;
+        }
+
+        public transformAnonymousArgsIntoFormals(formals: ASTList, argList: AST) : bool {
+
+            var translateBinExOperand = (operand: AST) : bool => {
+                if (operand.nodeType == NodeType.Comma) {
+                    return this.transformAnonymousArgsIntoFormals(formals, operand);
+                }
+                else if (operand.nodeType == NodeType.Name || operand.nodeType == NodeType.Asg) {
+                    var opArg = operand.nodeType == NodeType.Asg ? (<BinaryExpression>operand).operand1 : operand;
+
+                    var arg = new ArgDecl(<Identifier>opArg);
+                    arg.preComments = opArg.preComments;
+                    arg.postComments = opArg.postComments;
+                    arg.minChar = opArg.minChar;
+                    arg.limChar = opArg.limChar;
+
+                    if (hasFlag(opArg.flags, ASTFlags.PossibleOptionalParameter)) {
+                        arg.isOptional = true;
+                    }
+
+                    if (operand.nodeType == NodeType.Asg) {
+                        arg.init = (<BinaryExpression>operand).operand2;
+                    }
+
+                    formals.append(arg);
+
+                    return arg.isOptional;
+                }
+                else {
+                    this.reportParseError("Invalid lambda argument");
+                }
+                return false;
+            }
+
+            if (argList) {
+                if (argList.nodeType == NodeType.Comma) {
+                    var commaList = <BinaryExpression> argList;
+                    if (commaList.operand1.isParenthesized) { 
+                        this.reportParseError("Invalid lambda argument", commaList.operand1.minChar, commaList.operand1.limChar);
+                    }
+                    if (commaList.operand2.isParenthesized) { 
+                        this.reportParseError("Invalid lambda argument", commaList.operand2.minChar, commaList.operand2.limChar);
+                    }
+                    var isOptional = translateBinExOperand(commaList.operand1);
+                    isOptional = translateBinExOperand(commaList.operand2) || isOptional;
+                    return isOptional;
+                }
+                else {
+                    return translateBinExOperand(argList);
+                }
+            }
+        }
+
+        public parseFormalParameterList(errorRecoverySet: ErrorRecoverySet,
+                                            formals: ASTList,
+                                            isClassConstr: bool,
+                                            isSig: bool,
+                                            isIndexer: bool,
+                                            isGetter: bool,
+                                            isSetter: bool,
+                                            isLambda: bool,
+                                            preProcessedLambdaArgs: AST,
+                                            expectClosingRParen: bool): bool 
+        {
+
+            formals.minChar = this.scanner.startPos; // '(' or '['
+            if (isIndexer) {
+                this.tok = this.scanner.scan();
+            }
+            else if (!isLambda) {
+                this.checkCurrentToken(TokenID.OpenParen, "Expected '('",
+                            errorRecoverySet | ErrorRecoverySet.RParen);
+            }
+            var sawEllipsis = false;
+            var firstArg = true;
+            var hasOptional = false;
+            var haveFirstArgID = false;
+
+            // if preProcessedLambdaArgs is "true", we either have a typeless argument list, or we have
+            // a single identifier node and the current token is the ':' before a typereference
+            if (isLambda && preProcessedLambdaArgs && preProcessedLambdaArgs.nodeType != NodeType.EmptyExpr) {
+                hasOptional = this.transformAnonymousArgsIntoFormals(formals, preProcessedLambdaArgs);
+                haveFirstArgID = true;
+            }
+
+            while (true) {
+                var munchedArg = false;
+                var argFlags = VarFlags.None;
+                var argMinChar = this.scanner.startPos;
+
+                if (this.inferPropertiesFromThisAssignment && this.tok.tokenId == TokenID.This) {
+                    if (!isClassConstr) {
+                        this.reportParseError("Instance property declarations using 'this' may only be used in class constructors");
+                    }
+                    this.tok = this.scanner.scan(); // consume the '.'
+
+                    argFlags |= (VarFlags.Public | VarFlags.Property);
+                    if (this.currentClassDefinition) {
+                        this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
+                    }
+                }
+                if (this.tok.tokenId == TokenID.Public) {
+                    argFlags |= (VarFlags.Public | VarFlags.Property);
+
+                    if (this.currentClassDefinition) {
+                        this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
+                    }
+                }
+                else if (this.tok.tokenId == TokenID.Private) {
+                    argFlags |= (VarFlags.Private | VarFlags.Property);
+
+                    if (this.currentClassDefinition) {
+                        this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
+                    }
+                }
+                else if (this.tok.tokenId == TokenID.Static && isClassConstr) {
+                    this.reportParseError("Static properties can not be declared as parameter properties");
+                    this.tok = this.scanner.scan();
                 }
 
-                while (true) {
-                    var munchedArg = false;
-                    var argFlags = VarFlags.None;
-                    var argMinChar = this.scanner.startPos;
+                if (argFlags != VarFlags.None) {
+                    if (!isClassConstr) {
+                        this.reportParseError("only constructor parameters can be properties");
+                    }
+                    this.tok = this.scanner.scan();
+
+                    if (isModifier(this.tok)) { 
+                        this.reportParseError("Multiple modifiers may not be applied to parameters");
+                        this.tok = this.scanner.scan();
+                    }
 
                     if (this.inferPropertiesFromThisAssignment && this.tok.tokenId == TokenID.This) {
                         if (!isClassConstr) {
                             this.reportParseError("Instance property declarations using 'this' may only be used in class constructors");
                         }
                         this.tok = this.scanner.scan(); // consume the '.'
-
-                        argFlags |= (VarFlags.Public | VarFlags.Property);
-                        if (this.currentClassDefinition) {
-                            this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
-                        }
-                    }
-                    if (this.tok.tokenId == TokenID.Public) {
-                        argFlags |= (VarFlags.Public | VarFlags.Property);
-
-                        if (this.currentClassDefinition) {
-                            this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
-                        }
-                    }
-                    else if (this.tok.tokenId == TokenID.Private) {
-                        argFlags |= (VarFlags.Private | VarFlags.Property);
-
-                        if (this.currentClassDefinition) {
-                            this.currentClassDefinition.varFlags |= VarFlags.ClassSuperMustBeFirstCallInConstructor;
-                        }
-                    }
-                    else if (this.tok.tokenId == TokenID.Static && isClassConstr) {
-                        this.reportParseError("Static properties can not be declared as parameter properties");
                         this.tok = this.scanner.scan();
                     }
+                }
+                else if (this.tok.tokenId == TokenID.DotDotDot) {
+                    sawEllipsis = true;
+                    this.tok = this.scanner.scan();
 
-                    if (argFlags != VarFlags.None) {
-                        if (!isClassConstr) {
-                            this.reportParseError("only constructor parameters can be properties");
-                        }
-                        this.tok = this.scanner.scan();
-
-                        if (isModifier(this.tok)) { 
-                            this.reportParseError("Multiple modifiers may not be applied to parameters");
-                            this.tok = this.scanner.scan();
-                        }
-
-                        if (this.inferPropertiesFromThisAssignment && this.tok.tokenId == TokenID.This) {
-                            if (!isClassConstr) {
-                                this.reportParseError("Instance property declarations using 'this' may only be used in class constructors");
-                            }
-                            this.tok = this.scanner.scan(); // consume the '.'
-                            this.tok = this.scanner.scan();
-                        }
+                    if (!(this.tok.tokenId == TokenID.Identifier) || convertTokToID(this.tok, this.strictMode)) {
+                        this.reportParseError("'...' parameters require both a parameter name and an array type annotation to be specified");
+                        sawEllipsis = false; // Do not treat this parameter as vararg
                     }
-                    else if (this.tok.tokenId == TokenID.DotDotDot) {
-                        sawEllipsis = true;
-                        this.tok = this.scanner.scan();
+                }
 
-                        if (!(this.tok.tokenId == TokenID.Identifier) || convertTokToID(this.tok, this.strictMode)) {
-                            this.reportParseError("'...' parameters require both a parameter name and an array type annotation to be specified");
-                            sawEllipsis = false; // Do not treat this parameter as vararg
-                        }
-                    }
+                var argId: Identifier = null;
 
-                    var argId: Identifier = null;
+                if (!haveFirstArgID && (this.tok.tokenId == TokenID.Identifier) || convertTokToID(this.tok, this.strictMode)) {
+                    argId = Identifier.fromToken(this.tok);
+                    argId.minChar = this.scanner.startPos;
+                    argId.limChar = this.scanner.pos;
+                }
 
-                    if (!haveFirstArgID && (this.tok.tokenId == TokenID.Identifier) || convertTokToID(this.tok, this.strictMode)) {
-                        argId = Identifier.fromToken(this.tok);
-                        argId.minChar = this.scanner.startPos;
-                        argId.limChar = this.scanner.pos;
-                    }
+                if (haveFirstArgID || argId) {
+                    munchedArg = true;
+                    var type: AST = null;
+                    var arg: ArgDecl = null;
 
-                    if (haveFirstArgID || argId) {
-                        munchedArg = true;
-                        var type: AST = null;
-                        var arg: ArgDecl = null;
+                    if (haveFirstArgID && formals.members.length) {
+                        arg = <ArgDecl>formals.members[formals.members.length - 1];
 
-                        if (haveFirstArgID && formals.members.length) {
-                            arg = <ArgDecl>formals.members[formals.members.length - 1];
-
-                            if (arg.isOptional) {
-                                hasOptional = true;
-                            }
-                        }
-                        else {
-                            arg = new ArgDecl(argId);
-
-                            if (isGetter) {
-                                this.reportParseError("Property getters may not take any arguments");
-                            }
-
-                            if (isSetter && !firstArg) {
-                                this.reportParseError("Property setters may only take one argument");
-                            }
-
-                            arg.minChar = argMinChar;
-                            arg.preComments = this.parseComments();
-                            this.tok = this.scanner.scan();
-                        }
-
-                        if (this.tok.tokenId == TokenID.Question) {
-                            arg.isOptional = true;
+                        if (arg.isOptional) {
                             hasOptional = true;
-                            this.tok = this.scanner.scan();
-                        }
-
-                        if (this.tok.tokenId == TokenID.Colon) {
-                            this.tok = this.scanner.scan();
-                            type = this.parseTypeReference(errorRecoverySet, false);
-                        }
-
-                        // check for default parameter
-                        // REVIEW: In the case of a typed reference, assume that parseTypeReference or one
-                        // of its children in the call graph advanced tok
-                        if (this.tok.tokenId == TokenID.Equals) {
-                            if (isSig) {
-                                this.reportParseError("Arguments in signatures may not have default values");
-                            }
-
-                            hasOptional = true;
-                            this.tok = this.scanner.scan();
-                            arg.init = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
-                                                OperatorPrecedence.Comma, false,
-                                                TypeContext.NoTypes);
-
-                        }
-
-                        if (hasOptional && !arg.isOptionalArg() && !sawEllipsis) {
-                            this.reportParseError("Optional parameters may only be followed by other optional parameters");
-                        }
-
-                        if (sawEllipsis && arg.isOptionalArg()) {
-                            this.reportParseError("Varargs may not be optional or have default parameters");
-                        }
-
-                        if (sawEllipsis && !type) {
-                            // Ellipsis is missing a type definition
-                            this.reportParseError("'...' parameters require both a parameter name and an array type annotation to be specified");
-                        }
-
-                        // REVIEW: Ok for lambdas?
-                        arg.postComments = this.parseComments();
-                        arg.typeExpr = type;
-                        arg.limChar = this.scanner.lastTokenLimChar();
-                        arg.varFlags |= argFlags;
-                        if (!haveFirstArgID) {
-                            formals.append(arg);
-                        }
-                        else {
-                            haveFirstArgID = false;
                         }
                     }
-                    firstArg = false;
-                    if (this.tok.tokenId == TokenID.Comma) {
-                        if ((munchedArg) && (!sawEllipsis)) {
+                    else {
+                        arg = new ArgDecl(argId);
+
+                        if (isGetter) {
+                            this.reportParseError("Property getters may not take any arguments");
+                        }
+
+                        if (isSetter && !firstArg) {
+                            this.reportParseError("Property setters may only take one argument");
+                        }
+
+                        arg.minChar = argMinChar;
+                        arg.preComments = this.parseComments();
+                        this.tok = this.scanner.scan();
+                    }
+
+                    if (this.tok.tokenId == TokenID.Question) {
+                        arg.isOptional = true;
+                        hasOptional = true;
+                        this.tok = this.scanner.scan();
+                    }
+
+                    if (this.tok.tokenId == TokenID.Colon) {
+                        this.tok = this.scanner.scan();
+                        type = this.parseTypeReference(errorRecoverySet, false);
+                    }
+
+                    // check for default parameter
+                    // REVIEW: In the case of a typed reference, assume that parseTypeReference or one
+                    // of its children in the call graph advanced tok
+                    if (this.tok.tokenId == TokenID.Equals) {
+                        if (isSig) {
+                            this.reportParseError("Arguments in signatures may not have default values");
+                        }
+
+                        hasOptional = true;
+                        this.tok = this.scanner.scan();
+                        arg.init = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
+                                            OperatorPrecedence.Comma, false,
+                                            TypeContext.NoTypes);
+
+                    }
+
+                    if (hasOptional && !arg.isOptionalArg() && !sawEllipsis) {
+                        this.reportParseError("Optional parameters may only be followed by other optional parameters");
+                    }
+
+                    if (sawEllipsis && arg.isOptionalArg()) {
+                        this.reportParseError("Varargs may not be optional or have default parameters");
+                    }
+
+                    if (sawEllipsis && !type) {
+                        // Ellipsis is missing a type definition
+                        this.reportParseError("'...' parameters require both a parameter name and an array type annotation to be specified");
+                    }
+
+                    // REVIEW: Ok for lambdas?
+                    arg.postComments = this.parseComments();
+                    arg.typeExpr = type;
+                    arg.limChar = this.scanner.lastTokenLimChar();
+                    arg.varFlags |= argFlags;
+                    if (!haveFirstArgID) {
+                        formals.append(arg);
+                    }
+                    else {
+                        haveFirstArgID = false;
+                    }
+                }
+                firstArg = false;
+                if (this.tok.tokenId == TokenID.Comma) {
+                    if ((munchedArg) && (!sawEllipsis)) {
+                        this.tok = this.scanner.scan();
+                        continue;
+                    }
+                    else {
+                        this.reportParseError("Unexpected ',' in argument list");
+                        if (this.errorRecovery) {
                             this.tok = this.scanner.scan();
                             continue;
                         }
-                        else {
-                            this.reportParseError("Unexpected ',' in argument list");
-                            if (this.errorRecovery) {
-                                this.tok = this.scanner.scan();
-                                continue;
-                            }
-                        }
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                if (isIndexer) {
-                    this.checkCurrentToken(TokenID.CloseBracket, "Expected ']'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
-                }
-                else if (expectClosingRParen) {
-                    this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
-                }
-                formals.limChar = this.scanner.lastTokenLimChar(); // ')' or ']'
-                return sawEllipsis;
-            }
-
-            public parseFncDecl(  errorRecoverySet: ErrorRecoverySet,
-                                    isDecl: bool, requiresSignature: bool,
-                                    isMethod: bool,
-                                    methodName: Identifier,
-                                    indexer: bool,
-                                    isStatic: bool,
-                                    markedAsAmbient: bool,
-                                    modifiers: Modifiers,
-                                    lambdaArgContext: ILambdaArgumentContext,
-                                    expectClosingRParen: bool): AST {
-
-                var leftCurlyCount = this.scanner.leftCurlyCount;
-                var rightCurlyCount = this.scanner.rightCurlyCount;
-
-                var prevInConstr = this.parsingClassConstructorDefinition;
-                this.parsingClassConstructorDefinition = false;
-
-                var name: Identifier = null;
-                var fnMin = this.scanner.startPos;
-                var minChar = this.scanner.pos;
-                var prevNestingLevel = this.nestingLevel;
-                this.nestingLevel = 0;
-                if ((!this.style_funcInLoop) && this.inLoop()) {
-                    this.reportParseStyleError("function declaration in loop");
-                }
-                if (!isMethod && !isStatic && !indexer && !lambdaArgContext) {
-                    // past function keyword
-                    this.tok = this.scanner.scan();
-                    this.state = ParseState.StartFncDecl;
-                    if ((this.tok.tokenId != TokenID.Identifier) && (!convertTokToID(this.tok, this.strictMode))) {
-                        if (isDecl) {
-                            this.reportParseError("Function declaration must include identifier");
-
-                            this.nestingLevel = prevNestingLevel;
-                            return new IncompleteAST(fnMin, this.scanner.pos);
-                        }
-                    }
-                    else {
-                        name = Identifier.fromToken(this.tok);
-                        name.minChar = this.scanner.startPos;
-                        name.limChar = this.scanner.pos;
-                        this.tok = this.scanner.scan();
                     }
                 }
                 else {
-                    if (methodName) {
-                        name = methodName;
-                    }
+                    break;
                 }
-
-                this.state = ParseState.FncDeclName;
-                var args: ASTList = new ASTList();
-                var variableArgList = false;
-                var isOverload = false;
-                var isGetter = hasFlag(modifiers, Modifiers.Getter);
-                var isSetter = hasFlag(modifiers, Modifiers.Setter);
-                if ((this.tok.tokenId == TokenID.OpenParen) || (indexer && (this.tok.tokenId == TokenID.OpenBracket)) || (lambdaArgContext && (lambdaArgContext.preProcessedLambdaArgs || this.tok.tokenId == TokenID.DotDotDot))) {
-                    // arg list
-                    variableArgList = this.parseFormalParameterList(errorRecoverySet, args, false, requiresSignature, indexer, isGetter, isSetter, !!lambdaArgContext, lambdaArgContext ? lambdaArgContext.preProcessedLambdaArgs : null, expectClosingRParen);
-                }
-                this.state = ParseState.FncDeclArgs;
-                var returnType: AST = null;
-                if (this.tok.tokenId == TokenID.Colon) {
-                    this.tok = this.scanner.scan();
-                    if (hasFlag(modifiers, Modifiers.Setter)) {
-                        this.reportParseError("Property setters may not declare a return type");
-                    }
-                    returnType = this.parseTypeReference(errorRecoverySet, true);
-                }
-
-                if (indexer && args.members.length == 0) {
-                    this.reportParseError("Index signatures require a parameter type to be specified");
-                }
-                this.state = ParseState.FncDeclReturnType;
-
-                // REVIEW:
-                // Currently, it's imperative that ambient functions *not* be marked as overloads.  At some point, we may
-                // want to unify the two concepts internally
-                if (isDecl && !(this.parsingDeclareFile || markedAsAmbient) && (!isMethod || !(this.ambientModule || this.ambientClass || this.inInterfaceDecl)) && this.tok.tokenId == TokenID.Semicolon) {
-                    isOverload = true;
-                    isDecl = false;
-                    requiresSignature = true;
-                }
-                var svInFncDecl = this.inFncDecl;
-                this.inFncDecl = true;
-                var funcDecl: FuncDecl =
-                    this.parseFunctionStatements(errorRecoverySet | ErrorRecoverySet.RCurly,
-                                            name, false, isMethod, args, AllowedElements.FunctionBody,
-                                            minChar, requiresSignature, Modifiers.None);
-                this.inFncDecl = svInFncDecl;
-                funcDecl.variableArgList = variableArgList;
-                funcDecl.isOverload = isOverload;
-
-                if (!requiresSignature) { // REVIEW: What's the point of this?  Why not just use 'Signature' instead of 'Definition'?
-                    funcDecl.fncFlags |= FncFlags.Definition;
-                }
-
-                if (isStatic) {
-                    funcDecl.fncFlags |= FncFlags.Static;
-                }
-
-                if (requiresSignature) {
-                    funcDecl.fncFlags |= FncFlags.Signature;
-                }
-                if (indexer) {
-                    funcDecl.fncFlags |= FncFlags.IndexerMember;
-                }
-                funcDecl.returnTypeAnnotation = returnType;
-                if (isMethod) {
-                    funcDecl.fncFlags |= FncFlags.Method;
-                    // all class property methods are currently exported
-                    funcDecl.fncFlags |= FncFlags.ClassPropertyMethodExported;
-                }
-                funcDecl.leftCurlyCount = this.scanner.leftCurlyCount - leftCurlyCount;
-                funcDecl.rightCurlyCount = this.scanner.rightCurlyCount - rightCurlyCount;
-
-                this.nestingLevel = prevNestingLevel;
-                this.parsingClassConstructorDefinition = prevInConstr;
-                return funcDecl;
             }
 
-            public convertToTypeReference(ast: AST): TypeReference {
-                var result: TypeReference;
-                switch (ast.nodeType) {
-                    case NodeType.TypeRef:
-                        return <TypeReference>ast;
-                    case NodeType.Name:
-                        result = new TypeReference(ast, 0);
-                        result.minChar = ast.minChar;
-                        result.limChar = ast.limChar;
-                        return result;
-                    case NodeType.Index: {
-                        var expr = <BinaryExpression>ast;
-                        result = this.convertToTypeReference(expr.operand1);
-                        if (result) {
-                            result.arrayCount++;
-                            result.minChar = expr.minChar;
-                            result.limChar = expr.limChar;
-                            return result;
-                        }
-                        else {
-                            var etr = <TypeReference>new AST(NodeType.Error);
-                            return etr;
-                        }
-                    }
-                }
-                return null;
+            if (isIndexer) {
+                this.checkCurrentToken(TokenID.CloseBracket, "Expected ']'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
             }
+            else if (expectClosingRParen) {
+                this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
+            }
+            formals.limChar = this.scanner.lastTokenLimChar(); // ')' or ']'
+            return sawEllipsis;
+        }
 
-            public parseArgList(errorRecoverySet: ErrorRecoverySet): ASTList {
-                var args: ASTList = new ASTList();
-                args.minChar = this.scanner.startPos;
+        public parseFncDecl(  errorRecoverySet: ErrorRecoverySet,
+                                isDecl: bool, requiresSignature: bool,
+                                isMethod: bool,
+                                methodName: Identifier,
+                                indexer: bool,
+                                isStatic: bool,
+                                markedAsAmbient: bool,
+                                modifiers: Modifiers,
+                                lambdaArgContext: ILambdaArgumentContext,
+                                expectClosingRParen: bool): AST {
 
-                // skip left paren
+            var leftCurlyCount = this.scanner.leftCurlyCount;
+            var rightCurlyCount = this.scanner.rightCurlyCount;
+
+            var prevInConstr = this.parsingClassConstructorDefinition;
+            this.parsingClassConstructorDefinition = false;
+
+            var name: Identifier = null;
+            var fnMin = this.scanner.startPos;
+            var minChar = this.scanner.pos;
+            var prevNestingLevel = this.nestingLevel;
+            this.nestingLevel = 0;
+            if ((!this.style_funcInLoop) && this.inLoop()) {
+                this.reportParseStyleError("function declaration in loop");
+            }
+            if (!isMethod && !isStatic && !indexer && !lambdaArgContext) {
+                // past function keyword
                 this.tok = this.scanner.scan();
+                this.state = ParseState.StartFncDecl;
+                if ((this.tok.tokenId != TokenID.Identifier) && (!convertTokToID(this.tok, this.strictMode))) {
+                    if (isDecl) {
+                        this.reportParseError("Function declaration must include identifier");
 
-                if (this.tok.tokenId !== TokenID.CloseParen) {
-                    while (true) {
-                        if (args.members.length > 0xffff) {
-                            this.reportParseError("max number of args exceeded");
-                            break;
-                        }
-                        var arg = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
-                                          OperatorPrecedence.Comma, false, TypeContext.NoTypes);
-                        args.append(arg);
-                        if (this.tok.tokenId != TokenID.Comma) {
-                            break;
-                        }
-                        this.tok = this.scanner.scan();
+                        this.nestingLevel = prevNestingLevel;
+                        return new IncompleteAST(fnMin, this.scanner.pos);
                     }
                 }
-
-                args.limChar = this.scanner.pos;
-                return args;
+                else {
+                    name = Identifier.fromToken(this.tok);
+                    name.minChar = this.scanner.startPos;
+                    name.limChar = this.scanner.pos;
+                    this.tok = this.scanner.scan();
+                }
+            }
+            else {
+                if (methodName) {
+                    name = methodName;
+                }
             }
 
-            public parseBaseList(extendsList: ASTList, implementsList: ASTList, errorRecoverySet: ErrorRecoverySet, interfaceOnly: bool, isClass: bool): void {
-                var keyword = true;
+            this.state = ParseState.FncDeclName;
+            var args: ASTList = new ASTList();
+            var variableArgList = false;
+            var isOverload = false;
+            var isGetter = hasFlag(modifiers, Modifiers.Getter);
+            var isSetter = hasFlag(modifiers, Modifiers.Setter);
+            if ((this.tok.tokenId == TokenID.OpenParen) || (indexer && (this.tok.tokenId == TokenID.OpenBracket)) || (lambdaArgContext && (lambdaArgContext.preProcessedLambdaArgs || this.tok.tokenId == TokenID.DotDotDot))) {
+                // arg list
+                variableArgList = this.parseFormalParameterList(errorRecoverySet, args, false, requiresSignature, indexer, isGetter, isSetter, !!lambdaArgContext, lambdaArgContext ? lambdaArgContext.preProcessedLambdaArgs : null, expectClosingRParen);
+            }
+            this.state = ParseState.FncDeclArgs;
+            var returnType: AST = null;
+            if (this.tok.tokenId == TokenID.Colon) {
+                this.tok = this.scanner.scan();
+                if (hasFlag(modifiers, Modifiers.Setter)) {
+                    this.reportParseError("Property setters may not declare a return type");
+                }
+                returnType = this.parseTypeReference(errorRecoverySet, true);
+            }
+
+            if (indexer && args.members.length == 0) {
+                this.reportParseError("Index signatures require a parameter type to be specified");
+            }
+            this.state = ParseState.FncDeclReturnType;
+
+            // REVIEW:
+            // Currently, it's imperative that ambient functions *not* be marked as overloads.  At some point, we may
+            // want to unify the two concepts internally
+            if (isDecl && !(this.parsingDeclareFile || markedAsAmbient) && (!isMethod || !(this.ambientModule || this.ambientClass || this.inInterfaceDecl)) && this.tok.tokenId == TokenID.Semicolon) {
+                isOverload = true;
+                isDecl = false;
+                requiresSignature = true;
+            }
+            var svInFncDecl = this.inFncDecl;
+            this.inFncDecl = true;
+            var funcDecl: FuncDecl =
+                this.parseFunctionStatements(errorRecoverySet | ErrorRecoverySet.RCurly,
+                                        name, false, isMethod, args, AllowedElements.FunctionBody,
+                                        minChar, requiresSignature, Modifiers.None);
+            this.inFncDecl = svInFncDecl;
+            funcDecl.variableArgList = variableArgList;
+            funcDecl.isOverload = isOverload;
+
+            if (!requiresSignature) { // REVIEW: What's the point of this?  Why not just use 'Signature' instead of 'Definition'?
+                funcDecl.fncFlags |= FncFlags.Definition;
+            }
+
+            if (isStatic) {
+                funcDecl.fncFlags |= FncFlags.Static;
+            }
+
+            if (requiresSignature) {
+                funcDecl.fncFlags |= FncFlags.Signature;
+            }
+            if (indexer) {
+                funcDecl.fncFlags |= FncFlags.IndexerMember;
+            }
+            funcDecl.returnTypeAnnotation = returnType;
+            if (isMethod) {
+                funcDecl.fncFlags |= FncFlags.Method;
+                // all class property methods are currently exported
+                funcDecl.fncFlags |= FncFlags.ClassPropertyMethodExported;
+            }
+            funcDecl.leftCurlyCount = this.scanner.leftCurlyCount - leftCurlyCount;
+            funcDecl.rightCurlyCount = this.scanner.rightCurlyCount - rightCurlyCount;
+
+            this.nestingLevel = prevNestingLevel;
+            this.parsingClassConstructorDefinition = prevInConstr;
+            return funcDecl;
+        }
+
+        public convertToTypeReference(ast: AST): TypeReference {
+            var result: TypeReference;
+            switch (ast.nodeType) {
+                case NodeType.TypeRef:
+                    return <TypeReference>ast;
+                case NodeType.Name:
+                    result = new TypeReference(ast, 0);
+                    result.minChar = ast.minChar;
+                    result.limChar = ast.limChar;
+                    return result;
+                case NodeType.Index: {
+                    var expr = <BinaryExpression>ast;
+                    result = this.convertToTypeReference(expr.operand1);
+                    if (result) {
+                        result.arrayCount++;
+                        result.minChar = expr.minChar;
+                        result.limChar = expr.limChar;
+                        return result;
+                    }
+                    else {
+                        var etr = <TypeReference>new AST(NodeType.Error);
+                        return etr;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public parseArgList(errorRecoverySet: ErrorRecoverySet): ASTList {
+            var args: ASTList = new ASTList();
+            args.minChar = this.scanner.startPos;
+
+            // skip left paren
+            this.tok = this.scanner.scan();
+
+            if (this.tok.tokenId !== TokenID.CloseParen) {
+                while (true) {
+                    if (args.members.length > 0xffff) {
+                        this.reportParseError("max number of args exceeded");
+                        break;
+                    }
+                    var arg = this.parseExpr(ErrorRecoverySet.Comma | errorRecoverySet,
+                                        OperatorPrecedence.Comma, false, TypeContext.NoTypes);
+                    args.append(arg);
+                    if (this.tok.tokenId != TokenID.Comma) {
+                        break;
+                    }
+                    this.tok = this.scanner.scan();
+                }
+            }
+
+            args.limChar = this.scanner.pos;
+            return args;
+        }
+
+        public parseBaseList(extendsList: ASTList, implementsList: ASTList, errorRecoverySet: ErrorRecoverySet, interfaceOnly: bool, isClass: bool): void {
+            var keyword = true;
             var currentList = extendsList;
             for (; ;) {
                 if (keyword) {
