@@ -491,11 +491,11 @@ module TypeScript {
             return true;
         }
 
-            public parseImportDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ImportDecl {
+            public parseImportDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ImportDeclaration {
 
                 var name: Identifier = null;
                 var alias: AST = null;
-                var importDecl: ImportDecl = null;
+                var importDecl: ImportDeclaration = null;
                 var minChar = this.scanner.startPos;
                 var isDynamicImport = false;
 
@@ -593,7 +593,7 @@ module TypeScript {
                     limChar = alias.limChar;
                 }
 
-                importDecl = new ImportDecl(name, alias);
+                importDecl = new ImportDeclaration(name, alias);
                 importDecl.isDynamicImport = isDynamicImport;
 
                 if (hasFlag(modifiers, Modifiers.Exported)) {
@@ -4125,7 +4125,7 @@ module TypeScript {
 
         public okAmbientModuleMember(ast: AST) {
             var nt = ast.nodeType;
-            return (nt == NodeType.Class) || (nt == NodeType.Import) || (nt == NodeType.Interface) || (nt == NodeType.Module) ||
+            return (nt == NodeType.Class) || (nt == NodeType.ImportDeclaration) || (nt == NodeType.Interface) || (nt == NodeType.Module) ||
                 (nt == NodeType.Empty) || (nt == NodeType.VarDecl) || 
                 ((nt == NodeType.Block) && !(<Block>ast).isStatementBlock) ||
                 ((nt == NodeType.FuncDecl) && ((<FuncDecl>ast).isMethod()));

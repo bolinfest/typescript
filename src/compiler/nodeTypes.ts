@@ -103,7 +103,7 @@ module TypeScript {
         Class,
         Interface,
         Module,
-        Import,
+        ImportDeclaration,
         With,
         Label,
         LabeledStatement,

@@ -349,7 +349,7 @@ module Formatting {
         static IsBinaryOpContext(context: FormattingContext): bool {
             if (context.contextNode.AuthorNode.Details.ast != null) {
                 switch (context.contextNode.AuthorNode.Details.ast.nodeType) {
-                    case TypeScript.NodeType.Import:
+                    case TypeScript.NodeType.ImportDeclaration:
                         return true;
                 }
             }

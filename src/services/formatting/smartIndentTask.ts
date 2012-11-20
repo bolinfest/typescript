@@ -89,7 +89,7 @@ module Formatting {
 
             if (node.AuthorNode.Details.ast != null) {
                 switch (node.AuthorNode.Details.ast.nodeType) {
-                    case TypeScript.NodeType.Import:
+                    case TypeScript.NodeType.ImportDeclaration:
                         // only smart indent on the first line
                         return this.CanDoSmartIndentInStatement(node);
                 }

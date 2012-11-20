@@ -287,8 +287,8 @@ module TypeScript {
         }
 
         public getImportDeclFromSymbol() {
-            if (this.declAST != null && this.declAST.nodeType == NodeType.Import) {
-                return <ImportDecl>this.declAST;
+            if (this.declAST != null && this.declAST.nodeType == NodeType.ImportDeclaration) {
+                return <ImportDeclaration>this.declAST;
             }
 
             return null;
@@ -351,7 +351,7 @@ module TypeScript {
             this.additionalLocations[this.additionalLocations.length] = loc;
         }
         public isMethod = false;
-        public aliasLink:ImportDecl = null;
+        public aliasLink:ImportDeclaration = null;
         public kind() { return SymbolKind.Type; }
         public isType(): bool { return true; }
         public getType() { return this.type; }

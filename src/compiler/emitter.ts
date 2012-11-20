@@ -669,7 +669,7 @@ module TypeScript {
                     if (moduleGenTarget == ModuleGenTarget.Asynchronous) { // AMD
                         var dependencyList = "[\"require\", \"exports\"";
                         var importList = "require, exports";
-                        var importStatement: ImportDecl = null;
+                        var importStatement: ImportDeclaration = null;
 
                         // all dependencies are quoted
                         for (var i = 0; i < (<ModuleType>moduleDecl.mod).importedModules.length; i++) {

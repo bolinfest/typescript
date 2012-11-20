@@ -188,7 +188,7 @@ module TypeScript {
             this.childrenWalkers[NodeType.Class] = ChildrenWalkers.walkClassDeclChildren;
             this.childrenWalkers[NodeType.Interface] = ChildrenWalkers.walkTypeDeclChildren;
             this.childrenWalkers[NodeType.Module] = ChildrenWalkers.walkModuleDeclChildren;
-            this.childrenWalkers[NodeType.Import] = ChildrenWalkers.walkImportDeclChildren;
+            this.childrenWalkers[NodeType.ImportDeclaration] = ChildrenWalkers.walkImportDeclChildren;
             this.childrenWalkers[NodeType.With] = ChildrenWalkers.walkWithStatementChildren;
             this.childrenWalkers[NodeType.Label] = ChildrenWalkers.walkLabelChildren;
             this.childrenWalkers[NodeType.LabeledStatement] = ChildrenWalkers.walkLabeledStatementChildren;
@@ -501,7 +501,7 @@ module TypeScript {
             }
         }
 
-        export function walkImportDeclChildren(preAst: ImportDecl, parent: AST, walker: IAstWalker): void {
+        export function walkImportDeclChildren(preAst: ImportDeclaration, parent: AST, walker: IAstWalker): void {
             if (preAst.id) {
                 preAst.id = <Identifier>walker.walk(preAst.id, preAst);
             }

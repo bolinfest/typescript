@@ -2894,7 +2894,7 @@ module TypeScript {
             return interfaceDecl;
         }
 
-        public typeCheckImportDecl(importDecl: ImportDecl) {
+        public typeCheckImportDecl(importDecl: ImportDeclaration) {
             var mod: ModuleType = <ModuleType>importDecl.alias.type;
             var sym: TypeSymbol = null;
             var prevInImportTC = this.inImportTypeCheck;

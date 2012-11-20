@@ -825,13 +825,13 @@ module TypeScript {
         }
     }
 
-    export class ImportDecl extends AST {
+    export class ImportDeclaration extends AST {
         public isStatementOrExpression() { return true; }
         public varFlags = VarFlags.None;
         public isDynamicImport = false;
 
         constructor (public id: Identifier, public alias: AST) {
-            super(NodeType.Import);
+            super(NodeType.ImportDeclaration);
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {

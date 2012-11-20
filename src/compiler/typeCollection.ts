@@ -151,7 +151,7 @@ module TypeScript {
         var scopeChain = context.scopeChain;
         var typeSymbol: TypeSymbol = null;
         var modType: ModuleType = null;
-        var importDecl = <ImportDecl>ast;
+        var importDecl = <ImportDeclaration>ast;
         var isExported = hasFlag(importDecl.varFlags, VarFlags.Exported);
 
         // REVIEW: technically, this call isn't strictly necessary, since we'll find the type during the call to resolveTypeMembers
@@ -777,7 +777,7 @@ module TypeScript {
         else if (ast.nodeType == NodeType.List) {
             go = true;
         }
-        else if (ast.nodeType == NodeType.Import) {
+        else if (ast.nodeType == NodeType.ImportDeclaration) {
             go = preCollectImportTypes(ast, parent, context);
         }
         else if (ast.nodeType == NodeType.With) {

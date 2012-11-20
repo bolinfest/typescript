@@ -489,7 +489,7 @@ module TypeScript {
         public getAllAmbientEnclosedTypes() { return this.ambientEnclosedTypes; }
         public getPublicEnclosedTypes(): ScopedMembers { return null; }
         public getpublicAmbientEnclosedTypes(): ScopedMembers { return null; }
-        public importedModules: ImportDecl[] = [];
+        public importedModules: ImportDeclaration[] = [];
 
         // Hash table with dynamicModule type as key and its name in current scope and flag that tells if it is private as value
         private prettyNames = new SimpleHashTable(); 

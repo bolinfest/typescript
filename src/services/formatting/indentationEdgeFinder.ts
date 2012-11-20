@@ -47,7 +47,7 @@ module Formatting {
                     ParseNodeExtensions.ForAllChildren(node, (child) => { nextNodesToVisit.Push(child); });
                     return;
 
-                case TypeScript.NodeType.Import:
+                case TypeScript.NodeType.ImportDeclaration:
                     node.ChildrenIndentationDelta = 1;
                     // Still visit all children. This covers for example right hand of assignments and functions declared in arguments for function calls
                     ParseNodeExtensions.ForAllChildren(node, (child) => { nextNodesToVisit.Push(child); });

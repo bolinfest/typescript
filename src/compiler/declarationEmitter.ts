@@ -503,7 +503,7 @@ module TypeScript {
             return true;
         }
 
-        public ImportCallback(pre: bool, importDecl: ImportDecl): bool {
+        public ImportDeclarationCallback(pre: bool, importDecl: ImportDeclaration): bool {
             if (pre && this.canEmitSignature(ToDeclFlags(importDecl.varFlags))) {
                 this.emitDeclFlags(ToDeclFlags(importDecl.varFlags), "import");
 

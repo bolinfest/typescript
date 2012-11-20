@@ -30,7 +30,7 @@ module Formatting {
                         case TypeScript.NodeType.Module:
                             return Span.FromBounds(currentNode.ast.minChar, currentNode.ast.limChar);
 
-                        case TypeScript.NodeType.Import:
+                        case TypeScript.NodeType.ImportDeclaration:
                             return new Span(currentNode.StartOffset, currentNode.EndOffset - currentNode.StartOffset);
                     }
                 }
