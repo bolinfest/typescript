@@ -69,5 +69,17 @@ describe('getFormattingEditsForRange', function() {
         it("formats constructor statements correctelly", function() {
             getFormattingEditsForRange('spaceAfterConstructor');
         });
+        it("formats classes and interfaces correctelly", function() {
+            getFormattingEditsForRange('classes');
+        });
+        it("formats modules correctelly", function() {
+            getFormattingEditsForRange('modules');
+        });
+        it("formats fat arrow expressions correctelly", function() {
+            getFormattingEditsForRange('fatArrowFunctions');
+        });
+        it("formats empty object/interface literals correctelly", function() {
+            getFormattingEditsForRange('emptyInterfaceLiteral');
+        });
     });
 });

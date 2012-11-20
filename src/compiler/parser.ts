@@ -994,8 +994,8 @@ module TypeScript {
                     var arg = new ArgDecl(<Identifier>opArg);
                     arg.preComments = opArg.preComments;
                     arg.postComments = opArg.postComments;
-                    arg.minChar = opArg.minChar;
-                    arg.limChar = opArg.limChar;
+                    arg.minChar = operand.minChar;
+                    arg.limChar = operand.limChar;
 
                     if (hasFlag(opArg.flags, ASTFlags.PossibleOptionalParameter)) {
                         arg.isOptional = true;
@@ -1007,7 +1007,7 @@ module TypeScript {
 
                     formals.append(arg);
 
-                    return arg.isOptional;
+                    return arg.isOptional || arg.init;
                 }
                 else {
                     this.reportParseError("Invalid lambda argument");

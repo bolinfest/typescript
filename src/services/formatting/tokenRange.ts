@@ -127,7 +127,7 @@ module Formatting {
             static Any: TokenRange = AllTokens();
             static Keywords = TokenRange.FromRange(AuthorTokenKind.atkBreak, AuthorTokenKind.atkWith);
             static Operators = TokenRange.FromRange(AuthorTokenKind.atkSColon, AuthorTokenKind.atkScope);
-            static BinaryOperators = TokenRange.FromRange(AuthorTokenKind.atkAsg, AuthorTokenKind.atkPct);
+            static BinaryOperators = TokenRange.FromRange(AuthorTokenKind.atkArrow, AuthorTokenKind.atkPct);
             static BinaryKeywordOperators = TokenRange.FromTokens([AuthorTokenKind.atkIn, AuthorTokenKind.atkInstanceof]);
             static ReservedKeywords = TokenRange.FromRange(AuthorTokenKind.atkImplements, AuthorTokenKind.atkYield);
             static UnaryPrefixOperators = TokenRange.FromTokens([AuthorTokenKind.atkAdd, AuthorTokenKind.atkSub, AuthorTokenKind.atkTilde, AuthorTokenKind.atkBang]);

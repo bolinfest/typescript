@@ -19,11 +19,10 @@ module Formatting {
         public IgnoreBeforeComment: Rule;
         public IgnoreAfterLineComment: Rule;
 
-        // Space after keyword but not before ; or : or ? or after constructor 
+        // Space after keyword but not before ; or : or ?
         public NoSpaceBeforeSemicolon: Rule;
         public NoSpaceBeforeColon: Rule;
         public NoSpaceBeforeQMark: Rule;
-        public NoSpaceAfterConstructor: Rule;
         public SpaceAfterColon: Rule;
         public SpaceAfterQMark: Rule;
         public SpaceAfterSemicolon: Rule;
@@ -40,20 +39,17 @@ module Formatting {
         public NoSpaceBeforeDot: Rule;
         public NoSpaceAfterDot: Rule;
         public NoSpaceBeforeOpenBracket: Rule;
-        public NoSpaceAfterOpenBracket    : Rule;
-        public NoSpaceBeforeCloseBracket  : Rule;
-        public NoSpaceAfterCloseBracket   : Rule;
+        public NoSpaceAfterOpenBracket: Rule;
+        public NoSpaceBeforeCloseBracket: Rule;
+        public NoSpaceAfterCloseBracket: Rule;
 
         // Insert after { and before } a space in single-line contexts, but remove space from empty object literals {}.
-        public SpaceAfterOpenCurly               : Rule;
-        public SpaceBeforeCloseCurly             : Rule;
-        public NoSpaceBetweenEmptyCurlyBrackets  : Rule;
+        public SpaceAfterOpenCurly: Rule;
+        public SpaceBeforeCloseCurly: Rule;
+        public NoSpaceBetweenEmptyCurlyBrackets: Rule;
 
         // Insert new line after { and before } in multi-line contexts.
         public NewLineAfterOpenCurlyInBlockContext: Rule;
-
-        // For empty function/control body insert a space between curly brackets
-        public SpaceBetweenCurlyBrackets: Rule;
 
         // For functions and control block place } on a new line    [multi-line rule]
         public NewLineBeforeCloseCurlyInFunctionOrControl: Rule;
@@ -61,30 +57,30 @@ module Formatting {
         // Special handling of unary operators.
         // Prefix operators generally shouldn't have a space between
         // them and their target unary expression.
-        public NoSpaceAfterUnaryPrefixOperator          : Rule;
-        public NoSpaceAfterUnaryPreincrementOperator    : Rule;
-        public NoSpaceAfterUnaryPredecrementOperator    : Rule;
-        public NoSpaceBeforeUnaryPostincrementOperator  : Rule;
-        public NoSpaceBeforeUnaryPostdecrementOperator  : Rule;
+        public NoSpaceAfterUnaryPrefixOperator: Rule;
+        public NoSpaceAfterUnaryPreincrementOperator: Rule;
+        public NoSpaceAfterUnaryPredecrementOperator: Rule;
+        public NoSpaceBeforeUnaryPostincrementOperator: Rule;
+        public NoSpaceBeforeUnaryPostdecrementOperator: Rule;
 
         // More unary operator special-casing.
         // DevDiv 181814:  Be careful when removing leading whitespace
         // around unary operators.  Examples:
         //      1 - -2  --X-->  1--2
         //      a + ++b --X-->  a+++b
-        public SpaceAfterPostincrementWhenFollowedByAdd     : Rule;
-        public SpaceAfterAddWhenFollowedByUnaryPlus         : Rule;
-        public SpaceAfterAddWhenFollowedByPreincrement      : Rule;
+        public SpaceAfterPostincrementWhenFollowedByAdd: Rule;
+        public SpaceAfterAddWhenFollowedByUnaryPlus: Rule;
+        public SpaceAfterAddWhenFollowedByPreincrement: Rule;
         public SpaceAfterPostdecrementWhenFollowedBySubtract: Rule;
-        public SpaceAfterSubtractWhenFollowedByUnaryMinus   : Rule;
-        public SpaceAfterSubtractWhenFollowedByPredecrement : Rule;
+        public SpaceAfterSubtractWhenFollowedByUnaryMinus: Rule;
+        public SpaceAfterSubtractWhenFollowedByPredecrement: Rule;
 
         public NoSpaceBeforeComma: Rule;
 
-        public SpaceAfterCertainKeywords        : Rule;
-        public NoSpaceBeforeOpenParenInFuncCall : Rule;
-        public SpaceAfterFunctionInFuncDecl     : Rule;
-        public NoSpaceBeforeOpenParenInFuncDecl : Rule;
+        public SpaceAfterCertainKeywords: Rule;
+        public NoSpaceBeforeOpenParenInFuncCall: Rule;
+        public SpaceAfterFunctionInFuncDecl: Rule;
+        public NoSpaceBeforeOpenParenInFuncDecl: Rule;
 
         // Add a space between statements. All keywords except (do,else,case) has open/close parens after them.
         // So, we have a rule to add a space for [),Any], [do,Any], [else,Any], and [case,Any]
@@ -103,10 +99,35 @@ module Formatting {
         public SpaceBeforeBinaryKeywordOperator: Rule;
         public SpaceAfterBinaryKeywordOperator: Rule;
 
+        // TypeScript-specific rules
+
+        // Treat constructor as an identifier in a function declaration, and remove spaces between constructor and following left parentheses
+        public NoSpaceAfterConstructor: Rule;
+        
+        // Use of module as a function call. e.g.: import m2 = module("m2");
+        public NoSpaceAfterModuleImport: Rule;
+
+        // Add a space around certain TypeScript keywords
+        public SpaceAfterCertainTypeScriptKeywords: Rule;
+        public SpaceBeforeCertainTypeScriptKeywords: Rule;
+
+        // Treat string literals in module names as identifiers, and add a space between the literal and the opening curly braces, e.g.: module "m2" {
+        public SpaceAfterModuleName: Rule;
+
+        // Lambda expressions
+        public SpaceAfterArrow: Rule;
+
+        // Optional parameters and var args
+        public NoSpaceAfterEllipsis: Rule;
+        public NoSpaceAfterOptionalParameters: Rule;
+
+        // Remove spaces in empty interface literals. e.g.: x: {}
+        public NoSpaceBetweenEmptyInterfaceCurlyBrackets: Rule;
+
         // These rules are higher in priority than user-configurable rules.
         public HighPriorityCommonRules: Rule[];
 
-            // These rules are lower in priority than user-configurable rules.
+        // These rules are lower in priority than user-configurable rules.
         public LowPriorityCommonRules: Rule[];
 
         //#endregion
@@ -124,8 +145,8 @@ module Formatting {
         public NoSpaceAfterBinaryOperator: Rule;
 
         // Insert space after keywords in control flow statements
-        public SpaceAfterKeywordInControl   : Rule;
-        public NoSpaceAfterKeywordInControl : Rule;
+        public SpaceAfterKeywordInControl: Rule;
+        public NoSpaceAfterKeywordInControl: Rule;
 
         // Open curly braces after function
         //TypeScript: Function can have return types, which can be made of tons of different token kinds
@@ -172,7 +193,6 @@ module Formatting {
             this.NoSpaceBeforeSemicolon = new Rule(RuleDescriptor.create2(Shared.TokenRange.Any, AuthorTokenKind.atkSColon), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotForContext), RuleAction.Delete));
             this.NoSpaceBeforeColon = new Rule(RuleDescriptor.create2(Shared.TokenRange.Any, AuthorTokenKind.atkColon), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotBinaryOpContext), RuleAction.Delete));
             this.NoSpaceBeforeQMark = new Rule(RuleDescriptor.create2(Shared.TokenRange.Any, AuthorTokenKind.atkQMark), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotBinaryOpContext), RuleAction.Delete));
-            this.NoSpaceAfterConstructor = new Rule(RuleDescriptor.create1(AuthorTokenKind.atkConstructor, AuthorTokenKind.atkLParen), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Delete));
             this.SpaceAfterColon = new Rule(RuleDescriptor.create3(AuthorTokenKind.atkColon, Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotBinaryOpContext), RuleAction.Space));
             this.SpaceAfterQMark = new Rule(RuleDescriptor.create3(AuthorTokenKind.atkQMark, Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotBinaryOpContext), RuleAction.Space));
             this.SpaceAfterSemicolon = new Rule(RuleDescriptor.create3(AuthorTokenKind.atkSColon, Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Space));
@@ -200,9 +220,6 @@ module Formatting {
 
             // Insert new line after { and before } in multi-line contexts.
             this.NewLineAfterOpenCurlyInBlockContext = new Rule(RuleDescriptor.create3(AuthorTokenKind.atkLCurly, Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsMultilineBlockContext), RuleAction.NewLine));
-
-            // For empty function/control body insert a space between curly brackets
-            this.SpaceBetweenCurlyBrackets = new Rule(RuleDescriptor.create1(AuthorTokenKind.atkLCurly, AuthorTokenKind.atkRCurly), RuleOperation.create1(RuleAction.Space));
 
             // For functions and control block place } on a new line    [multi-line rule]
             this.NewLineBeforeCloseCurlyInFunctionOrControl = new Rule(RuleDescriptor.create2(Shared.TokenRange.Any, AuthorTokenKind.atkRCurly), RuleOperation.create2(new RuleOperationContext(Rules.IsMultilineBlockContext), RuleAction.NewLine));
@@ -252,11 +269,36 @@ module Formatting {
             this.SpaceBeforeBinaryKeywordOperator = new Rule(RuleDescriptor.create4(Shared.TokenRange.Any, Shared.TokenRange.BinaryKeywordOperators), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsBinaryOpContext), RuleAction.Space));
             this.SpaceAfterBinaryKeywordOperator = new Rule(RuleDescriptor.create4(Shared.TokenRange.BinaryKeywordOperators, Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsBinaryOpContext), RuleAction.Space));
 
+            // TypeScript-specific higher priority rules
+
+            // Treat constructor as an identifier in a function declaration, and remove spaces between constructor and following left parentheses
+            this.NoSpaceAfterConstructor = new Rule(RuleDescriptor.create1(AuthorTokenKind.atkConstructor, AuthorTokenKind.atkLParen), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Delete));
+
+            // Use of module as a function call. e.g.: import m2 = module("m2");
+            this.NoSpaceAfterModuleImport = new Rule(RuleDescriptor.create1(AuthorTokenKind.atkModule, AuthorTokenKind.atkLParen), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Delete));
+
+            // Add a space around certain TypeScript keywords
+            this.SpaceAfterCertainTypeScriptKeywords = new Rule(RuleDescriptor.create4(Shared.TokenRange.FromTokens([AuthorTokenKind.atkClass, AuthorTokenKind.atkDeclare, AuthorTokenKind.atkEnum, AuthorTokenKind.atkExport, AuthorTokenKind.atkExtends, AuthorTokenKind.atkGet, AuthorTokenKind.atkImplements, AuthorTokenKind.atkImport, AuthorTokenKind.atkInterface, AuthorTokenKind.atkModule, AuthorTokenKind.atkPrivate, AuthorTokenKind.atkPublic, AuthorTokenKind.atkSet, AuthorTokenKind.atkStatic]), Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Space));
+            this.SpaceBeforeCertainTypeScriptKeywords = new Rule(RuleDescriptor.create4(Shared.TokenRange.Any, Shared.TokenRange.FromTokens([AuthorTokenKind.atkExtends, AuthorTokenKind.atkImplements])), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Space));
+
+            // Treat string literals in module names as identifiers, and add a space between the literal and the opening curly braces, e.g.: module "m2" {
+            this.SpaceAfterModuleName = new Rule(RuleDescriptor.create1(AuthorTokenKind.atkString, AuthorTokenKind.atkLCurly), RuleOperation.create2(new RuleOperationContext(Rules.IsModuleDeclContext), RuleAction.Space));
+
+            // Lambda expressions
+            this.SpaceAfterArrow = new Rule(RuleDescriptor.create3(AuthorTokenKind.atkArrow, Shared.TokenRange.Any), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Space));
+
+            // Optional parameters and var args
+            this.NoSpaceAfterEllipsis = new Rule(RuleDescriptor.create1(AuthorTokenKind.atkEllipsis, AuthorTokenKind.atkIdentifier), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext), RuleAction.Delete));
+            this.NoSpaceAfterOptionalParameters = new Rule(RuleDescriptor.create3(AuthorTokenKind.atkQMark, Shared.TokenRange.FromTokens([AuthorTokenKind.atkRParen, AuthorTokenKind.atkComma])), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsNotBinaryOpContext), RuleAction.Delete));
+
+            // Remove spaces in empty interface literals. e.g.: x: {}
+            this.NoSpaceBetweenEmptyInterfaceCurlyBrackets = new Rule(RuleDescriptor.create1(AuthorTokenKind.atkLCurly, AuthorTokenKind.atkRCurly), RuleOperation.create2(new RuleOperationContext(Rules.IsSameLineTokenContext, Rules.IsInterfaceContext), RuleAction.Delete));
+
             // These rules are higher in priority than user-configurable rules.
             this.HighPriorityCommonRules =
             [
                 this.IgnoreBeforeComment, this.IgnoreAfterLineComment,
-                this.NoSpaceBeforeSemicolon, this.NoSpaceBeforeColon, this.SpaceAfterColon, this.NoSpaceBeforeQMark, this.NoSpaceAfterConstructor, this.SpaceAfterQMark, this.NewLineAfterCloseCurly,
+                this.NoSpaceBeforeSemicolon, this.NoSpaceBeforeColon, this.SpaceAfterColon, this.NoSpaceBeforeQMark, this.SpaceAfterQMark, this.NewLineAfterCloseCurly,
                 this.NoSpaceBeforeDot, this.NoSpaceAfterDot,
                 this.NoSpaceAfterUnaryPrefixOperator,
                 this.NoSpaceAfterUnaryPreincrementOperator, this.NoSpaceAfterUnaryPredecrementOperator,
@@ -267,14 +309,22 @@ module Formatting {
                 this.SpaceAfterSubtractWhenFollowedByUnaryMinus, this.SpaceAfterSubtractWhenFollowedByPredecrement,
                 this.SpaceAfterOpenCurly, this.SpaceBeforeCloseCurly, this.SpaceAfterCloseCurly, this.SpaceBetweenCloseCurlyAndElse, this.SpaceBetweenCloseCurlyAndWhile, this.NoSpaceBetweenEmptyCurlyBrackets,
                 this.NewLineBeforeCloseCurlyInFunctionOrControl,
-                this.SpaceBetweenCurlyBrackets,
                 this.SpaceAfterFunctionInFuncDecl, this.NewLineAfterOpenCurlyInBlockContext, this.SpaceAfterGetSetInMember,
                 this.SpaceAfterCertainKeywords,
                 this.NoSpaceBeforeOpenParenInFuncCall,
                 this.SpaceBeforeBinaryKeywordOperator, this.SpaceAfterBinaryKeywordOperator,
+
+                // TypeScript-specific rules
+                this.NoSpaceAfterConstructor, this.NoSpaceAfterModuleImport,
+                this.SpaceAfterCertainTypeScriptKeywords, this.SpaceBeforeCertainTypeScriptKeywords,
+                this.SpaceAfterModuleName,
+                this.SpaceAfterArrow,
+                this.NoSpaceAfterEllipsis,
+                this.NoSpaceAfterOptionalParameters,
+                this.NoSpaceBetweenEmptyInterfaceCurlyBrackets,
             ];
 
-                // These rules are lower in priority than user-configurable rules.
+            // These rules are lower in priority than user-configurable rules.
             this.LowPriorityCommonRules =
             [
                 this.NoSpaceBeforeComma,
@@ -431,6 +481,16 @@ module Formatting {
                         }
                     }
                     return true;
+
+                case AuthorParseNodeKind.apnkFncDecl:
+                    var fncDecl = <TypeScript.FuncDecl>context.contextNode.AuthorNode.Details.ast;
+                    // Treat "=>" as a binary expression
+                    if (context.tokenSpan.tokenID === TypeScript.TokenID.Arrow || context.nextTokenSpan.tokenID === TypeScript.TokenID.Arrow) { 
+                        if (fncDecl != null && TypeScript.hasFlag(fncDecl.fncFlags, TypeScript.FncFlags.IsFunctionExpression)) { 
+                            return true;
+                        }
+                    }
+                    break;
 
                 default:
                     return false;
@@ -602,6 +662,16 @@ module Formatting {
             var twoCharSpan = token.Span.Intersection(new Span(token.Span.startPosition(), 2));
             return twoCharSpan != null && twoCharSpan.GetText() == "//";
         }
+
+        static IsModuleDeclContext(context: FormattingContext): bool {
+            return context.contextNode.AuthorNode.Details.nodeType == TypeScript.NodeType.Module;
+        }
+
+        static IsInterfaceContext(context: FormattingContext): bool {
+            return context.contextNode.AuthorNode.Details.nodeType == TypeScript.NodeType.List && 
+                    context.contextNode.Parent != null && context.contextNode.Parent.AuthorNode.Details.nodeType == TypeScript.NodeType.Interface ;
+        }
+
 
         //#endregion
     }

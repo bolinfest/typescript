@@ -251,6 +251,7 @@ module Formatting {
                 case TypeScript.NodeType.EndCode: return AuthorParseNodeKind.apnkEndCode;
                 case TypeScript.NodeType.Error: return AuthorParseNodeKind.apnkEmpty; //TODO
                 case TypeScript.NodeType.Comment: return AuthorParseNodeKind.apnkEmpty; //TODO
+                case TypeScript.NodeType.Debugger: return AuthorParseNodeKind.apnkDebugger; //TODO
                 default:
                     throw new Error("Invalid node kind: " + nodeType);
             }
@@ -1530,6 +1531,9 @@ module Formatting {
         // The token is ",".
         atkComma,
 
+        // The token is "=>".
+        atkArrow,
+
         // The token is "=".
         atkAsg,
 
@@ -1653,6 +1657,9 @@ module Formatting {
         // The token is "::".
         atkScope,
 
+        // The token is "..."
+        atkEllipsis,
+
         // The token is the "break" keyword.
         atkBreak,
 
@@ -1763,6 +1770,18 @@ module Formatting {
 
         // TypeScript: constructor
         atkConstructor,
+
+        // TypeScript: declare
+        atkDeclare,
+
+        // TypeScript: module
+        atkModule,
+
+        // TypeScript: get
+        atkGet,
+
+        // TypeScript: set
+        atkSet,
 
         // The token is the future reserved keyword "implements".
         atkImplements,
@@ -2244,13 +2263,13 @@ module Formatting {
                 case TypeScript.TokenID.Enum: return AuthorTokenKind.atkEnum;
                 case TypeScript.TokenID.Export: return AuthorTokenKind.atkExport;
                 case TypeScript.TokenID.Extends: return AuthorTokenKind.atkExtends;
-                case TypeScript.TokenID.Declare: return AuthorTokenKind.atkIdentifier;//TODO
+                case TypeScript.TokenID.Declare: return AuthorTokenKind.atkDeclare;
                 case TypeScript.TokenID.False: return AuthorTokenKind.atkFalse;
                 case TypeScript.TokenID.Finally: return AuthorTokenKind.atkFinally;
                 case TypeScript.TokenID.For: return AuthorTokenKind.atkFor;
                 case TypeScript.TokenID.Constructor: return AuthorTokenKind.atkConstructor;//TODO
                 case TypeScript.TokenID.Function: return AuthorTokenKind.atkFunction;
-                case TypeScript.TokenID.Get: return AuthorTokenKind.atkIdentifier;//TODO
+                case TypeScript.TokenID.Get: return AuthorTokenKind.atkGet;
                 case TypeScript.TokenID.If: return AuthorTokenKind.atkIf;
                 case TypeScript.TokenID.Implements: return AuthorTokenKind.atkImplements;
                 case TypeScript.TokenID.Import: return AuthorTokenKind.atkImport;
@@ -2258,18 +2277,18 @@ module Formatting {
                 case TypeScript.TokenID.InstanceOf: return AuthorTokenKind.atkInstanceof;
                 case TypeScript.TokenID.Interface: return AuthorTokenKind.atkInterface;
                 case TypeScript.TokenID.Let: return AuthorTokenKind.atkLet;
-                case TypeScript.TokenID.Module: return AuthorTokenKind.atkIdentifier;//TODO
+                case TypeScript.TokenID.Module: return AuthorTokenKind.atkModule;
                 case TypeScript.TokenID.New: return AuthorTokenKind.atkNew;
                 case TypeScript.TokenID.Number: return AuthorTokenKind.atkIdentifier;//TODO
                 case TypeScript.TokenID.Null: return AuthorTokenKind.atkNull;//TODO
                 case TypeScript.TokenID.Package: return AuthorTokenKind.atkPackage;//TODO
-                case TypeScript.TokenID.Private: return AuthorTokenKind.atkPrivate;//TODO
-                case TypeScript.TokenID.Protected: return AuthorTokenKind.atkProtected;//TODO
-                case TypeScript.TokenID.Public: return AuthorTokenKind.atkPublic;//TODO
+                case TypeScript.TokenID.Private: return AuthorTokenKind.atkPrivate;
+                case TypeScript.TokenID.Protected: return AuthorTokenKind.atkProtected;
+                case TypeScript.TokenID.Public: return AuthorTokenKind.atkPublic;
                 case TypeScript.TokenID.With: return AuthorTokenKind.atkWith;//TODO
                 case TypeScript.TokenID.Return: return AuthorTokenKind.atkReturn;
-                case TypeScript.TokenID.Set: return AuthorTokenKind.atkIdentifier;//TODO
-                case TypeScript.TokenID.Static: return AuthorTokenKind.atkStatic;//TODO
+                case TypeScript.TokenID.Set: return AuthorTokenKind.atkSet;
+                case TypeScript.TokenID.Static: return AuthorTokenKind.atkStatic;
                 case TypeScript.TokenID.String: return AuthorTokenKind.atkIdentifier;//TODO
                 case TypeScript.TokenID.Super: return AuthorTokenKind.atkSuper;
                 case TypeScript.TokenID.Switch: return AuthorTokenKind.atkSwitch;
@@ -2331,10 +2350,10 @@ module Formatting {
                 case TypeScript.TokenID.PlusPlus: return AuthorTokenKind.atkInc;
                 case TypeScript.TokenID.MinusMinus: return AuthorTokenKind.atkDec;
                 case TypeScript.TokenID.Dot: return AuthorTokenKind.atkDot;
-                case TypeScript.TokenID.DotDotDot: return AuthorTokenKind.atkIdentifier; //TODO
+                case TypeScript.TokenID.DotDotDot: return AuthorTokenKind.atkEllipsis;
                 case TypeScript.TokenID.Error: return AuthorTokenKind.atkIdentifier;//TODO
                 case TypeScript.TokenID.EndOfFile: return AuthorTokenKind.atkEnd;
-                case TypeScript.TokenID.EqualsGreaterThan: return AuthorTokenKind.atkIdentifier;//TODO
+                case TypeScript.TokenID.EqualsGreaterThan: return AuthorTokenKind.atkArrow;
                 case TypeScript.TokenID.Identifier: return AuthorTokenKind.atkIdentifier;
                 case TypeScript.TokenID.StringLiteral: return AuthorTokenKind.atkString;
                 case TypeScript.TokenID.RegularExpressionLiteral: return AuthorTokenKind.atkRegexp;
