@@ -825,7 +825,13 @@ module TypeScript {
         }
     }
 
-    export class ImportDeclaration extends AST {
+    export class ModuleElement extends AST {
+        constructor (nodeType: NodeType) {
+            super(nodeType);
+        }
+    }
+
+    export class ImportDeclaration extends ModuleElement {
         public isStatementOrExpression() { return true; }
         public varFlags = VarFlags.None;
         public isDynamicImport = false;
@@ -1334,7 +1340,7 @@ module TypeScript {
         }
     }
 
-    export class Statement extends AST {
+    export class Statement extends ModuleElement {
         constructor (nodeType: NodeType) {
             super(nodeType);
             this.flags |= ASTFlags.IsStatement;
