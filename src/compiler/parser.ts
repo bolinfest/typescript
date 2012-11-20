@@ -44,52 +44,52 @@ module TypeScript {
     }
 
     export class Parser {
-        public varLists: ASTList[] = [];
-        public scopeLists: ASTList[] = [];
-        public staticsLists: ASTList[] = [];
-        public scanner: IScanner = new Scanner();
-        public tok: Token = null;
-        public needTerminator = false;
+        private varLists: ASTList[] = [];
+        private scopeLists: ASTList[] = [];
+        private staticsLists: ASTList[] = [];
+        private scanner: IScanner = new Scanner();
+        private tok: Token = null;
+        private needTerminator = false;
         // TODO: consolidate these
-        public inFnc = false;
-        public inStaticFnc = false;
-        public inInterfaceDecl = false;
+        private inFnc = false;
+        private inStaticFnc = false;
+        private inInterfaceDecl = false;
         public currentClassDecl: TypeDecl = null;
 
-        public inFncDecl = false;  // this is only for FuncDecls - not constructors, like inFnc
-        public anonId = new Identifier("_anonymous");
+        private inFncDecl = false;  // this is only for FuncDecls - not constructors, like inFnc
+        private anonId = new Identifier("_anonymous");
         public style_requireSemi = false;
         public style_funcInLoop = true;
-        public incremental = false;
+        private incremental = false;
         public errorRecovery = false;
         public outfile: ITextWriter = undefined;
         public errorCallback: (minChar: number, charLen: number, message: string, unit: number) =>void = null;
-        public state: ParseState = ParseState.StartStmtList;
-        public cursorLine = -1;
-        public cursorColumn = -1;
-        public cursorState: ParseState = ParseState.None;
-        public errorMessage = "";
-        public ambientModule = false;
-        public ambientClass = false;
-        public topLevel = true;
-        public currentUnitIndex = (-1);
-        public prevIDTok: Token = null;
-        public stmtStack: IStatementInfo[] = new IStatementInfo[];
-        public hasTopLevelImportOrExport = false; // for imports, only true if it's a dynamic module
-        public strictMode = false;
-        public nestingLevel = 0;
-        public prevExpr: AST = null;
-        public currentClassDefinition: ClassDecl = null;
-        public parsingClassConstructorDefinition = false;
-        public parsingDeclareFile = false;
-        public amdDependencies: string[] = [];
+        private state: ParseState = ParseState.StartStmtList;
+        private cursorLine = -1;
+        private cursorColumn = -1;
+        private cursorState: ParseState = ParseState.None;
+        private errorMessage = "";
+        private ambientModule = false;
+        private ambientClass = false;
+        private topLevel = true;
+        private currentUnitIndex = (-1);
+        private prevIDTok: Token = null;
+        private stmtStack: IStatementInfo[] = new IStatementInfo[];
+        private hasTopLevelImportOrExport = false; // for imports, only true if it's a dynamic module
+        private strictMode = false;
+        private nestingLevel = 0;
+        private prevExpr: AST = null;
+        private currentClassDefinition: ClassDecl = null;
+        private parsingClassConstructorDefinition = false;
+        private parsingDeclareFile = false;
+        private amdDependencies: string[] = [];
         public inferPropertiesFromThisAssignment = false;
 
-        public resetStmtStack() {
+        private resetStmtStack() {
             this.stmtStack = new IStatementInfo[];
         }
 
-        public inLoop() {
+        private inLoop() {
             for (var j = this.stmtStack.length - 1; j >= 0; j--) {
                 if (this.stmtStack[j].stmt.isLoop()) {
                     return true;
@@ -98,17 +98,17 @@ module TypeScript {
             return false;
         }
 
-        public pushStmt(stmt: Statement, labels: ASTList) {
+        private pushStmt(stmt: Statement, labels: ASTList) {
             // allocate here to avoid always storing this information in statements
             var info = { stmt: stmt, labels: labels };
             this.stmtStack.push(info);
         }
 
-        public popStmt(): IStatementInfo {
+        private popStmt(): IStatementInfo {
             return this.stmtStack.pop();
         }
 
-        public resolveJumpTarget(jump: Jump): void {
+        private resolveJumpTarget(jump: Jump): void {
             var resolvedTarget = AST.getResolvedIdentifierName(jump.target);
             var len = this.stmtStack.length;
             for (var i = len - 1; i >= 0; i--) {
@@ -149,7 +149,7 @@ module TypeScript {
             }
         }
 
-        public setNonInteractive() {
+        private setNonInteractive() {
             this.errorRecovery = false;
         }
 
@@ -162,7 +162,7 @@ module TypeScript {
             this.errorRecovery = true;
         }
 
-        public posMatchesCursor(pos: number) {
+        private posMatchesCursor(pos: number) {
             var lineCol = { line: -1, col: -1 };
             this.getSourceLineCol(lineCol, pos);
             return (lineCol.line == this.cursorLine) && (lineCol.col == this.cursorColumn);
@@ -172,13 +172,13 @@ module TypeScript {
             getSourceLineColFromMap(lineCol, minChar, this.scanner.lineMap);
         }
 
-          public createRef(text: string, hasEscapeSequence: bool, minChar: number): Identifier {
+        private createRef(text: string, hasEscapeSequence: bool, minChar: number): Identifier {
             var id = new Identifier(text, hasEscapeSequence);
             id.minChar = minChar;
             return id;
         }
 
-        public reportParseStyleError(message: string) {
+        private reportParseStyleError(message: string) {
             this.reportParseError("STYLE: " + message);
         }
 
@@ -199,12 +199,12 @@ module TypeScript {
             }
         }
 
-        public chkNxtTok(tokenId: TokenID, errorText: string, errorRecoverySet: ErrorRecoverySet): void {
+        private chkNxtTok(tokenId: TokenID, errorText: string, errorRecoverySet: ErrorRecoverySet): void {
             this.tok = this.scanner.scan();
             this.checkCurrentToken(tokenId, errorText, errorRecoverySet);
         }
 
-        public skip(errorRecoverySet: ErrorRecoverySet) {
+        private skip(errorRecoverySet: ErrorRecoverySet) {
             errorRecoverySet |= ErrorRecoverySet.EOF;
             var ersTok = ErrorRecoverySet.None;
             var tokenInfo = lookupToken(this.tok.tokenId);
@@ -242,31 +242,31 @@ module TypeScript {
             }
         }
 
-        public pushDeclLists() {
+        private pushDeclLists() {
             this.staticsLists.push(new ASTList());
             this.varLists.push(new ASTList());
             this.scopeLists.push(new ASTList());
         }
 
-        public popDeclLists() {
+        private popDeclLists() {
             this.staticsLists.pop();
             this.varLists.pop();
             this.scopeLists.pop();
         }
 
-        public topVarList() {
+        private topVarList() {
             return this.varLists[this.varLists.length - 1];
         }
 
-        public topScopeList() {
+        private topScopeList() {
             return this.scopeLists[this.scopeLists.length - 1];
         }
 
-        public topStaticsList() {
+        private topStaticsList() {
             return this.staticsLists[this.staticsLists.length - 1];
         }
 
-        public parseComment(comment: CommentToken) {
+        private parseComment(comment: CommentToken) {
 
             if (comment) {
                 var c: Comment = new Comment(comment.value, comment.isBlock, comment.endsLine);
@@ -293,7 +293,7 @@ module TypeScript {
 
         }
 
-        public parseCommentsInner(comments: CommentToken[]) {
+        private parseCommentsInner(comments: CommentToken[]) {
             if (comments) {
                 var commentASTs: Comment[] = new Comment[];
                 for (var i = 0; i < comments.length; i++) {
@@ -305,18 +305,18 @@ module TypeScript {
             }
         }
 
-        public parseComments() {
+        private parseComments() {
             var comments = this.scanner.getComments();
             return this.parseCommentsInner(comments);
         }
 
-        public parseCommentsForLine(line: number) {
+        private parseCommentsForLine(line: number) {
             var comments = this.scanner.getCommentsForLine(line);
 
             return this.parseCommentsInner(comments);
         }
 
-        public combineComments(comment1: Comment[], comment2: Comment[]) {
+        private combineComments(comment1: Comment[], comment2: Comment[]) {
             if (comment1 == null) {
                 return comment2;
             }
@@ -328,7 +328,7 @@ module TypeScript {
             }
         }
 
-        public parseEnumDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDecl {
+        private parseEnumDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDecl {
             var leftCurlyCount = this.scanner.leftCurlyCount;
             var rightCurlyCount = this.scanner.rightCurlyCount;
 
@@ -458,7 +458,7 @@ module TypeScript {
             return modDecl;
         }
 
-        public parseDottedName(enclosedList: AST[]): void {
+        private parseDottedName(enclosedList: AST[]): void {
             this.tok = this.scanner.scan();
             if ((this.tok.tokenId == TokenID.Identifier) || convertTokToID(this.tok, this.strictMode)) {
                 var id = Identifier.fromToken(this.tok);
@@ -478,7 +478,7 @@ module TypeScript {
 
         // REVIEW: This is much more lenient than the spec - we're basically just checking to see if the
         // path is rooted or contains an extension, not if it could potentially be a bogus file path
-        public isValidImportPath(importPath: string) {
+        private isValidImportPath(importPath: string) {
             importPath = stripQuotes(importPath);
 
             if (!importPath ||
@@ -491,7 +491,7 @@ module TypeScript {
             return true;
         }
 
-        public parseImportDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ImportDeclaration {
+        private parseImportDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ImportDeclaration {
 
             var name: Identifier = null;
             var alias: AST = null;
@@ -606,7 +606,7 @@ module TypeScript {
             return importDecl;
         }
 
-        public parseModuleDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDecl {
+        private parseModuleDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDecl {
             var leftCurlyCount = this.scanner.leftCurlyCount;
             var rightCurlyCount = this.scanner.rightCurlyCount;
 
@@ -738,7 +738,7 @@ module TypeScript {
             return moduleDecl;
         }
 
-        public parseTypeReferenceTail(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST): TypeReference {
+        private parseTypeReferenceTail(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST): TypeReference {
             var result = new TypeReference(term, 0);
             result.minChar = minChar;
             while (this.tok.tokenId == TokenID.OpenBracket) {
@@ -752,7 +752,7 @@ module TypeScript {
         }
 
         // REVIEW: Consider renaming to parseTypeName.
-        public parseNamedType(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST, tail: bool): AST {
+        private parseNamedType(errorRecoverySet: ErrorRecoverySet, minChar: number, term: AST, tail: bool): AST {
             this.tok = this.scanner.scan();
             if (this.tok.tokenId == TokenID.Dot) {
                 var curpos = this.scanner.pos;
@@ -802,7 +802,7 @@ module TypeScript {
         }
 
         // REVIEW: Reconsider renaming this to parseType to match the grammar.
-        public parseTypeReference(errorRecoverySet: ErrorRecoverySet, allowVoid: bool): AST {
+        private parseTypeReference(errorRecoverySet: ErrorRecoverySet, allowVoid: bool): AST {
             var minChar = this.scanner.startPos;
             var isConstructorMember = false;
 
@@ -899,7 +899,7 @@ module TypeScript {
             return this.parseTypeReferenceTail(errorRecoverySet, minChar, interfaceDecl);
         }
 
-        public parseFunctionStatements(   errorRecoverySet: ErrorRecoverySet,
+        private parseFunctionStatements(   errorRecoverySet: ErrorRecoverySet,
                                             name: Identifier,
                                             isConstructor: bool,
                                             isMethod: bool,
@@ -999,7 +999,7 @@ module TypeScript {
             return funcDecl;
         }
 
-        public transformAnonymousArgsIntoFormals(formals: ASTList, argList: AST) : bool {
+        private transformAnonymousArgsIntoFormals(formals: ASTList, argList: AST) : bool {
 
             var translateBinExOperand = (operand: AST) : bool => {
                 if (operand.nodeType == NodeType.Comma) {
@@ -1051,7 +1051,7 @@ module TypeScript {
             }
         }
 
-        public parseFormalParameterList(errorRecoverySet: ErrorRecoverySet,
+        private parseFormalParameterList(errorRecoverySet: ErrorRecoverySet,
                                             formals: ASTList,
                                             isClassConstr: bool,
                                             isSig: bool,
@@ -1264,7 +1264,7 @@ module TypeScript {
             return sawEllipsis;
         }
 
-        public parseFncDecl(  errorRecoverySet: ErrorRecoverySet,
+        private parseFncDecl(  errorRecoverySet: ErrorRecoverySet,
                                 isDecl: bool, requiresSignature: bool,
                                 isMethod: bool,
                                 methodName: Identifier,
@@ -1385,7 +1385,7 @@ module TypeScript {
             return funcDecl;
         }
 
-        public convertToTypeReference(ast: AST): TypeReference {
+        private convertToTypeReference(ast: AST): TypeReference {
             var result: TypeReference;
             switch (ast.nodeType) {
                 case NodeType.TypeRef:
@@ -1413,7 +1413,7 @@ module TypeScript {
             return null;
         }
 
-        public parseArgList(errorRecoverySet: ErrorRecoverySet): ASTList {
+        private parseArgList(errorRecoverySet: ErrorRecoverySet): ASTList {
             var args: ASTList = new ASTList();
             args.minChar = this.scanner.startPos;
 
@@ -1440,7 +1440,7 @@ module TypeScript {
             return args;
         }
 
-        public parseBaseList(extendsList: ASTList, implementsList: ASTList, errorRecoverySet: ErrorRecoverySet, interfaceOnly: bool, isClass: bool): void {
+        private parseBaseList(extendsList: ASTList, implementsList: ASTList, errorRecoverySet: ErrorRecoverySet, interfaceOnly: bool, isClass: bool): void {
             var keyword = true;
             var currentList = extendsList;
             for (; ;) {
@@ -1503,7 +1503,7 @@ module TypeScript {
             }
         }
 
-        public parseClassDecl(errorRecoverySet: ErrorRecoverySet, minChar: number, modifiers: Modifiers): ClassDecl {
+        private parseClassDecl(errorRecoverySet: ErrorRecoverySet, minChar: number, modifiers: Modifiers): ClassDecl {
             var leftCurlyCount = this.scanner.leftCurlyCount;
             var rightCurlyCount = this.scanner.rightCurlyCount;
 
@@ -1575,7 +1575,7 @@ module TypeScript {
             return classDecl;
         }
 
-        public parseClassElements(classDecl: ClassDecl, errorRecoverySet: ErrorRecoverySet, parentModifiers: Modifiers) {
+        private parseClassElements(classDecl: ClassDecl, errorRecoverySet: ErrorRecoverySet, parentModifiers: Modifiers) {
             var modifiers = parentModifiers;
             var resetModifiers = false;
 
@@ -1731,7 +1731,7 @@ module TypeScript {
             this.currentClassDefinition = null;
         }
 
-        public parseClassConstructorDeclaration(minChar: number, errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers) {
+        private parseClassConstructorDeclaration(minChar: number, errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers) {
             this.parsingClassConstructorDefinition = true;
 
             var isAmbient = this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient);
@@ -1816,8 +1816,7 @@ module TypeScript {
             return constructorFuncDecl;
         }
 
-
-        public parseClassMemberVariableDeclaration(text: Identifier, minChar: number, isDeclaredInConstructor: bool, errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers) {
+        private parseClassMemberVariableDeclaration(text: Identifier, minChar: number, isDeclaredInConstructor: bool, errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers) {
 
             var varDecl = new VarDecl(text, this.nestingLevel);
             varDecl.minChar = minChar;
@@ -1891,7 +1890,7 @@ module TypeScript {
             return varDecl;
         }
 
-        public parseClassMemberFunctionDeclaration(methodName: Identifier, minChar: number, errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers) {
+        private parseClassMemberFunctionDeclaration(methodName: Identifier, minChar: number, errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers) {
             var wasAccessorID = this.prevIDTok != null;
             var isAccessor = hasFlag(modifiers, Modifiers.Getter) || hasFlag(modifiers, Modifiers.Setter);
             var isStatic = hasFlag(modifiers, Modifiers.Static);
@@ -1974,7 +1973,7 @@ module TypeScript {
             return propertyDecl;
         }
 
-        public parseTypeMemberList(errorRecoverySet: ErrorRecoverySet, members: ASTList) {
+        private parseTypeMemberList(errorRecoverySet: ErrorRecoverySet, members: ASTList) {
             errorRecoverySet |= ErrorRecoverySet.TypeScriptS;
             while (true) {
                 switch (this.tok.tokenId) {
@@ -1993,7 +1992,7 @@ module TypeScript {
             }
         }
 
-        public parseInterfaceDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): TypeDecl {
+        private parseInterfaceDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): TypeDecl {
             var leftCurlyCount = this.scanner.leftCurlyCount;
             var rightCurlyCount = this.scanner.rightCurlyCount;
 
@@ -2052,7 +2051,7 @@ module TypeScript {
             return interfaceDecl;
         }
 
-        public makeVarDecl(id: Identifier, nest: number): VarDecl {
+        private makeVarDecl(id: Identifier, nest: number): VarDecl {
             var varDecl = new VarDecl(id, nest);
             var currentVarList = this.topVarList();
             if (currentVarList) {
@@ -2061,7 +2060,7 @@ module TypeScript {
             return varDecl;
         }
 
-        public parsePropertyDeclaration(
+        private parsePropertyDeclaration(
             errorRecoverySet: ErrorRecoverySet,
             modifiers: Modifiers,
             requireSignature: bool,
@@ -2285,7 +2284,7 @@ module TypeScript {
             }
         }
 
-        public parseVariableDeclaration(
+        private parseVariableDeclaration(
             errorRecoverySet: ErrorRecoverySet,
             modifiers: Modifiers,
             allowIn: bool,
@@ -2398,7 +2397,7 @@ module TypeScript {
             }
         }
 
-        public parseMemberList(errorRecoverySet: ErrorRecoverySet): ASTList {
+        private parseMemberList(errorRecoverySet: ErrorRecoverySet): ASTList {
             var elements = new ASTList();
             if (this.tok.tokenId == TokenID.CloseBrace) {
                 return elements;
@@ -2567,7 +2566,7 @@ module TypeScript {
             return elements;
         }
 
-        public parseArrayList(errorRecoverySet: ErrorRecoverySet): ASTList {
+        private parseArrayList(errorRecoverySet: ErrorRecoverySet): ASTList {
             var elements: ASTList = null;
             if (this.tok.tokenId == TokenID.CloseBracket) {
                 return elements;
@@ -2598,14 +2597,14 @@ module TypeScript {
             return elements;
         }
 
-        public parseArrayLiteral(errorRecoverySet: ErrorRecoverySet): UnaryExpression {
+        private parseArrayLiteral(errorRecoverySet: ErrorRecoverySet): UnaryExpression {
             var arrayLiteral: UnaryExpression = null;
             arrayLiteral = new UnaryExpression(NodeType.ArrayLit,
                                              this.parseArrayList(errorRecoverySet));
             return arrayLiteral;
         }
 
-        public parseTerm(errorRecoverySet: ErrorRecoverySet, allowCall: bool, typeContext: TypeContext, inCast: bool): AST {
+        private parseTerm(errorRecoverySet: ErrorRecoverySet, allowCall: bool, typeContext: TypeContext, inCast: bool): AST {
             var ast: AST = null;
             var sawId = false;
             var inNew = false;
@@ -2879,7 +2878,7 @@ module TypeScript {
 
         }
 
-        public parseLambdaExpr(errorRecoverySet: ErrorRecoverySet, lambdaArgs: AST, skipNextRParen: bool, expectClosingRParen: bool): AST {
+        private parseLambdaExpr(errorRecoverySet: ErrorRecoverySet, lambdaArgs: AST, skipNextRParen: bool, expectClosingRParen: bool): AST {
             // REVIEW: Parse the remainder of a lambda expression. The opening paren has been read already, if it existed. 
             //         skipNextRParen sets a flag on the resulting lambda node to tell the calling parseTerm that the LParen it scanned has been matched as part of parsing the formal parameter list
             //         expectClosingRParen indicates that a closing RParen is expected, in the cases with optional parameter or more than one parameter.
@@ -2893,7 +2892,7 @@ module TypeScript {
             return ast;
         }
 
-        public parseExpr(errorRecoverySet: ErrorRecoverySet, minPrecedence: number, allowIn: bool,
+        private parseExpr(errorRecoverySet: ErrorRecoverySet, minPrecedence: number, allowIn: bool,
             typeContext: TypeContext, possiblyInLambda: bool = false): AST {
             var ast: AST = null;
             var tokenInfo = lookupToken(this.tok.tokenId);
@@ -3074,7 +3073,7 @@ module TypeScript {
             return ast;
         }
 
-        public parsePostfixOperators(errorRecoverySet: ErrorRecoverySet, ast: AST, allowCall: bool, inNew: bool,
+        private parsePostfixOperators(errorRecoverySet: ErrorRecoverySet, ast: AST, allowCall: bool, inNew: bool,
             typeContext: TypeContext, lhsMinChar: number, lhsLimChar: number): AST {
             var count = 0;
 
@@ -3171,7 +3170,7 @@ module TypeScript {
         }
 
 
-        public parseTry(tryNode: Try, errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Try {
+        private parseTry(tryNode: Try, errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Try {
             var minChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.tok = this.scanner.scan();
@@ -3193,7 +3192,7 @@ module TypeScript {
             return tryNode;
         }
 
-        public parseCatch(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Catch {
+        private parseCatch(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Catch {
             var catchMinChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.tok = this.scanner.scan();
@@ -3250,7 +3249,7 @@ module TypeScript {
             return catchNode;
         }
 
-        public parseFinally(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Finally {
+        private parseFinally(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Finally {
             var finMinChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.tok = this.scanner.scan();
@@ -3274,7 +3273,7 @@ module TypeScript {
             return fin;
         }
 
-        public parseTryCatchFinally(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers, labelList: ASTList): AST {
+        private parseTryCatchFinally(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers, labelList: ASTList): AST {
             var tryPart: AST = new Try(null);
             var tryMinChar = this.scanner.startPos;
             this.pushStmt(<Statement>tryPart, labelList);
@@ -3316,7 +3315,7 @@ module TypeScript {
             }
         }
 
-        public parseStatement(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): AST {
+        private parseStatement(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): AST {
             var ast: AST = null;
             var labelList: ASTList = null;
             var astList: ASTList = null;
@@ -4123,7 +4122,7 @@ module TypeScript {
             return ast;
         }
 
-        public okAmbientModuleMember(ast: AST) {
+        private okAmbientModuleMember(ast: AST) {
             var nt = ast.nodeType;
             return (nt == NodeType.Class) || (nt == NodeType.ImportDeclaration) || (nt == NodeType.Interface) || (nt == NodeType.Module) ||
                 (nt == NodeType.Empty) || (nt == NodeType.VarDecl) || 
@@ -4131,7 +4130,7 @@ module TypeScript {
                 ((nt == NodeType.FuncDecl) && ((<FuncDecl>ast).isMethod()));
         }
 
-        public parseStmtList(errorRecoverySet: ErrorRecoverySet, stmts: ASTList, sourceElms: bool, noLeadingCase: bool,
+        private parseStmtList(errorRecoverySet: ErrorRecoverySet, stmts: ASTList, sourceElms: bool, noLeadingCase: bool,
             allowedElements: AllowedElements, parentModifiers: Modifiers): void {
             var directivePrologue = sourceElms;
             stmts.minChar = this.scanner.startPos;
@@ -4192,9 +4191,9 @@ module TypeScript {
             }
         }
 
-        public fname = "";
+        private fname = "";
 
-        public parseError = false;
+        private parseError = false;
 
         public quickParse(sourceText: ISourceText, filename: string, unitIndex: number): QuickParseResult {
             //TODO: REVIEW: We set this to avoid adding a "module" decl in the resulting script (see parse() method)
