@@ -199,9 +199,9 @@ module TypeScript {
             }
         }
 
-        private chkNxtTok(tokenId: TokenID, errorText: string, errorRecoverySet: ErrorRecoverySet): void {
+        private checkNextToken(tokenId: TokenID, errorRecoverySet: ErrorRecoverySet, errorText: string = null): void {
             this.tok = this.scanner.scan();
-            this.checkCurrentToken(tokenId, errorText, errorRecoverySet);
+            this.checkCurrentToken(tokenId, errorRecoverySet, errorText);
         }
 
         private skip(errorRecoverySet: ErrorRecoverySet) {
@@ -230,8 +230,9 @@ module TypeScript {
             }
         }
 
-        private checkCurrentToken(tokenId: TokenID, errorText: string, errorRecoverySet: ErrorRecoverySet): void {
+        private checkCurrentToken(tokenId: TokenID, errorRecoverySet: ErrorRecoverySet, errorText: string = null): void {
             if (this.tok.tokenId != tokenId) {
+                errorText = errorText == null ? ("Expected '" + tokenTable[tokenId].text + "'") : errorText;
                 this.reportParseError(errorText);
                 if (this.errorRecovery) {
                     this.skip(errorRecoverySet);
@@ -350,7 +351,7 @@ module TypeScript {
             }
 
             var membersMinChar = this.scanner.startPos;
-            this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'", errorRecoverySet | ErrorRecoverySet.ID);
+            this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.ID);
             this.pushDeclLists();
             var members = new ASTList();
             members.minChar = membersMinChar;
@@ -447,7 +448,7 @@ module TypeScript {
             endingToken.minChar = this.scanner.startPos;
             endingToken.limChar = this.scanner.pos;
 
-            this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+            this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
             members.limChar = this.scanner.lastTokenLimChar();
             var modDecl = new ModuleDecl(name, members, this.topVarList(), this.topScopeList(), endingToken);
             modDecl.modFlags |= ModuleFlags.IsEnum;
@@ -514,7 +515,7 @@ module TypeScript {
 
             this.tok = this.scanner.scan();
 
-            this.checkCurrentToken(TokenID.Equals, "Expected =", errorRecoverySet | ErrorRecoverySet.ID);
+            this.checkCurrentToken(TokenID.Equals, errorRecoverySet | ErrorRecoverySet.ID);
 
             var aliasPreComments = this.parseComments();
 
@@ -559,7 +560,7 @@ module TypeScript {
                         }
 
                         limChar = this.scanner.pos;
-                        this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.ID);
+                        this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet | ErrorRecoverySet.ID);
                             
                         if (alias) {
                             alias.postComments = this.parseComments();
@@ -660,7 +661,7 @@ module TypeScript {
 
             var moduleBody = new ASTList();
             var bodyMinChar = this.scanner.startPos;
-            this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'", errorRecoverySet | ErrorRecoverySet.ID);
+            this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.ID);
             this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly, moduleBody, true, true,
                             AllowedElements.ModuleMembers, modifiers);
             moduleBody.minChar = bodyMinChar;
@@ -669,7 +670,7 @@ module TypeScript {
             var endingToken = new ASTSpan();
             endingToken.minChar = this.scanner.startPos;
             endingToken.limChar = this.scanner.pos;
-            this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+            this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
 
             var limChar = this.scanner.pos;
             var moduleDecl: ModuleDecl;
@@ -744,8 +745,7 @@ module TypeScript {
             while (this.tok.tokenId == TokenID.OpenBracket) {
                 this.tok = this.scanner.scan();
                 result.arrayCount++;
-                this.checkCurrentToken(TokenID.CloseBracket, "Expected ']'",
-                            errorRecoverySet | ErrorRecoverySet.LBrack);
+                this.checkCurrentToken(TokenID.CloseBracket, errorRecoverySet | ErrorRecoverySet.LBrack);
             }
             result.limChar = this.scanner.lastTokenLimChar();
             return result;
@@ -849,7 +849,7 @@ module TypeScript {
                     var variableArgList =
                         this.parseFormalParameterList(errorRecoverySet | ErrorRecoverySet.RParen,
                                             formals, false, true, false, false, false, false, null, true);
-                    this.checkCurrentToken(TokenID.EqualsGreaterThan, "Expected '=>'", errorRecoverySet);
+                    this.checkCurrentToken(TokenID.EqualsGreaterThan, errorRecoverySet);
                     var returnType = this.parseTypeReference(errorRecoverySet, true);
                     var funcDecl = new FuncDecl(null, null, false, formals, null, null, null,
                                                 NodeType.FuncDecl);
@@ -887,7 +887,7 @@ module TypeScript {
             this.parseTypeMemberList(errorRecoverySet | ErrorRecoverySet.RCurly, members);
             this.inInterfaceDecl = prevInInterfaceDecl;
 
-            this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+            this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
 
             // REVIEW: We're parsing an ObjectType, but we give a NodeType of Interface here.
             var interfaceDecl = new TypeDecl(
@@ -941,8 +941,7 @@ module TypeScript {
                 }
                 else {
                     this.state = ParseState.StartStmtList;
-                    this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'", errorRecoverySet |
-                                ErrorRecoverySet.StmtStart);
+                    this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.StmtStart);
                     var svInFnc = this.inFnc;
                     isAnonLambda = wasShorthand;
                     this.inFnc = true;
@@ -967,14 +966,14 @@ module TypeScript {
             var staticFuncDecl = false;
             var limChar = this.scanner.pos;
             if (requiresSignature) {
-                this.checkCurrentToken(TokenID.Semicolon, this.tok.tokenId == TokenID.OpenBrace ? "Function declarations are not permitted within interfaces, ambient modules or classes" : "Expected ';'", errorRecoverySet);
+                this.checkCurrentToken(TokenID.Semicolon, errorRecoverySet, this.tok.tokenId == TokenID.OpenBrace ? "Function declarations are not permitted within interfaces, ambient modules or classes" : "Expected ';'");
             }
             else {
                 if (!wasShorthand || isAnonLambda) {
                     funcDecl.endingToken = new ASTSpan();
                     funcDecl.endingToken.minChar = this.scanner.startPos;
                     funcDecl.endingToken.limChar = this.scanner.pos;
-                    this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+                    this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
 
                     if (isAnonLambda) {
                         funcDecl.fncFlags |= FncFlags.IsFatArrowFunction;
@@ -1068,8 +1067,7 @@ module TypeScript {
                 this.tok = this.scanner.scan();
             }
             else if (!isLambda) {
-                this.checkCurrentToken(TokenID.OpenParen, "Expected '('",
-                            errorRecoverySet | ErrorRecoverySet.RParen);
+                this.checkCurrentToken(TokenID.OpenParen, errorRecoverySet | ErrorRecoverySet.RParen);
             }
             var sawEllipsis = false;
             var firstArg = true;
@@ -1255,10 +1253,10 @@ module TypeScript {
             }
 
             if (isIndexer) {
-                this.checkCurrentToken(TokenID.CloseBracket, "Expected ']'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
+                this.checkCurrentToken(TokenID.CloseBracket, errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
             }
             else if (expectClosingRParen) {
-                this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
+                this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet | ErrorRecoverySet.LCurly | ErrorRecoverySet.SColon);
             }
             formals.limChar = this.scanner.lastTokenLimChar(); // ')' or ']'
             return sawEllipsis;
@@ -1580,7 +1578,7 @@ module TypeScript {
             var resetModifiers = false;
 
             var membersMinChar = this.scanner.startPos;
-            this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'", errorRecoverySet);
+            this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet);
 
             this.nestingLevel++;
 
@@ -1966,7 +1964,7 @@ module TypeScript {
                 propertyDecl.minChar = minChar;
 
                 if (propertyDecl.nodeType == NodeType.VarDecl) {
-                     this.checkCurrentToken(TokenID.Semicolon, "Expected ';'", errorRecoverySet);
+                     this.checkCurrentToken(TokenID.Semicolon, errorRecoverySet);
                 }
             }
 
@@ -2022,14 +2020,14 @@ module TypeScript {
             }
 
             var membersMinChar = this.scanner.startPos;
-            this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'", errorRecoverySet | ErrorRecoverySet.TypeScriptS);
+            this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.TypeScriptS);
             var members = new ASTList();
             members.minChar = membersMinChar;
             var prevInInterfaceDecl = this.inInterfaceDecl;
             this.inInterfaceDecl = true;
             this.parseTypeMemberList(errorRecoverySet | ErrorRecoverySet.RCurly, members);
             this.inInterfaceDecl = prevInInterfaceDecl;
-            this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+            this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
 
             // REVIEW: According to the grammar, an interface declaration should actually just
             // have an 'ObjectType' and not a list of members.  We may want to consider making that
@@ -2698,7 +2696,7 @@ module TypeScript {
             }
 
             if (inCast) {
-                this.checkCurrentToken(TokenID.GreaterThan, "Expected '>'", errorRecoverySet);
+                this.checkCurrentToken(TokenID.GreaterThan, errorRecoverySet);
             }
 
             if (ast == null) {
@@ -2740,7 +2738,7 @@ module TypeScript {
                                 ast.flags = ast.flags & (~(ASTFlags.SkipNextRParen)); 
                                 break;
                             }
-                            this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet);
+                            this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet);
                             ast.isParenthesized = true;
                         }
 
@@ -2773,14 +2771,14 @@ module TypeScript {
                         ast = this.parseArrayLiteral(ErrorRecoverySet.RBrack | errorRecoverySet);
                         ast.minChar = minChar;
                         limChar = this.scanner.pos; // ']'
-                        this.checkCurrentToken(TokenID.CloseBracket, "Expected ']'", errorRecoverySet);
+                        this.checkCurrentToken(TokenID.CloseBracket, errorRecoverySet);
                         break;
                     // TODO: rescan regex for TokenID.Div and AsgDiv
                         case TokenID.OpenBrace:
                         minChar = this.scanner.startPos;
                         this.tok = this.scanner.scan();
                         var members = this.parseMemberList(ErrorRecoverySet.RCurly | errorRecoverySet)
-                        this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+                        this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
                         ast = new UnaryExpression(NodeType.ObjectLit, members);
                         ast.minChar = minChar;
                         limChar = this.scanner.lastTokenLimChar();
@@ -2792,7 +2790,7 @@ module TypeScript {
                         minChar = this.scanner.startPos;
                         this.tok = this.scanner.scan();
                         var term: AST = this.parseTypeReference(ErrorRecoverySet.BinOp, false);
-                        this.checkCurrentToken(TokenID.GreaterThan, "Expected '>'", errorRecoverySet);
+                        this.checkCurrentToken(TokenID.GreaterThan, errorRecoverySet);
                         ast = new UnaryExpression(NodeType.TypeAssertion, this.parseExpr(errorRecoverySet, OperatorPrecedence.Unary, false, TypeContext.NoTypes));
                         (<UnaryExpression>ast).castTerm = term;
                         break;
@@ -3028,7 +3026,7 @@ module TypeScript {
 
                         // Do not hold onto the prevExpr handle
                         this.prevExpr = null;
-                        this.checkCurrentToken(TokenID.Colon, "Expected :", errorRecoverySet | ErrorRecoverySet.ExprStart);
+                        this.checkCurrentToken(TokenID.Colon, errorRecoverySet | ErrorRecoverySet.ExprStart);
 
                         var whenFalse = this.parseExpr(
                             errorRecoverySet | ErrorRecoverySet.BinOp, OperatorPrecedence.Assignment, allowIn, TypeContext.NoTypes)
@@ -3102,7 +3100,7 @@ module TypeScript {
                             ast.minChar = lhsMinChar;
                         }
                         ast.limChar = this.scanner.pos; // ')'
-                        this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet);
+                        this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet);
                         break;
                     case TokenID.OpenBracket:
                         this.tok = this.scanner.scan();
@@ -3127,7 +3125,7 @@ module TypeScript {
                                                            TypeContext.NoTypes));
                         ast.minChar = lhsMinChar;
                         ast.limChar = this.scanner.pos; // ']'
-                        this.checkCurrentToken(TokenID.CloseBracket, "Expected ']'", errorRecoverySet);
+                        this.checkCurrentToken(TokenID.CloseBracket, errorRecoverySet);
                         break;
                     case TokenID.Dot: {
                         var name: Identifier = null;
@@ -3196,8 +3194,7 @@ module TypeScript {
             var catchMinChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.tok = this.scanner.scan();
-            this.checkCurrentToken(TokenID.OpenParen, "Expected '('", errorRecoverySet |
-                        ErrorRecoverySet.ExprStart);
+            this.checkCurrentToken(TokenID.OpenParen, errorRecoverySet | ErrorRecoverySet.ExprStart);
             if ((this.tok.tokenId != TokenID.Identifier) || convertTokToID(this.tok, this.strictMode)) {
                 this.reportParseError("Expected identifier in catch header");
                 if (this.errorRecovery) {
@@ -3220,8 +3217,7 @@ module TypeScript {
             param.limChar = param.id.limChar;
             this.tok = this.scanner.scan();
             var statementPos = this.scanner.pos;
-            this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet |
-                        ErrorRecoverySet.StmtStart);
+            this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet | ErrorRecoverySet.StmtStart);
             if (this.tok.tokenId != TokenID.OpenBrace) {
                 this.reportParseError("Expected '{' to start catch body");
                 if (this.errorRecovery) {
@@ -3648,8 +3644,7 @@ module TypeScript {
                             this.reportParseError("syntax error: for statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
-                                  ErrorRecoverySet.ExprStart | ErrorRecoverySet.Var);
+                        this.checkNextToken(TokenID.OpenParen, errorRecoverySet | ErrorRecoverySet.ExprStart | ErrorRecoverySet.Var);
                         this.state = ParseState.ForInit;
                         forInOk = true;
                         switch (this.tok.tokenId) {
@@ -3689,8 +3684,7 @@ module TypeScript {
                                 forInStmt.limChar = this.scanner.pos;
                                 forInStmt.statement.minChar = minChar;
                                 forInStmt.statement.limChar = this.scanner.pos;
-                                this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", ErrorRecoverySet.StmtStart |
-                                          errorRecoverySet);
+                                this.checkCurrentToken(TokenID.CloseParen, ErrorRecoverySet.StmtStart | errorRecoverySet);
                                 this.pushStmt(forInStmt, labelList);
                                 forInStmt.body = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
                                 this.popStmt();
@@ -3701,7 +3695,7 @@ module TypeScript {
                         else {
                             var forStmt: ForStatement = new ForStatement(temp);
                             forStmt.minChar = minChar;
-                            this.checkCurrentToken(TokenID.Semicolon, "Expected ';'", errorRecoverySet);
+                            this.checkCurrentToken(TokenID.Semicolon, errorRecoverySet);
                             if (this.tok.tokenId == TokenID.Semicolon) {
                                 forStmt.cond = null;
                             }
@@ -3726,8 +3720,7 @@ module TypeScript {
                                                        OperatorPrecedence.None, true,
                                                        TypeContext.NoTypes);
                             }
-                            this.checkCurrentToken(TokenID.CloseParen, "Expected ')'",
-                                      errorRecoverySet | ErrorRecoverySet.LCurly);
+                            this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet | ErrorRecoverySet.LCurly);
                             this.pushStmt(forStmt, labelList);
                             forStmt.body = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
                             this.popStmt();
@@ -3749,14 +3742,12 @@ module TypeScript {
                             this.reportParseError("'with' statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
-                                  ErrorRecoverySet.ExprStart | ErrorRecoverySet.Var);
+                        this.checkNextToken(TokenID.OpenParen, errorRecoverySet | ErrorRecoverySet.ExprStart | ErrorRecoverySet.Var);
 
                         var expr = this.parseExpr(errorRecoverySet | ErrorRecoverySet.Colon,
                                                             OperatorPrecedence.None, true,
                                                             TypeContext.NoTypes);
-                        this.checkCurrentToken(TokenID.CloseParen, "Expected ')'",
-                                      errorRecoverySet | ErrorRecoverySet.LCurly);
+                        this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet | ErrorRecoverySet.LCurly);
 
                         var withStmt = new WithStatement(expr);
                         withStmt.body = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
@@ -3770,8 +3761,7 @@ module TypeScript {
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("'switch' statement does not take modifiers");
                         }
-                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
-                                  ErrorRecoverySet.ExprStart);
+                        this.checkNextToken(TokenID.OpenParen, errorRecoverySet | ErrorRecoverySet.ExprStart);
 
                         var switchStmt = new SwitchStatement(this.parseExpr(errorRecoverySet |
                                                                      ErrorRecoverySet.RParen,
@@ -3780,11 +3770,9 @@ module TypeScript {
                                                                      TypeContext.NoTypes));
                         switchStmt.statement.minChar = minChar;
                         switchStmt.statement.limChar = this.scanner.pos;
-                        this.checkCurrentToken(TokenID.CloseParen, "Expected ')'",
-                                  errorRecoverySet | ErrorRecoverySet.LCurly);
+                        this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet | ErrorRecoverySet.LCurly);
                         var caseListMinChar = this.scanner.startPos;
-                         this.checkCurrentToken(TokenID.OpenBrace, "Expected '{'",
-                                  errorRecoverySet | ErrorRecoverySet.SCase);
+                         this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.SCase);
                         switchStmt.defaultCase = null;
                         switchStmt.caseList = new ASTList();
                         var caseStmt: CaseStatement = null;
@@ -3804,8 +3792,7 @@ module TypeScript {
                                                             OperatorPrecedence.None, true,
                                                             TypeContext.NoTypes);
                                 }
-                                this.checkCurrentToken(TokenID.Colon, "Expected ':'", errorRecoverySet |
-                                          ErrorRecoverySet.StmtStart);
+                                this.checkCurrentToken(TokenID.Colon, errorRecoverySet | ErrorRecoverySet.StmtStart);
                                 caseStmt.body = new ASTList();
                                 this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly,
                                               caseStmt.body, false, true, allowedElements, modifiers);
@@ -3820,7 +3807,7 @@ module TypeScript {
                         switchStmt.caseList.minChar = caseListMinChar;
                         switchStmt.caseList.limChar = this.scanner.pos;
                         switchStmt.limChar = switchStmt.caseList.limChar;
-                        this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+                        this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
                         this.popStmt();
                         ast = switchStmt;
                         break;
@@ -3831,14 +3818,14 @@ module TypeScript {
                             this.reportParseError("'while' statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", ErrorRecoverySet.ExprStart |
+                        this.checkNextToken(TokenID.OpenParen, ErrorRecoverySet.ExprStart |
                                   errorRecoverySet);
                         var whileStmt = new WhileStatement(this.parseExpr(errorRecoverySet |
                                                                    ErrorRecoverySet.RParen,
                                                                    OperatorPrecedence.None,
                                                                    true, TypeContext.NoTypes));
                         whileStmt.minChar = minChar;
-                        this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet |
+                        this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet |
                                   ErrorRecoverySet.StmtStart);
                         this.pushStmt(whileStmt, labelList);
                         whileStmt.body = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
@@ -3862,15 +3849,13 @@ module TypeScript {
                         this.popStmt();
                         doStmt.whileAST = new Identifier("while");
                         doStmt.whileAST.minChar = this.scanner.startPos;
-                        this.checkCurrentToken(TokenID.While, "Expected 'while'", errorRecoverySet |
-                                  ErrorRecoverySet.LParen);
+                        this.checkCurrentToken(TokenID.While, errorRecoverySet | ErrorRecoverySet.LParen);
                         doStmt.whileAST.limChar = doStmt.whileAST.minChar + 5;
-                        this.checkCurrentToken(TokenID.OpenParen, "Expected '('", errorRecoverySet |
-                                  ErrorRecoverySet.ExprStart);
+                        this.checkCurrentToken(TokenID.OpenParen, errorRecoverySet | ErrorRecoverySet.ExprStart);
                         doStmt.cond = this.parseExpr(errorRecoverySet | ErrorRecoverySet.RParen,
                                               OperatorPrecedence.None, true, TypeContext.NoTypes);
                         doStmt.limChar = this.scanner.pos;
-                        this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet);
+                        this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet);
                         ast = doStmt;
                         // compatibility; more strict would be to require the ';'
                         if (this.tok.tokenId == TokenID.Semicolon) {
@@ -3884,8 +3869,7 @@ module TypeScript {
                             this.reportParseError("if statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        this.chkNxtTok(TokenID.OpenParen, "Expected '('", errorRecoverySet |
-                                  ErrorRecoverySet.ExprStart);
+                        this.checkNextToken(TokenID.OpenParen, errorRecoverySet | ErrorRecoverySet.ExprStart);
                         var ifStmt = new IfStatement(this.parseExpr(errorRecoverySet |
                                                              ErrorRecoverySet.LParen,
                                                              OperatorPrecedence.None, true,
@@ -3893,8 +3877,7 @@ module TypeScript {
                         ifStmt.minChar = minChar;
                         ifStmt.statement.minChar = minChar;
                         ifStmt.statement.limChar = this.scanner.pos;
-                        this.checkCurrentToken(TokenID.CloseParen, "Expected ')'", errorRecoverySet |
-                                  ErrorRecoverySet.StmtStart);
+                        this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet | ErrorRecoverySet.StmtStart);
                         this.pushStmt(ifStmt, labelList);
                         ifStmt.thenBod = this.parseStatement(ErrorRecoverySet.Else | errorRecoverySet,
                                                       allowedElements, parentModifiers);
@@ -3933,7 +3916,7 @@ module TypeScript {
                         block.statements.limChar = this.scanner.pos;
                         block.minChar = block.statements.minChar;
                         block.limChar = block.statements.limChar;
-                        this.checkCurrentToken(TokenID.CloseBrace, "Expected '}'", errorRecoverySet);
+                        this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
                         ast = block;
                         break;
                     }
