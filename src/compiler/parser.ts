@@ -147,10 +147,6 @@ module TypeScript {
             }
         }
 
-        private setNonInteractive() {
-            this.errorRecovery = false;
-        }
-
         public setErrorRecovery(outfile: ITextWriter) {
             this.outfile = outfile;
             this.errorRecovery = true;
