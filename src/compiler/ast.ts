@@ -312,7 +312,10 @@ module TypeScript {
         constructor () {
             super("__missing");
         }
-        public isMissing() { return true; }
+
+        public isMissing() {
+            return true;
+        }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             // Emit nothing for a missing ID
@@ -725,15 +728,13 @@ module TypeScript {
         }
     }
 
-    export class NumberLiteral extends AST {
-
+    export class NumberLiteral extends Expression {
         constructor (public value: number, public hasEmptyFraction?: bool) {
             super(NodeType.NumberLit);
         }
 
-        // REVIEW: NumberLiteral is a "statement or expression" but is not an "expression"?
-        public isStatementOrExpression() { return true; }
         public isNegativeZero = false;
+
         public typeCheck(typeFlow: TypeFlow) {
             this.type = typeFlow.doubleType;
             return this;
@@ -772,14 +773,11 @@ module TypeScript {
         }
     }
 
-    export class RegexLiteral extends AST {
-
+    export class RegexLiteral extends Expression {
         constructor (public regex) {
             super(NodeType.Regex);
         }
         
-        // REVIEW: RegexLiteral is a "statement or expression" but is not an "expression"?
-        public isStatementOrExpression() { return true; }
         public typeCheck(typeFlow: TypeFlow) {
             this.type = typeFlow.regexType;
             return this;
@@ -794,14 +792,10 @@ module TypeScript {
         }
     }
 
-    export class StringLiteral extends AST {
-
+    export class StringLiteral extends Expression {
         constructor (public text: string) {
             super(NodeType.QString);
         }
-        
-        // REVIEW: StringLiteral is a "statement or expression" but is not an "expression"?
-        public isStatementOrExpression() { return true; }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
@@ -917,7 +911,6 @@ module TypeScript {
     }
 
     export class VarDecl extends BoundDecl {
-
         constructor (id: Identifier, nest: number) {
             super(id, NodeType.VarDecl, nest);
         }
@@ -1088,8 +1081,6 @@ module TypeScript {
         public isPrivate() { return hasFlag(this.fncFlags, FncFlags.Private); }
         public isPublic() { return hasFlag(this.fncFlags, FncFlags.Public); }
         public isStatic() { return hasFlag(this.fncFlags, FncFlags.Static); }
-
-
 
         public treeViewLabel() {
             if (this.name == null) {
@@ -1319,7 +1310,6 @@ module TypeScript {
     }
 
     export class LabeledStatement extends Statement {
-
         constructor (public labels: ASTList, public stmt: AST) {
             super(NodeType.LabeledStatement);
         }
@@ -2073,7 +2063,6 @@ module TypeScript {
     }
 
     export class TypeReference extends AST {
-
         constructor (public term: AST, public arrayCount: number) {
             super(NodeType.TypeRef);
         }
@@ -2107,7 +2096,6 @@ module TypeScript {
     }
 
     export class TryFinally extends Statement {
-
         constructor (public tryNode: AST, public finallyNode: Finally) {
             super(NodeType.TryFinally);
         }
@@ -2153,7 +2141,6 @@ module TypeScript {
     }
 
     export class TryCatch extends Statement {
-
         constructor (public tryNode: Try, public catchNode: Catch) {
             super(NodeType.TryCatch);
         }
@@ -2204,7 +2191,6 @@ module TypeScript {
     }
 
     export class Try extends Statement {
-
         constructor (public body: AST) {
             super(NodeType.Try);
         }
@@ -2233,7 +2219,6 @@ module TypeScript {
     }
 
     export class Catch extends Statement {
-
         constructor (public param: VarDecl, public body: AST) {
             super(NodeType.Catch);
             if (this.param) {
@@ -2312,7 +2297,6 @@ module TypeScript {
 
 
     export class Finally extends Statement {
-
         constructor (public body: AST) {
             super(NodeType.Finally);
         }
