@@ -1328,7 +1328,7 @@ module TypeScript {
             this.inFncDecl = true;
             var funcDecl: FuncDecl =
                 this.parseFunctionStatements(errorRecoverySet | ErrorRecoverySet.RCurly,
-                                        name, false, isMethod, args, AllowedElements.FunctionDeclarations,
+                                        name, false, isMethod, args, AllowedElements.None,
                                         minChar, requiresSignature, Modifiers.None);
             this.inFncDecl = svInFncDecl;
             funcDecl.variableArgList = variableArgList;
@@ -2473,7 +2473,7 @@ module TypeScript {
                     var funcDecl: FuncDecl =
                         this.parseFunctionStatements(errorRecoverySet | ErrorRecoverySet.RCurly,
                                                 <Identifier>memberName, false, true, args,
-                                                AllowedElements.FunctionDeclarations,
+                                                AllowedElements.None,
                                                 this.scanner.startPos, false, Modifiers.None);
 
                     if (isSet && funcDecl.returnTypeAnnotation) {
@@ -3873,7 +3873,7 @@ module TypeScript {
                             this.reportParseError("try statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        ast = this.parseTryCatchFinally(errorRecoverySet, AllowedElements.FunctionDeclarations, parentModifiers, labelList);
+                        ast = this.parseTryCatchFinally(errorRecoverySet, AllowedElements.None, parentModifiers, labelList);
                         break;
                     }
                     case TokenID.OpenBrace: {
@@ -3887,7 +3887,7 @@ module TypeScript {
                         this.pushStmt(block, labelList);
                         this.parseStatementList(
                             errorRecoverySet | ErrorRecoverySet.RCurly, block.statements,
-                            /*sourceElements:*/ false, /*noLeadingCase:*/ false, AllowedElements.FunctionDeclarations, modifiers);
+                            /*sourceElements:*/ false, /*noLeadingCase:*/ false, AllowedElements.None, modifiers);
                         this.popStmt();
                         block.statements.minChar = minChar;
                         block.statements.limChar = this.scanner.pos;
