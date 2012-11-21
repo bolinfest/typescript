@@ -1597,10 +1597,10 @@ module TypeScript {
                     this.recordSourceMappingEnd(classDecl);
                 }
 
-                var membersLen = classDecl.definitionMembers.members.length;
+                var membersLen = classDecl.members.members.length;
                 for (var j = 0; j < membersLen; j++) {
 
-                    var memberDecl: AST = classDecl.definitionMembers.members[j];
+                    var memberDecl: AST = classDecl.members.members[j];
 
                     if (memberDecl.nodeType == NodeType.FuncDecl) {
                         var fn = <FuncDecl>memberDecl;

@@ -1206,9 +1206,7 @@ module TypeScript {
         public rightCurlyCount = 0;
         public prettyName: string;
         public amdDependencies: string[] = [];
-        public members: ASTList;
         public vars: ASTList;
-        public name: Identifier;
         public scopes: ASTList;
         // Remember if the module contains Unicode chars, that is needed for dynamic module as we will generate a file for each.
         public containsUnicodeChar = false;
@@ -1217,11 +1215,8 @@ module TypeScript {
         constructor (name: Identifier, members: ASTList, vars: ASTList, scopes: ASTList, public endingToken: ASTSpan) {
             super(NodeType.Module, name, members);
 
-            this.members = members;
             this.vars = vars;
-            this.name = name;
             this.scopes = scopes;
-
             this.prettyName = this.name.actualText;
         }
 
@@ -1249,13 +1244,12 @@ module TypeScript {
     }
 
     export class NamedType extends Record {
-        public name: Identifier;
-        public members: ASTList;
-
-        constructor (nodeType: NodeType, name: Identifier, public extendsList: ASTList, public implementsList: ASTList, members: ASTList) {
+        constructor (nodeType: NodeType,
+                     name: Identifier,
+                     public extendsList: ASTList,
+                     public implementsList: ASTList,
+                     members: ASTList) {
             super(nodeType, name, members);
-            this.name = name;
-            this.members = members;
         }
     }
 
@@ -1267,22 +1261,18 @@ module TypeScript {
         public constructorDecl: FuncDecl = null;
         public constructorNestingLevel = 0;
         public allMemberDefinitions: ASTList = new ASTList();
-        public name: Identifier;
         public baseClass: ASTList;
         public implementsList: ASTList;
-        public definitionMembers: ASTList;
         public endingToken: ASTSpan = null;
 
         constructor (name: Identifier,
-                     definitionMembers: ASTList,
+                     members: ASTList,
                      baseClass: ASTList,
                      implementsList: ASTList) {
-            super(NodeType.Class, name, baseClass, implementsList, definitionMembers);
+            super(NodeType.Class, name, baseClass, implementsList, members);
 
-            this.name = name;
             this.baseClass = baseClass;
             this.implementsList = implementsList;
-            this.definitionMembers = definitionMembers;
         }
 
         public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }

@@ -1694,7 +1694,7 @@ module TypeScript {
                 classDecl.endingToken.limChar = this.scanner.pos;
 
                 // for a class with an empty body, consume any 'dangling' inner comments
-                if (!this.currentClassDefinition.definitionMembers.members.length) {
+                if (!this.currentClassDefinition.members.members.length) {
                     this.currentClassDefinition.preComments = this.parseComments();
                 }
 
@@ -1785,7 +1785,7 @@ module TypeScript {
             // REVIEW: Should we have a separate flag for class constructors?  (Constructors are not methods)
             constructorFuncDecl.fncFlags |= FncFlags.ClassMethod;
 
-            this.currentClassDefinition.definitionMembers.members[this.currentClassDefinition.definitionMembers.members.length] = constructorFuncDecl;
+            this.currentClassDefinition.members.members[this.currentClassDefinition.members.members.length] = constructorFuncDecl;
 
             this.parsingClassConstructorDefinition = false;
 
@@ -1860,7 +1860,7 @@ module TypeScript {
             this.currentClassDefinition.knownMemberNames[text.actualText] = true;
 
             if (!isDeclaredInConstructor) {
-                this.currentClassDefinition.definitionMembers.members[this.currentClassDefinition.definitionMembers.members.length] = varDecl;
+                this.currentClassDefinition.members.members[this.currentClassDefinition.members.members.length] = varDecl;
             }
             this.currentClassDefinition.allMemberDefinitions.members[this.currentClassDefinition.allMemberDefinitions.members.length] = varDecl;
 
@@ -1927,7 +1927,7 @@ module TypeScript {
 
             this.currentClassDefinition.knownMemberNames[methodName.actualText] = true;
 
-            this.currentClassDefinition.definitionMembers.members[this.currentClassDefinition.definitionMembers.members.length] = funcDecl;
+            this.currentClassDefinition.members.members[this.currentClassDefinition.members.members.length] = funcDecl;
 
             funcDecl.postComments = this.parseComments();
 
