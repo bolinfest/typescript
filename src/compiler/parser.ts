@@ -3151,7 +3151,6 @@ module TypeScript {
             }
         }
 
-
         private parseTry(tryNode: Try, errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Try {
             var minChar = this.scanner.startPos;
             var preComments = this.parseComments();
@@ -4157,8 +4156,6 @@ module TypeScript {
 
         private fname = "";
 
-        private parseError = false;
-
         public quickParse(sourceText: ISourceText, filename: string, unitIndex: number): QuickParseResult {
             //TODO: REVIEW: We set this to avoid adding a "module" decl in the resulting script (see parse() method)
             var svGenTarget = TypeScript.moduleGenTarget;
@@ -4175,7 +4172,6 @@ module TypeScript {
         public parse(sourceText: ISourceText, filename: string, unitIndex: number, allowedElements = AllowedElements.Global): Script {
             this.ambientModule = false;
             this.topLevel = true;
-            this.parseError = false;
             this.hasTopLevelImportOrExport = false;
             this.fname = filename;
             this.currentUnitIndex = unitIndex;
