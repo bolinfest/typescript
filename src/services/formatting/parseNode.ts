@@ -123,7 +123,7 @@ module Formatting {
                     // Otherwise, use the node level and its parent indentation override
                     if (node.CanIndent()) {
                         level = node.IndentationDelta;
-                        if (node.AuthorNode.Label != 0)
+                        if (!!node.AuthorNode.Label)
                             level++;
 
                         node = node.Parent;

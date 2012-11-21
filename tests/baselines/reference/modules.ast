@@ -148,7 +148,7 @@
                   {"nodeType": "Name", "minChar": 2283, "limChar": 2286, "startLine": 32, "startCol": 77, "endLine": 32, "endCol": 80, "children": []},
                   {"nodeType": "TypeRef", "minChar": 2320, "limChar": 2321, "startLine": 32, "startCol": 114, "endLine": 32, "endCol": 115, "children": [
                     {"nodeType": "Name", "minChar": 2320, "limChar": 2321, "startLine": 32, "startCol": 114, "endLine": 32, "endCol": 115, "children": []}]}]}]}]},
-            {"nodeType": "Import", "minChar": 2343, "limChar": 2434, "startLine": 35, "startCol": 7, "endLine": 35, "endCol": 98, "children": [
+            {"nodeType": "ImportDeclaration", "minChar": 2343, "limChar": 2434, "startLine": 35, "startCol": 7, "endLine": 35, "endCol": 98, "children": [
               {"nodeType": "Name", "minChar": 2375, "limChar": 2377, "startLine": 35, "startCol": 39, "endLine": 35, "endCol": 41, "children": []},
               {"nodeType": "Name", "minChar": 2416, "limChar": 2420, "startLine": 35, "startCol": 80, "endLine": 35, "endCol": 84, "children": []}]},
             {"nodeType": "VarDecl", "minChar": 2447, "limChar": 2505, "startLine": 36, "startCol": 7, "endLine": 36, "endCol": 65, "children": [
@@ -186,10 +186,10 @@
                       {"nodeType": "Name", "minChar": 3285, "limChar": 3288, "startLine": 45, "startCol": 113, "endLine": 45, "endCol": 116, "children": []},
                       {"nodeType": "TypeRef", "minChar": 3322, "limChar": 3323, "startLine": 45, "startCol": 150, "endLine": 45, "endCol": 151, "children": [
                         {"nodeType": "Name", "minChar": 3322, "limChar": 3323, "startLine": 45, "startCol": 150, "endLine": 45, "endCol": 151, "children": []}]}]}]}]},
-                {"nodeType": "Import", "minChar": 3415, "limChar": 3506, "startLine": 47, "startCol": 43, "endLine": 47, "endCol": 134, "children": [
+                {"nodeType": "ImportDeclaration", "minChar": 3415, "limChar": 3506, "startLine": 47, "startCol": 43, "endLine": 47, "endCol": 134, "children": [
                   {"nodeType": "Name", "minChar": 3447, "limChar": 3449, "startLine": 47, "startCol": 75, "endLine": 47, "endCol": 77, "children": []},
                   {"nodeType": "Name", "minChar": 3488, "limChar": 3492, "startLine": 47, "startCol": 116, "endLine": 47, "endCol": 120, "children": []}]},
-                {"nodeType": "Import", "minChar": 3555, "limChar": 3646, "startLine": 48, "startCol": 43, "endLine": 48, "endCol": 134, "children": [
+                {"nodeType": "ImportDeclaration", "minChar": 3555, "limChar": 3646, "startLine": 48, "startCol": 43, "endLine": 48, "endCol": 134, "children": [
                   {"nodeType": "Name", "minChar": 3587, "limChar": 3589, "startLine": 48, "startCol": 75, "endLine": 48, "endCol": 77, "children": []},
                   {"nodeType": "Name", "minChar": 3628, "limChar": 3632, "startLine": 48, "startCol": 116, "endLine": 48, "endCol": 120, "children": []}]},
                 {"nodeType": "VarDecl", "minChar": 3697, "limChar": 3755, "startLine": 50, "startCol": 43, "endLine": 50, "endCol": 101, "children": [

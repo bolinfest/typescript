@@ -485,7 +485,7 @@ module Formatting {
                 case AuthorParseNodeKind.apnkFncDecl:
                     var fncDecl = <TypeScript.FuncDecl>context.contextNode.AuthorNode.Details.ast;
                     // Treat "=>" as a binary expression
-                    if (context.tokenSpan.tokenID === TypeScript.TokenID.Arrow || context.nextTokenSpan.tokenID === TypeScript.TokenID.Arrow) { 
+                    if (context.tokenSpan.tokenID === TypeScript.TokenID.EqualsGreaterThan || context.nextTokenSpan.tokenID === TypeScript.TokenID.EqualsGreaterThan) { 
                         if (fncDecl != null && TypeScript.hasFlag(fncDecl.fncFlags, TypeScript.FncFlags.IsFunctionExpression)) { 
                             return true;
                         }
