@@ -7,7 +7,7 @@
   "ast":
     {"nodeType": "Script", "minChar": 0, "limChar": 18, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 2, "children": [
       {"nodeType": "List", "minChar": 0, "limChar": 18, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 2, "children": [
-        {"nodeType": "Class", "minChar": 0, "limChar": 18, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 2, "children": [
+        {"nodeType": "ClassDeclaration", "minChar": 0, "limChar": 18, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 2, "children": [
           {"nodeType": "Name", "minChar": 9, "limChar": 9, "startLine": 2, "startCol": 2, "endLine": 2, "endCol": 2, "children": []},
           {"nodeType": "List", "minChar": 8, "limChar": 18, "startLine": 2, "startCol": 1, "endLine": 4, "endCol": 2, "children": []}]}]}]}
 }

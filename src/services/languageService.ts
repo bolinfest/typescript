@@ -190,8 +190,8 @@ module Services {
                     symbolLocation = (<TypeScript.TypeDecl>ast).name;
                     break;
 
-                case TypeScript.NodeType.Class:
-                    symbolLocation = (<TypeScript.ClassDecl>ast).name;
+                case TypeScript.NodeType.ClassDeclaration:
+                    symbolLocation = (<TypeScript.ClassDeclaration>ast).name;
                     break;
 
                 case TypeScript.NodeType.Module:
@@ -630,7 +630,7 @@ module Services {
                         switch (cur.nodeType) {
                             // Can be used as breakpoint location
                             case TypeScript.NodeType.Module:
-                            case TypeScript.NodeType.Class:
+                            case TypeScript.NodeType.ClassDeclaration:
                             case TypeScript.NodeType.FuncDecl:
                             case TypeScript.NodeType.Break:
                             case TypeScript.NodeType.Continue:
@@ -716,8 +716,8 @@ module Services {
                     customSpan = funcDecl.endingToken;
                     break;
 
-                case TypeScript.NodeType.Class:
-                    var classDecl = <TypeScript.ClassDecl>cur;
+                case TypeScript.NodeType.ClassDeclaration:
+                    var classDecl = <TypeScript.ClassDeclaration>cur;
                     // If class is inside module then it can be used completely as statement
                     if (containerASTs.length > 1) {
                         resultAST = classDecl;
@@ -1720,8 +1720,8 @@ module Services {
                         result = maxLim(result, (<TypeScript.ModuleDecl>ast).name);
                         break;
 
-                    case TypeScript.NodeType.Class:
-                        result = maxLim(result, (<TypeScript.ClassDecl>ast).name, (<TypeScript.ClassDecl>ast).extendsList, (<TypeScript.ClassDecl>ast).implementsList);
+                    case TypeScript.NodeType.ClassDeclaration:
+                        result = maxLim(result, (<TypeScript.ClassDeclaration>ast).name, (<TypeScript.ClassDeclaration>ast).extendsList, (<TypeScript.ClassDeclaration>ast).implementsList);
                         break;
 
                     case TypeScript.NodeType.Interface:
@@ -1743,7 +1743,7 @@ module Services {
                         if ((<TypeScript.FuncDecl>ast).bod == null)
                             return MatchKind.none;
                     //fall through
-                    case TypeScript.NodeType.Class:
+                    case TypeScript.NodeType.ClassDeclaration:
                     case TypeScript.NodeType.Module:
                     case TypeScript.NodeType.Interface:
                         return MatchKind.exact;
@@ -1925,7 +1925,7 @@ module Services {
                 case TypeScript.NodeType.Interface:
                     return ScriptElementKind.interfaceElement;
 
-                case TypeScript.NodeType.Class:
+                case TypeScript.NodeType.ClassDeclaration:
                     return ScriptElementKind.classElement;
 
                 case TypeScript.NodeType.Module:
@@ -2000,7 +2000,7 @@ module Services {
                 return result;
             }
 
-            var classDeclToKindModifiers = (decl: TypeScript.ClassDecl): string => {
+            var classDeclToKindModifiers = (decl: TypeScript.ClassDeclaration): string => {
                 var result = ScriptElementKindModifier.none;
                 result = addMofifier(result, decl.isExported(), ScriptElementKindModifier.exportedModifier);
                 result = addMofifier(result, decl.isAmbient(), ScriptElementKindModifier.ambientModifier);
@@ -2046,8 +2046,8 @@ module Services {
                     var typeDecl = <TypeScript.TypeDecl>ast;
                     return typeDeclToKindModifiers(typeDecl);
 
-                case TypeScript.NodeType.Class:
-                    var classDecl = <TypeScript.ClassDecl>ast;
+                case TypeScript.NodeType.ClassDeclaration:
+                    var classDecl = <TypeScript.ClassDeclaration>ast;
                     return classDeclToKindModifiers(classDecl);
 
                 case TypeScript.NodeType.Module:
@@ -2142,8 +2142,8 @@ module Services {
                     }
                         break;
 
-                    case TypeScript.NodeType.Class: {
-                        var classDecl = <TypeScript.ClassDecl>ast;
+                    case TypeScript.NodeType.ClassDeclaration: {
+                        var classDecl = <TypeScript.ClassDeclaration>ast;
                         item = addItem(parent, classDecl, classDecl.name.actualText, ScriptElementKind.classElement);
                         context.containerASTs.push(ast);
                         context.containerSymbols.push(classDecl.type.symbol);

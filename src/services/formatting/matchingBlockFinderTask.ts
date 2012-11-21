@@ -26,7 +26,7 @@ module Formatting {
                     //TypeScript:
                     switch (currentNode.ast.nodeType) {
                         case TypeScript.NodeType.Interface:
-                        case TypeScript.NodeType.Class:
+                        case TypeScript.NodeType.ClassDeclaration:
                         case TypeScript.NodeType.Module:
                             return Span.FromBounds(currentNode.ast.minChar, currentNode.ast.limChar);
 

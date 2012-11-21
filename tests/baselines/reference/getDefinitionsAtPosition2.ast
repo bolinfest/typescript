@@ -17,7 +17,7 @@
             {"nodeType": "Name", "minChar": 76, "limChar": 81, "startLine": 3, "startCol": 10, "endLine": 3, "endCol": 15, "children": []},
             {"nodeType": "List", "minChar": 84, "limChar": 87, "startLine": 3, "startCol": 18, "endLine": 3, "endCol": 21, "children": [
               {"nodeType": "EndCode", "minChar": 87, "limChar": 87, "startLine": 3, "startCol": 21, "endLine": 3, "endCol": 21, "children": []}]}]},
-          {"nodeType": "Class", "minChar": 89, "limChar": 105, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 17, "children": [
+          {"nodeType": "ClassDeclaration", "minChar": 89, "limChar": 105, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 17, "children": [
             {"nodeType": "Name", "minChar": 95, "limChar": 101, "startLine": 4, "startCol": 7, "endLine": 4, "endCol": 13, "children": []},
             {"nodeType": "List", "minChar": 102, "limChar": 105, "startLine": 4, "startCol": 14, "endLine": 4, "endCol": 17, "children": []}]},
           {"nodeType": "Interface", "minChar": 107, "limChar": 126, "startLine": 5, "startCol": 1, "endLine": 5, "endCol": 20, "children": [

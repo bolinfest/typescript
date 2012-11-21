@@ -192,7 +192,7 @@ module TypeScript {
                     }
                     break;
 
-                case NodeType.Class:
+                case NodeType.ClassDeclaration:
                     if (declarationContainerAst.type) {
                         containingScope = declarationContainerAst.type.instanceType.containedScope;
                     }
@@ -449,7 +449,7 @@ module TypeScript {
             }
         }
 
-        public ClassCallback(pre: bool, classDecl: ClassDecl): bool {
+        public ClassDeclarationCallback(pre: bool, classDecl: ClassDeclaration): bool {
             if (!this.canEmitPrePostAstSignature(ToDeclFlags(classDecl.varFlags), classDecl, pre)) {
                 return false;
             }

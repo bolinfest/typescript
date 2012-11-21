@@ -131,7 +131,7 @@ module TypeScript {
                     context.scopeStartAST = script;
                     break;
 
-                case NodeType.Class:
+                case NodeType.ClassDeclaration:
                     context.scopeGetter = function () {
                         return (ast.type === null || ast.type.instanceType.containedScope === null) ? null : ast.type.instanceType.containedScope;
                     };

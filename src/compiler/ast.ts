@@ -1155,7 +1155,7 @@ module TypeScript {
                             return true;
                         }
                     }
-                    else if (stmt.nodeType == NodeType.Class) {
+                    else if (stmt.nodeType == NodeType.ClassDeclaration) {
                         if (!hasFlag((<TypeDecl>stmt).varFlags, VarFlags.Ambient)) {
                             return true;
                         }
@@ -1253,7 +1253,7 @@ module TypeScript {
         }
     }
 
-    export class ClassDecl extends NamedType {
+    export class ClassDeclaration extends NamedType {
         public varFlags = VarFlags.None;
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
@@ -1269,7 +1269,7 @@ module TypeScript {
                      members: ASTList,
                      baseClass: ASTList,
                      implementsList: ASTList) {
-            super(NodeType.Class, name, baseClass, implementsList, members);
+            super(NodeType.ClassDeclaration, name, baseClass, implementsList, members);
 
             this.baseClass = baseClass;
             this.implementsList = implementsList;

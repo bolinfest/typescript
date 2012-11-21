@@ -39,7 +39,7 @@
                 {"nodeType": "IncPost", "minChar": 96, "limChar": 104, "startLine": 7, "startCol": 5, "endLine": 7, "endCol": 13, "children": [
                   {"nodeType": "Name", "minChar": 96, "limChar": 102, "startLine": 7, "startCol": 5, "endLine": 7, "endCol": 11, "children": []}]},
                 {"nodeType": "Comment", "minChar": 78, "limChar": 90, "startLine": 6, "startCol": 5, "endLine": 6, "endCol": 17, "children": []},
-                {"nodeType": "Class", "minChar": 117, "limChar": 150, "startLine": 9, "startCol": 5, "endLine": 11, "endCol": 6, "children": [
+                {"nodeType": "ClassDeclaration", "minChar": 117, "limChar": 150, "startLine": 9, "startCol": 5, "endLine": 11, "endCol": 6, "children": [
                   {"nodeType": "Name", "minChar": 123, "limChar": 130, "startLine": 9, "startCol": 11, "endLine": 9, "endCol": 18, "children": []},
                   {"nodeType": "List", "minChar": 130, "limChar": 150, "startLine": 9, "startCol": 18, "endLine": 11, "endCol": 6, "children": []}]},
                 {"nodeType": "FuncDecl", "minChar": 162, "limChar": 228, "startLine": 13, "startCol": 5, "endLine": 16, "endCol": 6, "children": [

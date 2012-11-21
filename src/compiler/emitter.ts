@@ -379,7 +379,7 @@ module TypeScript {
 
             var isClassConstructor = funcDecl.isConstructor && hasFlag(funcDecl.fncFlags, FncFlags.ClassMethod);
             var hasNonObjectBaseType = isClassConstructor && hasFlag(this.thisClassNode.type.instanceType.typeFlags, TypeFlags.HasBaseType) && !hasFlag(this.thisClassNode.type.instanceType.typeFlags, TypeFlags.HasBaseTypeOfObject);
-            var classPropertiesMustComeAfterSuperCall = hasNonObjectBaseType && hasFlag((<ClassDecl>this.thisClassNode).varFlags, VarFlags.ClassSuperMustBeFirstCallInConstructor);
+            var classPropertiesMustComeAfterSuperCall = hasNonObjectBaseType && hasFlag((<ClassDeclaration>this.thisClassNode).varFlags, VarFlags.ClassSuperMustBeFirstCallInConstructor);
 
             this.emitParensAndCommentsInPlace(funcDecl, true);
             this.recordSourceMappingStart(funcDecl);
@@ -451,7 +451,7 @@ module TypeScript {
                 this.recordSourceMappingEnd(arg);
             }
 
-            if (funcDecl.isConstructor && ((<ClassDecl>funcDecl.classDecl).varFlags & VarFlags.MustCaptureThis)) {
+            if (funcDecl.isConstructor && ((<ClassDeclaration>funcDecl.classDecl).varFlags & VarFlags.MustCaptureThis)) {
                 this.writeCaptureThisStatement(funcDecl);
             }
 
@@ -1285,7 +1285,7 @@ module TypeScript {
                     if (i == 1 && emitClassPropertiesAfterSuperCall) {
 
                         // emit any parameter properties first
-                        var constructorDecl = (<ClassDecl>this.thisClassNode).constructorDecl;
+                        var constructorDecl = (<ClassDeclaration>this.thisClassNode).constructorDecl;
 
                         if (constructorDecl && constructorDecl.arguments) {
                             var argsLen = constructorDecl.arguments.members.length;
@@ -1488,7 +1488,7 @@ module TypeScript {
             }
         }
 
-        public emitJavascriptClass(classDecl: ClassDecl) {
+        public emitJavascriptClass(classDecl: ClassDeclaration) {
             if (!hasFlag(classDecl.varFlags, VarFlags.Ambient)) {
                 var svClassNode = this.thisClassNode;
                 var i = 0;

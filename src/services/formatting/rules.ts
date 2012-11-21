@@ -537,7 +537,7 @@ module Formatting {
             switch (node.AuthorNode.Details.nodeType) {
                 case TypeScript.NodeType.Module:
                 case TypeScript.NodeType.Interface:
-                case TypeScript.NodeType.Class:
+                case TypeScript.NodeType.ClassDeclaration:
                     return true;
 
                 default:

@@ -19,7 +19,7 @@
         {"nodeType": "Module", "minChar": 0, "limChar": 111, "startLine": 1, "startCol": 1, "endLine": 10, "endCol": 2, "children": [
           {"nodeType": "Name", "minChar": 7, "limChar": 10, "startLine": 1, "startCol": 8, "endLine": 1, "endCol": 11, "children": []},
           {"nodeType": "List", "minChar": 11, "limChar": 111, "startLine": 1, "startCol": 12, "endLine": 10, "endCol": 2, "children": [
-            {"nodeType": "Class", "minChar": 18, "limChar": 53, "startLine": 2, "startCol": 5, "endLine": 4, "endCol": 6, "children": [
+            {"nodeType": "ClassDeclaration", "minChar": 18, "limChar": 53, "startLine": 2, "startCol": 5, "endLine": 4, "endCol": 6, "children": [
               {"nodeType": "Name", "minChar": 31, "limChar": 34, "startLine": 2, "startCol": 18, "endLine": 2, "endCol": 21, "children": []},
               {"nodeType": "List", "minChar": 35, "limChar": 53, "startLine": 2, "startCol": 22, "endLine": 4, "endCol": 6, "children": []}]},
             {"nodeType": "Module", "minChar": 71, "limChar": 108, "startLine": 7, "startCol": 5, "endLine": 9, "endCol": 6, "children": [

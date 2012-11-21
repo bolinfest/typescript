@@ -98,7 +98,7 @@ module TypeScript.AstWalkerWithDetailCallback {
         CatchCallback? (pre, ast: AST): bool;
         ListCallback? (pre, astList: ASTList): bool;
         ScriptCallback? (pre, script: Script): bool;
-        ClassCallback? (pre, ast: AST): bool;
+        ClassDeclarationCallback? (pre, ast: AST): bool;
         InterfaceCallback? (pre, interfaceDecl: TypeDecl): bool;
         ModuleCallback? (pre, moduleDecl: ModuleDecl): bool;
         ImportDeclarationCallback? (pre, ast: AST): bool;

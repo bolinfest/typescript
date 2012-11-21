@@ -288,7 +288,7 @@ module TypeScript {
 
     export function preCollectClassTypes(ast: AST, parent: AST, context: TypeCollectionContext) {
         var scopeChain = context.scopeChain;
-        var classDecl = <ClassDecl>ast;
+        var classDecl = <ClassDeclaration>ast;
 
         var classType: Type;
         var instanceType: Type;
@@ -786,7 +786,7 @@ module TypeScript {
         else if (ast.nodeType == NodeType.Module) {
             go = preCollectModuleTypes(ast, parent, context);
         }
-        else if (ast.nodeType == NodeType.Class) {
+        else if (ast.nodeType == NodeType.ClassDeclaration) {
             go = preCollectClassTypes(ast, parent, context);
         }
         else if (ast.nodeType == NodeType.Block) {
@@ -821,7 +821,7 @@ module TypeScript {
         if (ast.nodeType == NodeType.Module) {
             popTypeCollectionScope(context);
         }
-        else if (ast.nodeType == NodeType.Class) {
+        else if (ast.nodeType == NodeType.ClassDeclaration) {
             popTypeCollectionScope(context);
         }
         else if (ast.nodeType == NodeType.Interface) {

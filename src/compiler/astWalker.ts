@@ -185,7 +185,7 @@ module TypeScript {
             this.childrenWalkers[NodeType.Catch] = ChildrenWalkers.walkCatchChildren;
             this.childrenWalkers[NodeType.List] = ChildrenWalkers.walkListChildren;
             this.childrenWalkers[NodeType.Script] = ChildrenWalkers.walkScriptChildren;
-            this.childrenWalkers[NodeType.Class] = ChildrenWalkers.walkClassDeclChildren;
+            this.childrenWalkers[NodeType.ClassDeclaration] = ChildrenWalkers.walkClassDeclChildren;
             this.childrenWalkers[NodeType.Interface] = ChildrenWalkers.walkTypeDeclChildren;
             this.childrenWalkers[NodeType.Module] = ChildrenWalkers.walkModuleDeclChildren;
             this.childrenWalkers[NodeType.ImportDeclaration] = ChildrenWalkers.walkImportDeclChildren;
@@ -462,7 +462,7 @@ module TypeScript {
             walkRecordChildren(preAst, parent, walker);
         }
 
-        export function walkClassDeclChildren(preAst: ClassDecl, parent: AST, walker: IAstWalker): void {
+        export function walkClassDeclChildren(preAst: ClassDeclaration, parent: AST, walker: IAstWalker): void {
             walkNamedTypeChildren(preAst, parent, walker);
 
             if (walker.options.goNextSibling && preAst.baseClass) {

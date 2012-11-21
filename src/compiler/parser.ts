@@ -77,7 +77,7 @@ module TypeScript {
         private strictMode = false;
         private nestingLevel = 0;
         private prevExpr: AST = null;
-        private currentClassDefinition: ClassDecl = null;
+        private currentClassDefinition: ClassDeclaration = null;
         private parsingClassConstructorDefinition = false;
         private parsingDeclareFile = false;
         private amdDependencies: string[] = [];
@@ -1481,7 +1481,7 @@ module TypeScript {
             }
         }
 
-        private parseClassDecl(errorRecoverySet: ErrorRecoverySet, minChar: number, modifiers: Modifiers): ClassDecl {
+        private parseClassDecl(errorRecoverySet: ErrorRecoverySet, minChar: number, modifiers: Modifiers): ClassDeclaration {
             var leftCurlyCount = this.scanner.leftCurlyCount;
             var rightCurlyCount = this.scanner.rightCurlyCount;
 
@@ -1529,7 +1529,7 @@ module TypeScript {
             }
 
             // REVIEW: Note that we don't set this as the current class decl
-            var classDecl = new ClassDecl(name, new ASTList(), baseClass, interfacesImplemented);
+            var classDecl = new ClassDeclaration(name, new ASTList(), baseClass, interfacesImplemented);
 
             this.currentClassDefinition = classDecl;
 
@@ -1553,7 +1553,7 @@ module TypeScript {
             return classDecl;
         }
 
-        private parseClassElements(classDecl: ClassDecl, errorRecoverySet: ErrorRecoverySet, parentModifiers: Modifiers) {
+        private parseClassElements(classDecl: ClassDeclaration, errorRecoverySet: ErrorRecoverySet, parentModifiers: Modifiers) {
             var modifiers = parentModifiers;
             var resetModifiers = false;
 
@@ -4088,7 +4088,7 @@ module TypeScript {
 
         private okAmbientModuleMember(ast: AST) {
             var nt = ast.nodeType;
-            return (nt == NodeType.Class) || (nt == NodeType.ImportDeclaration) || (nt == NodeType.Interface) || (nt == NodeType.Module) ||
+            return (nt == NodeType.ClassDeclaration) || (nt == NodeType.ImportDeclaration) || (nt == NodeType.Interface) || (nt == NodeType.Module) ||
                 (nt == NodeType.Empty) || (nt == NodeType.VarDecl) || 
                 ((nt == NodeType.Block) && !(<Block>ast).isStatementBlock) ||
                 ((nt == NodeType.FuncDecl) && ((<FuncDecl>ast).isMethod()));
@@ -4264,7 +4264,7 @@ module TypeScript {
 
         // REVIEW: use enclosing scope to determine this
         // REVIEW: Why even use class here?
-        var quickClassDecl = new TypeDecl(NodeType.Class, null, null, null, null, null);
+        var quickClassDecl = new TypeDecl(NodeType.ClassDeclaration, null, null, null, null, null);
         quickParser.currentClassDecl = quickClassDecl;
 
         var result = quickParser.quickParse(new StringSourceText(fragment), "", 0);

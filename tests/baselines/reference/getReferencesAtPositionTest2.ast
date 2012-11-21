@@ -68,7 +68,7 @@
           {"nodeType": "NumberLit", "minChar": 30, "limChar": 31, "startLine": 1, "startCol": 31, "endLine": 1, "endCol": 32, "children": []},
           {"nodeType": "TypeRef", "minChar": 21, "limChar": 27, "startLine": 1, "startCol": 22, "endLine": 1, "endCol": 28, "children": [
             {"nodeType": "Name", "minChar": 21, "limChar": 27, "startLine": 1, "startCol": 22, "endLine": 1, "endCol": 28, "children": []}]}]},
-        {"nodeType": "Class", "minChar": 36, "limChar": 378, "startLine": 3, "startCol": 1, "endLine": 16, "endCol": 2, "children": [
+        {"nodeType": "ClassDeclaration", "minChar": 36, "limChar": 378, "startLine": 3, "startCol": 1, "endLine": 16, "endCol": 2, "children": [
           {"nodeType": "Name", "minChar": 42, "limChar": 54, "startLine": 3, "startCol": 7, "endLine": 3, "endCol": 19, "children": []},
           {"nodeType": "List", "minChar": 55, "limChar": 378, "startLine": 3, "startCol": 20, "endLine": 16, "endCol": 2, "children": [
             {"nodeType": "VarDecl", "minChar": 77, "limChar": 93, "startLine": 5, "startCol": 5, "endLine": 5, "endCol": 21, "children": [
@@ -155,7 +155,7 @@
                               {"nodeType": "Name", "minChar": 790, "limChar": 803, "startLine": 38, "startCol": 18, "endLine": 38, "endCol": 31, "children": []}]}]},
                           {"nodeType": "IncPost", "minChar": 812, "limChar": 827, "startLine": 39, "startCol": 5, "endLine": 39, "endCol": 20, "children": [
                             {"nodeType": "Name", "minChar": 812, "limChar": 824, "startLine": 39, "startCol": 5, "endLine": 39, "endCol": 17, "children": []}]},
-                          {"nodeType": "Class", "minChar": 839, "limChar": 906, "startLine": 41, "startCol": 5, "endLine": 43, "endCol": 6, "children": [
+                          {"nodeType": "ClassDeclaration", "minChar": 839, "limChar": 906, "startLine": 41, "startCol": 5, "endLine": 43, "endCol": 6, "children": [
                             {"nodeType": "Name", "minChar": 845, "limChar": 858, "startLine": 41, "startCol": 11, "endLine": 41, "endCol": 24, "children": []},
                             {"nodeType": "List", "minChar": 859, "limChar": 906, "startLine": 41, "startCol": 25, "endLine": 43, "endCol": 6, "children": [
                               {"nodeType": "VarDecl", "minChar": 870, "limChar": 898, "startLine": 42, "startCol": 9, "endLine": 42, "endCol": 37, "children": [

@@ -743,7 +743,7 @@ module TypeScript {
                     if (type.isClass()) {
                         this.thisType = type.instanceType;
                         if (typeSym.declAST &&
-                            (typeSym.declAST.nodeType == NodeType.Class)) {
+                            (typeSym.declAST.nodeType == NodeType.ClassDeclaration)) {
                             this.thisClassNode = <NamedType>typeSym.declAST;
                         }
                         // use innermost class
@@ -1018,7 +1018,7 @@ module TypeScript {
             if (this.thisFnc == null) {
                 // 'this' in class bodies should bind to 'any'
                 if (this.thisType) {
-                    if (this.thisClassNode && this.thisClassNode.nodeType == NodeType.Class) {
+                    if (this.thisClassNode && this.thisClassNode.nodeType == NodeType.ClassDeclaration) {
                         illegalThisRef = true;
                         ast.type = this.anyType;
                     }
@@ -1034,7 +1034,7 @@ module TypeScript {
                 }
             }
             else {
-                if (this.thisClassNode && (this.inBoundPropTypeCheck || (this.inSuperCall && hasFlag((<ClassDecl>this.thisClassNode).varFlags, VarFlags.ClassSuperMustBeFirstCallInConstructor)))) {
+                if (this.thisClassNode && (this.inBoundPropTypeCheck || (this.inSuperCall && hasFlag((<ClassDeclaration>this.thisClassNode).varFlags, VarFlags.ClassSuperMustBeFirstCallInConstructor)))) {
                     illegalThisRef = true;
                 }
                 if (this.thisFnc.isMethod() || this.thisFnc.isConstructor || this.thisFnc.isTargetTypedAsMethod) {
@@ -1083,7 +1083,7 @@ module TypeScript {
                     }
                     else if (!foundMeth) { // the lambda is bound at the top-level...
                         if (this.thisClassNode) {
-                            (<ClassDecl>this.thisClassNode).varFlags |= VarFlags.MustCaptureThis;
+                            (<ClassDeclaration>this.thisClassNode).varFlags |= VarFlags.MustCaptureThis;
                         }
                         else if (this.checker.currentModDecl) {
                             this.checker.currentModDecl.modFlags |= ModuleFlags.MustCaptureThis;
@@ -2229,7 +2229,7 @@ module TypeScript {
 
                 var hasBaseType = hasFlag(funcDecl.classDecl.type.instanceType.typeFlags, TypeFlags.HasBaseType);
                 var noSuperCallAllowed = !hasBaseType || hasFlag(funcDecl.classDecl.type.instanceType.typeFlags, TypeFlags.HasBaseTypeOfObject);
-                var superCallMustBeFirst = hasFlag((<ClassDecl>funcDecl.classDecl).varFlags, VarFlags.ClassSuperMustBeFirstCallInConstructor);
+                var superCallMustBeFirst = hasFlag((<ClassDeclaration>funcDecl.classDecl).varFlags, VarFlags.ClassSuperMustBeFirstCallInConstructor);
 
                 if (noSuperCallAllowed && this.classConstructorHasSuperCall(funcDecl)) {
                     this.checker.errorReporter.simpleError(funcDecl, "Calls to 'super' constructor are not allowed in classes that either inherit directly from 'Object' or have no base class");
@@ -2259,7 +2259,7 @@ module TypeScript {
                 if (funcDecl.type.enclosingType.symbol.declAST.nodeType == NodeType.FuncDecl) {
                     enclosingClassNode = <NamedType>(<FuncDecl>funcDecl.type.enclosingType.symbol.declAST).classDecl;
                 }
-                else if (funcDecl.type.enclosingType.symbol.declAST.nodeType == NodeType.Class) {
+                else if (funcDecl.type.enclosingType.symbol.declAST.nodeType == NodeType.ClassDeclaration) {
                     enclosingClassNode = <NamedType>funcDecl.type.enclosingType.symbol.declAST;
                 }
 
@@ -2776,7 +2776,7 @@ module TypeScript {
             }
         }
 
-        public typeCheckClass(classDecl: ClassDecl): ClassDecl {
+        public typeCheckClass(classDecl: ClassDeclaration): ClassDeclaration {
             var typeSymbol = <TypeSymbol>classDecl.type.symbol;
 
             if (typeSymbol.typeCheckStatus == TypeCheckStatus.Finished) {

@@ -92,7 +92,7 @@ module TypeScript {
                 return false;
 
             return (this.ast().nodeType === TypeScript.NodeType.Name) &&
-                (this.parent().nodeType === TypeScript.NodeType.Class) &&
+                (this.parent().nodeType === TypeScript.NodeType.ClassDeclaration) &&
                 ((<TypeScript.TypeDecl>this.parent()).name === this.ast());
         }
 
@@ -162,7 +162,7 @@ module TypeScript {
             return this.count() >= 3 &&
                 this.asts[this.top] === ast &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.List &&
-                this.asts[this.top - 2].nodeType === TypeScript.NodeType.Class;
+                this.asts[this.top - 2].nodeType === TypeScript.NodeType.ClassDeclaration;
         }
 
         public isArgumentOfClassConstructor(): bool {
@@ -172,10 +172,10 @@ module TypeScript {
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.List &&
                 this.asts[this.top - 2].nodeType === TypeScript.NodeType.FuncDecl &&
                 this.asts[this.top - 3].nodeType === TypeScript.NodeType.List &&
-                this.asts[this.top - 4].nodeType === TypeScript.NodeType.Class &&
+                this.asts[this.top - 4].nodeType === TypeScript.NodeType.ClassDeclaration &&
                 ((<TypeScript.FuncDecl>this.asts[this.top - 2]).isConstructor) &&
                 ((<TypeScript.FuncDecl>this.asts[this.top - 2]).arguments === this.asts[this.top - 1]) &&
-                ((<TypeScript.ClassDecl>this.asts[this.top - 4]).constructorDecl === this.asts[this.top - 2]);
+                ((<TypeScript.ClassDeclaration>this.asts[this.top - 4]).constructorDecl === this.asts[this.top - 2]);
         }
 
         public isChildOfInterface(): bool {
@@ -220,8 +220,8 @@ module TypeScript {
 
         public isBodyOfClass(): bool {
             return this.count() >= 2 &&
-                this.asts[this.top - 1].nodeType === TypeScript.NodeType.Class &&
-                 (<TypeScript.ClassDecl>this.asts[this.top - 1]).members == this.asts[this.top - 0];
+                this.asts[this.top - 1].nodeType === TypeScript.NodeType.ClassDeclaration &&
+                 (<TypeScript.ClassDeclaration>this.asts[this.top - 1]).members == this.asts[this.top - 0];
         }
 
         public isBodyOfFunction(): bool {

@@ -396,7 +396,7 @@ module TypeScript {
             else if (ast.nodeType == NodeType.Module) {
                 preAssignModuleScopes(ast, context);
             }
-            else if (ast.nodeType == NodeType.Class) {
+            else if (ast.nodeType == NodeType.ClassDeclaration) {
                 preAssignClassScopes(ast, context);
             }
             else if (ast.nodeType == NodeType.Interface) {
@@ -433,7 +433,7 @@ module TypeScript {
                     context.typeFlow.checker.currentModDecl = context.modDeclChain[context.modDeclChain.length - 1];
                 }
             }
-            else if (ast.nodeType == NodeType.Class) {
+            else if (ast.nodeType == NodeType.ClassDeclaration) {
                 popAssignScope(context);
             }
             else if (ast.nodeType == NodeType.Interface) {

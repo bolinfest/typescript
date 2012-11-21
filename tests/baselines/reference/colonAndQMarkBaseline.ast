@@ -8,7 +8,7 @@
   "ast":
     {"nodeType": "Script", "minChar": 0, "limChar": 102, "startLine": 1, "startCol": 1, "endLine": 5, "endCol": 1, "children": [
       {"nodeType": "List", "minChar": 0, "limChar": 102, "startLine": 1, "startCol": 1, "endLine": 5, "endCol": 1, "children": [
-        {"nodeType": "Class", "minChar": 0, "limChar": 100, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 2, "children": [
+        {"nodeType": "ClassDeclaration", "minChar": 0, "limChar": 100, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 2, "children": [
           {"nodeType": "Name", "minChar": 6, "limChar": 9, "startLine": 1, "startCol": 7, "endLine": 1, "endCol": 10, "children": []},
           {"nodeType": "List", "minChar": 10, "limChar": 100, "startLine": 1, "startCol": 11, "endLine": 4, "endCol": 2, "children": [
             {"nodeType": "FuncDecl", "minChar": 17, "limChar": 69, "startLine": 2, "startCol": 5, "endLine": 2, "endCol": 57, "children": [

@@ -100,7 +100,7 @@ module TypeScript {
         Catch,
         List,
         Script,
-        Class,
+        ClassDeclaration,
         Interface,
         Module,
         ImportDeclaration,

@@ -138,7 +138,7 @@
         {"nodeType": "Module", "minChar": 0, "limChar": 496, "startLine": 1, "startCol": 1, "endLine": 43, "endCol": 2, "children": [
           {"nodeType": "Name", "minChar": 7, "limChar": 10, "startLine": 1, "startCol": 8, "endLine": 1, "endCol": 11, "children": []},
           {"nodeType": "List", "minChar": 11, "limChar": 496, "startLine": 1, "startCol": 12, "endLine": 43, "endCol": 2, "children": [
-            {"nodeType": "Class", "minChar": 20, "limChar": 258, "startLine": 3, "startCol": 5, "endLine": 16, "endCol": 6, "children": [
+            {"nodeType": "ClassDeclaration", "minChar": 20, "limChar": 258, "startLine": 3, "startCol": 5, "endLine": 16, "endCol": 6, "children": [
               {"nodeType": "Name", "minChar": 26, "limChar": 29, "startLine": 3, "startCol": 11, "endLine": 3, "endCol": 14, "children": []},
               {"nodeType": "List", "minChar": 30, "limChar": 258, "startLine": 3, "startCol": 15, "endLine": 16, "endCol": 6, "children": [
                 {"nodeType": "VarDecl", "minChar": 43, "limChar": 66, "startLine": 5, "startCol": 9, "endLine": 5, "endCol": 32, "children": [

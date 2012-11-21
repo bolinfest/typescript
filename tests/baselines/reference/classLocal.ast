@@ -26,7 +26,7 @@
           {"nodeType": "Name", "minChar": 31, "limChar": 32, "startLine": 3, "startCol": 5, "endLine": 3, "endCol": 6, "children": []},
           {"nodeType": "NumberLit", "minChar": 35, "limChar": 37, "startLine": 3, "startCol": 9, "endLine": 3, "endCol": 11, "children": []}]},
         {"nodeType": "Comment", "minChar": 0, "limChar": 23, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 24, "children": [
-          {"nodeType": "Class", "minChar": 42, "limChar": 252, "startLine": 5, "startCol": 1, "endLine": 19, "endCol": 2, "children": [
+          {"nodeType": "ClassDeclaration", "minChar": 42, "limChar": 252, "startLine": 5, "startCol": 1, "endLine": 19, "endCol": 2, "children": [
             {"nodeType": "Name", "minChar": 48, "limChar": 51, "startLine": 5, "startCol": 7, "endLine": 5, "endCol": 10, "children": []},
             {"nodeType": "List", "minChar": 52, "limChar": 252, "startLine": 5, "startCol": 11, "endLine": 19, "endCol": 2, "children": [
               {"nodeType": "VarDecl", "minChar": 71, "limChar": 73, "startLine": 6, "startCol": 17, "endLine": 6, "endCol": 19, "children": [
