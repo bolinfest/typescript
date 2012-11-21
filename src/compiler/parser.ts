@@ -56,7 +56,7 @@ module TypeScript {
         // TODO: consolidate these
         private inFunction = false;
         private inInterfaceDecl = false;
-        public currentClassDecl: TypeDecl = null;
+        public currentClassDecl: Record = null;
 
         private inFncDecl = false;  // this is only for FuncDecls - not constructors, like inFnc
         private anonId = new Identifier("_anonymous");
@@ -4267,7 +4267,7 @@ module TypeScript {
 
         // REVIEW: use enclosing scope to determine this
         // REVIEW: Why even use class here?
-        var quickClassDecl = new TypeDecl(NodeType.ClassDeclaration, null, null, null, null);
+        var quickClassDecl = new ClassDeclaration(null, null, null, null);
         quickParser.currentClassDecl = quickClassDecl;
 
         var result = quickParser.quickParse(new StringSourceText(fragment), "", 0);
