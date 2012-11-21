@@ -53,21 +53,18 @@ module TypeScript {
 
     export enum AllowedElements {
         None = 0,
-        Statements = 1,
         FunctionDecls = 1 << 1,
         ModuleDecls = 1 << 2,
         ClassDecls = 1 << 3,
         InterfaceDecls = 1 << 4,
-        TypedFuncDecls = 1 << 5,
-        TypedDecls = 1 << 6,
         AmbientDecls = 1 << 10,
         Properties = 1 << 11,
 
-        Block = Statements | FunctionDecls | TypedFuncDecls | TypedDecls,
-        Global = Statements | FunctionDecls | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
-        FunctionBody = Statements | FunctionDecls,
-        ModuleMembers = TypedFuncDecls | FunctionDecls | ModuleDecls | ClassDecls | InterfaceDecls | TypedDecls | Statements | AmbientDecls,
-        ClassMembers = TypedFuncDecls | FunctionDecls | Statements | TypedDecls | Properties,
+        Block = FunctionDecls,
+        Global = FunctionDecls | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
+        FunctionBody = FunctionDecls,
+        ModuleMembers = FunctionDecls | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
+        ClassMembers = FunctionDecls | Properties,
         QuickParse = Global | Properties,
     }
 
