@@ -52,8 +52,10 @@ module TypeScript {
         private currentToken: Token = null;
 
         private needTerminator = false;
+
+
         // TODO: consolidate these
-        private inFnc = false;
+        private inFunction = false;
         private inStaticFnc = false;
         private inInterfaceDecl = false;
         public currentClassDecl: TypeDecl = null;
@@ -664,7 +666,7 @@ module TypeScript {
             var moduleBody = new ASTList();
             var bodyMinChar = this.scanner.startPos;
             this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.ID);
-            this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly, moduleBody, true, true,
+            this.parseStatementList(errorRecoverySet | ErrorRecoverySet.RCurly, moduleBody, true, true,
                             AllowedElements.ModuleMembers, modifiers);
             moduleBody.minChar = bodyMinChar;
             moduleBody.limChar = this.scanner.pos;
@@ -944,15 +946,15 @@ module TypeScript {
                 else {
                     this.state = ParseState.StartStmtList;
                     this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.StmtStart);
-                    var svInFnc = this.inFnc;
+                    var savedInFunction = this.inFunction;
                     isAnonLambda = wasShorthand;
-                    this.inFnc = true;
-                    this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly |
-                                    ErrorRecoverySet.StmtStart,
-                                    bod, true, false, allowedElements, parentModifiers);
+                    this.inFunction = true;
+                    this.parseStatementList(
+                        errorRecoverySet | ErrorRecoverySet.RCurly | ErrorRecoverySet.StmtStart,
+                        bod, /*sourceElements:*/ true, /*noLeadingCase:*/ false, allowedElements, parentModifiers);
                     bod.minChar = bodMinChar;
                     bod.limChar = this.scanner.pos;
-                    this.inFnc = svInFnc;
+                    this.inFunction = savedInFunction;
                     var ec = new EndCode();
                     ec.minChar = bod.limChar;
                     ec.limChar = ec.minChar;
@@ -3796,7 +3798,7 @@ module TypeScript {
                                 }
                                 this.checkCurrentToken(TokenID.Colon, errorRecoverySet | ErrorRecoverySet.StmtStart);
                                 caseStmt.body = new ASTList();
-                                this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly,
+                                this.parseStatementList(errorRecoverySet | ErrorRecoverySet.RCurly,
                                               caseStmt.body, false, true, allowedElements, modifiers);
                                 caseStmt.limChar = caseStmt.body.limChar;
                                 switchStmt.caseList.append(caseStmt);
@@ -3911,7 +3913,7 @@ module TypeScript {
                         this.currentToken = this.scanner.scan();
                         var block = new Block(new ASTList(), true);
                         this.pushStmt(block, labelList);
-                        this.parseStmtList(errorRecoverySet | ErrorRecoverySet.RCurly, block.statements, false, false,
+                        this.parseStatementList(errorRecoverySet | ErrorRecoverySet.RCurly, block.statements, false, false,
                                       AllowedElements.Block, modifiers);
                         this.popStmt();
                         block.statements.minChar = minChar;
@@ -3954,7 +3956,7 @@ module TypeScript {
                         if (modifiers != Modifiers.None) {
                             this.reportParseError("modifiers can not appear before return statement");
                         }
-                        if (!this.inFnc) {
+                        if (!this.inFunction) {
                             this.reportParseError("return statement outside of function body");
                         }
                         minChar = this.scanner.startPos;
@@ -4115,7 +4117,7 @@ module TypeScript {
                 ((nt == NodeType.FuncDecl) && ((<FuncDecl>ast).isMethod()));
         }
 
-        private parseStmtList(errorRecoverySet: ErrorRecoverySet, stmts: ASTList, sourceElms: bool, noLeadingCase: bool,
+        private parseStatementList(errorRecoverySet: ErrorRecoverySet, stmts: ASTList, sourceElms: bool, noLeadingCase: bool,
             allowedElements: AllowedElements, parentModifiers: Modifiers): void {
             var directivePrologue = sourceElms;
             stmts.minChar = this.scanner.startPos;
@@ -4218,7 +4220,7 @@ module TypeScript {
             this.state = ParseState.StartScript;
             this.parsingDeclareFile = isDSTRFile(filename) || isDTSFile(filename);
 
-            this.parseStmtList(ErrorRecoverySet.EOF | ErrorRecoverySet.Func,
+            this.parseStatementList(ErrorRecoverySet.EOF | ErrorRecoverySet.Func,
                             bod, true, false, allowedElements, Modifiers.None);
             if (this.currentToken.tokenId != TokenID.EndOfFile) {
                 var badToken: TokenInfo = tokenTable[this.currentToken.tokenId];
