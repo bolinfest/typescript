@@ -453,7 +453,7 @@ module TypeScript {
         export function walkRecordChildren(preAst: Record, parent: AST, walker: IAstWalker): void {
             preAst.name = walker.walk(preAst.name, preAst);
             if (walker.options.goNextSibling && preAst.members) {
-                preAst.members = walker.walk(preAst.members, preAst);
+                preAst.members = <ASTList>walker.walk(preAst.members, preAst);
             }
 
         }

@@ -1193,7 +1193,7 @@ module TypeScript {
     export class Record extends AST {
         constructor (nodeType: NodeType,
                      public name: AST,
-                     public members: AST) {
+                     public members: ASTList) {
             super(nodeType);
         }
     }
@@ -1251,9 +1251,9 @@ module TypeScript {
 
     export class NamedType extends Record {
         public name: Identifier;
-        public members: AST;
+        public members: ASTList;
 
-        constructor (nodeType: NodeType, name: Identifier, public extendsList: ASTList, public implementsList: ASTList, members: AST) {
+        constructor (nodeType: NodeType, name: Identifier, public extendsList: ASTList, public implementsList: ASTList, members: ASTList) {
             super(nodeType, name, members);
             this.name = name;
             this.members = members;
@@ -1274,9 +1274,10 @@ module TypeScript {
         public definitionMembers: ASTList;
         public endingToken: ASTSpan = null;
 
-        constructor (name: Identifier, definitionMembers: ASTList, baseClass: ASTList,
-            implementsList: ASTList) {
-
+        constructor (name: Identifier,
+                     definitionMembers: ASTList,
+                     baseClass: ASTList,
+                     implementsList: ASTList) {
             super(NodeType.Class, name, baseClass, implementsList, definitionMembers);
 
             this.name = name;
@@ -1305,14 +1306,14 @@ module TypeScript {
         public name: Identifier;
         public extendsList: ASTList;
         public implementsList: ASTList;
-        public members: AST;
+        public members: ASTList;
 
         constructor (nodeType: NodeType,
                      name: Identifier,
-                     members: AST,
+                     members: ASTList,
                      public args: ASTList,
                      extendsList: ASTList,
-            implementsList: ASTList) {
+                     implementsList: ASTList) {
             super(nodeType, name, extendsList, implementsList, members);
 
             this.name = name;
