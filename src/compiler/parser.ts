@@ -53,10 +53,8 @@ module TypeScript {
 
         private needTerminator = false;
 
-
         // TODO: consolidate these
         private inFunction = false;
-        private inStaticFnc = false;
         private inInterfaceDecl = false;
         public currentClassDecl: TypeDecl = null;
 
@@ -3346,9 +3344,6 @@ module TypeScript {
                         ast.limChar = this.scanner.pos;
                         break;
                     case TokenID.Function:
-                        if (this.inStaticFnc) {
-                            this.reportParseError("Ambient static function delarations may only contain other ambient static function declarations");
-                        }
                         if (this.parsingDeclareFile || isAmbient() || this.ambientModule) {
                             this.currentToken = this.scanner.scan();
                             fnOrVar = this.parsePropertyDeclaration(errorRecoverySet | ErrorRecoverySet.SColon,
