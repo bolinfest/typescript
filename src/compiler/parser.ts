@@ -3147,7 +3147,7 @@ module TypeScript {
             }
         }
 
-        private parseTry(tryNode: Try, errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Try {
+        private parseTry(tryNode: Try, errorRecoverySet: ErrorRecoverySet, parentModifiers: Modifiers): Try {
             var minChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.currentToken = this.scanner.scan();
@@ -3161,7 +3161,7 @@ module TypeScript {
                     return etryNode;
                 }
             }
-            tryNode.body = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
+            tryNode.body = this.parseStatement(errorRecoverySet, AllowedElements.None, parentModifiers);
             tryNode.minChar = minChar;
             tryNode.limChar = tryNode.body.limChar;
             tryNode.preComments = preComments;
@@ -3169,7 +3169,7 @@ module TypeScript {
             return tryNode;
         }
 
-        private parseCatch(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Catch {
+        private parseCatch(errorRecoverySet: ErrorRecoverySet, parentModifiers: Modifiers): Catch {
             var catchMinChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.currentToken = this.scanner.scan();
@@ -3213,7 +3213,7 @@ module TypeScript {
                 }
             }
 
-            var catchStmt = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers);
+            var catchStmt = this.parseStatement(errorRecoverySet, AllowedElements.None, parentModifiers);
             var catchNode = new Catch(param, catchStmt);
             catchNode.statement.minChar = catchMinChar;
             catchNode.statement.limChar = statementPos;
@@ -3224,7 +3224,7 @@ module TypeScript {
             return catchNode;
         }
 
-        private parseFinally(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers): Finally {
+        private parseFinally(errorRecoverySet: ErrorRecoverySet, parentModifiers: Modifiers): Finally {
             var finMinChar = this.scanner.startPos;
             var preComments = this.parseComments();
             this.currentToken = this.scanner.scan();
@@ -3239,7 +3239,8 @@ module TypeScript {
                     return efin;
                 }
             }
-            var finBody = this.parseStatement(errorRecoverySet, allowedElements, parentModifiers)
+
+            var finBody = this.parseStatement(errorRecoverySet, AllowedElements.None, parentModifiers)
             var fin = new Finally(finBody);
             fin.minChar = finMinChar;
             fin.limChar = fin.body.limChar;
@@ -3248,20 +3249,22 @@ module TypeScript {
             return fin;
         }
 
-        private parseTryCatchFinally(errorRecoverySet: ErrorRecoverySet, allowedElements: AllowedElements, parentModifiers: Modifiers, labelList: ASTList): AST {
+        private parseTryCatchFinally(errorRecoverySet: ErrorRecoverySet, parentModifiers: Modifiers, labelList: ASTList): AST {
             var tryPart: AST = new Try(null);
             var tryMinChar = this.scanner.startPos;
             this.pushStmt(<Statement>tryPart, labelList);
-            this.parseTry(<Try>tryPart, errorRecoverySet | ErrorRecoverySet.Catch, allowedElements, parentModifiers);
+            this.parseTry(<Try>tryPart, errorRecoverySet | ErrorRecoverySet.Catch, parentModifiers);
             this.popStmt();
             var tc: TryCatch = null;
             var tf: TryFinally = null;
+
             if (this.currentToken.tokenId == TokenID.Catch) {
-                var catchPart = this.parseCatch(errorRecoverySet | ErrorRecoverySet.Catch, allowedElements, parentModifiers);
+                var catchPart = this.parseCatch(errorRecoverySet | ErrorRecoverySet.Catch, parentModifiers);
                 tc = new TryCatch(<Try>tryPart, catchPart);
                 tc.minChar = tryPart.minChar;
                 tc.limChar = catchPart.limChar;
             }
+
             if (this.currentToken.tokenId != TokenID.Finally) {
                 if (tc == null) {
                     this.reportParseError("try with neither catch nor finally");
@@ -3282,7 +3285,7 @@ module TypeScript {
                 if (tc) {
                     tryPart = tc;
                 }
-                var finallyPart = this.parseFinally(errorRecoverySet, allowedElements, parentModifiers)
+                var finallyPart = this.parseFinally(errorRecoverySet, parentModifiers)
                 tf = new TryFinally(tryPart, finallyPart);
                 tf.minChar = tryMinChar;
                 tf.limChar = finallyPart.limChar;
@@ -3873,7 +3876,7 @@ module TypeScript {
                             this.reportParseError("try statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        ast = this.parseTryCatchFinally(errorRecoverySet, AllowedElements.None, parentModifiers, labelList);
+                        ast = this.parseTryCatchFinally(errorRecoverySet, parentModifiers, labelList);
                         break;
                     }
                     case TokenID.OpenBrace: {
