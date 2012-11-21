@@ -57,11 +57,11 @@ module TypeScript {
         ModuleDecls = 1 << 2,
         ClassDecls = 1 << 3,
         InterfaceDecls = 1 << 4,
-        AmbientDecls = 1 << 10,
+        AmbientDeclarations = 1 << 10,
         Properties = 1 << 11,
 
-        Global = FunctionDeclarations | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
-        ModuleMembers = FunctionDeclarations | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
+        Global = FunctionDeclarations | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDeclarations,
+        ModuleMembers = FunctionDeclarations | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDeclarations,
         ClassMembers = FunctionDeclarations | Properties,
         QuickParse = Global | Properties,
     }

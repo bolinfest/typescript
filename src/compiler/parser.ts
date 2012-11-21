@@ -3524,7 +3524,7 @@ module TypeScript {
                         }
                         break;
                     case TokenID.Declare:
-                        if (!(allowedElements & AllowedElements.AmbientDecls)) {
+                        if (!(allowedElements & AllowedElements.AmbientDeclarations)) {
                             this.reportParseError("Ambient declarations are only allowed at the top-level or module scopes")
                         }
                         if (!this.parsingDeclareFile && hasFlag(parentModifiers, Modifiers.Ambient)) {
