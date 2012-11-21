@@ -2826,11 +2826,11 @@ module TypeScript {
 
             // if the class has no declared constructor, adapt its base class's signature group, if necessary
             if (!classDecl.constructorDecl) {
-                if (classDecl.baseClass &&
-                    classDecl.baseClass.members.length &&
-                    classDecl.baseClass.members[0].type &&
-                    classDecl.baseClass.members[0].type.symbol.type.isClass()) {
-                    cloneParentConstructGroupForChildType(classDecl.type, classDecl.baseClass.members[0].type.symbol.type);
+                if (classDecl.extendsList &&
+                    classDecl.extendsList.members.length &&
+                    classDecl.extendsList.members[0].type &&
+                    classDecl.extendsList.members[0].type.symbol.type.isClass()) {
+                    cloneParentConstructGroupForChildType(classDecl.type, classDecl.extendsList.members[0].type.symbol.type);
                 }
             }
 

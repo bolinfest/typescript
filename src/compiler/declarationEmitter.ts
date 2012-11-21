@@ -458,7 +458,7 @@ module TypeScript {
                 var className = classDecl.name.text;
                 this.emitDeclFlags(ToDeclFlags(classDecl.varFlags), "class");
                 this.declFile.Write(className);
-                this.emitBaseList(classDecl.baseClass, "extends");
+                this.emitBaseList(classDecl.extendsList, "extends");
                 this.emitBaseList(classDecl.implementsList, "implements");
                 this.declFile.WriteLine(" {");
 

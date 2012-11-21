@@ -465,8 +465,8 @@ module TypeScript {
         export function walkClassDeclChildren(preAst: ClassDeclaration, parent: AST, walker: IAstWalker): void {
             walkNamedTypeChildren(preAst, parent, walker);
 
-            if (walker.options.goNextSibling && preAst.baseClass) {
-                preAst.baseClass = <ASTList>walker.walk(preAst.baseClass, preAst);
+            if (walker.options.goNextSibling && preAst.extendsList) {
+                preAst.extendsList = <ASTList>walker.walk(preAst.extendsList, preAst);
             }
 
             if (walker.options.goNextSibling && preAst.implementsList) {

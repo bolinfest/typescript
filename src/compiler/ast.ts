@@ -1261,18 +1261,13 @@ module TypeScript {
         public constructorDecl: FuncDecl = null;
         public constructorNestingLevel = 0;
         public allMemberDefinitions: ASTList = new ASTList();
-        public baseClass: ASTList;
-        public implementsList: ASTList;
         public endingToken: ASTSpan = null;
 
         constructor (name: Identifier,
                      members: ASTList,
-                     baseClass: ASTList,
+                     extendsList: ASTList,
                      implementsList: ASTList) {
-            super(NodeType.ClassDeclaration, name, baseClass, implementsList, members);
-
-            this.baseClass = baseClass;
-            this.implementsList = implementsList;
+            super(NodeType.ClassDeclaration, name, extendsList, implementsList, members);
         }
 
         public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }
@@ -1292,8 +1287,6 @@ module TypeScript {
         public isOverload = false;
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
-        public extendsList: ASTList;
-        public implementsList: ASTList;
 
         constructor (nodeType: NodeType,
                      name: Identifier,
@@ -1301,9 +1294,6 @@ module TypeScript {
                      extendsList: ASTList,
                      implementsList: ASTList) {
             super(nodeType, name, extendsList, implementsList, members);
-
-            this.extendsList = extendsList;
-            this.implementsList = implementsList;
         }
 
         public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }
