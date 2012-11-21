@@ -2,6 +2,6 @@
 //// 
 
 goTo.bof();
-edit.insert("interface Person {\n");
-// indentation on newline after "interface {"
+edit.insert("module M {\n");
+// indentation on newline after "module {"
 verify.smartIndentLevelIs(1);

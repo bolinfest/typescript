@@ -545,15 +545,9 @@ module TypeScript {
 
                         limChar = this.scanner.pos;
                         this.checkCurrentToken(TokenID.CloseParen, errorRecoverySet | ErrorRecoverySet.ID);
-                            
+
                         if (alias) {
                             alias.postComments = this.parseComments();
-                        }
-                            
-                        // gobble up the ';' if there is one...
-                        if (this.currentToken.tokenId == TokenID.Semicolon) {
-                            limChar = this.scanner.pos;
-                            this.currentToken = this.scanner.scan();
                         }
                     }
                 }
@@ -656,7 +650,7 @@ module TypeScript {
             endingToken.limChar = this.scanner.pos;
             this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
 
-            var limChar = this.scanner.pos;
+            var limChar = this.scanner.lastTokenLimChar();
             var moduleDecl: ModuleDecl;
             if (enclosedList && (enclosedList.length > 0)) {
                 var len = enclosedList.length;
@@ -720,6 +714,7 @@ module TypeScript {
             this.topLevel = svTopLevel;
             moduleDecl.leftCurlyCount = this.scanner.leftCurlyCount - leftCurlyCount;
             moduleDecl.rightCurlyCount = this.scanner.rightCurlyCount - rightCurlyCount;
+            moduleDecl.limChar = moduleBody.limChar;
             return moduleDecl;
         }
 
@@ -2028,6 +2023,7 @@ module TypeScript {
                 interfaceDecl.varFlags |= VarFlags.Exported;
             }
 
+            interfaceDecl.limChar = members.limChar;
             interfaceDecl.leftCurlyCount = this.scanner.leftCurlyCount - leftCurlyCount;
             interfaceDecl.rightCurlyCount = this.scanner.rightCurlyCount - rightCurlyCount;
             return interfaceDecl;

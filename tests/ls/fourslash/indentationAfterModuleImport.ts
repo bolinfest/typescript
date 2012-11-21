@@ -4,6 +4,5 @@
 
 goTo.marker();
 edit.insert("\n");
-// Bug 15684: [Smart Indent] Auto indent incorrect after module import decl
-//verify.smartIndentLevelIs(0);
-verify.smartIndentLevelIs(1);
+// [Smart Indent] Auto indent after module import decl
+verify.smartIndentLevelIs(0);
