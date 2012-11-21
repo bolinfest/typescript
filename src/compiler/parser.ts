@@ -1742,10 +1742,10 @@ module TypeScript {
                 this.currentClassDefinition.constructorNestingLevel = this.nestingLevel + 1;
             }
 
-            var constructorFuncDecl: FuncDecl =
-                this.parseFunctionStatements(errorRecoverySet | ErrorRecoverySet.RCurly,
-                                        this.currentClassDefinition.name, true, false, args, AllowedElements.ClassMembers,
-                                        minChar, requiresSignature, modifiers);
+            var constructorFuncDecl = this.parseFunctionStatements(
+                errorRecoverySet | ErrorRecoverySet.RCurly, this.currentClassDefinition.name, 
+                /*isConstructor:*/ true, /*isMethod:*/ false, args, AllowedElements.Properties, 
+                minChar, requiresSignature, modifiers);
 
             constructorFuncDecl.preComments = preComments;
 

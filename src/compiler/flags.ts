@@ -61,7 +61,6 @@ module TypeScript {
 
         Global = ModuleDecls | ClassDecls | InterfaceDecls | AmbientDeclarations,
         ModuleMembers = ModuleDecls | ClassDecls | InterfaceDecls | AmbientDeclarations,
-        ClassMembers = Properties,
         QuickParse = Global | Properties,
     }
 
