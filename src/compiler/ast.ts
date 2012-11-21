@@ -1284,7 +1284,6 @@ module TypeScript {
 
     export class TypeDecl extends NamedType {
         public varFlags = VarFlags.None;
-        public isOverload = false;
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
 

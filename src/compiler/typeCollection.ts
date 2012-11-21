@@ -331,7 +331,7 @@ module TypeScript {
             }
         }
         
-        if (typeSymbol && !foundValSymbol && (typeSymbol.declAST != classDecl) && !(<TypeDecl>typeSymbol.declAST).isOverload) {
+        if (typeSymbol && !foundValSymbol && (typeSymbol.declAST != classDecl)) {
             typeSymbol = null;
         }
 
