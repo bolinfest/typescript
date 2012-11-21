@@ -1123,7 +1123,7 @@ module TypeScript {
         public isResident = false;
         public isDeclareFile = false;
         public hasBeenTypeChecked = false;
-        public topLevelMod: ModuleDecl = null;
+        public topLevelMod: ModuleDeclaration = null;
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
         public vars: ASTList;
@@ -1151,7 +1151,7 @@ module TypeScript {
                 for (var i = 0, len = this.bod.members.length; i < len; i++) {
                     var stmt = this.bod.members[i];
                     if (stmt.nodeType == NodeType.Module) {
-                        if (!hasFlag((<ModuleDecl>stmt).modFlags, ModuleFlags.ShouldEmitModuleDecl | ModuleFlags.Ambient)) {
+                        if (!hasFlag((<ModuleDeclaration>stmt).modFlags, ModuleFlags.ShouldEmitModuleDecl | ModuleFlags.Ambient)) {
                             return true;
                         }
                     }
@@ -1197,7 +1197,7 @@ module TypeScript {
         }
     }
 
-    export class ModuleDecl extends NamedDeclaration {
+    export class ModuleDeclaration extends NamedDeclaration {
         public modFlags = ModuleFlags.ShouldEmitModuleDecl;
         public mod: ModuleType;
         public alias: AST = null;

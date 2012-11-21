@@ -186,7 +186,7 @@ module TypeScript {
     export function preCollectModuleTypes(ast: AST, parent: AST, context: TypeCollectionContext) {
         var scopeChain = context.scopeChain;
 
-        var moduleDecl: ModuleDecl = <ModuleDecl>ast;
+        var moduleDecl: ModuleDeclaration = <ModuleDeclaration>ast;
 
         var isAmbient = hasFlag(moduleDecl.modFlags, ModuleFlags.Ambient);
         var isEnum = hasFlag(moduleDecl.modFlags, ModuleFlags.IsEnum);

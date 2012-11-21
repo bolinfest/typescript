@@ -72,7 +72,7 @@ module TypeScript {
         public prologueEmitted = false;
         public thisClassNode: NamedType = null;
         public thisFnc: FuncDecl = null;
-        public moduleDeclList: ModuleDecl[] = [];
+        public moduleDeclList: ModuleDeclaration[] = [];
         public moduleName = "";
         public emitState = new EmitState();
         public indenter = new Indenter();
@@ -614,7 +614,7 @@ module TypeScript {
             //}           
         }
 
-        public emitJavascriptModule(moduleDecl: ModuleDecl) {
+        public emitJavascriptModule(moduleDecl: ModuleDeclaration) {
             var modName = moduleDecl.name.actualText;
             if (isTSFile(modName)) {
                 moduleDecl.name.setText(modName.substring(0, modName.length - 3));
@@ -768,9 +768,9 @@ module TypeScript {
                     }
                 }
                 else {
-                    var containingMod: ModuleDecl = null;
+                    var containingMod: ModuleDeclaration = null;
                     if (moduleDecl.type && moduleDecl.type.symbol.container && moduleDecl.type.symbol.container.declAST) {
-                        containingMod = <ModuleDecl>moduleDecl.type.symbol.container.declAST;
+                        containingMod = <ModuleDeclaration>moduleDecl.type.symbol.container.declAST;
                     }
                     var parentIsDynamic = containingMod && hasFlag(containingMod.modFlags, ModuleFlags.IsDynamic);
 
@@ -1026,7 +1026,7 @@ module TypeScript {
             }
         }
 
-        public declEnclosed(moduleDecl: ModuleDecl): bool {
+        public declEnclosed(moduleDecl: ModuleDeclaration): bool {
             if (moduleDecl == null) {
                 return true;
             }
@@ -1114,15 +1114,15 @@ module TypeScript {
                 if (sym &&
                     sym.declAST &&
                     sym.declAST.nodeType == NodeType.Module &&
-                    (hasFlag((<ModuleDecl>sym.declAST).modFlags, ModuleFlags.IsDynamic))) {
-                    var moduleDecl: ModuleDecl = <ModuleDecl>sym.declAST;
+                    (hasFlag((<ModuleDeclaration>sym.declAST).modFlags, ModuleFlags.IsDynamic))) {
+                    var moduleDecl: ModuleDeclaration = <ModuleDeclaration>sym.declAST;
 
                     if (moduleGenTarget == ModuleGenTarget.Asynchronous) {
                         this.writeLineToOutput("__" + this.modAliasId + "__;");
                     }
                     else {
                         var modPath = name.actualText;//(<ModuleDecl>moduleDecl.mod.symbol.declAST).name.actualText;
-                        var isAmbient = moduleDecl.mod.symbol.declAST && hasFlag((<ModuleDecl>moduleDecl.mod.symbol.declAST).modFlags, ModuleFlags.Ambient);
+                        var isAmbient = moduleDecl.mod.symbol.declAST && hasFlag((<ModuleDeclaration>moduleDecl.mod.symbol.declAST).modFlags, ModuleFlags.Ambient);
                         modPath = isAmbient ? modPath : this.firstModAlias ? this.firstModAlias : quoteBaseName(modPath);
                         modPath = isAmbient ? modPath : (!isRelative(stripQuotes(modPath)) ? quoteStr("./" + stripQuotes(modPath)) : modPath);
                         this.writeToOutput("require(" + modPath + ")");

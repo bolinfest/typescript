@@ -52,7 +52,7 @@ module TypeScript {
         public isObjectLitField = false;
 
         public declAST: AST = null;
-        public declModule: ModuleDecl = null;  // if child of module, this is the module that declared it
+        public declModule: ModuleDeclaration = null;  // if child of module, this is the module that declared it
 
         public passSymbolCreated: number = CompilerDiagnostics.analysisPass;
 

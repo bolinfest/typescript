@@ -349,7 +349,7 @@ module TypeScript {
                     funcdecl.scopeType = null;
                 }
                 else if (ast.nodeType == NodeType.Module) {
-                    var modDecl = <ModuleDecl>ast;
+                    var modDecl = <ModuleDeclaration>ast;
                     modDecl.mod = null;
                 }
                 else if (ast.nodeType == NodeType.With) {

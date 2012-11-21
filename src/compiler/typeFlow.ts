@@ -8,7 +8,7 @@ module TypeScript {
         public thisType: Type;
         public classType: Type;
         public fnc: FuncDecl;
-        public moduleDecl: ModuleDecl;
+        public moduleDecl: ModuleDeclaration;
 
         constructor (public container: Symbol, public previous: ScopeChain,
                      public scope: SymbolScope) { }
@@ -750,7 +750,7 @@ module TypeScript {
                         break;
                     }
                     if (type.isModuleType()) {
-                        this.checker.currentModDecl = <ModuleDecl>typeSym.declAST;
+                        this.checker.currentModDecl = <ModuleDeclaration>typeSym.declAST;
                         // use innermost module
                         break;
                     }
@@ -1167,7 +1167,7 @@ module TypeScript {
                         // no going back                        
                         if (symType && (<TypeSymbol>symbol).aliasLink && (<TypeSymbol>symbol).onlyReferencedAsTypeRef) {
 
-                            var modDecl = <ModuleDecl>symType.symbol.declAST;
+                            var modDecl = <ModuleDeclaration>symType.symbol.declAST;
                             if (modDecl && hasFlag(modDecl.modFlags, ModuleFlags.IsDynamic)) {
                                 (<TypeSymbol>symbol).onlyReferencedAsTypeRef = this.inTypeRefTypeCheck;
                             }
@@ -2279,7 +2279,7 @@ module TypeScript {
                 }
 
                 if (enclosingSym && enclosingSym.declAST && enclosingSym.declAST.nodeType == NodeType.Module) {
-                    this.checker.currentModDecl = <ModuleDecl>enclosingSym.declAST;
+                    this.checker.currentModDecl = <ModuleDeclaration>enclosingSym.declAST;
                 }
             }
 
@@ -2929,7 +2929,7 @@ module TypeScript {
                 (<TypeSymbol>importDecl.id.sym).type = mod;
 
                 if (mod.symbol && mod.symbol.declAST) {
-                    (<ModuleDecl>mod.symbol.declAST).modFlags &= ~ModuleFlags.ShouldEmitModuleDecl;
+                    (<ModuleDeclaration>mod.symbol.declAST).modFlags &= ~ModuleFlags.ShouldEmitModuleDecl;
                 }
 
                 this.checkSymbolPrivacy(mod.symbol, importDecl.id.sym, (typeName: string) => {
@@ -2952,7 +2952,7 @@ module TypeScript {
             return importDecl;
         }
 
-        public typeCheckModule(moduleDecl: ModuleDecl): ModuleDecl {
+        public typeCheckModule(moduleDecl: ModuleDeclaration): ModuleDeclaration {
 
             // In some really nasty cases of error recovery, we may not have a type
             if (!moduleDecl.mod) {

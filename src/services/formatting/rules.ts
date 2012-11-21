@@ -669,9 +669,9 @@ module Formatting {
 
         static IsInterfaceContext(context: FormattingContext): bool {
             return context.contextNode.AuthorNode.Details.nodeType == TypeScript.NodeType.List && 
-                    context.contextNode.Parent != null && context.contextNode.Parent.AuthorNode.Details.nodeType == TypeScript.NodeType.Interface ;
+                   context.contextNode.Parent != null &&
+                   context.contextNode.Parent.AuthorNode.Details.nodeType == TypeScript.NodeType.InterfaceDeclaration;
         }
-
 
         //#endregion
     }

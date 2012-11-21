@@ -313,7 +313,7 @@ module TypeScript {
             }
         }
 
-        private parseEnumDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDecl {
+        private parseEnumDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDeclaration {
             var leftCurlyCount = this.scanner.leftCurlyCount;
             var rightCurlyCount = this.scanner.rightCurlyCount;
 
@@ -434,7 +434,7 @@ module TypeScript {
 
             this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
             members.limChar = this.scanner.lastTokenLimChar();
-            var modDecl = new ModuleDecl(name, members, this.topVarList(), this.topScopeList(), endingToken);
+            var modDecl = new ModuleDeclaration(name, members, this.topVarList(), this.topScopeList(), endingToken);
             modDecl.modFlags |= ModuleFlags.IsEnum;
             this.popDeclLists();
 
@@ -585,7 +585,7 @@ module TypeScript {
             return importDecl;
         }
 
-        private parseModuleDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDecl {
+        private parseModuleDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ModuleDeclaration {
             var leftCurlyCount = this.scanner.leftCurlyCount;
             var rightCurlyCount = this.scanner.rightCurlyCount;
 
@@ -652,11 +652,12 @@ module TypeScript {
             this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
 
             var limChar = this.scanner.lastTokenLimChar();
-            var moduleDecl: ModuleDecl;
+            var moduleDecl: ModuleDeclaration;
+
             if (enclosedList && (enclosedList.length > 0)) {
                 var len = enclosedList.length;
                 var innerName = <Identifier>enclosedList[len - 1];
-                var innerDecl = new ModuleDecl(innerName, moduleBody, this.topVarList(),
+                var innerDecl = new ModuleDeclaration(innerName, moduleBody, this.topVarList(),
                                                 this.topScopeList(), endingToken);
 
                 if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
@@ -675,7 +676,7 @@ module TypeScript {
                     outerModBod = new ASTList();
                     outerModBod.append(innerDecl);
                     innerName = <Identifier>enclosedList[i];
-                    innerDecl = new ModuleDecl(innerName, outerModBod, new ASTList(),
+                    innerDecl = new ModuleDeclaration(innerName, outerModBod, new ASTList(),
                                                 new ASTList(), endingToken);
                     outerModBod.minChar = innerDecl.minChar = minChar;
                     outerModBod.limChar = innerDecl.limChar = limChar;
@@ -690,11 +691,11 @@ module TypeScript {
                 outerModBod.append(innerDecl);
                 outerModBod.minChar = minChar;
                 outerModBod.limChar = limChar;
-                moduleDecl = new ModuleDecl(<Identifier>name, outerModBod, new ASTList(),
+                moduleDecl = new ModuleDeclaration(<Identifier>name, outerModBod, new ASTList(),
                                             new ASTList(), endingToken);
             }
             else {
-                moduleDecl = new ModuleDecl(<Identifier>name, moduleBody, this.topVarList(), this.topScopeList(), endingToken);
+                moduleDecl = new ModuleDeclaration(<Identifier>name, moduleBody, this.topVarList(), this.topScopeList(), endingToken);
                 this.popDeclLists();
             }
 
@@ -3985,10 +3986,10 @@ module TypeScript {
                         ast.minChar = minChar;
                         ast.limChar = this.scanner.lastTokenLimChar();
                         if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Ambient)) {
-                            (<ModuleDecl>ast).modFlags |= ModuleFlags.Ambient;
+                            (<ModuleDeclaration>ast).modFlags |= ModuleFlags.Ambient;
                         }
                         if (this.parsingDeclareFile || this.ambientModule || hasFlag(modifiers, Modifiers.Exported)) {
-                            (<ModuleDecl>ast).modFlags |= ModuleFlags.Exported;
+                            (<ModuleDeclaration>ast).modFlags |= ModuleFlags.Exported;
                         }
                         break;
                     case TokenID.Debugger:
@@ -4211,11 +4212,11 @@ module TypeScript {
 
             bod.limChar = this.scanner.pos;
 
-            var topLevelMod: ModuleDecl = null;
+            var topLevelMod: ModuleDeclaration = null;
             if (moduleGenTarget != ModuleGenTarget.Local && this.hasTopLevelImportOrExport) {
                 var correctedFileName = switchToForwardSlashes(filename);
                 var id: Identifier = new Identifier(correctedFileName);
-                topLevelMod = new ModuleDecl(id, bod, this.topVarList(), this.topScopeList(), null);
+                topLevelMod = new ModuleDeclaration(id, bod, this.topVarList(), this.topScopeList(), null);
 
                 topLevelMod.modFlags |= ModuleFlags.IsDynamic;
                 topLevelMod.modFlags |= ModuleFlags.IsWholeFile;

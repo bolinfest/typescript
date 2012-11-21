@@ -93,7 +93,7 @@ module TypeScript {
             // Emit export only for global export statements. The container for this would be dynamic module which is whole file
             var container = this.getAstDeclarationContainer();
             if (container.nodeType == NodeType.Module &&
-                hasFlag((<ModuleDecl>container).modFlags, ModuleFlags.IsWholeFile) &&
+                hasFlag((<ModuleDeclaration>container).modFlags, ModuleFlags.IsWholeFile) &&
                 hasFlag(declFlags, DeclFlags.Exported)) {
                 this.declFile.Write("export ");
             }
@@ -518,7 +518,7 @@ module TypeScript {
             return false;
         }
 
-        private emitEnumSignature(moduleDecl: ModuleDecl) {
+        private emitEnumSignature(moduleDecl: ModuleDeclaration) {
             if (!this.canEmitSignature(ToDeclFlags(moduleDecl.modFlags))) {
                 return false;
             }
@@ -545,7 +545,7 @@ module TypeScript {
             return false;
         }
 
-        public ModuleCallback(pre: bool, moduleDecl: ModuleDecl): bool {
+        public ModuleCallback(pre: bool, moduleDecl: ModuleDeclaration): bool {
             if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsWholeFile)) {
                 // This is dynamic modules and we are going to outputing single file, 
                 // we need to change the declFile because dynamic modules are always emitted to their corresponding .d.ts
@@ -594,8 +594,8 @@ module TypeScript {
 
                 var isCurrentModuleDotted = (moduleDecl.members.members.length == 1 &&
                     moduleDecl.members.members[0].nodeType == NodeType.Module &&
-                    !(<ModuleDecl>moduleDecl.members.members[0]).isEnum() &&
-                    hasFlag((<ModuleDecl>moduleDecl.members.members[0]).modFlags, ModuleFlags.Exported));
+                    !(<ModuleDeclaration>moduleDecl.members.members[0]).isEnum() &&
+                    hasFlag((<ModuleDeclaration>moduleDecl.members.members[0]).modFlags, ModuleFlags.Exported));
 
                 this.isDottedModuleName.push(isCurrentModuleDotted);
                 this.pushDeclarationContainer(moduleDecl);

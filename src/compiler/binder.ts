@@ -107,7 +107,7 @@ module TypeScript {
                 agg.addParentScope(memberScope);
                 agg.addParentScope(scope);
                 if (type.isModuleType()) {
-                    this.checker.currentModDecl = <ModuleDecl>type.symbol.declAST;
+                    this.checker.currentModDecl = <ModuleDeclaration>type.symbol.declAST;
                     this.checker.inBind = true;
                 }
                 if (members) {

@@ -27,7 +27,7 @@ module TypeScript {
         public objectLiteralScopeGetter: () => SymbolScope = null;
         public scopeStartAST: AST = null;
         public skipNextFuncDeclForClass = false;
-        public deepestModuleDecl: ModuleDecl = null;
+        public deepestModuleDecl: ModuleDeclaration = null;
         public enclosingClassDecl: NamedType = null;
         public enclosingObjectLit: UnaryExpression = null;
         public publicsOnly = true;
@@ -97,7 +97,7 @@ module TypeScript {
         context: TypeCollectionContext,
         thisType: Type,
         classType: Type,
-        moduleDecl: ModuleDecl) {
+        moduleDecl: ModuleDeclaration) {
         var builder = new SymbolScopeBuilder(valueMembers, ambientValueMembers, enclosedTypes, ambientEnclosedTypes, null, container);
         var chain: ScopeChain = new ScopeChain(container, context.scopeChain, builder);
         chain.thisType = thisType;
@@ -154,7 +154,7 @@ module TypeScript {
                     break;
 
                 case NodeType.Module:
-                    context.deepestModuleDecl = <ModuleDecl>ast;
+                    context.deepestModuleDecl = <ModuleDeclaration>ast;
                     context.scopeGetter = function () {
                         return ast.type === null ? null : ast.type.containedScope;
                     };

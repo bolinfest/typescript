@@ -129,7 +129,7 @@ module TypeScript {
 
             return (this.ast().nodeType === TypeScript.NodeType.Name) &&
                 (this.parent().nodeType === TypeScript.NodeType.Module) &&
-                ((<TypeScript.ModuleDecl>this.parent()).name === this.ast());
+                ((<TypeScript.ModuleDeclaration>this.parent()).name === this.ast());
         }
 
         public isNameOfFunction(): bool {
@@ -189,15 +189,15 @@ module TypeScript {
         public isTopLevelImplicitModule() {
             return this.count() >= 1 &&
                 this.asts[this.top].nodeType === TypeScript.NodeType.Module &&
-                TypeScript.hasFlag((<TypeScript.ModuleDecl>this.asts[this.top]).modFlags, TypeScript.ModuleFlags.IsWholeFile);
+                TypeScript.hasFlag((<TypeScript.ModuleDeclaration>this.asts[this.top]).modFlags, TypeScript.ModuleFlags.IsWholeFile);
         }
 
         public isBodyOfTopLevelImplicitModule() {
             return this.count() >= 2 &&
                 this.asts[this.top - 0].nodeType === TypeScript.NodeType.List &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.Module &&
-                 (<TypeScript.ModuleDecl>this.asts[this.top - 1]).members == this.asts[this.top - 0] &&
-                TypeScript.hasFlag((<TypeScript.ModuleDecl>this.asts[this.top - 1]).modFlags, TypeScript.ModuleFlags.IsWholeFile);
+                 (<TypeScript.ModuleDeclaration>this.asts[this.top - 1]).members == this.asts[this.top - 0] &&
+                TypeScript.hasFlag((<TypeScript.ModuleDeclaration>this.asts[this.top - 1]).modFlags, TypeScript.ModuleFlags.IsWholeFile);
         }
 
         public isBodyOfScript(): bool {
@@ -215,7 +215,7 @@ module TypeScript {
         public isBodyOfModule(): bool {
             return this.count() >= 2 &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.Module &&
-                 (<TypeScript.ModuleDecl>this.asts[this.top - 1]).members == this.asts[this.top - 0];
+                 (<TypeScript.ModuleDeclaration>this.asts[this.top - 1]).members == this.asts[this.top - 0];
         }
 
         public isBodyOfClass(): bool {

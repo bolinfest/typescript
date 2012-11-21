@@ -255,7 +255,7 @@ module TypeScript {
         public currentCompareA: Symbol = null;
         public currentCompareB: Symbol = null;
 
-        public currentModDecl: ModuleDecl = null;
+        public currentModDecl: ModuleDeclaration = null;
 
         public inBind = false;
         public inWith = false;
@@ -914,7 +914,7 @@ module TypeScript {
                             // no going back                        
                             if (symType && typeSymbol.aliasLink && typeSymbol.onlyReferencedAsTypeRef) {
 
-                                var modDecl = <ModuleDecl>symType.symbol.declAST;
+                                var modDecl = <ModuleDeclaration>symType.symbol.declAST;
                                 if (modDecl && hasFlag(modDecl.modFlags, ModuleFlags.IsDynamic)) {
                                     typeSymbol.onlyReferencedAsTypeRef = !this.resolvingBases;
                                 }

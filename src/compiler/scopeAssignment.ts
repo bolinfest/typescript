@@ -8,7 +8,7 @@ module TypeScript {
     export class AssignScopeContext {
         constructor (public scopeChain: ScopeChain,
                      public typeFlow: TypeFlow,
-                     public modDeclChain: ModuleDecl[]) {
+                     public modDeclChain: ModuleDeclaration[]) {
         }
     }
 
@@ -65,7 +65,7 @@ module TypeScript {
     export var instanceFilter = new ScopeSearchFilter(instanceCompare, instanceFilterStop);
 
     export function preAssignModuleScopes(ast: AST, context: AssignScopeContext) {
-        var moduleDecl = <ModuleDecl>ast;
+        var moduleDecl = <ModuleDeclaration>ast;
         var memberScope: SymbolTableScope = null;
         var aggScope: SymbolAggregateScope = null;
 
@@ -424,7 +424,7 @@ module TypeScript {
         var go = true;
         if (ast) {
             if (ast.nodeType == NodeType.Module) {
-                var prevModDecl = <ModuleDecl>ast;
+                var prevModDecl = <ModuleDeclaration>ast;
 
                 popAssignScope(context);
 

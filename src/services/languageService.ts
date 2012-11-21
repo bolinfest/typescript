@@ -195,7 +195,7 @@ module Services {
                     break;
 
                 case TypeScript.NodeType.Module:
-                    symbolLocation = (<TypeScript.ModuleDecl>ast).name;
+                    symbolLocation = (<TypeScript.ModuleDeclaration>ast).name;
                     break;
 
                 case TypeScript.NodeType.VarDecl:
@@ -691,7 +691,7 @@ module Services {
             switch (cur.nodeType) {
                 // TODO : combine these as interface and use custom method instead of duplicate logic
                 case TypeScript.NodeType.Module:
-                    var moduleDecl = <TypeScript.ModuleDecl>cur;
+                    var moduleDecl = <TypeScript.ModuleDeclaration>cur;
                     // If inside another module the whole module is debuggable
                     if (containerASTs.length > 1) {
                         resultAST = moduleDecl;
@@ -1717,7 +1717,7 @@ module Services {
                         break
 
                     case TypeScript.NodeType.Module:
-                        result = maxLim(result, (<TypeScript.ModuleDecl>ast).name);
+                        result = maxLim(result, (<TypeScript.ModuleDeclaration>ast).name);
                         break;
 
                     case TypeScript.NodeType.ClassDeclaration:
@@ -1929,7 +1929,7 @@ module Services {
                     return ScriptElementKind.classElement;
 
                 case TypeScript.NodeType.Module:
-                    var moduleDecl = <TypeScript.ModuleDecl>ast;
+                    var moduleDecl = <TypeScript.ModuleDeclaration>ast;
                     var isEnum = moduleDecl.isEnum();
                     return isEnum ? ScriptElementKind.enumElement : ScriptElementKind.moduleElement;
 
@@ -2007,7 +2007,7 @@ module Services {
                 return result;
             }
 
-            var moduleDeclToKindModifiers = (decl: TypeScript.ModuleDecl): string => {
+            var moduleDeclToKindModifiers = (decl: TypeScript.ModuleDeclaration): string => {
                 var result = ScriptElementKindModifier.none;
                 result = addMofifier(result, decl.isExported(), ScriptElementKindModifier.exportedModifier);
                 result = addMofifier(result, decl.isAmbient(), ScriptElementKindModifier.ambientModifier);
@@ -2051,7 +2051,7 @@ module Services {
                     return classDeclToKindModifiers(classDecl);
 
                 case TypeScript.NodeType.Module:
-                    var moduleDecl = <TypeScript.ModuleDecl>ast;
+                    var moduleDecl = <TypeScript.ModuleDeclaration>ast;
                     return moduleDeclToKindModifiers(moduleDecl);
 
                 case TypeScript.NodeType.VarDecl:
@@ -2152,7 +2152,7 @@ module Services {
                         break;
 
                     case TypeScript.NodeType.Module: {
-                        var moduleDecl = <TypeScript.ModuleDecl>ast;
+                        var moduleDecl = <TypeScript.ModuleDeclaration>ast;
                         var isEnum = moduleDecl.isEnum();
                         var kind = isEnum ? ScriptElementKind.enumElement : ScriptElementKind.moduleElement;
                         item = addItem(parent, moduleDecl, moduleDecl.name.actualText, kind);
