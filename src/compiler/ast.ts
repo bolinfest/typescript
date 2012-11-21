@@ -2295,7 +2295,6 @@ module TypeScript {
         }
     }
 
-
     export class Finally extends Statement {
         constructor (public body: AST) {
             super(NodeType.Finally);

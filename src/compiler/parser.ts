@@ -252,7 +252,6 @@ module TypeScript {
         }
 
         private parseComment(comment: CommentToken) {
-
             if (comment) {
                 var c: Comment = new Comment(comment.value, comment.isBlock, comment.endsLine);
                 c.minChar = comment.startPos;
@@ -275,7 +274,6 @@ module TypeScript {
             else {
                 return null;
             }
-
         }
 
         private parseCommentsInner(comments: CommentToken[]) {
