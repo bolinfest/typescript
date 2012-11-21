@@ -3353,7 +3353,7 @@ module TypeScript {
                         }
                         break;
                     case TokenID.Module:
-                        if ((allowedElements & AllowedElements.ModuleDecls) == AllowedElements.None) {
+                        if ((allowedElements & AllowedElements.ModuleDeclarations) == AllowedElements.None) {
                             this.reportParseError("module not allowed in this context");
                             this.currentToken = this.scanner.scan();
                             ast = new AST(NodeType.Error);
@@ -3365,7 +3365,7 @@ module TypeScript {
                         }
                         break;
                     case TokenID.Import:
-                        if ((allowedElements & AllowedElements.ModuleDecls) == AllowedElements.None) {
+                        if ((allowedElements & AllowedElements.ModuleDeclarations) == AllowedElements.None) {
                             this.reportParseError("module not allowed in this context");
                             this.currentToken = this.scanner.scan();
                             ast = new AST(NodeType.Error);
@@ -3378,7 +3378,7 @@ module TypeScript {
                         }
                         break;
                     case TokenID.Export:
-                        if ((allowedElements & AllowedElements.ModuleDecls) == AllowedElements.None) {
+                        if ((allowedElements & AllowedElements.ModuleDeclarations) == AllowedElements.None) {
                             this.reportParseError("'export' statements are only allowed at the global and module levels");
                             this.currentToken = this.scanner.scan();
                             ast = new AST(NodeType.Error);
@@ -3537,7 +3537,7 @@ module TypeScript {
                         this.currentToken = this.scanner.scan();
                         break;
                     case TokenID.Class:
-                        if ((allowedElements & AllowedElements.ClassDecls) == AllowedElements.None) {
+                        if ((allowedElements & AllowedElements.ClassDeclarations) == AllowedElements.None) {
                             this.reportParseError("class not allowed in this context");
                             this.currentToken = this.scanner.scan();
                             ast = new AST(NodeType.Error);
@@ -3549,7 +3549,7 @@ module TypeScript {
                         }
                         break;
                     case TokenID.Interface:
-                        if ((allowedElements & AllowedElements.InterfaceDecls) == AllowedElements.None) {
+                        if ((allowedElements & AllowedElements.InterfaceDeclarations) == AllowedElements.None) {
                             this.reportParseError("interface not allowed in this context");
                             this.currentToken = this.scanner.scan();
                             ast = new AST(NodeType.Error);
@@ -4098,8 +4098,8 @@ module TypeScript {
             var directivePrologue = sourceElms;
             stmts.minChar = this.scanner.startPos;
             var limChar = this.scanner.pos;
-            var innerStmts = (allowedElements & AllowedElements.ModuleDecls) == AllowedElements.None;
-            var classNope = (allowedElements & AllowedElements.ClassDecls) == AllowedElements.None;
+            var innerStmts = (allowedElements & AllowedElements.ModuleDeclarations) == AllowedElements.None;
+            var classNope = (allowedElements & AllowedElements.ClassDeclarations) == AllowedElements.None;
 
             errorRecoverySet |= ErrorRecoverySet.TypeScriptS | ErrorRecoverySet.RCurly;
 

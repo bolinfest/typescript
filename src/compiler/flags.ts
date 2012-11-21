@@ -53,14 +53,14 @@ module TypeScript {
 
     export enum AllowedElements {
         None = 0,
-        ModuleDecls = 1 << 2,
-        ClassDecls = 1 << 3,
-        InterfaceDecls = 1 << 4,
+        ModuleDeclarations = 1 << 2,
+        ClassDeclarations = 1 << 3,
+        InterfaceDeclarations = 1 << 4,
         AmbientDeclarations = 1 << 10,
         Properties = 1 << 11,
 
-        Global = ModuleDecls | ClassDecls | InterfaceDecls | AmbientDeclarations,
-        ModuleMembers = ModuleDecls | ClassDecls | InterfaceDecls | AmbientDeclarations,
+        Global = ModuleDeclarations | ClassDeclarations | InterfaceDeclarations | AmbientDeclarations,
+        ModuleMembers = ModuleDeclarations | ClassDeclarations | InterfaceDeclarations | AmbientDeclarations,
         QuickParse = Global | Properties,
     }
 
