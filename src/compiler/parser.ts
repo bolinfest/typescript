@@ -72,7 +72,7 @@ module TypeScript {
         private topLevel = true;
         private currentUnitIndex = (-1);
         private prevIDTok: Token = null;
-        private stmtStack: IStatementInfo[] = new IStatementInfo[];
+        private statementInfoStack: IStatementInfo[] = new IStatementInfo[];
         private hasTopLevelImportOrExport = false; // for imports, only true if it's a dynamic module
         private strictMode = false;
         private nestingLevel = 0;
@@ -84,12 +84,12 @@ module TypeScript {
         public inferPropertiesFromThisAssignment = false;
 
         private resetStmtStack() {
-            this.stmtStack = new IStatementInfo[];
+            this.statementInfoStack = new IStatementInfo[];
         }
 
         private inLoop() {
-            for (var j = this.stmtStack.length - 1; j >= 0; j--) {
-                if (this.stmtStack[j].stmt.isLoop()) {
+            for (var j = this.statementInfoStack.length - 1; j >= 0; j--) {
+                if (this.statementInfoStack[j].stmt.isLoop()) {
                     return true;
                 }
             }
@@ -99,18 +99,18 @@ module TypeScript {
         private pushStmt(stmt: Statement, labels: ASTList) {
             // allocate here to avoid always storing this information in statements
             var info = { stmt: stmt, labels: labels };
-            this.stmtStack.push(info);
+            this.statementInfoStack.push(info);
         }
 
         private popStmt(): IStatementInfo {
-            return this.stmtStack.pop();
+            return this.statementInfoStack.pop();
         }
 
         private resolveJumpTarget(jump: Jump): void {
             var resolvedTarget = AST.getResolvedIdentifierName(jump.target);
-            var len = this.stmtStack.length;
+            var len = this.statementInfoStack.length;
             for (var i = len - 1; i >= 0; i--) {
-                var info = this.stmtStack[i];
+                var info = this.statementInfoStack[i];
                 if (jump.target) {
                     if (info.labels && (info.labels.members.length > 0)) {
                         for (var j = 0, labLen = info.labels.members.length; j < labLen; j++) {
@@ -899,7 +899,7 @@ module TypeScript {
 
             this.pushDeclLists();
             // start new statement stack
-            var svStmtStack = this.stmtStack;
+            var svStmtStack = this.statementInfoStack;
             this.resetStmtStack();
 
             var bod: ASTList = null;
@@ -982,7 +982,7 @@ module TypeScript {
                 funcDecl.fncFlags |= FncFlags.Definition;
             }
 
-            this.stmtStack = svStmtStack;
+            this.statementInfoStack = svStmtStack;
             return funcDecl;
         }
 
