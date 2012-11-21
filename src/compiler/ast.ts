@@ -1200,7 +1200,6 @@ module TypeScript {
     export class ModuleDeclaration extends NamedDeclaration {
         public modFlags = ModuleFlags.ShouldEmitModuleDecl;
         public mod: ModuleType;
-        public alias: AST = null;
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
         public prettyName: string;

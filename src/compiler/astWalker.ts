@@ -495,10 +495,6 @@ module TypeScript {
 
         export function walkModuleDeclChildren(preAst: ModuleDeclaration, parent: AST, walker: IAstWalker): void {
             walkRecordChildren(preAst, parent, walker);
-
-            if (walker.options.goNextSibling && preAst.alias) {
-                preAst.alias = walker.walk(preAst.alias, preAst);
-            }
         }
 
         export function walkImportDeclChildren(preAst: ImportDeclaration, parent: AST, walker: IAstWalker): void {
