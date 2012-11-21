@@ -664,7 +664,7 @@ module Formatting {
         }
 
         static IsModuleDeclContext(context: FormattingContext): bool {
-            return context.contextNode.AuthorNode.Details.nodeType == TypeScript.NodeType.Module;
+            return context.contextNode.AuthorNode.Details.nodeType == TypeScript.NodeType.ModuleDeclaration;
         }
 
         static IsInterfaceContext(context: FormattingContext): bool {

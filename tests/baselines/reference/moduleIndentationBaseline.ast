@@ -6,16 +6,16 @@
   "ast":
     {"nodeType": "Script", "minChar": 0, "limChar": 44, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 2, "children": [
       {"nodeType": "List", "minChar": 0, "limChar": 44, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 2, "children": [
-        {"nodeType": "Module", "minChar": 0, "limChar": 44, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 2, "children": [
+        {"nodeType": "ModuleDeclaration", "minChar": 0, "limChar": 44, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 2, "children": [
           {"nodeType": "Name", "minChar": 7, "limChar": 10, "startLine": 1, "startCol": 8, "endLine": 1, "endCol": 11, "children": []},
           {"nodeType": "List", "minChar": 11, "limChar": 44, "startLine": 1, "startCol": 12, "endLine": 3, "endCol": 2, "children": [
-            {"nodeType": "Module", "minChar": 18, "limChar": 41, "startLine": 2, "startCol": 5, "endLine": 2, "endCol": 28, "children": [
+            {"nodeType": "ModuleDeclaration", "minChar": 18, "limChar": 41, "startLine": 2, "startCol": 5, "endLine": 2, "endCol": 28, "children": [
               {"nodeType": "Name", "minChar": 32, "limChar": 33, "startLine": 2, "startCol": 19, "endLine": 2, "endCol": 20, "children": []},
               {"nodeType": "List", "minChar": 32, "limChar": 41, "startLine": 2, "startCol": 19, "endLine": 2, "endCol": 28, "children": [
-                {"nodeType": "Module", "minChar": 32, "limChar": 41, "startLine": 2, "startCol": 19, "endLine": 2, "endCol": 28, "children": [
+                {"nodeType": "ModuleDeclaration", "minChar": 32, "limChar": 41, "startLine": 2, "startCol": 19, "endLine": 2, "endCol": 28, "children": [
                   {"nodeType": "Name", "minChar": 34, "limChar": 35, "startLine": 2, "startCol": 21, "endLine": 2, "endCol": 22, "children": []},
                   {"nodeType": "List", "minChar": 32, "limChar": 41, "startLine": 2, "startCol": 19, "endLine": 2, "endCol": 28, "children": [
-                    {"nodeType": "Module", "minChar": 32, "limChar": 41, "startLine": 2, "startCol": 19, "endLine": 2, "endCol": 28, "children": [
+                    {"nodeType": "ModuleDeclaration", "minChar": 32, "limChar": 41, "startLine": 2, "startCol": 19, "endLine": 2, "endCol": 28, "children": [
                       {"nodeType": "Name", "minChar": 36, "limChar": 37, "startLine": 2, "startCol": 23, "endLine": 2, "endCol": 24, "children": []},
                       {"nodeType": "List", "minChar": 38, "limChar": 41, "startLine": 2, "startCol": 25, "endLine": 2, "endCol": 28, "children": []}]}]}]}]}]}]}]}]}]}
 }

@@ -4,7 +4,7 @@
   "ast":
     {"nodeType": "Script", "minChar": 0, "limChar": 51, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 52, "children": [
       {"nodeType": "List", "minChar": 0, "limChar": 51, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 52, "children": [
-        {"nodeType": "Class", "minChar": 0, "limChar": 51, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 52, "children": [
+        {"nodeType": "ClassDeclaration", "minChar": 0, "limChar": 51, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 52, "children": [
           {"nodeType": "Name", "minChar": 6, "limChar": 10, "startLine": 1, "startCol": 7, "endLine": 1, "endCol": 11, "children": []},
           {"nodeType": "List", "minChar": 11, "limChar": 51, "startLine": 1, "startCol": 12, "endLine": 1, "endCol": 52, "children": [
             {"nodeType": "FuncDecl", "minChar": 13, "limChar": 49, "startLine": 1, "startCol": 14, "endLine": 1, "endCol": 50, "children": [
