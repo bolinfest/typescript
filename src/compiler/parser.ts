@@ -640,8 +640,9 @@ module TypeScript {
             var moduleBody = new ASTList();
             var bodyMinChar = this.scanner.startPos;
             this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.ID);
-            this.parseStatementList(errorRecoverySet | ErrorRecoverySet.RCurly, moduleBody, true, true,
-                            AllowedElements.ModuleMembers, modifiers);
+            this.parseStatementList(
+                errorRecoverySet | ErrorRecoverySet.RCurly, moduleBody,
+                /*sourceElements:*/ true, /*noLeadingCase:*/ true, AllowedElements.Global, modifiers);
             moduleBody.minChar = bodyMinChar;
             moduleBody.limChar = this.scanner.pos;
 

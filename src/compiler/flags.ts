@@ -60,7 +60,6 @@ module TypeScript {
         Properties = 1 << 11,
 
         Global = ModuleDeclarations | ClassDeclarations | InterfaceDeclarations | AmbientDeclarations,
-        ModuleMembers = ModuleDeclarations | ClassDeclarations | InterfaceDeclarations | AmbientDeclarations,
         QuickParse = Global | Properties,
     }
 
