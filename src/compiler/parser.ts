@@ -4094,10 +4094,14 @@ module TypeScript {
                 ((nt == NodeType.FuncDecl) && ((<FuncDecl>ast).isMethod()));
         }
 
-        private parseStatementList(errorRecoverySet: ErrorRecoverySet, stmts: ASTList, sourceElms: bool, noLeadingCase: bool,
-            allowedElements: AllowedElements, parentModifiers: Modifiers): void {
+        private parseStatementList(errorRecoverySet: ErrorRecoverySet,
+                                   statements: ASTList,
+                                   sourceElms: bool,
+                                   noLeadingCase: bool,
+                                   allowedElements: AllowedElements,
+                                   parentModifiers: Modifiers): void {
             var directivePrologue = sourceElms;
-            stmts.minChar = this.scanner.startPos;
+            statements.minChar = this.scanner.startPos;
             var limChar = this.scanner.pos;
             var innerStmts = (allowedElements & AllowedElements.ModuleDeclarations) == AllowedElements.None;
             var classNope = (allowedElements & AllowedElements.ClassDeclarations) == AllowedElements.None;
@@ -4114,12 +4118,12 @@ module TypeScript {
                     (classNope && (this.currentToken.tokenId == TokenID.Class)) ||
                     (this.currentToken.tokenId == TokenID.EndOfFile)) {
                     this.state = ParseState.EndStmtList;
-                    stmts.limChar = limChar;
-                    if (stmts.members.length == 0) {
-                        stmts.preComments = this.parseComments();
+                    statements.limChar = limChar;
+                    if (statements.members.length == 0) {
+                        statements.preComments = this.parseComments();
                     }
                     else {
-                        stmts.postComments = this.parseComments();
+                        statements.postComments = this.parseComments();
                     }
                     this.strictMode = oldStrictMode;
                     this.nestingLevel--;
@@ -4134,13 +4138,13 @@ module TypeScript {
 
                 if (stmt) {
                     stmt.postComments = this.combineComments(stmt.postComments, this.parseCommentsForLine(this.scanner.prevLine));
-                    stmts.append(stmt);
+                    statements.append(stmt);
                     limChar = stmt.limChar;
                     if (directivePrologue) {
                         if (stmt.nodeType == NodeType.QString) {
                             var qstring = <StringLiteral>stmt;
                             if (qstring.text == "\"use strict\"") {
-                                stmts.flags |= ASTFlags.StrictMode;
+                                statements.flags |= ASTFlags.StrictMode;
                                 this.strictMode = true;
                             }
                             else {
