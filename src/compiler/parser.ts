@@ -476,7 +476,7 @@ module TypeScript {
             return true;
         }
 
-        private parseImportDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ImportDeclaration {
+        private parseImportDeclaration(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): ImportDeclaration {
 
             var name: Identifier = null;
             var alias: AST = null;
@@ -3375,7 +3375,7 @@ module TypeScript {
                             ast.limChar = this.scanner.lastTokenLimChar();
                         }
                         else {
-                            ast = this.parseImportDecl(errorRecoverySet, modifiers);
+                            ast = this.parseImportDeclaration(errorRecoverySet, modifiers);
                             needTerminator = true;
                         }
                         break;
