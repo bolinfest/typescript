@@ -164,12 +164,6 @@ module TypeScript {
             this.errorRecovery = true;
         }
 
-        private posMatchesCursor(pos: number) {
-            var lineCol = { line: -1, col: -1 };
-            this.getSourceLineCol(lineCol, pos);
-            return (lineCol.line == this.cursorLine) && (lineCol.col == this.cursorColumn);
-        }
-
         public getSourceLineCol(lineCol: ILineCol, minChar: number): void {
             getSourceLineColFromMap(lineCol, minChar, this.scanner.lineMap);
         }
