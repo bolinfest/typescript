@@ -883,15 +883,15 @@ module TypeScript {
             return this.parseTypeReferenceTail(errorRecoverySet, minChar, interfaceDecl);
         }
 
-        private parseFunctionStatements(   errorRecoverySet: ErrorRecoverySet,
-                                            name: Identifier,
-                                            isConstructor: bool,
-                                            isMethod: bool,
-                                            args: ASTList,
-                                            allowedElements: AllowedElements,
-                                            minChar: number,
-                                            requiresSignature: bool,
-                                            parentModifiers: Modifiers) {
+        private parseFunctionStatements(errorRecoverySet: ErrorRecoverySet,
+                                        name: Identifier,
+                                        isConstructor: bool,
+                                        isMethod: bool,
+                                        args: ASTList,
+                                        allowedElements: AllowedElements,
+                                        minChar: number,
+                                        requiresSignature: bool,
+                                        parentModifiers: Modifiers) {
 
             this.pushDeclLists();
             // start new statement stack
