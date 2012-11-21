@@ -70,7 +70,7 @@ module TypeScript {
 
     export class Emitter {
         public prologueEmitted = false;
-        public thisClassNode: NamedType = null;
+        public thisClassNode: TypeDeclaration = null;
         public thisFnc: FuncDecl = null;
         public moduleDeclList: ModuleDeclaration[] = [];
         public moduleName = "";
@@ -320,7 +320,7 @@ module TypeScript {
             }
         }
 
-        public emitConstructorCalls(bases: ASTList, classDecl: NamedType) {
+        public emitConstructorCalls(bases: ASTList, classDecl: TypeDeclaration) {
             if (bases == null) {
                 return;
             }
@@ -363,7 +363,7 @@ module TypeScript {
         }
 
         public emitInnerFunction(funcDecl: FuncDecl, printName: bool, isProtoMember: bool,
-            bases: ASTList, hasSelfRef: bool, classDecl: NamedType) {
+            bases: ASTList, hasSelfRef: bool, classDecl: TypeDeclaration) {
             /// REVIEW: The code below causes functions to get pushed to a newline in cases where they shouldn't
             /// such as: 
             ///     Foo.prototype.bar = 
@@ -1464,7 +1464,7 @@ module TypeScript {
             }
         }
 
-        public emitAddBaseMethods(className: string, base: Type, classDecl: NamedType): void {
+        public emitAddBaseMethods(className: string, base: Type, classDecl: TypeDeclaration): void {
             if (base.members) {
                 var baseSymbol = base.symbol;
                 var baseName = baseSymbol.name;

@@ -26,7 +26,7 @@ module TypeScript {
         return baseTypeLinks;
     }
 
-    function getBases(type: Type, typeDecl: NamedType) {
+    function getBases(type: Type, typeDecl: TypeDeclaration) {
         type.extendsTypeLinks = getBaseTypeLinks(typeDecl.extendsList, type.extendsTypeLinks);
         type.implementsTypeLinks = getBaseTypeLinks(typeDecl.implementsList, type.implementsTypeLinks);
     }

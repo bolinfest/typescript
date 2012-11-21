@@ -28,7 +28,7 @@ module TypeScript {
         public scopeStartAST: AST = null;
         public skipNextFuncDeclForClass = false;
         public deepestModuleDecl: ModuleDeclaration = null;
-        public enclosingClassDecl: NamedType = null;
+        public enclosingClassDecl: TypeDeclaration = null;
         public enclosingObjectLit: UnaryExpression = null;
         public publicsOnly = true;
         public useFullAst = false;
@@ -136,7 +136,7 @@ module TypeScript {
                         return (ast.type === null || ast.type.instanceType.containedScope === null) ? null : ast.type.instanceType.containedScope;
                     };
                     context.scopeStartAST = ast;
-                    context.enclosingClassDecl = <NamedType>ast;
+                    context.enclosingClassDecl = <TypeDeclaration>ast;
                     break;
 
                 case NodeType.ObjectLit:

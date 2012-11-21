@@ -458,7 +458,7 @@ module TypeScript {
 
         }
 
-        export function walkNamedTypeChildren(preAst: NamedType, parent: AST, walker: IAstWalker): void {
+        export function walkNamedTypeChildren(preAst: TypeDeclaration, parent: AST, walker: IAstWalker): void {
             walkRecordChildren(preAst, parent, walker);
         }
 

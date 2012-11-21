@@ -616,7 +616,7 @@ module TypeScript {
 
         public thisType: Type;
         public thisFnc: FuncDecl = null;
-        public thisClassNode: NamedType = null;
+        public thisClassNode: TypeDeclaration = null;
         public enclosingFncIsMethod = false;
 
         // REVIEW: Prune in favor of typechecker fields
@@ -744,7 +744,7 @@ module TypeScript {
                         this.thisType = type.instanceType;
                         if (typeSym.declAST &&
                             (typeSym.declAST.nodeType == NodeType.ClassDeclaration)) {
-                            this.thisClassNode = <NamedType>typeSym.declAST;
+                            this.thisClassNode = <TypeDeclaration>typeSym.declAST;
                         }
                         // use innermost class
                         break;
@@ -2254,13 +2254,13 @@ module TypeScript {
             // we need to reset the current class node in question, so that visibility checks on class members don't fail
             if (funcDecl.isMethod() && funcDecl.type.enclosingType) {
 
-                var enclosingClassNode: NamedType = null;
+                var enclosingClassNode: TypeDeclaration = null;
 
                 if (funcDecl.type.enclosingType.symbol.declAST.nodeType == NodeType.FuncDecl) {
-                    enclosingClassNode = <NamedType>(<FuncDecl>funcDecl.type.enclosingType.symbol.declAST).classDecl;
+                    enclosingClassNode = <TypeDeclaration>(<FuncDecl>funcDecl.type.enclosingType.symbol.declAST).classDecl;
                 }
                 else if (funcDecl.type.enclosingType.symbol.declAST.nodeType == NodeType.ClassDeclaration) {
-                    enclosingClassNode = <NamedType>funcDecl.type.enclosingType.symbol.declAST;
+                    enclosingClassNode = <TypeDeclaration>funcDecl.type.enclosingType.symbol.declAST;
                 }
 
                 if (enclosingClassNode) {

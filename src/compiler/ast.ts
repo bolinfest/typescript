@@ -1242,7 +1242,7 @@ module TypeScript {
         }
     }
 
-    export class NamedType extends NamedDeclaration {
+    export class TypeDeclaration extends NamedDeclaration {
         constructor (nodeType: NodeType,
                      name: Identifier,
                      public extendsList: ASTList,
@@ -1252,7 +1252,7 @@ module TypeScript {
         }
     }
 
-    export class ClassDeclaration extends NamedType {
+    export class ClassDeclaration extends TypeDeclaration {
         public varFlags = VarFlags.None;
         public knownMemberNames: any = {};
         public constructorDecl: FuncDecl = null;
@@ -1278,7 +1278,7 @@ module TypeScript {
         }
     }
 
-    export class InterfaceDeclaration extends NamedType {
+    export class InterfaceDeclaration extends TypeDeclaration {
         public varFlags = VarFlags.None;
 
         constructor (name: Identifier,
