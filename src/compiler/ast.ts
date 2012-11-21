@@ -1192,14 +1192,13 @@ module TypeScript {
 
     export class Record extends AST {
         constructor (nodeType: NodeType,
-                     public name: AST,
+                     public name: Identifier,
                      public members: ASTList) {
             super(nodeType);
         }
     }
 
     export class ModuleDecl extends Record {
-
         public modFlags = ModuleFlags.ShouldEmitModuleDecl;
         public mod: ModuleType;
         public alias: AST = null;
