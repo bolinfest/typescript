@@ -60,17 +60,14 @@ module TypeScript {
         InterfaceDecls = 1 << 4,
         TypedFuncDecls = 1 << 5,
         TypedDecls = 1 << 6,
-        TypedFuncSignatures = 1 << 8,
-        TypedSignatures = 1 << 9,
         AmbientDecls = 1 << 10,
         Properties = 1 << 11,
-        
+
         Block = Statements | FunctionDecls | TypedFuncDecls | TypedDecls,
         Global = Statements | FunctionDecls | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
         FunctionBody = Statements | FunctionDecls,
         ModuleMembers = TypedFuncDecls | FunctionDecls | ModuleDecls | ClassDecls | InterfaceDecls | TypedDecls | Statements | AmbientDecls,
         ClassMembers = TypedFuncDecls | FunctionDecls | Statements | TypedDecls | Properties,
-        InterfaceMembers = TypedFuncSignatures | TypedSignatures,
         QuickParse = Global | Properties,
     }
 
