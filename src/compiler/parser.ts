@@ -67,7 +67,6 @@ module TypeScript {
         public outfile: ITextWriter = undefined;
         public errorCallback: (minChar: number, charLen: number, message: string, unit: number) =>void = null;
         private state: ParseState = ParseState.StartStatementList;
-        private cursorState: ParseState = ParseState.None;
         private errorMessage = "";
         private ambientModule = false;
         private ambientClass = false;
@@ -155,8 +154,6 @@ module TypeScript {
 
         public setErrorRecovery(outfile: ITextWriter) {
             this.outfile = outfile;
-            this.cursorState = ParseState.None;
-
             this.errorRecovery = true;
         }
 
