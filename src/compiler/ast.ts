@@ -1298,7 +1298,6 @@ module TypeScript {
         constructor (nodeType: NodeType,
                      name: Identifier,
                      members: ASTList,
-                     public args: ASTList,
                      extendsList: ASTList,
                      implementsList: ASTList) {
             super(nodeType, name, extendsList, implementsList, members);

@@ -871,7 +871,7 @@ module TypeScript {
 
             // REVIEW: We're parsing an ObjectType, but we give a NodeType of Interface here.
             var interfaceDecl = new TypeDecl(
-                NodeType.Interface, this.anonId, members, /*args:*/ null, /*extends:*/ null, /*implementsL*/ null);
+                NodeType.Interface, this.anonId, members, /*extends:*/ null, /*implementsL*/ null);
 
             interfaceDecl.minChar = minChar;
             interfaceDecl.limChar = members.limChar;    // "}"
@@ -2013,7 +2013,7 @@ module TypeScript {
             // have an 'ObjectType' and not a list of members.  We may want to consider making that
             // change.  Note: it would mean breaking aparat TypeDecl into InterfaceDeclaration and 
             // ClassDeclaration.
-            var interfaceDecl = new TypeDecl(NodeType.Interface, name, members, null, interfaces, null);
+            var interfaceDecl = new TypeDecl(NodeType.Interface, name, members, interfaces, null);
             if (hasFlag(modifiers, Modifiers.Private)) {
                 interfaceDecl.varFlags |= VarFlags.Private;
             }
@@ -4264,7 +4264,7 @@ module TypeScript {
 
         // REVIEW: use enclosing scope to determine this
         // REVIEW: Why even use class here?
-        var quickClassDecl = new TypeDecl(NodeType.ClassDeclaration, null, null, null, null, null);
+        var quickClassDecl = new TypeDecl(NodeType.ClassDeclaration, null, null, null, null);
         quickParser.currentClassDecl = quickClassDecl;
 
         var result = quickParser.quickParse(new StringSourceText(fragment), "", 0);

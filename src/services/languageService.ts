@@ -1725,7 +1725,7 @@ module Services {
                         break;
 
                     case TypeScript.NodeType.Interface:
-                        result = maxLim(result, (<TypeScript.TypeDecl>ast).name, (<TypeScript.TypeDecl>ast).args, (<TypeScript.TypeDecl>ast).extendsList, (<TypeScript.TypeDecl>ast).implementsList);
+                        result = maxLim(result, (<TypeScript.TypeDecl>ast).name, (<TypeScript.TypeDecl>ast).extendsList, (<TypeScript.TypeDecl>ast).implementsList);
                         break;
                 }
 
