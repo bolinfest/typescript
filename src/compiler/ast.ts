@@ -1190,6 +1190,9 @@ module TypeScript {
     }
 
     export class NamedDeclaration extends AST {
+        public leftCurlyCount = 0;
+        public rightCurlyCount = 0;
+
         constructor (nodeType: NodeType,
                      public name: Identifier,
                      public members: ASTList) {
@@ -1200,8 +1203,6 @@ module TypeScript {
     export class ModuleDeclaration extends NamedDeclaration {
         public modFlags = ModuleFlags.ShouldEmitModuleDecl;
         public mod: ModuleType;
-        public leftCurlyCount = 0;
-        public rightCurlyCount = 0;
         public prettyName: string;
         public amdDependencies: string[] = [];
         public vars: ASTList;
@@ -1253,8 +1254,6 @@ module TypeScript {
 
     export class ClassDeclaration extends NamedType {
         public varFlags = VarFlags.None;
-        public leftCurlyCount = 0;
-        public rightCurlyCount = 0;
         public knownMemberNames: any = {};
         public constructorDecl: FuncDecl = null;
         public constructorNestingLevel = 0;
@@ -1281,8 +1280,6 @@ module TypeScript {
 
     export class InterfaceDeclaration extends NamedType {
         public varFlags = VarFlags.None;
-        public leftCurlyCount = 0;
-        public rightCurlyCount = 0;
 
         constructor (name: Identifier,
                      members: ASTList,
