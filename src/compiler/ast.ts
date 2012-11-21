@@ -1292,10 +1292,8 @@ module TypeScript {
         public isOverload = false;
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
-        public name: Identifier;
         public extendsList: ASTList;
         public implementsList: ASTList;
-        public members: ASTList;
 
         constructor (nodeType: NodeType,
                      name: Identifier,
@@ -1305,10 +1303,8 @@ module TypeScript {
                      implementsList: ASTList) {
             super(nodeType, name, extendsList, implementsList, members);
 
-            this.name = name;
             this.extendsList = extendsList;
             this.implementsList = implementsList;
-            this.members = members;
         }
 
         public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }
