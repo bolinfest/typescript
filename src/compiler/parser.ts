@@ -56,7 +56,7 @@ module TypeScript {
         // TODO: consolidate these
         private inFunction = false;
         private inInterfaceDecl = false;
-        public currentClassDecl: Record = null;
+        public currentClassDecl: NamedDeclaration = null;
 
         private inFncDecl = false;  // this is only for FuncDecls - not constructors, like inFnc
         private anonId = new Identifier("_anonymous");

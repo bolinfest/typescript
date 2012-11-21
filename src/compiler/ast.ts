@@ -975,7 +975,7 @@ module TypeScript {
         public enclosingFnc: FuncDecl = null;
         public freeVariables: Symbol[] = [];
         public unitIndex = -1;
-        public classDecl: Record = null;
+        public classDecl: NamedDeclaration = null;
         public boundToProperty: VarDecl = null;
         public isOverload = false;
         public innerStaticFuncs: FuncDecl[] = [];
@@ -1187,10 +1187,9 @@ module TypeScript {
                 emitter.emitParensAndCommentsInPlace(this, false);
             }
         }
-
     }
 
-    export class Record extends AST {
+    export class NamedDeclaration extends AST {
         constructor (nodeType: NodeType,
                      public name: Identifier,
                      public members: ASTList) {
@@ -1198,7 +1197,7 @@ module TypeScript {
         }
     }
 
-    export class ModuleDecl extends Record {
+    export class ModuleDecl extends NamedDeclaration {
         public modFlags = ModuleFlags.ShouldEmitModuleDecl;
         public mod: ModuleType;
         public alias: AST = null;
@@ -1243,7 +1242,7 @@ module TypeScript {
         }
     }
 
-    export class NamedType extends Record {
+    export class NamedType extends NamedDeclaration {
         constructor (nodeType: NodeType,
                      name: Identifier,
                      public extendsList: ASTList,

@@ -450,7 +450,7 @@ module TypeScript {
             }
         }
 
-        export function walkRecordChildren(preAst: Record, parent: AST, walker: IAstWalker): void {
+        export function walkRecordChildren(preAst: NamedDeclaration, parent: AST, walker: IAstWalker): void {
             preAst.name = <Identifier>walker.walk(preAst.name, preAst);
             if (walker.options.goNextSibling && preAst.members) {
                 preAst.members = <ASTList>walker.walk(preAst.members, preAst);
