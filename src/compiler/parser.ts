@@ -2473,7 +2473,7 @@ module TypeScript {
                     var funcDecl: FuncDecl =
                         this.parseFunctionStatements(errorRecoverySet | ErrorRecoverySet.RCurly,
                                                 <Identifier>memberName, false, true, args,
-                                                AllowedElements.FunctionDecls,
+                                                AllowedElements.FunctionDeclarations,
                                                 this.scanner.startPos, false, Modifiers.None);
 
                     if (isSet && funcDecl.returnTypeAnnotation) {
