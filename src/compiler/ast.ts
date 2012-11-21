@@ -1189,7 +1189,7 @@ module TypeScript {
         }
     }
 
-    export class NamedDeclaration extends AST {
+    export class NamedDeclaration extends ModuleElement {
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
 
