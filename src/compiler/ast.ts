@@ -1293,18 +1293,10 @@ module TypeScript {
         }
 
         public typeCheck(typeFlow: TypeFlow) {
-            if (this.nodeType == NodeType.InterfaceDeclaration) {
-                return typeFlow.typeCheckInterface(this);
-            }
-            else {
-                throw new Error("please implement type check for node type " + this.nodeType);
-            }
+            return typeFlow.typeCheckInterface(this);
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
-            if (this.nodeType != NodeType.InterfaceDeclaration) {
-                throw new Error("please implement emit for node type " + this.nodeType);
-            }
         }
     }
 
