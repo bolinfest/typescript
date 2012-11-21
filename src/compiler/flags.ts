@@ -61,7 +61,6 @@ module TypeScript {
         Properties = 1 << 11,
 
         Global = FunctionDeclarations | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
-        FunctionBody = FunctionDeclarations,
         ModuleMembers = FunctionDeclarations | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
         ClassMembers = FunctionDeclarations | Properties,
         QuickParse = Global | Properties,

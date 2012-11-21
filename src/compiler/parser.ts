@@ -1328,7 +1328,7 @@ module TypeScript {
             this.inFncDecl = true;
             var funcDecl: FuncDecl =
                 this.parseFunctionStatements(errorRecoverySet | ErrorRecoverySet.RCurly,
-                                        name, false, isMethod, args, AllowedElements.FunctionBody,
+                                        name, false, isMethod, args, AllowedElements.FunctionDeclarations,
                                         minChar, requiresSignature, Modifiers.None);
             this.inFncDecl = svInFncDecl;
             funcDecl.variableArgList = variableArgList;
@@ -3873,7 +3873,7 @@ module TypeScript {
                             this.reportParseError("try statement does not take modifiers");
                         }
                         minChar = this.scanner.startPos;
-                        ast = this.parseTryCatchFinally(errorRecoverySet, AllowedElements.FunctionBody, parentModifiers, labelList);
+                        ast = this.parseTryCatchFinally(errorRecoverySet, AllowedElements.FunctionDeclarations, parentModifiers, labelList);
                         break;
                     }
                     case TokenID.OpenBrace: {
