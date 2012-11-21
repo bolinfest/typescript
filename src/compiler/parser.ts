@@ -1418,7 +1418,11 @@ module TypeScript {
             return args;
         }
 
-        private parseBaseList(extendsList: ASTList, implementsList: ASTList, errorRecoverySet: ErrorRecoverySet, interfaceOnly: bool, isClass: bool): void {
+        private parseBaseList(extendsList: ASTList,
+                              implementsList: ASTList,
+                              errorRecoverySet: ErrorRecoverySet,
+                              interfaceOnly: bool,
+                              isClass: bool): void {
             var keyword = true;
             var currentList = extendsList;
             for (; ;) {
