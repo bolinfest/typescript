@@ -1866,7 +1866,6 @@ module TypeScript {
             if (!isDeclaredInConstructor) {
                 this.currentClassDefinition.members.members[this.currentClassDefinition.members.members.length] = varDecl;
             }
-            this.currentClassDefinition.allMemberDefinitions.members[this.currentClassDefinition.allMemberDefinitions.members.length] = varDecl;
 
             varDecl.postComments = this.parseComments();
             return varDecl;

@@ -1260,7 +1260,6 @@ module TypeScript {
         public knownMemberNames: any = {};
         public constructorDecl: FuncDecl = null;
         public constructorNestingLevel = 0;
-        public allMemberDefinitions: ASTList = new ASTList();
         public endingToken: ASTSpan = null;
 
         constructor (name: Identifier,
