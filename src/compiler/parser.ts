@@ -3885,8 +3885,9 @@ module TypeScript {
                         this.currentToken = this.scanner.scan();
                         var block = new Block(new ASTList(), true);
                         this.pushStmt(block, labelList);
-                        this.parseStatementList(errorRecoverySet | ErrorRecoverySet.RCurly, block.statements, false, false,
-                                      AllowedElements.Block, modifiers);
+                        this.parseStatementList(
+                            errorRecoverySet | ErrorRecoverySet.RCurly, block.statements,
+                            /*sourceElements:*/ false, /*noLeadingCase:*/ false, AllowedElements.FunctionDeclarations, modifiers);
                         this.popStmt();
                         block.statements.minChar = minChar;
                         block.statements.limChar = this.scanner.pos;

@@ -60,7 +60,6 @@ module TypeScript {
         AmbientDecls = 1 << 10,
         Properties = 1 << 11,
 
-        Block = FunctionDeclarations,
         Global = FunctionDeclarations | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
         FunctionBody = FunctionDeclarations,
         ModuleMembers = FunctionDeclarations | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
