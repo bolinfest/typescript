@@ -77,7 +77,7 @@
                         {"nodeType": "Module", "minChar": 47, "limChar": 68, "startLine": 3, "startCol": 9, "endLine": 4, "endCol": 10, "children": [
                           {"nodeType": "Name", "minChar": 54, "limChar": 55, "startLine": 3, "startCol": 16, "endLine": 3, "endCol": 17, "children": []},
                           {"nodeType": "List", "minChar": 56, "limChar": 68, "startLine": 3, "startCol": 18, "endLine": 4, "endCol": 10, "children": []}]}]}]}]}]}]}]},
-            {"nodeType": "Interface", "minChar": 81, "limChar": 126, "startLine": 6, "startCol": 5, "endLine": 8, "endCol": 6, "children": [
+            {"nodeType": "InterfaceDeclaration", "minChar": 81, "limChar": 126, "startLine": 6, "startCol": 5, "endLine": 8, "endCol": 6, "children": [
               {"nodeType": "Name", "minChar": 91, "limChar": 95, "startLine": 6, "startCol": 15, "endLine": 6, "endCol": 19, "children": []},
               {"nodeType": "List", "minChar": 96, "limChar": 126, "startLine": 6, "startCol": 20, "endLine": 8, "endCol": 6, "children": [
                 {"nodeType": "VarDecl", "minChar": 107, "limChar": 119, "startLine": 7, "startCol": 9, "endLine": 7, "endCol": 21, "children": [
@@ -185,7 +185,7 @@
               {"nodeType": "VarDecl", "minChar": 865, "limChar": 959, "startLine": 53, "startCol": 5, "endLine": 57, "endCol": 7, "children": [
                 {"nodeType": "Name", "minChar": 877, "limChar": 878, "startLine": 53, "startCol": 17, "endLine": 53, "endCol": 18, "children": []},
                 {"nodeType": "TypeRef", "minChar": 880, "limChar": 958, "startLine": 53, "startCol": 20, "endLine": 57, "endCol": 6, "children": [
-                  {"nodeType": "Interface", "minChar": 880, "limChar": 958, "startLine": 53, "startCol": 20, "endLine": 57, "endCol": 6, "children": [
+                  {"nodeType": "InterfaceDeclaration", "minChar": 880, "limChar": 958, "startLine": 53, "startCol": 20, "endLine": 57, "endCol": 6, "children": [
                     {"nodeType": "Name", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": []},
                     {"nodeType": "List", "minChar": 880, "limChar": 958, "startLine": 53, "startCol": 20, "endLine": 57, "endCol": 6, "children": [
                       {"nodeType": "FuncDecl", "minChar": 891, "limChar": 899, "startLine": 54, "startCol": 9, "endLine": 54, "endCol": 17, "children": [

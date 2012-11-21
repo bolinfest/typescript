@@ -18,7 +18,7 @@
         {"nodeType": "ClassDeclaration", "minChar": 37, "limChar": 54, "startLine": 3, "startCol": 1, "endLine": 3, "endCol": 18, "children": [
           {"nodeType": "Name", "minChar": 43, "limChar": 50, "startLine": 3, "startCol": 7, "endLine": 3, "endCol": 14, "children": []},
           {"nodeType": "List", "minChar": 51, "limChar": 54, "startLine": 3, "startCol": 15, "endLine": 3, "endCol": 18, "children": []}]},
-        {"nodeType": "Interface", "minChar": 56, "limChar": 76, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 21, "children": [
+        {"nodeType": "InterfaceDeclaration", "minChar": 56, "limChar": 76, "startLine": 4, "startCol": 1, "endLine": 4, "endCol": 21, "children": [
           {"nodeType": "Name", "minChar": 66, "limChar": 73, "startLine": 4, "startCol": 11, "endLine": 4, "endCol": 18, "children": []},
           {"nodeType": "List", "minChar": 73, "limChar": 76, "startLine": 4, "startCol": 18, "endLine": 4, "endCol": 21, "children": []}]},
         {"nodeType": "Module", "minChar": 78, "limChar": 111, "startLine": 5, "startCol": 1, "endLine": 5, "endCol": 34, "children": [

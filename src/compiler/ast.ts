@@ -1156,7 +1156,7 @@ module TypeScript {
                         }
                     }
                     else if (stmt.nodeType == NodeType.ClassDeclaration) {
-                        if (!hasFlag((<TypeDecl>stmt).varFlags, VarFlags.Ambient)) {
+                        if (!hasFlag((<InterfaceDeclaration>stmt).varFlags, VarFlags.Ambient)) {
                             return true;
                         }
                     }
@@ -1170,7 +1170,7 @@ module TypeScript {
                             return true;
                         }
                     }
-                    else if (stmt.nodeType != NodeType.Interface && stmt.nodeType != NodeType.Empty) {
+                    else if (stmt.nodeType != NodeType.InterfaceDeclaration && stmt.nodeType != NodeType.Empty) {
                         return true;
                     }
                 }
@@ -1281,24 +1281,23 @@ module TypeScript {
         }
     }
 
-    export class TypeDecl extends NamedType {
+    export class InterfaceDeclaration extends NamedType {
         public varFlags = VarFlags.None;
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
 
-        constructor (nodeType: NodeType,
-                     name: Identifier,
+        constructor (name: Identifier,
                      members: ASTList,
                      extendsList: ASTList,
                      implementsList: ASTList) {
-            super(nodeType, name, extendsList, implementsList, members);
+            super(NodeType.InterfaceDeclaration, name, extendsList, implementsList, members);
         }
 
         public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }
         public isAmbient() { return hasFlag(this.varFlags, VarFlags.Ambient); }
 
         public typeCheck(typeFlow: TypeFlow) {
-            if (this.nodeType == NodeType.Interface) {
+            if (this.nodeType == NodeType.InterfaceDeclaration) {
                 return typeFlow.typeCheckInterface(this);
             }
             else {
@@ -1307,7 +1306,7 @@ module TypeScript {
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
-            if (this.nodeType != NodeType.Interface) {
+            if (this.nodeType != NodeType.InterfaceDeclaration) {
                 throw new Error("please implement emit for node type " + this.nodeType);
             }
         }

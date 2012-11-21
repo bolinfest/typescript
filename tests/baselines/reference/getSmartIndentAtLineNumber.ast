@@ -180,7 +180,7 @@
                       {"nodeType": "List", "minChar": 236, "limChar": 239, "startLine": 14, "startCol": 25, "endLine": 14, "endCol": 28, "children": []}]},
                     {"nodeType": "Empty", "minChar": 239, "limChar": 240, "startLine": 14, "startCol": 28, "endLine": 14, "endCol": 29, "children": []},
                     {"nodeType": "EndCode", "minChar": 251, "limChar": 251, "startLine": 15, "startCol": 10, "endLine": 15, "endCol": 10, "children": []}]}]}]}]},
-            {"nodeType": "Interface", "minChar": 266, "limChar": 336, "startLine": 18, "startCol": 5, "endLine": 24, "endCol": 6, "children": [
+            {"nodeType": "InterfaceDeclaration", "minChar": 266, "limChar": 336, "startLine": 18, "startCol": 5, "endLine": 24, "endCol": 6, "children": [
               {"nodeType": "Name", "minChar": 276, "limChar": 279, "startLine": 18, "startCol": 15, "endLine": 18, "endCol": 18, "children": []},
               {"nodeType": "List", "minChar": 280, "limChar": 336, "startLine": 18, "startCol": 19, "endLine": 24, "endCol": 6, "children": [
                 {"nodeType": "VarDecl", "minChar": 293, "limChar": 302, "startLine": 20, "startCol": 9, "endLine": 20, "endCol": 18, "children": [

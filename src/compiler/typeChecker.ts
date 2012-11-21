@@ -1054,8 +1054,8 @@ module TypeScript {
                                     typeLink.type = this.anyType;
                                 }
                                 break;
-                            case NodeType.Interface:
-                                var interfaceDecl = <TypeDecl>ast;
+                            case NodeType.InterfaceDeclaration:
+                                var interfaceDecl = <InterfaceDeclaration>ast;
                                 var interfaceType = new Type();
                                 var interfaceSymbol = new TypeSymbol((<Identifier>interfaceDecl.name).text,
                                                                    ast.minChar,

@@ -161,7 +161,7 @@ module TypeScript {
                     context.scopeStartAST = ast;
                     break;
 
-                case NodeType.Interface:
+                case NodeType.InterfaceDeclaration:
                     context.scopeGetter = function () {
                         return (ast.type === null) ? null : ast.type.containedScope;
                     };

@@ -65,7 +65,7 @@
             {"nodeType": "Module", "minChar": 154, "limChar": 266, "startLine": 13, "startCol": 1, "endLine": 16, "endCol": 2, "children": [
               {"nodeType": "Name", "minChar": 161, "limChar": 168, "startLine": 13, "startCol": 8, "endLine": 13, "endCol": 15, "children": []},
               {"nodeType": "List", "minChar": 169, "limChar": 266, "startLine": 13, "startCol": 16, "endLine": 16, "endCol": 2, "children": [
-                {"nodeType": "Interface", "minChar": 176, "limChar": 212, "startLine": 14, "startCol": 5, "endLine": 14, "endCol": 41, "children": [
+                {"nodeType": "InterfaceDeclaration", "minChar": 176, "limChar": 212, "startLine": 14, "startCol": 5, "endLine": 14, "endCol": 41, "children": [
                   {"nodeType": "Name", "minChar": 186, "limChar": 191, "startLine": 14, "startCol": 15, "endLine": 14, "endCol": 20, "children": []},
                   {"nodeType": "List", "minChar": 192, "limChar": 212, "startLine": 14, "startCol": 21, "endLine": 14, "endCol": 41, "children": [
                     {"nodeType": "FuncDecl", "minChar": 194, "limChar": 210, "startLine": 14, "startCol": 23, "endLine": 14, "endCol": 39, "children": [

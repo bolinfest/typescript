@@ -240,7 +240,7 @@ module Formatting {
                 case TypeScript.NodeType.List: return mapList();
                 case TypeScript.NodeType.Script: return AuthorParseNodeKind.apnkProg;
                 case TypeScript.NodeType.ClassDeclaration: return AuthorParseNodeKind.apnkEmpty; //Note: We handle this directly in formatting code
-                case TypeScript.NodeType.Interface: return AuthorParseNodeKind.apnkEmpty; //Note: We handle this directly in formatting code
+                case TypeScript.NodeType.InterfaceDeclaration: return AuthorParseNodeKind.apnkEmpty; //Note: We handle this directly in formatting code
                 case TypeScript.NodeType.Module: return AuthorParseNodeKind.apnkEmpty; //Note: We handle this directly in formatting code
                 case TypeScript.NodeType.ImportDeclaration: return AuthorParseNodeKind.apnkEmpty; //Note: We handle this directly in formatting code
                 case TypeScript.NodeType.With: return AuthorParseNodeKind.apnkWith;

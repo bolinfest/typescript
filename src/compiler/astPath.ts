@@ -93,7 +93,7 @@ module TypeScript {
 
             return (this.ast().nodeType === TypeScript.NodeType.Name) &&
                 (this.parent().nodeType === TypeScript.NodeType.ClassDeclaration) &&
-                ((<TypeScript.TypeDecl>this.parent()).name === this.ast());
+                ((<TypeScript.InterfaceDeclaration>this.parent()).name === this.ast());
         }
 
         public isNameOfInterface(): bool {
@@ -101,8 +101,8 @@ module TypeScript {
                 return false;
 
             return (this.ast().nodeType === TypeScript.NodeType.Name) &&
-                (this.parent().nodeType === TypeScript.NodeType.Interface) &&
-                ((<TypeScript.TypeDecl>this.parent()).name === this.ast());
+                (this.parent().nodeType === TypeScript.NodeType.InterfaceDeclaration) &&
+                ((<TypeScript.InterfaceDeclaration>this.parent()).name === this.ast());
         }
 
         public isNameOfArgument(): bool {
@@ -183,7 +183,7 @@ module TypeScript {
             return this.count() >= 3 &&
                 this.asts[this.top] === ast &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.List &&
-                this.asts[this.top - 2].nodeType === TypeScript.NodeType.Interface;
+                this.asts[this.top - 2].nodeType === TypeScript.NodeType.InterfaceDeclaration;
         }
 
         public isTopLevelImplicitModule() {
@@ -232,8 +232,8 @@ module TypeScript {
 
         public isBodyOfInterface(): bool {
             return this.count() >= 2 &&
-                this.asts[this.top - 1].nodeType === TypeScript.NodeType.Interface &&
-                 (<TypeScript.TypeDecl>this.asts[this.top - 1]).members == this.asts[this.top - 0];
+                this.asts[this.top - 1].nodeType === TypeScript.NodeType.InterfaceDeclaration &&
+                 (<TypeScript.InterfaceDeclaration>this.asts[this.top - 1]).members == this.asts[this.top - 0];
         }
 
         public isBodyOfBlock(): bool {

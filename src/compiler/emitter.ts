@@ -1342,7 +1342,7 @@ module TypeScript {
                     }
                     else if (startLine &&
                              (emitNode.nodeType != NodeType.Module) &&
-                             (emitNode.nodeType != NodeType.Interface) &&
+                             (emitNode.nodeType != NodeType.InterfaceDeclaration) &&
                              (!((emitNode.nodeType == NodeType.VarDecl) &&
                                 ((((<VarDecl>emitNode).varFlags) & VarFlags.Ambient) == VarFlags.Ambient) &&
                                 (((<VarDecl>emitNode).init) == null)) && this.varListCount >= 0) &&
@@ -1366,7 +1366,7 @@ module TypeScript {
             // REVIEW: simplify rules for indenting
             if (startLine && (this.indenter.indentAmt > 0) && (ast.nodeType != NodeType.List) &&
                 (ast.nodeType != NodeType.Block)) {
-                if ((ast.nodeType != NodeType.Interface) &&
+                if ((ast.nodeType != NodeType.InterfaceDeclaration) &&
                     (!((ast.nodeType == NodeType.VarDecl) &&
                        ((((<VarDecl>ast).varFlags) & VarFlags.Ambient) == VarFlags.Ambient) &&
                        (((<VarDecl>ast).init) == null)) && this.varListCount >= 0) &&

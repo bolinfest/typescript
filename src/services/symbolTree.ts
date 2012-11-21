@@ -191,7 +191,7 @@ module Services {
             return sym != null &&
                 sym.kind() == TypeScript.SymbolKind.Type &&
                 sym.declAST != null &&
-                sym.declAST.nodeType === TypeScript.NodeType.Interface;
+                sym.declAST.nodeType === TypeScript.NodeType.InterfaceDeclaration;
         }
 
         public isMethod(sym: TypeScript.Symbol): bool {

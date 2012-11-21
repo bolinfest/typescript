@@ -536,7 +536,7 @@ module Formatting {
         static IsTypeScriptDeclWithBlockContextNode(node: ParseNode): bool {
             switch (node.AuthorNode.Details.nodeType) {
                 case TypeScript.NodeType.Module:
-                case TypeScript.NodeType.Interface:
+                case TypeScript.NodeType.InterfaceDeclaration:
                 case TypeScript.NodeType.ClassDeclaration:
                     return true;
 

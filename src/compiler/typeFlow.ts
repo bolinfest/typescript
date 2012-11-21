@@ -992,7 +992,7 @@ module TypeScript {
 
         private varPrivacyErrorReporter(varDecl: BoundDecl, typeName: string) {
             if (hasFlag(varDecl.varFlags, VarFlags.Public)) {
-                if (varDecl.sym.container.declAST.nodeType == NodeType.Interface) {
+                if (varDecl.sym.container.declAST.nodeType == NodeType.InterfaceDeclaration) {
                     this.checker.errorReporter.simpleError(varDecl, "property '" + varDecl.sym.name + "' of exported interface has or is using private type '" + typeName + "'");
                 } else {
                     this.checker.errorReporter.simpleError(varDecl, "public member '" + varDecl.sym.name + "' of exported class has or is using private type '" + typeName + "'");
@@ -1878,9 +1878,9 @@ module TypeScript {
 
         private baseListPrivacyErrorReporter(bases: ASTList, i: number, declSymbol: Symbol, extendsList: bool, typeName: string, isModuleName: bool) {
             var baseSymbol = bases.members[i].type.symbol;
-            var declTypeString = (declSymbol.declAST.nodeType == NodeType.Interface) ? "interface" : "class";
+            var declTypeString = (declSymbol.declAST.nodeType == NodeType.InterfaceDeclaration) ? "interface" : "class";
             var baseListTypeString = extendsList ? "extends" : "implements";
-            var baseTypeString = (baseSymbol.declAST.nodeType == NodeType.Interface) ? "interface" : "class";
+            var baseTypeString = (baseSymbol.declAST.nodeType == NodeType.InterfaceDeclaration) ? "interface" : "class";
             if (isModuleName) {
                 baseTypeString = " " + baseTypeString + " from private module";
             } else {
@@ -1938,7 +1938,7 @@ module TypeScript {
             }
 
             // Interface symbol doesn't reflect correct Exported state so use AST instead
-            var interfaceDecl: TypeDecl = declSymbol.getInterfaceDeclFromSymbol(this.checker);
+            var interfaceDecl: InterfaceDeclaration = declSymbol.getInterfaceDeclFromSymbol(this.checker);
             if (interfaceDecl && !hasFlag(interfaceDecl.varFlags, VarFlags.Exported)) {
                 return;
             }
@@ -2703,7 +2703,7 @@ module TypeScript {
             }
         }
 
-        public assertUniqueNamesInBaseTypes(names: IHashTable, type: Type, classDecl: TypeDecl, checkUnique: bool): void {
+        public assertUniqueNamesInBaseTypes(names: IHashTable, type: Type, classDecl: InterfaceDeclaration, checkUnique: bool): void {
             if (type) {
                 if (type.members) {
                     type.members.publicMembers.map((key, s, c) => {
@@ -2742,7 +2742,7 @@ module TypeScript {
                 var names = new StringHashTable();
                 if (instanceType.isClassInstance()) {
                     for (var i = 0; i < len; i++) {
-                        this.assertUniqueNamesInBaseTypes(names, instanceType.extendsList[i], <TypeDecl>derivedTypeDecl, i > 0);
+                        this.assertUniqueNamesInBaseTypes(names, instanceType.extendsList[i], <InterfaceDeclaration>derivedTypeDecl, i > 0);
                     }
                 }
 
@@ -2853,7 +2853,7 @@ module TypeScript {
             }
         }
 
-        public typeCheckInterface(interfaceDecl: TypeDecl): TypeDecl {
+        public typeCheckInterface(interfaceDecl: InterfaceDeclaration): InterfaceDeclaration {
             // overloads will be typechecked inline by the members
             //this.typeCheckOverloadSignatures(interfaceDecl.type, interfaceDecl);
             this.typeCheckBases(interfaceDecl.type);

@@ -101,7 +101,7 @@ module TypeScript {
         List,
         Script,
         ClassDeclaration,
-        Interface,
+        InterfaceDeclaration,
         Module,
         ImportDeclaration,
         With,

@@ -186,8 +186,8 @@ module Services {
 
             var symbolLocation: TypeScript.AST;
             switch (ast.nodeType) {
-                case TypeScript.NodeType.Interface:
-                    symbolLocation = (<TypeScript.TypeDecl>ast).name;
+                case TypeScript.NodeType.InterfaceDeclaration:
+                    symbolLocation = (<TypeScript.InterfaceDeclaration>ast).name;
                     break;
 
                 case TypeScript.NodeType.ClassDeclaration:
@@ -1724,8 +1724,8 @@ module Services {
                         result = maxLim(result, (<TypeScript.ClassDeclaration>ast).name, (<TypeScript.ClassDeclaration>ast).extendsList, (<TypeScript.ClassDeclaration>ast).implementsList);
                         break;
 
-                    case TypeScript.NodeType.Interface:
-                        result = maxLim(result, (<TypeScript.TypeDecl>ast).name, (<TypeScript.TypeDecl>ast).extendsList, (<TypeScript.TypeDecl>ast).implementsList);
+                    case TypeScript.NodeType.InterfaceDeclaration:
+                        result = maxLim(result, (<TypeScript.InterfaceDeclaration>ast).name, (<TypeScript.InterfaceDeclaration>ast).extendsList, (<TypeScript.InterfaceDeclaration>ast).implementsList);
                         break;
                 }
 
@@ -1745,7 +1745,7 @@ module Services {
                     //fall through
                     case TypeScript.NodeType.ClassDeclaration:
                     case TypeScript.NodeType.Module:
-                    case TypeScript.NodeType.Interface:
+                    case TypeScript.NodeType.InterfaceDeclaration:
                         return MatchKind.exact;
 
                     default:
@@ -1922,7 +1922,7 @@ module Services {
         //
         private getDeclNodeElementKind(ast: TypeScript.AST): string {
             switch (ast.nodeType) {
-                case TypeScript.NodeType.Interface:
+                case TypeScript.NodeType.InterfaceDeclaration:
                     return ScriptElementKind.interfaceElement;
 
                 case TypeScript.NodeType.ClassDeclaration:
@@ -1993,7 +1993,7 @@ module Services {
                 }
             }
 
-            var typeDeclToKindModifiers = (decl: TypeScript.TypeDecl): string => {
+            var typeDeclToKindModifiers = (decl: TypeScript.InterfaceDeclaration): string => {
                 var result = ScriptElementKindModifier.none;
                 result = addMofifier(result, decl.isExported(), ScriptElementKindModifier.exportedModifier);
                 result = addMofifier(result, decl.isAmbient(), ScriptElementKindModifier.ambientModifier);
@@ -2042,8 +2042,8 @@ module Services {
             }
 
             switch (ast.nodeType) {
-                case TypeScript.NodeType.Interface:
-                    var typeDecl = <TypeScript.TypeDecl>ast;
+                case TypeScript.NodeType.InterfaceDeclaration:
+                    var typeDecl = <TypeScript.InterfaceDeclaration>ast;
                     return typeDeclToKindModifiers(typeDecl);
 
                 case TypeScript.NodeType.ClassDeclaration:
@@ -2133,8 +2133,8 @@ module Services {
                 var item: NavigateToItem = null;
 
                 switch (ast.nodeType) {
-                    case TypeScript.NodeType.Interface: {
-                        var typeDecl = <TypeScript.TypeDecl>ast;
+                    case TypeScript.NodeType.InterfaceDeclaration: {
+                        var typeDecl = <TypeScript.InterfaceDeclaration>ast;
                         item = addItem(parent, typeDecl, typeDecl.name.actualText, ScriptElementKind.interfaceElement);
                         context.containerASTs.push(ast);
                         context.containerSymbols.push(typeDecl.type.symbol);

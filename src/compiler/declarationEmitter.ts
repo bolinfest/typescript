@@ -178,7 +178,7 @@ module TypeScript {
             var declarationContainerAst = this.getAstDeclarationContainer();
             switch (declarationContainerAst.nodeType) {
                 case NodeType.Module:
-                case NodeType.Interface:
+                case NodeType.InterfaceDeclaration:
                 case NodeType.FuncDecl:
                     if (declarationContainerAst.type) {
                         containingScope = declarationContainerAst.type.containedScope;
@@ -208,7 +208,7 @@ module TypeScript {
 
         public VarDeclCallback(pre: bool, varDecl: VarDecl): bool {
             if (pre && this.canEmitSignature(ToDeclFlags(varDecl.varFlags), false)) {
-                var interfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
+                var interfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.InterfaceDeclaration);
                 if (!interfaceMember) {
                     // If it is var list of form var a, b, c = emit it only if count > 0 - which will be when emitting first var
                     // If it is var list of form  var a = varList count will be 0
@@ -288,7 +288,7 @@ module TypeScript {
                 return this.emitPropertyAccessorSignature(funcDecl);
             }
 
-            var isInterfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
+            var isInterfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.InterfaceDeclaration);
             if (funcDecl.bod) {
                 if (funcDecl.isConstructor) {
                     if (funcDecl.type.construct && funcDecl.type.construct.signatures.length > 1) {
@@ -478,7 +478,7 @@ module TypeScript {
             return true;
         }
 
-        public InterfaceCallback(pre: bool, interfaceDecl: TypeDecl): bool {
+        public InterfaceDeclarationCallback(pre: bool, interfaceDecl: InterfaceDeclaration): bool {
             if (!this.canEmitPrePostAstSignature(ToDeclFlags(interfaceDecl.varFlags), interfaceDecl, pre)) {
                 return false;
             }

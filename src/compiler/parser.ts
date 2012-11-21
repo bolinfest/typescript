@@ -870,8 +870,8 @@ module TypeScript {
             this.checkCurrentToken(TokenID.CloseBrace, errorRecoverySet);
 
             // REVIEW: We're parsing an ObjectType, but we give a NodeType of Interface here.
-            var interfaceDecl = new TypeDecl(
-                NodeType.Interface, this.anonId, members, /*extends:*/ null, /*implementsL*/ null);
+            var interfaceDecl = new InterfaceDeclaration(
+                this.anonId, members, /*extends:*/ null, /*implementsL*/ null);
 
             interfaceDecl.minChar = minChar;
             interfaceDecl.limChar = members.limChar;    // "}"
@@ -1973,7 +1973,7 @@ module TypeScript {
             }
         }
 
-        private parseInterfaceDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): TypeDecl {
+        private parseInterfaceDecl(errorRecoverySet: ErrorRecoverySet, modifiers: Modifiers): InterfaceDeclaration {
             var leftCurlyCount = this.scanner.leftCurlyCount;
             var rightCurlyCount = this.scanner.rightCurlyCount;
 
@@ -2016,7 +2016,7 @@ module TypeScript {
             // have an 'ObjectType' and not a list of members.  We may want to consider making that
             // change.  Note: it would mean breaking aparat TypeDecl into InterfaceDeclaration and 
             // ClassDeclaration.
-            var interfaceDecl = new TypeDecl(NodeType.Interface, name, members, interfaces, null);
+            var interfaceDecl = new InterfaceDeclaration(name, members, interfaces, null);
             if (hasFlag(modifiers, Modifiers.Private)) {
                 interfaceDecl.varFlags |= VarFlags.Private;
             }
@@ -4091,7 +4091,7 @@ module TypeScript {
 
         private okAmbientModuleMember(ast: AST) {
             var nt = ast.nodeType;
-            return (nt == NodeType.ClassDeclaration) || (nt == NodeType.ImportDeclaration) || (nt == NodeType.Interface) || (nt == NodeType.Module) ||
+            return (nt == NodeType.ClassDeclaration) || (nt == NodeType.ImportDeclaration) || (nt == NodeType.InterfaceDeclaration) || (nt == NodeType.Module) ||
                 (nt == NodeType.Empty) || (nt == NodeType.VarDecl) || 
                 ((nt == NodeType.Block) && !(<Block>ast).isStatementBlock) ||
                 ((nt == NodeType.FuncDecl) && ((<FuncDecl>ast).isMethod()));

@@ -95,7 +95,7 @@ module TypeScript {
     }
 
     export function preAssignClassScopes(ast: AST, context: AssignScopeContext) {
-        var classDecl = <TypeDecl>ast;
+        var classDecl = <InterfaceDeclaration>ast;
         var memberScope: SymbolTableScope = null;
         var aggScope: SymbolAggregateScope = null;
 
@@ -132,7 +132,7 @@ module TypeScript {
     }
 
     export function preAssignInterfaceScopes(ast: AST, context: AssignScopeContext) {
-        var interfaceDecl = <TypeDecl>ast;
+        var interfaceDecl = <InterfaceDeclaration>ast;
         var memberScope: SymbolTableScope = null;
         var aggScope: SymbolAggregateScope = null;
 
@@ -399,7 +399,7 @@ module TypeScript {
             else if (ast.nodeType == NodeType.ClassDeclaration) {
                 preAssignClassScopes(ast, context);
             }
-            else if (ast.nodeType == NodeType.Interface) {
+            else if (ast.nodeType == NodeType.InterfaceDeclaration) {
                 preAssignInterfaceScopes(ast, context);
             }
             else if (ast.nodeType == NodeType.With) {
@@ -436,7 +436,7 @@ module TypeScript {
             else if (ast.nodeType == NodeType.ClassDeclaration) {
                 popAssignScope(context);
             }
-            else if (ast.nodeType == NodeType.Interface) {
+            else if (ast.nodeType == NodeType.InterfaceDeclaration) {
                 popAssignScope(context);
             }
             else if (ast.nodeType == NodeType.With) {

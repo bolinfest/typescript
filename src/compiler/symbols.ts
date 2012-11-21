@@ -268,10 +268,10 @@ module TypeScript {
 
         public getInterfaceDeclFromSymbol(checker: TypeChecker) {
             if (this.declAST != null) {
-                if (this.declAST.nodeType == NodeType.Interface) {
-                    return <TypeDecl>this.declAST;
-                } else if (this.container != null && this.container != checker.gloMod && this.container.declAST.nodeType == NodeType.Interface) {
-                    return <TypeDecl>this.container.declAST;
+                if (this.declAST.nodeType == NodeType.InterfaceDeclaration) {
+                    return <InterfaceDeclaration>this.declAST;
+                } else if (this.container != null && this.container != checker.gloMod && this.container.declAST.nodeType == NodeType.InterfaceDeclaration) {
+                    return <InterfaceDeclaration>this.container.declAST;
                 }
             }
 

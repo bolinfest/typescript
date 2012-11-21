@@ -418,7 +418,7 @@ module TypeScript {
 
     export function preCollectInterfaceTypes(ast: AST, parent: AST, context: TypeCollectionContext) {
         var scopeChain = context.scopeChain;
-        var interfaceDecl = <TypeDecl>ast;
+        var interfaceDecl = <InterfaceDeclaration>ast;
         var interfaceSymbol: TypeSymbol = null;
         var interfaceType: Type = null;
         var isExported = hasFlag(interfaceDecl.varFlags, VarFlags.Exported);
@@ -792,7 +792,7 @@ module TypeScript {
         else if (ast.nodeType == NodeType.Block) {
             go = true;
         }
-        else if (ast.nodeType == NodeType.Interface) {
+        else if (ast.nodeType == NodeType.InterfaceDeclaration) {
             go = preCollectInterfaceTypes(ast, parent, context);
         }
         // This will be a constructor arg because this pass only traverses
@@ -824,7 +824,7 @@ module TypeScript {
         else if (ast.nodeType == NodeType.ClassDeclaration) {
             popTypeCollectionScope(context);
         }
-        else if (ast.nodeType == NodeType.Interface) {
+        else if (ast.nodeType == NodeType.InterfaceDeclaration) {
             popTypeCollectionScope(context);
         }
         return ast;
