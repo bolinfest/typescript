@@ -23,7 +23,7 @@
           {"nodeType": "InterfaceDeclaration", "minChar": 107, "limChar": 126, "startLine": 5, "startCol": 1, "endLine": 5, "endCol": 20, "children": [
             {"nodeType": "Name", "minChar": 117, "limChar": 123, "startLine": 5, "startCol": 11, "endLine": 5, "endCol": 17, "children": []},
             {"nodeType": "List", "minChar": 123, "limChar": 126, "startLine": 5, "startCol": 17, "endLine": 5, "endCol": 20, "children": []}]},
-          {"nodeType": "Module", "minChar": 128, "limChar": 159, "startLine": 6, "startCol": 1, "endLine": 6, "endCol": 32, "children": [
+          {"nodeType": "ModuleDeclaration", "minChar": 128, "limChar": 159, "startLine": 6, "startCol": 1, "endLine": 6, "endCol": 32, "children": [
             {"nodeType": "Name", "minChar": 135, "limChar": 141, "startLine": 6, "startCol": 8, "endLine": 6, "endCol": 14, "children": []},
             {"nodeType": "List", "minChar": 141, "limChar": 159, "startLine": 6, "startCol": 14, "endLine": 6, "endCol": 32, "children": [
               {"nodeType": "VarDecl", "minChar": 143, "limChar": 158, "startLine": 6, "startCol": 16, "endLine": 6, "endCol": 31, "children": [

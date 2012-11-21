@@ -393,7 +393,7 @@ module TypeScript {
                 var list = <ASTList>ast;
                 list.enclosingScope = context.scopeChain.scope;
             }
-            else if (ast.nodeType == NodeType.Module) {
+            else if (ast.nodeType == NodeType.ModuleDeclaration) {
                 preAssignModuleScopes(ast, context);
             }
             else if (ast.nodeType == NodeType.ClassDeclaration) {
@@ -423,7 +423,7 @@ module TypeScript {
         var context:AssignScopeContext = walker.state;
         var go = true;
         if (ast) {
-            if (ast.nodeType == NodeType.Module) {
+            if (ast.nodeType == NodeType.ModuleDeclaration) {
                 var prevModDecl = <ModuleDeclaration>ast;
 
                 popAssignScope(context);

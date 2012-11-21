@@ -2278,7 +2278,7 @@ module TypeScript {
                     enclosingSym = enclosingSym.container;
                 }
 
-                if (enclosingSym && enclosingSym.declAST && enclosingSym.declAST.nodeType == NodeType.Module) {
+                if (enclosingSym && enclosingSym.declAST && enclosingSym.declAST.nodeType == NodeType.ModuleDeclaration) {
                     this.checker.currentModDecl = <ModuleDeclaration>enclosingSym.declAST;
                 }
             }

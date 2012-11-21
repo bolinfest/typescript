@@ -228,7 +228,7 @@ module TypeScript {
             modType.symbol = typeSymbol;
         }
         else {
-            if (symbol && symbol.declAST && symbol.declAST.nodeType != NodeType.Module) {
+            if (symbol && symbol.declAST && symbol.declAST.nodeType != NodeType.ModuleDeclaration) {
                 context.checker.errorReporter.simpleError(moduleDecl, "Conflicting symbol name for module '" + modName + "'");
             }
             typeSymbol = <TypeSymbol>symbol;
@@ -783,7 +783,7 @@ module TypeScript {
         else if (ast.nodeType == NodeType.With) {
             go = false;
         }
-        else if (ast.nodeType == NodeType.Module) {
+        else if (ast.nodeType == NodeType.ModuleDeclaration) {
             go = preCollectModuleTypes(ast, parent, context);
         }
         else if (ast.nodeType == NodeType.ClassDeclaration) {
@@ -818,7 +818,7 @@ module TypeScript {
     export function postCollectTypes(ast: AST, parent: AST, walker: IAstWalker) {
         var context: TypeCollectionContext = walker.state;
 
-        if (ast.nodeType == NodeType.Module) {
+        if (ast.nodeType == NodeType.ModuleDeclaration) {
             popTypeCollectionScope(context);
         }
         else if (ast.nodeType == NodeType.ClassDeclaration) {

@@ -6,7 +6,7 @@
   "ast":
     {"nodeType": "Script", "minChar": 0, "limChar": 14, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 2, "children": [
       {"nodeType": "List", "minChar": 0, "limChar": 14, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 2, "children": [
-        {"nodeType": "Module", "minChar": 0, "limChar": 14, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 2, "children": [
+        {"nodeType": "ModuleDeclaration", "minChar": 0, "limChar": 14, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 2, "children": [
           {"nodeType": "Name", "minChar": 10, "limChar": 10, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 1, "children": []},
           {"nodeType": "List", "minChar": 10, "limChar": 14, "startLine": 2, "startCol": 1, "endLine": 3, "endCol": 2, "children": []}]}]}]}
 }

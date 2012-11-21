@@ -1150,7 +1150,7 @@ module TypeScript {
             if (!this.isDeclareFile && !this.isResident && this.bod) {
                 for (var i = 0, len = this.bod.members.length; i < len; i++) {
                     var stmt = this.bod.members[i];
-                    if (stmt.nodeType == NodeType.Module) {
+                    if (stmt.nodeType == NodeType.ModuleDeclaration) {
                         if (!hasFlag((<ModuleDeclaration>stmt).modFlags, ModuleFlags.ShouldEmitModuleDecl | ModuleFlags.Ambient)) {
                             return true;
                         }
@@ -1212,7 +1212,7 @@ module TypeScript {
         public containsUnicodeCharInComment = false;
 
         constructor (name: Identifier, members: ASTList, vars: ASTList, scopes: ASTList, public endingToken: ASTSpan) {
-            super(NodeType.Module, name, members);
+            super(NodeType.ModuleDeclaration, name, members);
 
             this.vars = vars;
             this.scopes = scopes;

@@ -194,7 +194,7 @@ module Services {
                     symbolLocation = (<TypeScript.ClassDeclaration>ast).name;
                     break;
 
-                case TypeScript.NodeType.Module:
+                case TypeScript.NodeType.ModuleDeclaration:
                     symbolLocation = (<TypeScript.ModuleDeclaration>ast).name;
                     break;
 
@@ -629,7 +629,7 @@ module Services {
                     if (pos >= cur.minChar && pos <= cur.limChar) {
                         switch (cur.nodeType) {
                             // Can be used as breakpoint location
-                            case TypeScript.NodeType.Module:
+                            case TypeScript.NodeType.ModuleDeclaration:
                             case TypeScript.NodeType.ClassDeclaration:
                             case TypeScript.NodeType.FuncDecl:
                             case TypeScript.NodeType.Break:
@@ -690,7 +690,7 @@ module Services {
 
             switch (cur.nodeType) {
                 // TODO : combine these as interface and use custom method instead of duplicate logic
-                case TypeScript.NodeType.Module:
+                case TypeScript.NodeType.ModuleDeclaration:
                     var moduleDecl = <TypeScript.ModuleDeclaration>cur;
                     // If inside another module the whole module is debuggable
                     if (containerASTs.length > 1) {
@@ -1716,7 +1716,7 @@ module Services {
                         result = maxLim(result, (<TypeScript.FuncDecl>ast).name, (<TypeScript.FuncDecl>ast).arguments, (<TypeScript.FuncDecl>ast).returnTypeAnnotation);
                         break
 
-                    case TypeScript.NodeType.Module:
+                    case TypeScript.NodeType.ModuleDeclaration:
                         result = maxLim(result, (<TypeScript.ModuleDeclaration>ast).name);
                         break;
 
@@ -1744,7 +1744,7 @@ module Services {
                             return MatchKind.none;
                     //fall through
                     case TypeScript.NodeType.ClassDeclaration:
-                    case TypeScript.NodeType.Module:
+                    case TypeScript.NodeType.ModuleDeclaration:
                     case TypeScript.NodeType.InterfaceDeclaration:
                         return MatchKind.exact;
 
@@ -1928,7 +1928,7 @@ module Services {
                 case TypeScript.NodeType.ClassDeclaration:
                     return ScriptElementKind.classElement;
 
-                case TypeScript.NodeType.Module:
+                case TypeScript.NodeType.ModuleDeclaration:
                     var moduleDecl = <TypeScript.ModuleDeclaration>ast;
                     var isEnum = moduleDecl.isEnum();
                     return isEnum ? ScriptElementKind.enumElement : ScriptElementKind.moduleElement;
@@ -2050,7 +2050,7 @@ module Services {
                     var classDecl = <TypeScript.ClassDeclaration>ast;
                     return classDeclToKindModifiers(classDecl);
 
-                case TypeScript.NodeType.Module:
+                case TypeScript.NodeType.ModuleDeclaration:
                     var moduleDecl = <TypeScript.ModuleDeclaration>ast;
                     return moduleDeclToKindModifiers(moduleDecl);
 
@@ -2151,7 +2151,7 @@ module Services {
                     }
                         break;
 
-                    case TypeScript.NodeType.Module: {
+                    case TypeScript.NodeType.ModuleDeclaration: {
                         var moduleDecl = <TypeScript.ModuleDeclaration>ast;
                         var isEnum = moduleDecl.isEnum();
                         var kind = isEnum ? ScriptElementKind.enumElement : ScriptElementKind.moduleElement;

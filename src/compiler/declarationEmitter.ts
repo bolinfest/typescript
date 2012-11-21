@@ -53,7 +53,7 @@ module TypeScript {
                 container = this.declarationContainerStack[this.declarationContainerStack.length - 2];
             }
 
-            if (container.nodeType == NodeType.Module && !hasFlag(declFlags, DeclFlags.Exported)) {
+            if (container.nodeType == NodeType.ModuleDeclaration && !hasFlag(declFlags, DeclFlags.Exported)) {
                 return false;
             }
 
@@ -92,7 +92,7 @@ module TypeScript {
 
             // Emit export only for global export statements. The container for this would be dynamic module which is whole file
             var container = this.getAstDeclarationContainer();
-            if (container.nodeType == NodeType.Module &&
+            if (container.nodeType == NodeType.ModuleDeclaration &&
                 hasFlag((<ModuleDeclaration>container).modFlags, ModuleFlags.IsWholeFile) &&
                 hasFlag(declFlags, DeclFlags.Exported)) {
                 this.declFile.Write("export ");
@@ -177,7 +177,7 @@ module TypeScript {
             var containingScope: SymbolScope = null;
             var declarationContainerAst = this.getAstDeclarationContainer();
             switch (declarationContainerAst.nodeType) {
-                case NodeType.Module:
+                case NodeType.ModuleDeclaration:
                 case NodeType.InterfaceDeclaration:
                 case NodeType.FuncDecl:
                     if (declarationContainerAst.type) {
@@ -545,7 +545,7 @@ module TypeScript {
             return false;
         }
 
-        public ModuleCallback(pre: bool, moduleDecl: ModuleDeclaration): bool {
+        public ModuleDeclarationCallback(pre: bool, moduleDecl: ModuleDeclaration): bool {
             if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsWholeFile)) {
                 // This is dynamic modules and we are going to outputing single file, 
                 // we need to change the declFile because dynamic modules are always emitted to their corresponding .d.ts
@@ -593,7 +593,7 @@ module TypeScript {
                 this.declFile.Write(moduleDecl.name.text);
 
                 var isCurrentModuleDotted = (moduleDecl.members.members.length == 1 &&
-                    moduleDecl.members.members[0].nodeType == NodeType.Module &&
+                    moduleDecl.members.members[0].nodeType == NodeType.ModuleDeclaration &&
                     !(<ModuleDeclaration>moduleDecl.members.members[0]).isEnum() &&
                     hasFlag((<ModuleDeclaration>moduleDecl.members.members[0]).modFlags, ModuleFlags.Exported));
 

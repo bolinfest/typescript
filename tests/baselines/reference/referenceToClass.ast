@@ -57,7 +57,7 @@
                           {"nodeType": "Name", "minChar": 211, "limChar": 214, "startLine": 9, "startCol": 22, "endLine": 9, "endCol": 25, "children": []}]},
                         {"nodeType": "Name", "minChar": 215, "limChar": 215, "startLine": 9, "startCol": 26, "endLine": 9, "endCol": 26, "children": []}]}]}]},
                   {"nodeType": "List", "minChar": 216, "limChar": 218, "startLine": 9, "startCol": 27, "endLine": 9, "endCol": 29, "children": []}]}]}]}]},
-          {"nodeType": "Module", "minChar": 226, "limChar": 269, "startLine": 12, "startCol": 1, "endLine": 14, "endCol": 2, "children": [
+          {"nodeType": "ModuleDeclaration", "minChar": 226, "limChar": 269, "startLine": 12, "startCol": 1, "endLine": 14, "endCol": 2, "children": [
             {"nodeType": "Name", "minChar": 233, "limChar": 236, "startLine": 12, "startCol": 8, "endLine": 12, "endCol": 11, "children": []},
             {"nodeType": "List", "minChar": 237, "limChar": 269, "startLine": 12, "startCol": 12, "endLine": 14, "endCol": 2, "children": [
               {"nodeType": "VarDecl", "minChar": 244, "limChar": 252, "startLine": 13, "startCol": 5, "endLine": 13, "endCol": 13, "children": [

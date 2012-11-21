@@ -153,7 +153,7 @@ module TypeScript {
                     }
                     break;
 
-                case NodeType.Module:
+                case NodeType.ModuleDeclaration:
                     context.deepestModuleDecl = <ModuleDeclaration>ast;
                     context.scopeGetter = function () {
                         return ast.type === null ? null : ast.type.containedScope;

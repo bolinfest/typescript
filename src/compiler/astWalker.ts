@@ -187,7 +187,7 @@ module TypeScript {
             this.childrenWalkers[NodeType.Script] = ChildrenWalkers.walkScriptChildren;
             this.childrenWalkers[NodeType.ClassDeclaration] = ChildrenWalkers.walkClassDeclChildren;
             this.childrenWalkers[NodeType.InterfaceDeclaration] = ChildrenWalkers.walkTypeDeclChildren;
-            this.childrenWalkers[NodeType.Module] = ChildrenWalkers.walkModuleDeclChildren;
+            this.childrenWalkers[NodeType.ModuleDeclaration] = ChildrenWalkers.walkModuleDeclChildren;
             this.childrenWalkers[NodeType.ImportDeclaration] = ChildrenWalkers.walkImportDeclChildren;
             this.childrenWalkers[NodeType.With] = ChildrenWalkers.walkWithStatementChildren;
             this.childrenWalkers[NodeType.Label] = ChildrenWalkers.walkLabelChildren;

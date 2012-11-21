@@ -1113,7 +1113,7 @@ module TypeScript {
                 // If it's a dynamic module, we need to print the "require" invocation
                 if (sym &&
                     sym.declAST &&
-                    sym.declAST.nodeType == NodeType.Module &&
+                    sym.declAST.nodeType == NodeType.ModuleDeclaration &&
                     (hasFlag((<ModuleDeclaration>sym.declAST).modFlags, ModuleFlags.IsDynamic))) {
                     var moduleDecl: ModuleDeclaration = <ModuleDeclaration>sym.declAST;
 
@@ -1341,7 +1341,7 @@ module TypeScript {
                         }
                     }
                     else if (startLine &&
-                             (emitNode.nodeType != NodeType.Module) &&
+                             (emitNode.nodeType != NodeType.ModuleDeclaration) &&
                              (emitNode.nodeType != NodeType.InterfaceDeclaration) &&
                              (!((emitNode.nodeType == NodeType.VarDecl) &&
                                 ((((<VarDecl>emitNode).varFlags) & VarFlags.Ambient) == VarFlags.Ambient) &&

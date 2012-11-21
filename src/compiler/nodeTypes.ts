@@ -102,7 +102,7 @@ module TypeScript {
         Script,
         ClassDeclaration,
         InterfaceDeclaration,
-        Module,
+        ModuleDeclaration,
         ImportDeclaration,
         With,
         Label,

@@ -128,7 +128,7 @@ module TypeScript {
                 return false;
 
             return (this.ast().nodeType === TypeScript.NodeType.Name) &&
-                (this.parent().nodeType === TypeScript.NodeType.Module) &&
+                (this.parent().nodeType === TypeScript.NodeType.ModuleDeclaration) &&
                 ((<TypeScript.ModuleDeclaration>this.parent()).name === this.ast());
         }
 
@@ -154,7 +154,7 @@ module TypeScript {
             return this.count() >= 3 &&
                 this.asts[this.top] === ast &&
                 this.asts[this.top - 1].nodeType === TypeScript.NodeType.List &&
-                this.asts[this.top - 2].nodeType === TypeScript.NodeType.Module;
+                this.asts[this.top - 2].nodeType === TypeScript.NodeType.ModuleDeclaration;
         }
 
         public isChildOfClass(): bool {
@@ -188,14 +188,14 @@ module TypeScript {
 
         public isTopLevelImplicitModule() {
             return this.count() >= 1 &&
-                this.asts[this.top].nodeType === TypeScript.NodeType.Module &&
+                this.asts[this.top].nodeType === TypeScript.NodeType.ModuleDeclaration &&
                 TypeScript.hasFlag((<TypeScript.ModuleDeclaration>this.asts[this.top]).modFlags, TypeScript.ModuleFlags.IsWholeFile);
         }
 
         public isBodyOfTopLevelImplicitModule() {
             return this.count() >= 2 &&
                 this.asts[this.top - 0].nodeType === TypeScript.NodeType.List &&
-                this.asts[this.top - 1].nodeType === TypeScript.NodeType.Module &&
+                this.asts[this.top - 1].nodeType === TypeScript.NodeType.ModuleDeclaration &&
                  (<TypeScript.ModuleDeclaration>this.asts[this.top - 1]).members == this.asts[this.top - 0] &&
                 TypeScript.hasFlag((<TypeScript.ModuleDeclaration>this.asts[this.top - 1]).modFlags, TypeScript.ModuleFlags.IsWholeFile);
         }
@@ -214,7 +214,7 @@ module TypeScript {
 
         public isBodyOfModule(): bool {
             return this.count() >= 2 &&
-                this.asts[this.top - 1].nodeType === TypeScript.NodeType.Module &&
+                this.asts[this.top - 1].nodeType === TypeScript.NodeType.ModuleDeclaration &&
                  (<TypeScript.ModuleDeclaration>this.asts[this.top - 1]).members == this.asts[this.top - 0];
         }
 

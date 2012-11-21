@@ -348,7 +348,7 @@ module TypeScript {
                     funcdecl.accessorSymbol = null;
                     funcdecl.scopeType = null;
                 }
-                else if (ast.nodeType == NodeType.Module) {
+                else if (ast.nodeType == NodeType.ModuleDeclaration) {
                     var modDecl = <ModuleDeclaration>ast;
                     modDecl.mod = null;
                 }

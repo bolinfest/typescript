@@ -24,7 +24,7 @@
   "ast":
     {"nodeType": "Script", "minChar": 0, "limChar": 274, "startLine": 1, "startCol": 1, "endLine": 21, "endCol": 1, "children": [
       {"nodeType": "List", "minChar": 0, "limChar": 274, "startLine": 1, "startCol": 1, "endLine": 21, "endCol": 1, "children": [
-        {"nodeType": "Module", "minChar": 0, "limChar": 272, "startLine": 1, "startCol": 1, "endLine": 20, "endCol": 2, "children": [
+        {"nodeType": "ModuleDeclaration", "minChar": 0, "limChar": 272, "startLine": 1, "startCol": 1, "endLine": 20, "endCol": 2, "children": [
           {"nodeType": "Name", "minChar": 7, "limChar": 14, "startLine": 1, "startCol": 8, "endLine": 1, "endCol": 15, "children": []},
           {"nodeType": "List", "minChar": 15, "limChar": 272, "startLine": 1, "startCol": 16, "endLine": 20, "endCol": 2, "children": [
             {"nodeType": "VarDecl", "minChar": 37, "limChar": 62, "startLine": 3, "startCol": 5, "endLine": 3, "endCol": 30, "children": [

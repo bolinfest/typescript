@@ -39,7 +39,7 @@ module Formatting {
         {
             //TypeScript specific
             switch (node.AuthorNode.Details.nodeType) {
-                case TypeScript.NodeType.Module:
+                case TypeScript.NodeType.ModuleDeclaration:
                 case TypeScript.NodeType.ClassDeclaration:
                 case TypeScript.NodeType.InterfaceDeclaration:
                     FillBodyIndentation(node, nextNodesToVisit);
