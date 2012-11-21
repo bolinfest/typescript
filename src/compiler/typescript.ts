@@ -214,7 +214,7 @@ module TypeScript {
                         }
 
                         if (setRecovery) {
-                            this.parser.setErrorRecovery(null, 0, 0);
+                            this.parser.setErrorRecovery(null);
                         }
 
                         var updateResult: UpdateUnitResult;
@@ -266,7 +266,7 @@ module TypeScript {
         }
 
         public parseSourceUnit(sourceText: ISourceText, filename: string) {
-            this.parser.setErrorRecovery(this.errorOutput, -1, -1);
+            this.parser.setErrorRecovery(this.errorOutput);
             var script: Script = this.parser.parse(sourceText, filename, 0);
 
             var index = this.units.length;

@@ -154,7 +154,7 @@ class BatchCompiler {
                     }
                     else {
                         if (this.compilationSettings.errorRecovery) {
-                            compiler.parser.setErrorRecovery(this.ioHost.stderr, -1, -1);
+                            compiler.parser.setErrorRecovery(this.ioHost.stderr);
                         }
                         compiler.addUnit(code.content, code.path, addAsResident, code.referencedFiles);
                     }

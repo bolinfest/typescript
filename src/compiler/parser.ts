@@ -67,8 +67,6 @@ module TypeScript {
         public outfile: ITextWriter = undefined;
         public errorCallback: (minChar: number, charLen: number, message: string, unit: number) =>void = null;
         private state: ParseState = ParseState.StartStatementList;
-        private cursorLine = -1;
-        private cursorColumn = -1;
         private cursorState: ParseState = ParseState.None;
         private errorMessage = "";
         private ambientModule = false;
@@ -155,10 +153,8 @@ module TypeScript {
             this.errorRecovery = false;
         }
 
-        public setErrorRecovery(outf, l: number, c: number) {
-            this.outfile = outf;
-            this.cursorLine = l;
-            this.cursorColumn = c;
+        public setErrorRecovery(outfile: ITextWriter) {
+            this.outfile = outfile;
             this.cursorState = ParseState.None;
 
             this.errorRecovery = true;
@@ -4270,7 +4266,7 @@ module TypeScript {
         logger.log("Quick parse range (" + minChar + "," + limChar + "): \"" + TypeScript.stringToLiteral(fragment, 100) + "\"");
 
         var quickParser = new Parser();
-        quickParser.setErrorRecovery(null, -1, -1);
+        quickParser.setErrorRecovery(null);
         quickParser.errorCallback = errorCapture;
 
         // REVIEW: use enclosing scope to determine this
