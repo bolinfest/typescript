@@ -17,7 +17,7 @@ module TypeScript {
     export enum ParseState {
         None,
         StartScript,
-        StartStmtList,
+        StartStatementList,
         StartStatement,
         StartFncDecl,
         FncDeclName,
@@ -66,7 +66,7 @@ module TypeScript {
         public errorRecovery = false;
         public outfile: ITextWriter = undefined;
         public errorCallback: (minChar: number, charLen: number, message: string, unit: number) =>void = null;
-        private state: ParseState = ParseState.StartStmtList;
+        private state: ParseState = ParseState.StartStatementList;
         private cursorLine = -1;
         private cursorColumn = -1;
         private cursorState: ParseState = ParseState.None;
@@ -942,7 +942,7 @@ module TypeScript {
                     bod.append(retStmt);
                 }
                 else {
-                    this.state = ParseState.StartStmtList;
+                    this.state = ParseState.StartStatementList;
                     this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.StmtStart);
                     var savedInFunction = this.inFunction;
                     isAnonLambda = wasShorthand;
@@ -4122,7 +4122,7 @@ module TypeScript {
 
             errorRecoverySet |= ErrorRecoverySet.TypeScriptS | ErrorRecoverySet.RCurly;
 
-            this.state = ParseState.StartStmtList;
+            this.state = ParseState.StartStatementList;
             var oldStrictMode = this.strictMode;
             this.nestingLevel++;
             for (; ;) {
