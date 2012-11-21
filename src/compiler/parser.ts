@@ -67,7 +67,6 @@ module TypeScript {
         public outfile: ITextWriter = undefined;
         public errorCallback: (minChar: number, charLen: number, message: string, unit: number) =>void = null;
         private state: ParseState = ParseState.StartStatementList;
-        private errorMessage = "";
         private ambientModule = false;
         private ambientClass = false;
         private topLevel = true;
