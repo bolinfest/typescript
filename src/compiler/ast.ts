@@ -1243,6 +1243,8 @@ module TypeScript {
     }
 
     export class TypeDeclaration extends NamedDeclaration {
+        public varFlags = VarFlags.None;
+
         constructor (nodeType: NodeType,
                      name: Identifier,
                      public extendsList: ASTList,
@@ -1250,10 +1252,17 @@ module TypeScript {
                      members: ASTList) {
             super(nodeType, name, members);
         }
+
+        public isExported() { 
+            return hasFlag(this.varFlags, VarFlags.Exported);
+        }
+
+        public isAmbient() {
+            return hasFlag(this.varFlags, VarFlags.Ambient);
+        }
     }
 
     export class ClassDeclaration extends TypeDeclaration {
-        public varFlags = VarFlags.None;
         public knownMemberNames: any = {};
         public constructorDecl: FuncDecl = null;
         public constructorNestingLevel = 0;
@@ -1266,9 +1275,6 @@ module TypeScript {
             super(NodeType.ClassDeclaration, name, extendsList, implementsList, members);
         }
 
-        public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }
-        public isAmbient() { return hasFlag(this.varFlags, VarFlags.Ambient); }
-
         public typeCheck(typeFlow: TypeFlow) {
             return typeFlow.typeCheckClass(this);
         }
@@ -1279,17 +1285,12 @@ module TypeScript {
     }
 
     export class InterfaceDeclaration extends TypeDeclaration {
-        public varFlags = VarFlags.None;
-
         constructor (name: Identifier,
                      members: ASTList,
                      extendsList: ASTList,
                      implementsList: ASTList) {
             super(NodeType.InterfaceDeclaration, name, extendsList, implementsList, members);
         }
-
-        public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }
-        public isAmbient() { return hasFlag(this.varFlags, VarFlags.Ambient); }
 
         public typeCheck(typeFlow: TypeFlow) {
             if (this.nodeType == NodeType.InterfaceDeclaration) {
