@@ -171,8 +171,10 @@ module Formatting {
             var node = this;
             var indentation: IndentationInfo = null;
 
-            while (node.ChildrenIndentationDelta == null && node.Parent != null)
+            while (node.Parent != null && (node.ChildrenIndentationDelta == null || node.IndentationDelta == null)
+                && !ParseNode.IsNonIndentableException(node)) {
                 node = node.Parent;
+            }
 
             if (node.ChildrenIndentationDelta != null) {
                 indentation = new IndentationInfo();
@@ -183,6 +185,22 @@ module Formatting {
             }
 
             return indentation;
+        }
+
+        public static IsNonIndentableException(node:ParseNode): bool {
+            // Exceptions:
+            //
+            //     a(
+            //         {
+            //             //
+            //         }
+            //     );
+            //
+            //     var a = b(0,
+            //             function () {
+            //                 //
+            //             });
+            return node.IndentationDelta == null && (node.AuthorNode.Details.Kind == AuthorParseNodeKind.apnkObject || node.AuthorNode.Details.Kind == AuthorParseNodeKind.apnkFncDecl);
         }
 
         public GetBlockSpan(fileAuthoringProxy: FileAuthoringProxy, tokens: IList_TokenSpan): Span {
