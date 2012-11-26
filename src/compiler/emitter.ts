@@ -1690,6 +1690,7 @@ module TypeScript {
                     this.writeLineToOutput("};");
                 }
                 if (this.checker.mustCaptureGlobalThis) {
+                    this.prologueEmitted = true;
                     this.writeLineToOutput(this.captureThisStmtString);
                 }
             }
