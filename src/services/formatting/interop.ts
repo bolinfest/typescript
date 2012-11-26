@@ -229,7 +229,7 @@ module Formatting {
                 case TypeScript.NodeType.If: return AuthorParseNodeKind.apnkIf;
                 case TypeScript.NodeType.While: return AuthorParseNodeKind.apnkWhile;
                 case TypeScript.NodeType.DoWhile: return AuthorParseNodeKind.apnkDoWhile;
-                case TypeScript.NodeType.Block: return AuthorParseNodeKind.apnkBlock;
+                case TypeScript.NodeType.Block: return (<TypeScript.Block>path.ast()).isStatementBlock ? AuthorParseNodeKind.apnkBlock : AuthorParseNodeKind.apnkVarDeclList;
                 case TypeScript.NodeType.Case: return AuthorParseNodeKind.apnkCase;
                 case TypeScript.NodeType.Switch: return AuthorParseNodeKind.apnkSwitch;
                 case TypeScript.NodeType.Try: return AuthorParseNodeKind.apnkTry;

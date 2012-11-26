@@ -81,5 +81,8 @@ describe('getFormattingEditsForRange', function() {
         it("formats empty object/interface literals correctelly", function() {
             getFormattingEditsForRange('emptyInterfaceLiteral');
         });
+        it("formats variable declaration lists", function() {
+            getFormattingEditsForRange('formatVariableDeclarationList');
+        });
     });
 });
