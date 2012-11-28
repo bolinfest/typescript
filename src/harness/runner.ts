@@ -262,7 +262,8 @@ if (opts.unnamed.length === 0 && files.length === 0) {
     files = IO.dir(Harness.userSpecifiedroot + "tests/compiler", /\.ts$/)
             .concat(IO.dir(Harness.userSpecifiedroot + "tests/ls", /\.ts$/))
             .concat(IO.dir(Harness.userSpecifiedroot + "tests/services", /\.ts$/))
-            .concat(IO.dir(Harness.userSpecifiedroot + "tests/projects", /\.ts$/));
+            .concat(IO.dir(Harness.userSpecifiedroot + "tests/projects", /\.ts$/))
+            .concat(IO.dir(Harness.userSpecifiedroot + "tests/flags", /\.ts$/));
 } else {
     for (var i = 0; i < opts.unnamed.length; i++) {
         files.push(Harness.userSpecifiedroot + opts.unnamed[i]);
