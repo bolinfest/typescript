@@ -3,7 +3,7 @@
 // @declaration: true
 // @module: local
 
-export class MyClass
+class MyClass
 {
     public get Count(): number
     {

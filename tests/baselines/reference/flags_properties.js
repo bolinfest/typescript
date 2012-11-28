@@ -1,5 +1,5 @@
 
-this.MyClass = (function () {
+var MyClass = (function () {
     function MyClass() { }
     Object.defineProperty(MyClass.prototype, "Count", {
         get: function () {
