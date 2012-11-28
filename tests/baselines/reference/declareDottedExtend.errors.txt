@@ -1,0 +1,1 @@
+0.ts line 11 col 16: Base type must be interface or class
