@@ -102,7 +102,7 @@ module TypeScript {
                 var name = (<Identifier>alias).text;
                 var isDynamic = isQuoted(name);
 
-                var findSym = (id: string) {
+                var findSym = (id: string) => {
                     if (context.members) {
                         return context.members.lookup(name);
                     }
