@@ -1,0 +1,21 @@
+{
+  "sourceText": [
+    "   module     Foo    {\r\n",
+    "     export    module    A  .   B  .   C     {      }\r\n",
+    "                }"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 96, "startLine": 1, "startCol": 1, "endLine": 3, "endCol": 18, "children": [
+      {"nodeType": "List", "minChar": 3, "limChar": 96, "startLine": 1, "startCol": 4, "endLine": 3, "endCol": 18, "children": [
+        {"nodeType": "ModuleDeclaration", "minChar": 3, "limChar": 96, "startLine": 1, "startCol": 4, "endLine": 3, "endCol": 18, "children": [
+          {"nodeType": "Name", "minChar": 14, "limChar": 17, "startLine": 1, "startCol": 15, "endLine": 1, "endCol": 18, "children": []},
+          {"nodeType": "List", "minChar": 21, "limChar": 96, "startLine": 1, "startCol": 22, "endLine": 3, "endCol": 18, "children": [
+            {"nodeType": "ModuleDeclaration", "minChar": 29, "limChar": 77, "startLine": 2, "startCol": 6, "endLine": 2, "endCol": 54, "children": [
+              {"nodeType": "Name", "minChar": 49, "limChar": 50, "startLine": 2, "startCol": 26, "endLine": 2, "endCol": 27, "children": []},
+              {"nodeType": "List", "minChar": 49, "limChar": 77, "startLine": 2, "startCol": 26, "endLine": 2, "endCol": 54, "children": [
+                {"nodeType": "ModuleDeclaration", "minChar": 49, "limChar": 77, "startLine": 2, "startCol": 26, "endLine": 2, "endCol": 54, "children": [
+                  {"nodeType": "Name", "minChar": 56, "limChar": 57, "startLine": 2, "startCol": 33, "endLine": 2, "endCol": 34, "children": []},
+                  {"nodeType": "List", "minChar": 49, "limChar": 77, "startLine": 2, "startCol": 26, "endLine": 2, "endCol": 54, "children": [
+                    {"nodeType": "ModuleDeclaration", "minChar": 49, "limChar": 77, "startLine": 2, "startCol": 26, "endLine": 2, "endCol": 54, "children": [
+                      {"nodeType": "Name", "minChar": 63, "limChar": 64, "startLine": 2, "startCol": 40, "endLine": 2, "endCol": 41, "children": []},
+                      {"nodeType": "List", "minChar": 69, "limChar": 77, "startLine": 2, "startCol": 46, "endLine": 2, "endCol": 54, "children": []}]}]}]}]}]}]}]}]}]}
+}

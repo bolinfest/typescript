@@ -180,16 +180,16 @@ module TypeScript {
     }
     export function LexInitialize() {
         initializeStaticTokens();
-        autoToken[LexCodeLPR] = staticTokens[TokenID.LParen];
-        autoToken[LexCodeRPR] = staticTokens[TokenID.RParen];
+        autoToken[LexCodeLPR] = staticTokens[TokenID.OpenParen];
+        autoToken[LexCodeRPR] = staticTokens[TokenID.CloseParen];
         autoToken[LexCodeCMA] = staticTokens[TokenID.Comma];
-        autoToken[LexCodeSMC] = staticTokens[TokenID.SColon];
-        autoToken[LexCodeLBR] = staticTokens[TokenID.LBrack];
-        autoToken[LexCodeRBR] = staticTokens[TokenID.RBrack];
+        autoToken[LexCodeSMC] = staticTokens[TokenID.Semicolon];
+        autoToken[LexCodeLBR] = staticTokens[TokenID.OpenBracket];
+        autoToken[LexCodeRBR] = staticTokens[TokenID.CloseBracket];
         autoToken[LexCodeTIL] = staticTokens[TokenID.Tilde];
-        autoToken[LexCodeQUE] = staticTokens[TokenID.QMark];
-        autoToken[LexCodeLC] = staticTokens[TokenID.LCurly];
-        autoToken[LexCodeRC] = staticTokens[TokenID.RCurly];
+        autoToken[LexCodeQUE] = staticTokens[TokenID.Question];
+        autoToken[LexCodeLC] = staticTokens[TokenID.OpenBrace];
+        autoToken[LexCodeRC] = staticTokens[TokenID.CloseBrace];
         autoToken[LexCodeCOL] = staticTokens[TokenID.Colon];
         LexKeywordTable = new StringHashTable();
         for (var i in (<any>TokenID)._map) {
@@ -245,6 +245,7 @@ module TypeScript {
     export enum NumberScanState {
         Start,
         InFraction,
+        InEmptyFraction,
         InExponent
     }
 
@@ -432,7 +433,7 @@ module TypeScript {
                     this.currentTokens = this.tokensByLine[this.line];
                 }
                 else {
-                    return staticTokens[TokenID.EOF];
+                    return staticTokens[TokenID.EndOfFile];
                 }
             }
             if (this.currentTokenIndex < this.currentTokens.length) {
@@ -447,7 +448,7 @@ module TypeScript {
                 return curToken;
             }
             else {
-                return staticTokens[TokenID.EOF];
+                return staticTokens[TokenID.EndOfFile];
             }
         }
         public startLine: number;
@@ -580,7 +581,7 @@ module TypeScript {
             }            
         }
 
-        private prevTok = staticTokens[TokenID.EOF];
+        private prevTok = staticTokens[TokenID.EndOfFile];
         public previousToken() { return this.prevTok; }
 
         public setSourceText(newSrc: ISourceText, textMode: number) {
@@ -630,7 +631,7 @@ module TypeScript {
             var result: Token[] = new Token[];
             this.setText(line, LexMode.Line);
             var t: Token = this.scan();
-            while (t.tokenId != TokenID.EOF) {
+            while (t.tokenId != TokenID.EndOfFile) {
                 result[result.length] = t;
                 t = this.scan();
             }
@@ -681,7 +682,7 @@ module TypeScript {
                 }
                 else {
                     if (atLeastOneDigit) {
-                        return new NumberToken(parseInt(this.src.substring(this.startPos, this.pos)));
+                        return new NumberLiteralToken(parseInt(this.src.substring(this.startPos, this.pos)));
                     }
                     else {
                         return null;
@@ -700,7 +701,7 @@ module TypeScript {
                 }
                 else {
                     if (atLeastOneDigit) {
-                        return new NumberToken(parseInt(this.src.substring(this.startPos, this.pos)));
+                        return new NumberLiteralToken(parseInt(this.src.substring(this.startPos, this.pos)));
                     }
                     else {
                         return null;
@@ -717,19 +718,22 @@ module TypeScript {
             for (; ;) {
                 if (LexIsDigit(this.ch)) {
                     atLeastOneDigit = true;
+                    if (this.ch != LexCode_0 && state == NumberScanState.InEmptyFraction) {
+                        state = NumberScanState.InFraction;
+                    }
                     this.nextChar();
                 }
                 else if (this.ch == LexCodeDOT) {
                     if (state == NumberScanState.Start) {
                         // DecimalDigit* .
                         this.nextChar();
-                        state = NumberScanState.InFraction;
+                        state = NumberScanState.InEmptyFraction;
                     }
                     else {
                         // dot not part of number
                         if (atLeastOneDigit) {
                             // DecimalDigit* . DecimalDigit+
-                            return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                            return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
                         }
                         else {
                             this.pos = svPos;
@@ -740,7 +744,7 @@ module TypeScript {
                 } else if ((this.ch == LexCode_e) || (this.ch == LexCode_E)) {
                     if (state == NumberScanState.Start) {
                         if (atLeastOneDigit) {
-                            // DecimalDigit+ (. DecimalDigit+) [eE] [+-]DecimalDigit+
+                            // DecimalDigit+ (. DecimalDigit*) [eE] [+-]DecimalDigit+
                             atLeastOneDigit = false;
                             this.nextChar();
                             state = NumberScanState.InExponent;
@@ -751,7 +755,7 @@ module TypeScript {
                             return null;
                         }
                     }
-                    else if (state == NumberScanState.InFraction) {
+                    else if (state == NumberScanState.InFraction || state == NumberScanState.InEmptyFraction) {
                         // DecimalDigit+ . DecimalDigit* [eE]
                         this.nextChar();
                         state = NumberScanState.InExponent;
@@ -760,7 +764,7 @@ module TypeScript {
                     else {
                         // DecimalDigit+ . DecimalDigit* [eE] DecimalDigit+
                         if (atLeastOneDigit) {
-                            return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                            return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)));
                         }
                         else {
                             this.pos = svPos;
@@ -780,8 +784,9 @@ module TypeScript {
                             return null;
                         }
                     }
-                    else if (state == NumberScanState.InFraction) {
-                        return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                    else if (state == NumberScanState.InEmptyFraction || state == NumberScanState.InFraction) {
+                        // This case will not generate bad javascript if we miss the fractional part, but we just want to be consistent with the dot case
+                        return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
                     }
                     else {
                         if (!atLeastOneDigit) {
@@ -790,7 +795,7 @@ module TypeScript {
                             return null;
                         }
                         else {
-                            return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                            return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)));
                         }
                     }
                 }
@@ -801,7 +806,7 @@ module TypeScript {
                         return null;
                     }
                     else {
-                        return new NumberToken(parseFloat(this.src.substring(this.startPos, this.pos)));
+                        return new NumberLiteralToken(parseFloat(this.src.substring(this.startPos, this.pos)), state == NumberScanState.InEmptyFraction);
                     }
                 }
             }
@@ -984,7 +989,7 @@ module TypeScript {
                 if (regex) {
                     // no line boundary in regex string
                     this.col = svCol + (this.pos - this.startPos);
-                    return new RegexToken(regex);
+                    return new RegularExpressionLiteralToken(regex);
                 }
             }
             this.pos = svPos;
@@ -1072,7 +1077,7 @@ module TypeScript {
                     return new CommentToken(TokenID.Comment, commentText,/*isBlock*/true, this.startPos, commentLine,/*endsLine*/true);
                 }
                 else {
-                    return staticTokens[TokenID.EOF];
+                    return staticTokens[TokenID.EndOfFile];
                 }
             }
             this.prevLine = this.line;
@@ -1223,17 +1228,17 @@ module TypeScript {
                         else {
                             if (this.peekCharAt(this.pos) == LexCodeEQ) {
                                 this.nextChar();
-                                return staticTokens[TokenID.AsgDiv];
+                                return staticTokens[TokenID.SlashEquals];
                             }
                             else {
-                                return staticTokens[TokenID.Div];
+                                return staticTokens[TokenID.Slash];
                             }
                         }
                     }
                 }
                 else if (this.ch == LexCodeSMC) {
                     this.nextChar();
-                    return staticTokens[TokenID.SColon];
+                    return staticTokens[TokenID.Semicolon];
                 }
                 else if ((this.ch == LexCodeAPO) || (this.ch == LexCodeQUO)) {
                     var endCode = this.ch;
@@ -1259,14 +1264,14 @@ module TypeScript {
                         // skip past end code
                         this.nextChar();
                     }
-                    return new StringToken(this.src.substring(this.startPos, this.pos));
+                    return new StringLiteralToken(this.src.substring(this.startPos, this.pos));
                 }
                 else if (autoToken[this.ch]) {
                     var atok = autoToken[this.ch];
-                    if (atok.tokenId == TokenID.LCurly) {
+                    if (atok.tokenId == TokenID.OpenBrace) {
                         this.leftCurlyCount++;
                     }
-                    else if (atok.tokenId == TokenID.RCurly) {
+                    else if (atok.tokenId == TokenID.CloseBrace) {
                         this.rightCurlyCount++;
                     }
                     this.nextChar();
@@ -1312,7 +1317,7 @@ module TypeScript {
                         if (this.ch == LexCodeNWL) {
                             this.newLine();
                             if (this.mode == LexMode.Line) {
-                                return staticTokens[TokenID.EOF];
+                                return staticTokens[TokenID.EndOfFile];
                             }
                         }
                         if (!this.interveningWhitespace) {
@@ -1326,7 +1331,7 @@ module TypeScript {
                         if (this.peekCharAt(this.pos + 1) == LexCodeDOT) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeDOT) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.Ellipsis];
+                                return staticTokens[TokenID.DotDotDot];
                             }
                             else {
                                 this.nextChar();
@@ -1349,168 +1354,168 @@ module TypeScript {
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeEQ) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.Eqv];
+                                return staticTokens[TokenID.EqualsEqualsEquals];
                             }
                             else {
                                 this.advanceChar(2);
-                                return staticTokens[TokenID.EQ];
+                                return staticTokens[TokenID.EqualsEquals];
                             }
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeGT) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.Arrow];
+                            return staticTokens[TokenID.EqualsGreaterThan];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Asg];
+                            return staticTokens[TokenID.Equals];
                         }
                     // break;
                     case LexCodeBNG:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeEQ) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.NEqv];
+                                return staticTokens[TokenID.ExclamationEqualsEquals];
                             }
                             else {
                                 this.advanceChar(2);
-                                return staticTokens[TokenID.NE];
+                                return staticTokens[TokenID.ExclamationEquals];
                             }
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Bang];
+                            return staticTokens[TokenID.Exclamation];
                         }
                     // break;
                     case LexCodePLS:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgAdd];
+                            return staticTokens[TokenID.PlusEquals];
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodePLS) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.Inc];
+                            return staticTokens[TokenID.PlusPlus];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Add];
+                            return staticTokens[TokenID.Plus];
                         }
                     // break;
                     case LexCodeMIN:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgSub];
+                            return staticTokens[TokenID.MinusEquals];
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeMIN) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.Dec];
+                            return staticTokens[TokenID.MinusMinus];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Sub];
+                            return staticTokens[TokenID.Minus];
                         }
                     // break;
                     case LexCodeMUL:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgMul];
+                            return staticTokens[TokenID.AsteriskEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Mult];
+                            return staticTokens[TokenID.Asterisk];
                         }
                     // break;
                     case LexCodePCT:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgMod];
+                            return staticTokens[TokenID.PercentEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Pct];
+                            return staticTokens[TokenID.Percent];
                         }
                     // break;
                     case LexCodeLT:
                         if (this.peekCharAt(this.pos + 1) == LexCodeLT) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeEQ) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.AsgLsh];
+                                return staticTokens[TokenID.LessThanLessThanEquals];
                             }
                             else {
                                 this.advanceChar(2);
-                                return staticTokens[TokenID.Lsh];
+                                return staticTokens[TokenID.LessThanLessThan];
                             }
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.LE];
+                            return staticTokens[TokenID.LessThanEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.LT];
+                            return staticTokens[TokenID.LessThan];
                         }
                     //  break;
                     case LexCodeGT:
                         if (this.peekCharAt(this.pos + 1) == LexCodeGT) {
                             if (this.peekCharAt(this.pos + 2) == LexCodeEQ) {
                                 this.advanceChar(3);
-                                return staticTokens[TokenID.AsgRsh];
+                                return staticTokens[TokenID.GreaterThanGreaterThanEquals];
                             }
                             else if (this.peekCharAt(this.pos + 2) == LexCodeGT) {
                                 if (this.peekCharAt(this.pos + 3) == LexCodeEQ) {
                                     this.advanceChar(4);
-                                    return staticTokens[TokenID.AsgRs2];
+                                    return staticTokens[TokenID.GreaterThanGreaterThanGreaterThanEquals];
                                 }
                                 else {
                                     this.advanceChar(3);
-                                    return staticTokens[TokenID.Rs2];
+                                    return staticTokens[TokenID.GreaterThanGreaterThanGreaterThan];
                                 }
                             }
                             else {
                                 this.advanceChar(2);
-                                return staticTokens[TokenID.Rsh];
+                                return staticTokens[TokenID.GreaterThanGreaterThan];
                             }
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.GE];
+                            return staticTokens[TokenID.GreaterThanEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.GT];
+                            return staticTokens[TokenID.GreaterThan];
                         }
                     // break;
                     case LexCodeXOR:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgXor];
+                            return staticTokens[TokenID.CaretEquals];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Xor];
+                            return staticTokens[TokenID.Caret];
                         }
                     //  break;
                     case LexCodeBAR:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgOr];
+                            return staticTokens[TokenID.BarEquals];
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeBAR) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.LogOr];
+                            return staticTokens[TokenID.BarBar];
                         }
                         else {
                             this.nextChar();
-                            return staticTokens[TokenID.Or];
+                            return staticTokens[TokenID.Bar];
                         }
                     //  break;
                     case LexCodeAMP:
                         if (this.peekCharAt(this.pos + 1) == LexCodeEQ) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.AsgAnd];
+                            return staticTokens[TokenID.AmpersandEquals];
                         }
                         else if (this.peekCharAt(this.pos + 1) == LexCodeAMP) {
                             this.advanceChar(2);
-                            return staticTokens[TokenID.LogAnd];
+                            return staticTokens[TokenID.AmpersandAmpersand];
                         }
                         else {
                             this.nextChar();
@@ -1525,7 +1530,7 @@ module TypeScript {
                         continue start;
                 }
             }
-            return staticTokens[TokenID.EOF];
+            return staticTokens[TokenID.EndOfFile];
         }
 
         private reportScannerError(message: string) { 
@@ -1620,10 +1625,10 @@ module TypeScript {
     // Return true if the token is a primitive type
     export function isPrimitiveTypeToken(token: Token) {
         switch (token.tokenId) {
-            case TokenID.ANY:
-            case TokenID.BOOL:
-            case TokenID.NUMBER:
-            case TokenID.STRING:
+            case TokenID.Any:
+            case TokenID.Bool:
+            case TokenID.Number:
+            case TokenID.String:
                 return true;
         }
         return false;
@@ -1632,9 +1637,9 @@ module TypeScript {
     // Return true if the token is a primitive type
     export function isModifier(token: Token) {
         switch (token.tokenId) {
-            case TokenID.PUBLIC:
-            case TokenID.PRIVATE:
-            case TokenID.STATIC:
+            case TokenID.Public:
+            case TokenID.Private:
+            case TokenID.Static:
                 return true;
         }
         return false;

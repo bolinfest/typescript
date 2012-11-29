@@ -502,6 +502,57 @@ describe("Compiling a project", function (done) {
             , skipRun: true
     });
 
+    tests.push({
+        scenario: "privacy Check on imported module - simple reference"
+            , projectRoot: 'tests/projects/privacyCheck - simpleReference'
+            , inputFiles: ['test.ts']
+            , collectedFiles: ['test.ts', 'mExported.ts', 'mNonExported.ts']
+            , outputFiles: ['test.js', 'mExported.js', 'mNonExported.js']
+            , negative: true
+            , skipRun: true
+            , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - simpleReference/test.ts(21,0): exported variable \'c3\' has or is using private type \'mNonExported\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - simpleReference/test.ts(23,4): exported function return type has or is using private type \'mNonExported\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - simpleReference/test.ts(25,0): exported variable \'x3\' has or is using private type \'mNonExported\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - simpleReference/test.ts(27,28): exported class \'class3\' extends class from private module \'mNonExported\'']
+    });
+
+    tests.push({
+        scenario: "privacy Check on imported module - declarations inside module"
+            , projectRoot: 'tests/projects/privacyCheck - InsideModule'
+            , inputFiles: ['testGlo.ts']
+            , collectedFiles: ['testGlo.ts', 'mExported.ts', 'mNonExported.ts']
+            , outputFiles: ['testGlo.js', 'mExported.js', 'mNonExported.js']
+            , negative: true
+            , skipRun: true
+            , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - InsideModule/testGlo.ts(22,4): exported variable \'c3\' has or is using private type \'mNonExported\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - InsideModule/testGlo.ts(24,8): exported function return type has or is using private type \'mNonExported\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - InsideModule/testGlo.ts(26,4): exported variable \'x3\' has or is using private type \'mNonExported\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - InsideModule/testGlo.ts(28,32): exported class \'class3\' extends class from private module \'mNonExported\'']
+    });
+
+    tests.push({
+        scenario: "privacy Check on imported module - declarations inside non exported module"
+            , projectRoot: 'tests/projects/privacyCheck - InsideModule'
+            , inputFiles: ['test.ts']
+            , collectedFiles: ['test.ts', 'mExported.ts', 'mNonExported.ts']
+            , outputFiles: ['test.js', 'mExported.js', 'mNonExported.js']
+            , skipRun: true
+    });
+
+    tests.push({
+        scenario: "privacy Check on imported module - import statement in parent module"
+            , projectRoot: 'tests/projects/privacyCheck - ImportInParent'
+            , inputFiles: ['test.ts']
+            , collectedFiles: ['test.ts', 'mExported.ts', 'mNonExported.ts']
+            , outputFiles: ['test.js', 'mExported.js', 'mNonExported.js']
+            , negative: true
+            , skipRun: true
+            , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - ImportInParent/test.ts(64,8): exported variable \'c3\' has or is using private type \'mNonExported\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - ImportInParent/test.ts(66,12): exported function return type has or is using private type \'mNonExported\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - ImportInParent/test.ts(68,8): exported variable \'x3\' has or is using private type \'mNonExported\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/privacyCheck - ImportInParent/test.ts(70,36): exported class \'class3\' extends class from private module \'mNonExported\'']
+    });
+
     for (var i = 0; i < tests.length; i++) {
         createTest(tests[i]);
     }

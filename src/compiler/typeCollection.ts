@@ -26,7 +26,7 @@ module TypeScript {
         return baseTypeLinks;
     }
 
-    function getBases(type: Type, typeDecl: NamedType) {
+    function getBases(type: Type, typeDecl: TypeDeclaration) {
         type.extendsTypeLinks = getBaseTypeLinks(typeDecl.extendsList, type.extendsTypeLinks);
         type.implementsTypeLinks = getBaseTypeLinks(typeDecl.implementsList, type.implementsTypeLinks);
     }
@@ -151,7 +151,7 @@ module TypeScript {
         var scopeChain = context.scopeChain;
         var typeSymbol: TypeSymbol = null;
         var modType: ModuleType = null;
-        var importDecl = <ImportDecl>ast;
+        var importDecl = <ImportDeclaration>ast;
         var isExported = hasFlag(importDecl.varFlags, VarFlags.Exported);
 
         // REVIEW: technically, this call isn't strictly necessary, since we'll find the type during the call to resolveTypeMembers
@@ -186,7 +186,7 @@ module TypeScript {
     export function preCollectModuleTypes(ast: AST, parent: AST, context: TypeCollectionContext) {
         var scopeChain = context.scopeChain;
 
-        var moduleDecl: ModuleDecl = <ModuleDecl>ast;
+        var moduleDecl: ModuleDeclaration = <ModuleDeclaration>ast;
 
         var isAmbient = hasFlag(moduleDecl.modFlags, ModuleFlags.Ambient);
         var isEnum = hasFlag(moduleDecl.modFlags, ModuleFlags.IsEnum);
@@ -228,7 +228,7 @@ module TypeScript {
             modType.symbol = typeSymbol;
         }
         else {
-            if (symbol && symbol.declAST && symbol.declAST.nodeType != NodeType.Module) {
+            if (symbol && symbol.declAST && symbol.declAST.nodeType != NodeType.ModuleDeclaration) {
                 context.checker.errorReporter.simpleError(moduleDecl, "Conflicting symbol name for module '" + modName + "'");
             }
             typeSymbol = <TypeSymbol>symbol;
@@ -288,7 +288,7 @@ module TypeScript {
 
     export function preCollectClassTypes(ast: AST, parent: AST, context: TypeCollectionContext) {
         var scopeChain = context.scopeChain;
-        var classDecl = <ClassDecl>ast;
+        var classDecl = <ClassDeclaration>ast;
 
         var classType: Type;
         var instanceType: Type;
@@ -331,7 +331,7 @@ module TypeScript {
             }
         }
         
-        if (typeSymbol && !foundValSymbol && (typeSymbol.declAST != classDecl) && !(<TypeDecl>typeSymbol.declAST).isOverload) {
+        if (typeSymbol && !foundValSymbol && (typeSymbol.declAST != classDecl)) {
             typeSymbol = null;
         }
 
@@ -418,7 +418,7 @@ module TypeScript {
 
     export function preCollectInterfaceTypes(ast: AST, parent: AST, context: TypeCollectionContext) {
         var scopeChain = context.scopeChain;
-        var interfaceDecl = <TypeDecl>ast;
+        var interfaceDecl = <InterfaceDeclaration>ast;
         var interfaceSymbol: TypeSymbol = null;
         var interfaceType: Type = null;
         var isExported = hasFlag(interfaceDecl.varFlags, VarFlags.Exported);
@@ -777,22 +777,22 @@ module TypeScript {
         else if (ast.nodeType == NodeType.List) {
             go = true;
         }
-        else if (ast.nodeType == NodeType.Import) {
+        else if (ast.nodeType == NodeType.ImportDeclaration) {
             go = preCollectImportTypes(ast, parent, context);
         }
         else if (ast.nodeType == NodeType.With) {
             go = false;
         }
-        else if (ast.nodeType == NodeType.Module) {
+        else if (ast.nodeType == NodeType.ModuleDeclaration) {
             go = preCollectModuleTypes(ast, parent, context);
         }
-        else if (ast.nodeType == NodeType.Class) {
+        else if (ast.nodeType == NodeType.ClassDeclaration) {
             go = preCollectClassTypes(ast, parent, context);
         }
         else if (ast.nodeType == NodeType.Block) {
             go = true;
         }
-        else if (ast.nodeType == NodeType.Interface) {
+        else if (ast.nodeType == NodeType.InterfaceDeclaration) {
             go = preCollectInterfaceTypes(ast, parent, context);
         }
         // This will be a constructor arg because this pass only traverses
@@ -818,13 +818,13 @@ module TypeScript {
     export function postCollectTypes(ast: AST, parent: AST, walker: IAstWalker) {
         var context: TypeCollectionContext = walker.state;
 
-        if (ast.nodeType == NodeType.Module) {
+        if (ast.nodeType == NodeType.ModuleDeclaration) {
             popTypeCollectionScope(context);
         }
-        else if (ast.nodeType == NodeType.Class) {
+        else if (ast.nodeType == NodeType.ClassDeclaration) {
             popTypeCollectionScope(context);
         }
-        else if (ast.nodeType == NodeType.Interface) {
+        else if (ast.nodeType == NodeType.InterfaceDeclaration) {
             popTypeCollectionScope(context);
         }
         return ast;

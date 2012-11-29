@@ -43,6 +43,8 @@ module TypeScript {
         RLit = 1 << 27, // THIS, TRUE, FALSE, NULL
         Func = 1 << 28, // FUNCTION
         EOF = 1 << 29, // EOF
+
+        // REVIEW: Name this something clearer.
         TypeScriptS = 1 << 30, // PROPERTY, PRIVATE, STATIC, INTERFACE, CLASS, MODULE, EXPORT, IMPORT
         ExprStart = SColon | AddOp | LCurly | PreOp | RegExp | LParen | LBrack | ID | Prefix | RLit | Func | Literal,
         StmtStart = ExprStart | SColon | Var | Stmt | While | TypeScriptS,
@@ -51,24 +53,13 @@ module TypeScript {
 
     export enum AllowedElements {
         None = 0,
-        Statements = 1,
-        FunctionDecls = 1 << 1,
-        ModuleDecls = 1 << 2,
-        ClassDecls = 1 << 3,
-        InterfaceDecls = 1 << 4,
-        TypedFuncDecls = 1 << 5,
-        TypedDecls = 1 << 6,
-        TypedFuncSignatures = 1 << 8,
-        TypedSignatures = 1 << 9,
-        AmbientDecls = 1 << 10,
+        ModuleDeclarations = 1 << 2,
+        ClassDeclarations = 1 << 3,
+        InterfaceDeclarations = 1 << 4,
+        AmbientDeclarations = 1 << 10,
         Properties = 1 << 11,
-        
-        Block = Statements | FunctionDecls | TypedFuncDecls | TypedDecls,
-        Global = Statements | FunctionDecls | ModuleDecls | ClassDecls | InterfaceDecls | AmbientDecls,
-        FunctionBody = Statements | FunctionDecls,
-        ModuleMembers = TypedFuncDecls | FunctionDecls | ModuleDecls | ClassDecls | InterfaceDecls | TypedDecls | Statements | AmbientDecls,
-        ClassMembers = TypedFuncDecls | FunctionDecls | Statements | TypedDecls | Properties,
-        InterfaceMembers = TypedFuncSignatures | TypedSignatures,
+
+        Global = ModuleDeclarations | ClassDeclarations | InterfaceDeclarations | AmbientDeclarations,
         QuickParse = Global | Properties,
     }
 

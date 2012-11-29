@@ -8,7 +8,7 @@ module TypeScript {
     export class AssignScopeContext {
         constructor (public scopeChain: ScopeChain,
                      public typeFlow: TypeFlow,
-                     public modDeclChain: ModuleDecl[]) {
+                     public modDeclChain: ModuleDeclaration[]) {
         }
     }
 
@@ -65,7 +65,7 @@ module TypeScript {
     export var instanceFilter = new ScopeSearchFilter(instanceCompare, instanceFilterStop);
 
     export function preAssignModuleScopes(ast: AST, context: AssignScopeContext) {
-        var moduleDecl = <ModuleDecl>ast;
+        var moduleDecl = <ModuleDeclaration>ast;
         var memberScope: SymbolTableScope = null;
         var aggScope: SymbolAggregateScope = null;
 
@@ -95,7 +95,7 @@ module TypeScript {
     }
 
     export function preAssignClassScopes(ast: AST, context: AssignScopeContext) {
-        var classDecl = <TypeDecl>ast;
+        var classDecl = <InterfaceDeclaration>ast;
         var memberScope: SymbolTableScope = null;
         var aggScope: SymbolAggregateScope = null;
 
@@ -132,7 +132,7 @@ module TypeScript {
     }
 
     export function preAssignInterfaceScopes(ast: AST, context: AssignScopeContext) {
-        var interfaceDecl = <TypeDecl>ast;
+        var interfaceDecl = <InterfaceDeclaration>ast;
         var memberScope: SymbolTableScope = null;
         var aggScope: SymbolAggregateScope = null;
 
@@ -393,13 +393,13 @@ module TypeScript {
                 var list = <ASTList>ast;
                 list.enclosingScope = context.scopeChain.scope;
             }
-            else if (ast.nodeType == NodeType.Module) {
+            else if (ast.nodeType == NodeType.ModuleDeclaration) {
                 preAssignModuleScopes(ast, context);
             }
-            else if (ast.nodeType == NodeType.Class) {
+            else if (ast.nodeType == NodeType.ClassDeclaration) {
                 preAssignClassScopes(ast, context);
             }
-            else if (ast.nodeType == NodeType.Interface) {
+            else if (ast.nodeType == NodeType.InterfaceDeclaration) {
                 preAssignInterfaceScopes(ast, context);
             }
             else if (ast.nodeType == NodeType.With) {
@@ -423,8 +423,8 @@ module TypeScript {
         var context:AssignScopeContext = walker.state;
         var go = true;
         if (ast) {
-            if (ast.nodeType == NodeType.Module) {
-                var prevModDecl = <ModuleDecl>ast;
+            if (ast.nodeType == NodeType.ModuleDeclaration) {
+                var prevModDecl = <ModuleDeclaration>ast;
 
                 popAssignScope(context);
 
@@ -433,10 +433,10 @@ module TypeScript {
                     context.typeFlow.checker.currentModDecl = context.modDeclChain[context.modDeclChain.length - 1];
                 }
             }
-            else if (ast.nodeType == NodeType.Class) {
+            else if (ast.nodeType == NodeType.ClassDeclaration) {
                 popAssignScope(context);
             }
-            else if (ast.nodeType == NodeType.Interface) {
+            else if (ast.nodeType == NodeType.InterfaceDeclaration) {
                 popAssignScope(context);
             }
             else if (ast.nodeType == NodeType.With) {

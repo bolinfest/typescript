@@ -1,0 +1,30 @@
+var m4 = require("m4")
+exports.x4 = m4.x;
+exports.d4 = m4.d;
+exports.f4 = m4.foo();
+(function (m1) {
+        var m2 = require("m2")
+    var m3 = require("m4")
+    m1.x2 = m2.x;
+    m1.d2 = m2.d;
+    m1.f2 = m2.foo();
+    m1.x3 = m3.x;
+    m1.d3 = m3.d;
+    m1.f3 = m3.foo();
+})(exports.m1 || (exports.m1 = {}));
+var m1 = exports.m1;
+exports.x2 = m1.m2.x;
+exports.d2 = m1.m2.d;
+exports.f2 = m1.m2.foo();
+exports.x3 = m1.m3.x;
+exports.d3 = m1.m3.d;
+exports.f3 = m1.m3.foo();
+(function (m5) {
+    m5.x2 = m1.m2.x;
+    m5.d2 = m1.m2.d;
+    m5.f2 = m1.m2.foo();
+    m5.x3 = m1.m3.x;
+    m5.d3 = m1.m3.d;
+    m5.f3 = m1.m3.foo();
+})(exports.m5 || (exports.m5 = {}));
+var m5 = exports.m5;

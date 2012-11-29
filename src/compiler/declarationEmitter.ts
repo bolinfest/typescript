@@ -53,7 +53,7 @@ module TypeScript {
                 container = this.declarationContainerStack[this.declarationContainerStack.length - 2];
             }
 
-            if (container.nodeType == NodeType.Module && !hasFlag(declFlags, DeclFlags.Exported)) {
+            if (container.nodeType == NodeType.ModuleDeclaration && !hasFlag(declFlags, DeclFlags.Exported)) {
                 return false;
             }
 
@@ -92,8 +92,8 @@ module TypeScript {
 
             // Emit export only for global export statements. The container for this would be dynamic module which is whole file
             var container = this.getAstDeclarationContainer();
-            if (container.nodeType == NodeType.Module &&
-                hasFlag((<ModuleDecl>container).modFlags, ModuleFlags.IsWholeFile) &&
+            if (container.nodeType == NodeType.ModuleDeclaration &&
+                hasFlag((<ModuleDeclaration>container).modFlags, ModuleFlags.IsWholeFile) &&
                 hasFlag(declFlags, DeclFlags.Exported)) {
                 this.declFile.Write("export ");
             }
@@ -177,8 +177,8 @@ module TypeScript {
             var containingScope: SymbolScope = null;
             var declarationContainerAst = this.getAstDeclarationContainer();
             switch (declarationContainerAst.nodeType) {
-                case NodeType.Module:
-                case NodeType.Interface:
+                case NodeType.ModuleDeclaration:
+                case NodeType.InterfaceDeclaration:
                 case NodeType.FuncDecl:
                     if (declarationContainerAst.type) {
                         containingScope = declarationContainerAst.type.containedScope;
@@ -192,7 +192,7 @@ module TypeScript {
                     }
                     break;
 
-                case NodeType.Class:
+                case NodeType.ClassDeclaration:
                     if (declarationContainerAst.type) {
                         containingScope = declarationContainerAst.type.instanceType.containedScope;
                     }
@@ -208,9 +208,11 @@ module TypeScript {
 
         public VarDeclCallback(pre: bool, varDecl: VarDecl): bool {
             if (pre && this.canEmitSignature(ToDeclFlags(varDecl.varFlags), false)) {
-                var interfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
+                var interfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.InterfaceDeclaration);
                 if (!interfaceMember) {
-                    // If it is var list of form var a, b, c = emit it only if count > 0 - which will be when emitting first var                    // If it is var list of form  var a = varList count will be 0                    if (this.varListCount >= 0) {
+                    // If it is var list of form var a, b, c = emit it only if count > 0 - which will be when emitting first var
+                    // If it is var list of form  var a = varList count will be 0
+                    if (this.varListCount >= 0) {
                         this.emitDeclFlags(ToDeclFlags(varDecl.varFlags), "var");
                         this.varListCount = -this.varListCount;
                     }
@@ -241,7 +243,10 @@ module TypeScript {
                 }
                
                 // emitted one var decl
-                if (this.varListCount > 0) { this.varListCount--; } else if (this.varListCount < 0) { this.varListCount++; }                // Write ; or ,                if (this.varListCount < 0) {
+                if (this.varListCount > 0) { this.varListCount--; } else if (this.varListCount < 0) { this.varListCount++; }
+
+                // Write ; or ,
+                if (this.varListCount < 0) {
                     this.declFile.Write(", ");
                 } else {
                     this.declFile.WriteLine(";");
@@ -253,7 +258,7 @@ module TypeScript {
         public BlockCallback(pre: bool, block: Block): bool {
             if (!block.isStatementBlock) {
                 if (pre) {
-                    this.varListCount = block.stmts.members.length;
+                    this.varListCount = block.statements.members.length;
                 } else {
                     this.varListCount = 0;
                 }
@@ -283,7 +288,7 @@ module TypeScript {
                 return this.emitPropertyAccessorSignature(funcDecl);
             }
 
-            var isInterfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.Interface);
+            var isInterfaceMember = (this.getAstDeclarationContainer().nodeType == NodeType.InterfaceDeclaration);
             if (funcDecl.bod) {
                 if (funcDecl.isConstructor) {
                     if (funcDecl.type.construct && funcDecl.type.construct.signatures.length > 1) {
@@ -341,13 +346,13 @@ module TypeScript {
                 this.declFile.Write("[");
             }
 
-            if (funcDecl.args) {
-                var argsLen = funcDecl.args.members.length;
+            if (funcDecl.arguments) {
+                var argsLen = funcDecl.arguments.members.length;
                 if (funcDecl.variableArgList) {
                     argsLen--;
                 }
                 for (var i = 0; i < argsLen; i++) {
-                    var argDecl = <ArgDecl>funcDecl.args.members[i];
+                    var argDecl = <ArgDecl>funcDecl.arguments.members[i];
                     this.emitArgDecl(argDecl, funcDecl);
                     if (i < (argsLen - 1)) {
                         this.declFile.Write(", ");
@@ -356,8 +361,8 @@ module TypeScript {
             }
 
             if (funcDecl.variableArgList) {
-                var lastArg = <ArgDecl>funcDecl.args.members[funcDecl.args.members.length - 1];
-                if (funcDecl.args.members.length > 1) {
+                var lastArg = <ArgDecl>funcDecl.arguments.members[funcDecl.arguments.members.length - 1];
+                if (funcDecl.arguments.members.length > 1) {
                     this.declFile.Write(", ...");
                 }
                 else {
@@ -425,10 +430,11 @@ module TypeScript {
         }
 
         private emitClassMembersFromConstructorDefinition(funcDecl: FuncDecl) {
-            if (funcDecl.args) {
-                var argsLen = funcDecl.args.members.length; if (funcDecl.variableArgList) { argsLen--; }
+            if (funcDecl.arguments) {
+                var argsLen = funcDecl.arguments.members.length; if (funcDecl.variableArgList) { argsLen--; }
+
                 for (var i = 0; i < argsLen; i++) {
-                    var argDecl = <ArgDecl>funcDecl.args.members[i];
+                    var argDecl = <ArgDecl>funcDecl.arguments.members[i];
                     if (hasFlag(argDecl.varFlags, VarFlags.Property)) {
                         this.emitDeclFlags(ToDeclFlags(argDecl.varFlags), "var");
                         this.declFile.Write(argDecl.id.text);
@@ -443,7 +449,7 @@ module TypeScript {
             }
         }
 
-        public ClassCallback(pre: bool, classDecl: ClassDecl): bool {
+        public ClassDeclarationCallback(pre: bool, classDecl: ClassDeclaration): bool {
             if (!this.canEmitPrePostAstSignature(ToDeclFlags(classDecl.varFlags), classDecl, pre)) {
                 return false;
             }
@@ -452,7 +458,7 @@ module TypeScript {
                 var className = classDecl.name.text;
                 this.emitDeclFlags(ToDeclFlags(classDecl.varFlags), "class");
                 this.declFile.Write(className);
-                this.emitBaseList(classDecl.baseClass, "extends");
+                this.emitBaseList(classDecl.extendsList, "extends");
                 this.emitBaseList(classDecl.implementsList, "implements");
                 this.declFile.WriteLine(" {");
 
@@ -472,7 +478,7 @@ module TypeScript {
             return true;
         }
 
-        public InterfaceCallback(pre: bool, interfaceDecl: TypeDecl): bool {
+        public InterfaceDeclarationCallback(pre: bool, interfaceDecl: InterfaceDeclaration): bool {
             if (!this.canEmitPrePostAstSignature(ToDeclFlags(interfaceDecl.varFlags), interfaceDecl, pre)) {
                 return false;
             }
@@ -497,7 +503,7 @@ module TypeScript {
             return true;
         }
 
-        public ImportCallback(pre: bool, importDecl: ImportDecl): bool {
+        public ImportDeclarationCallback(pre: bool, importDecl: ImportDeclaration): bool {
             if (pre && this.canEmitSignature(ToDeclFlags(importDecl.varFlags))) {
                 this.emitDeclFlags(ToDeclFlags(importDecl.varFlags), "import");
 
@@ -512,7 +518,7 @@ module TypeScript {
             return false;
         }
 
-        private emitEnumSignature(moduleDecl: ModuleDecl) {
+        private emitEnumSignature(moduleDecl: ModuleDeclaration) {
             if (!this.canEmitSignature(ToDeclFlags(moduleDecl.modFlags))) {
                 return false;
             }
@@ -539,7 +545,7 @@ module TypeScript {
             return false;
         }
 
-        public ModuleCallback(pre: bool, moduleDecl: ModuleDecl): bool {
+        public ModuleDeclarationCallback(pre: bool, moduleDecl: ModuleDeclaration): bool {
             if (hasFlag(moduleDecl.modFlags, ModuleFlags.IsWholeFile)) {
                 // This is dynamic modules and we are going to outputing single file, 
                 // we need to change the declFile because dynamic modules are always emitted to their corresponding .d.ts
@@ -587,9 +593,9 @@ module TypeScript {
                 this.declFile.Write(moduleDecl.name.text);
 
                 var isCurrentModuleDotted = (moduleDecl.members.members.length == 1 &&
-                    moduleDecl.members.members[0].nodeType == NodeType.Module &&
-                    !(<ModuleDecl>moduleDecl.members.members[0]).isEnum() &&
-                    hasFlag((<ModuleDecl>moduleDecl.members.members[0]).modFlags, ModuleFlags.Exported));
+                    moduleDecl.members.members[0].nodeType == NodeType.ModuleDeclaration &&
+                    !(<ModuleDeclaration>moduleDecl.members.members[0]).isEnum() &&
+                    hasFlag((<ModuleDeclaration>moduleDecl.members.members[0]).modFlags, ModuleFlags.Exported));
 
                 this.isDottedModuleName.push(isCurrentModuleDotted);
                 this.pushDeclarationContainer(moduleDecl);

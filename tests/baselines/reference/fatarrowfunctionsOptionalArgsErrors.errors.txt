@@ -6,3 +6,4 @@
 // 0.ts  line 5 col 4: '...' parameters require both a parameter name and an array type annotation to be specified
 // 0.ts  line 8 col 14: Invalid lambda argument
 // 0.ts  line 9 col 12: Invalid lambda argument
+// 0.ts  line 14 col 17: Optional parameters may only be followed by other optional parameters

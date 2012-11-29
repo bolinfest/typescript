@@ -9,3 +9,6 @@ var tt1 = (a, (b, c)) => a+b+c;
 var tt2 = ((a), b, c) => a+b+c;
 // Still not fixed
 // var tt3 = ((a)) => a;
+
+// Non optional parameter following an optional one
+(arg1 = 1, arg2) => 1; 

@@ -39,15 +39,15 @@ module Formatting {
         {
             //TypeScript specific
             switch (node.AuthorNode.Details.nodeType) {
-                case TypeScript.NodeType.Module:
-                case TypeScript.NodeType.Class:
-                case TypeScript.NodeType.Interface:
+                case TypeScript.NodeType.ModuleDeclaration:
+                case TypeScript.NodeType.ClassDeclaration:
+                case TypeScript.NodeType.InterfaceDeclaration:
                     FillBodyIndentation(node, nextNodesToVisit);
                     // Still visit all children. This covers for example right hand of assignments and functions declared in arguments for function calls
                     ParseNodeExtensions.ForAllChildren(node, (child) => { nextNodesToVisit.Push(child); });
                     return;
 
-                case TypeScript.NodeType.Import:
+                case TypeScript.NodeType.ImportDeclaration:
                     node.ChildrenIndentationDelta = 1;
                     // Still visit all children. This covers for example right hand of assignments and functions declared in arguments for function calls
                     ParseNodeExtensions.ForAllChildren(node, (child) => { nextNodesToVisit.Push(child); });

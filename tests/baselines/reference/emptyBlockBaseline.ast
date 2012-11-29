@@ -1,0 +1,9 @@
+{
+  "sourceText": [
+    "{ }"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 3, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 4, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 3, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 4, "children": [
+        {"nodeType": "Block", "minChar": 0, "limChar": 3, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 4, "children": [
+          {"nodeType": "List", "minChar": 0, "limChar": 3, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 4, "children": []}]}]}]}
+}

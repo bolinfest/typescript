@@ -1,0 +1,16 @@
+{
+  "sourceText": [
+    "class test { constructor() { } }"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 32, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 33, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 32, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 33, "children": [
+        {"nodeType": "ClassDeclaration", "minChar": 0, "limChar": 32, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 33, "children": [
+          {"nodeType": "Name", "minChar": 6, "limChar": 10, "startLine": 1, "startCol": 7, "endLine": 1, "endCol": 11, "children": []},
+          {"nodeType": "List", "minChar": 11, "limChar": 32, "startLine": 1, "startCol": 12, "endLine": 1, "endCol": 33, "children": [
+            {"nodeType": "FuncDecl", "minChar": 13, "limChar": 30, "startLine": 1, "startCol": 14, "endLine": 1, "endCol": 31, "children": [
+              {"nodeType": "Name", "minChar": 6, "limChar": 10, "startLine": 1, "startCol": 7, "endLine": 1, "endCol": 11, "children": []},
+              {"nodeType": "TypeRef", "minChar": 6, "limChar": 10, "startLine": 1, "startCol": 7, "endLine": 1, "endCol": 11, "children": [
+                {"nodeType": "Name", "minChar": 6, "limChar": 10, "startLine": 1, "startCol": 7, "endLine": 1, "endCol": 11, "children": []}]},
+              {"nodeType": "List", "minChar": 27, "limChar": 30, "startLine": 1, "startCol": 28, "endLine": 1, "endCol": 31, "children": [
+                {"nodeType": "EndCode", "minChar": 30, "limChar": 30, "startLine": 1, "startCol": 31, "endLine": 1, "endCol": 31, "children": []}]}]}]}]}]}]}
+}

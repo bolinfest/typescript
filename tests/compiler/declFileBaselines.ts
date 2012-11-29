@@ -24,3 +24,4 @@ checkDeclOutput('tests/compiler/testCode/moduledecl.ts');
 checkDeclOutput('tests/compiler/testCode/interfaceOnly.ts');
 checkDeclOutput('tests/compiler/testCode/withExportDecl.ts');
 checkDeclOutput('tests/compiler/testCode/withImportDecl.ts');
+checkDeclOutput('tests/compiler/testCode/importDecl.ts');

@@ -81,7 +81,7 @@ class BatchCompiler {
         for (var i = 0; i < this.compilationEnvironment.residentCode.length; i++) {
             if (!this.commandLineHost.isResolved(this.compilationEnvironment.residentCode[i].path)) {
                 var path = this.compilationEnvironment.residentCode[i].path;
-                if (!TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path) && !TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path)) {
+                if (!TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path) && !TypeScript.isTSFile(path) && !TypeScript.isDTSFile(path)) {
                     this.ioHost.stderr.WriteLine("Unknown extension for file: \"" + path + "\". Only .ts and .d.ts extensions are allowed.");
                 }
                 else {
@@ -93,7 +93,7 @@ class BatchCompiler {
         for (var i = 0; i < this.compilationEnvironment.code.length; i++) {
             if (!this.commandLineHost.isResolved(this.compilationEnvironment.code[i].path)) {
                 var path = this.compilationEnvironment.code[i].path;
-                if (!TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path) && !TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path)) {
+                if (!TypeScript.isSTRFile(path) && !TypeScript.isDSTRFile(path) && !TypeScript.isTSFile(path) && !TypeScript.isDTSFile(path)) {
                     this.ioHost.stderr.WriteLine("Unknown extension for file: \""+path+"\". Only .ts and .d.ts extensions are allowed.");
                 }
                 else {
@@ -154,7 +154,7 @@ class BatchCompiler {
                     }
                     else {
                         if (this.compilationSettings.errorRecovery) {
-                            compiler.parser.setErrorRecovery(this.ioHost.stderr, -1, -1);
+                            compiler.parser.setErrorRecovery(this.ioHost.stderr);
                         }
                         compiler.addUnit(code.content, code.path, addAsResident, code.referencedFiles);
                     }

@@ -186,16 +186,16 @@ module Services {
 
             var symbolLocation: TypeScript.AST;
             switch (ast.nodeType) {
-                case TypeScript.NodeType.Interface:
-                    symbolLocation = (<TypeScript.TypeDecl>ast).name;
+                case TypeScript.NodeType.InterfaceDeclaration:
+                    symbolLocation = (<TypeScript.InterfaceDeclaration>ast).name;
                     break;
 
-                case TypeScript.NodeType.Class:
-                    symbolLocation = (<TypeScript.ClassDecl>ast).name;
+                case TypeScript.NodeType.ClassDeclaration:
+                    symbolLocation = (<TypeScript.ClassDeclaration>ast).name;
                     break;
 
-                case TypeScript.NodeType.Module:
-                    symbolLocation = (<TypeScript.ModuleDecl>ast).name;
+                case TypeScript.NodeType.ModuleDeclaration:
+                    symbolLocation = (<TypeScript.ModuleDeclaration>ast).name;
                     break;
 
                 case TypeScript.NodeType.VarDecl:
@@ -592,7 +592,7 @@ module Services {
             var astList: TypeScript.ASTList = null;
             if (ast.nodeType == TypeScript.NodeType.Block) {
                 var block = <TypeScript.Block>ast;
-                astList = block.stmts;
+                astList = block.statements;
             } else if (ast.nodeType == TypeScript.NodeType.List) {
                 astList = <TypeScript.ASTList>ast;
             } else {
@@ -629,8 +629,8 @@ module Services {
                     if (pos >= cur.minChar && pos <= cur.limChar) {
                         switch (cur.nodeType) {
                             // Can be used as breakpoint location
-                            case TypeScript.NodeType.Module:
-                            case TypeScript.NodeType.Class:
+                            case TypeScript.NodeType.ModuleDeclaration:
+                            case TypeScript.NodeType.ClassDeclaration:
                             case TypeScript.NodeType.FuncDecl:
                             case TypeScript.NodeType.Break:
                             case TypeScript.NodeType.Continue:
@@ -665,7 +665,7 @@ module Services {
                                      containerASTs.length == 0 ||
                                      (!containerASTs[containerASTs.length - 1].isExpression() &&
                                       containerASTs[containerASTs.length - 1].nodeType != TypeScript.NodeType.VarDecl ||
-                                      containerASTs[containerASTs.length - 1].nodeType == TypeScript.NodeType.QMark))) {
+                                      containerASTs[containerASTs.length - 1].nodeType == TypeScript.NodeType.ConditionalExpression))) {
                                     containerASTs.push(cur);
                                 }
                                 break;
@@ -690,8 +690,8 @@ module Services {
 
             switch (cur.nodeType) {
                 // TODO : combine these as interface and use custom method instead of duplicate logic
-                case TypeScript.NodeType.Module:
-                    var moduleDecl = <TypeScript.ModuleDecl>cur;
+                case TypeScript.NodeType.ModuleDeclaration:
+                    var moduleDecl = <TypeScript.ModuleDeclaration>cur;
                     // If inside another module the whole module is debuggable
                     if (containerASTs.length > 1) {
                         resultAST = moduleDecl;
@@ -716,8 +716,8 @@ module Services {
                     customSpan = funcDecl.endingToken;
                     break;
 
-                case TypeScript.NodeType.Class:
-                    var classDecl = <TypeScript.ClassDecl>cur;
+                case TypeScript.NodeType.ClassDeclaration:
+                    var classDecl = <TypeScript.ClassDeclaration>cur;
                     // If class is inside module then it can be used completely as statement
                     if (containerASTs.length > 1) {
                         resultAST = classDecl;
@@ -951,14 +951,14 @@ module Services {
                 if (!TypeScript.isValidAstNode(ast))
                     return null;
 
-                if (!TypeScript.isValidAstNode(ast.args))
+                if (!TypeScript.isValidAstNode(ast.arguments))
                     return null;
 
                 var result = new ActualSignatureInfo();
                 result.currentParameter = -1;
-                result.openParenMinChar = ast.args.minChar;
-                result.closeParenLimChar = Math.max(ast.args.minChar, ast.args.limChar);
-                ast.args.members.forEach((arg, index) => {
+                result.openParenMinChar = ast.arguments.minChar;
+                result.closeParenLimChar = Math.max(ast.arguments.minChar, ast.arguments.limChar);
+                ast.arguments.members.forEach((arg, index) => {
                     var parameter = new ActualParameterInfo();
                     parameter.minChar = arg.minChar;
                     parameter.limChar = Math.max(arg.minChar, arg.limChar);
@@ -1434,7 +1434,7 @@ module Services {
             var isNameArea = false;
             var cancelSearch = false;
 
-            if (!tokenStream.expect(TypeScript.TokenID.LCurly))
+            if (!tokenStream.expect(TypeScript.TokenID.OpenBrace))
                 return false;
 
             memberList.members.forEach((x, i) => {
@@ -1490,7 +1490,7 @@ module Services {
             if (isNameArea)
                 return true;
 
-            if (tokenStream.tokenId() !== TypeScript.TokenID.RCurly)
+            if (tokenStream.tokenId() !== TypeScript.TokenID.CloseBrace)
                 return false;
 
             return (nameAreaMinChar <= pos) && (pos <= tokenStream.tokenStartPos());
@@ -1713,19 +1713,19 @@ module Services {
                 var result = ast.minChar;
                 switch (ast.nodeType) {
                     case TypeScript.NodeType.FuncDecl:
-                        result = maxLim(result, (<TypeScript.FuncDecl>ast).name, (<TypeScript.FuncDecl>ast).args, (<TypeScript.FuncDecl>ast).returnTypeAnnotation);
+                        result = maxLim(result, (<TypeScript.FuncDecl>ast).name, (<TypeScript.FuncDecl>ast).arguments, (<TypeScript.FuncDecl>ast).returnTypeAnnotation);
                         break
 
-                    case TypeScript.NodeType.Module:
-                        result = maxLim(result, (<TypeScript.ModuleDecl>ast).name);
+                    case TypeScript.NodeType.ModuleDeclaration:
+                        result = maxLim(result, (<TypeScript.ModuleDeclaration>ast).name);
                         break;
 
-                    case TypeScript.NodeType.Class:
-                        result = maxLim(result, (<TypeScript.ClassDecl>ast).name, (<TypeScript.ClassDecl>ast).extendsList, (<TypeScript.ClassDecl>ast).implementsList);
+                    case TypeScript.NodeType.ClassDeclaration:
+                        result = maxLim(result, (<TypeScript.ClassDeclaration>ast).name, (<TypeScript.ClassDeclaration>ast).extendsList, (<TypeScript.ClassDeclaration>ast).implementsList);
                         break;
 
-                    case TypeScript.NodeType.Interface:
-                        result = maxLim(result, (<TypeScript.TypeDecl>ast).name, (<TypeScript.TypeDecl>ast).args, (<TypeScript.TypeDecl>ast).extendsList, (<TypeScript.TypeDecl>ast).implementsList);
+                    case TypeScript.NodeType.InterfaceDeclaration:
+                        result = maxLim(result, (<TypeScript.InterfaceDeclaration>ast).name, (<TypeScript.InterfaceDeclaration>ast).extendsList, (<TypeScript.InterfaceDeclaration>ast).implementsList);
                         break;
                 }
 
@@ -1743,9 +1743,9 @@ module Services {
                         if ((<TypeScript.FuncDecl>ast).bod == null)
                             return MatchKind.none;
                     //fall through
-                    case TypeScript.NodeType.Class:
-                    case TypeScript.NodeType.Module:
-                    case TypeScript.NodeType.Interface:
+                    case TypeScript.NodeType.ClassDeclaration:
+                    case TypeScript.NodeType.ModuleDeclaration:
+                    case TypeScript.NodeType.InterfaceDeclaration:
                         return MatchKind.exact;
 
                     default:
@@ -1922,14 +1922,14 @@ module Services {
         //
         private getDeclNodeElementKind(ast: TypeScript.AST): string {
             switch (ast.nodeType) {
-                case TypeScript.NodeType.Interface:
+                case TypeScript.NodeType.InterfaceDeclaration:
                     return ScriptElementKind.interfaceElement;
 
-                case TypeScript.NodeType.Class:
+                case TypeScript.NodeType.ClassDeclaration:
                     return ScriptElementKind.classElement;
 
-                case TypeScript.NodeType.Module:
-                    var moduleDecl = <TypeScript.ModuleDecl>ast;
+                case TypeScript.NodeType.ModuleDeclaration:
+                    var moduleDecl = <TypeScript.ModuleDeclaration>ast;
                     var isEnum = moduleDecl.isEnum();
                     return isEnum ? ScriptElementKind.enumElement : ScriptElementKind.moduleElement;
 
@@ -1993,21 +1993,21 @@ module Services {
                 }
             }
 
-            var typeDeclToKindModifiers = (decl: TypeScript.TypeDecl): string => {
+            var typeDeclToKindModifiers = (decl: TypeScript.InterfaceDeclaration): string => {
                 var result = ScriptElementKindModifier.none;
                 result = addMofifier(result, decl.isExported(), ScriptElementKindModifier.exportedModifier);
                 result = addMofifier(result, decl.isAmbient(), ScriptElementKindModifier.ambientModifier);
                 return result;
             }
 
-            var classDeclToKindModifiers = (decl: TypeScript.ClassDecl): string => {
+            var classDeclToKindModifiers = (decl: TypeScript.ClassDeclaration): string => {
                 var result = ScriptElementKindModifier.none;
                 result = addMofifier(result, decl.isExported(), ScriptElementKindModifier.exportedModifier);
                 result = addMofifier(result, decl.isAmbient(), ScriptElementKindModifier.ambientModifier);
                 return result;
             }
 
-            var moduleDeclToKindModifiers = (decl: TypeScript.ModuleDecl): string => {
+            var moduleDeclToKindModifiers = (decl: TypeScript.ModuleDeclaration): string => {
                 var result = ScriptElementKindModifier.none;
                 result = addMofifier(result, decl.isExported(), ScriptElementKindModifier.exportedModifier);
                 result = addMofifier(result, decl.isAmbient(), ScriptElementKindModifier.ambientModifier);
@@ -2042,16 +2042,16 @@ module Services {
             }
 
             switch (ast.nodeType) {
-                case TypeScript.NodeType.Interface:
-                    var typeDecl = <TypeScript.TypeDecl>ast;
+                case TypeScript.NodeType.InterfaceDeclaration:
+                    var typeDecl = <TypeScript.InterfaceDeclaration>ast;
                     return typeDeclToKindModifiers(typeDecl);
 
-                case TypeScript.NodeType.Class:
-                    var classDecl = <TypeScript.ClassDecl>ast;
+                case TypeScript.NodeType.ClassDeclaration:
+                    var classDecl = <TypeScript.ClassDeclaration>ast;
                     return classDeclToKindModifiers(classDecl);
 
-                case TypeScript.NodeType.Module:
-                    var moduleDecl = <TypeScript.ModuleDecl>ast;
+                case TypeScript.NodeType.ModuleDeclaration:
+                    var moduleDecl = <TypeScript.ModuleDeclaration>ast;
                     return moduleDeclToKindModifiers(moduleDecl);
 
                 case TypeScript.NodeType.VarDecl:
@@ -2133,8 +2133,8 @@ module Services {
                 var item: NavigateToItem = null;
 
                 switch (ast.nodeType) {
-                    case TypeScript.NodeType.Interface: {
-                        var typeDecl = <TypeScript.TypeDecl>ast;
+                    case TypeScript.NodeType.InterfaceDeclaration: {
+                        var typeDecl = <TypeScript.InterfaceDeclaration>ast;
                         item = addItem(parent, typeDecl, typeDecl.name.actualText, ScriptElementKind.interfaceElement);
                         context.containerASTs.push(ast);
                         context.containerSymbols.push(typeDecl.type.symbol);
@@ -2142,8 +2142,8 @@ module Services {
                     }
                         break;
 
-                    case TypeScript.NodeType.Class: {
-                        var classDecl = <TypeScript.ClassDecl>ast;
+                    case TypeScript.NodeType.ClassDeclaration: {
+                        var classDecl = <TypeScript.ClassDeclaration>ast;
                         item = addItem(parent, classDecl, classDecl.name.actualText, ScriptElementKind.classElement);
                         context.containerASTs.push(ast);
                         context.containerSymbols.push(classDecl.type.symbol);
@@ -2151,8 +2151,8 @@ module Services {
                     }
                         break;
 
-                    case TypeScript.NodeType.Module: {
-                        var moduleDecl = <TypeScript.ModuleDecl>ast;
+                    case TypeScript.NodeType.ModuleDeclaration: {
+                        var moduleDecl = <TypeScript.ModuleDeclaration>ast;
                         var isEnum = moduleDecl.isEnum();
                         var kind = isEnum ? ScriptElementKind.enumElement : ScriptElementKind.moduleElement;
                         item = addItem(parent, moduleDecl, moduleDecl.name.actualText, kind);

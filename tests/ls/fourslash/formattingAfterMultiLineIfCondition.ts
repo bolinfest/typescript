@@ -10,6 +10,5 @@
 goTo.marker();
 edit.insert('}');
 goTo.marker('comment');
-// Bug 15035: [Formatting] Comment below multi-line 'if' condition gets tabbed too far in
-// verify.currentLineContentIs('    // This is a comment');
-verify.currentLineContentIs('        // This is a comment');
+// Comment below multi-line 'if' condition formatting
+verify.currentLineContentIs('    // This is a comment');

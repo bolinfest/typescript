@@ -255,7 +255,7 @@ module TypeScript {
         public currentCompareA: Symbol = null;
         public currentCompareB: Symbol = null;
 
-        public currentModDecl: ModuleDecl = null;
+        public currentModDecl: ModuleDeclaration = null;
 
         public inBind = false;
         public inWith = false;
@@ -455,7 +455,7 @@ module TypeScript {
 
             signature.hasVariableArgList = funcDecl.variableArgList;
 
-            var sigData = this.getParameterList(funcDecl.args, container);
+            var sigData = this.getParameterList(funcDecl.arguments, container);
 
             signature.parameters = sigData.parameters;
             signature.nonOptionalParameterCount = sigData.nonOptionalParameterCount;
@@ -914,7 +914,7 @@ module TypeScript {
                             // no going back                        
                             if (symType && typeSymbol.aliasLink && typeSymbol.onlyReferencedAsTypeRef) {
 
-                                var modDecl = <ModuleDecl>symType.symbol.declAST;
+                                var modDecl = <ModuleDeclaration>symType.symbol.declAST;
                                 if (modDecl && hasFlag(modDecl.modFlags, ModuleFlags.IsDynamic)) {
                                     typeSymbol.onlyReferencedAsTypeRef = !this.resolvingBases;
                                 }
@@ -1054,8 +1054,8 @@ module TypeScript {
                                     typeLink.type = this.anyType;
                                 }
                                 break;
-                            case NodeType.Interface:
-                                var interfaceDecl = <TypeDecl>ast;
+                            case NodeType.InterfaceDeclaration:
+                                var interfaceDecl = <InterfaceDeclaration>ast;
                                 var interfaceType = new Type();
                                 var interfaceSymbol = new TypeSymbol((<Identifier>interfaceDecl.name).text,
                                                                    ast.minChar,

@@ -19,7 +19,7 @@ module Services {
             this.scanner.lexState = lexState;
             this.scanner.setText(text, TypeScript.LexMode.Line);
             var t = this.scanner.scan();
-            while (t.tokenId != TypeScript.TokenID.EOF) {
+            while (t.tokenId != TypeScript.TokenID.EndOfFile) {
                 result.entries.push(new ClassificationInfo(this.scanner.pos, t.classification()));
                 t = this.scanner.scan();
             }

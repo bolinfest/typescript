@@ -1,0 +1,18 @@
+{
+  "sourceText": [
+    "if (false) { debugger; }\r\n",
+    "if (false) { debugger; }"],
+  "ast":
+    {"nodeType": "Script", "minChar": 0, "limChar": 50, "startLine": 1, "startCol": 1, "endLine": 2, "endCol": 25, "children": [
+      {"nodeType": "List", "minChar": 0, "limChar": 50, "startLine": 1, "startCol": 1, "endLine": 2, "endCol": 25, "children": [
+        {"nodeType": "If", "minChar": 0, "limChar": 24, "startLine": 1, "startCol": 1, "endLine": 1, "endCol": 25, "children": [
+          {"nodeType": "False", "minChar": 4, "limChar": 9, "startLine": 1, "startCol": 5, "endLine": 1, "endCol": 10, "children": []},
+          {"nodeType": "Block", "minChar": 11, "limChar": 24, "startLine": 1, "startCol": 12, "endLine": 1, "endCol": 25, "children": [
+            {"nodeType": "List", "minChar": 11, "limChar": 24, "startLine": 1, "startCol": 12, "endLine": 1, "endCol": 25, "children": [
+              {"nodeType": "Debugger", "minChar": 13, "limChar": 22, "startLine": 1, "startCol": 14, "endLine": 1, "endCol": 23, "children": []}]}]}]},
+        {"nodeType": "If", "minChar": 26, "limChar": 50, "startLine": 2, "startCol": 1, "endLine": 2, "endCol": 25, "children": [
+          {"nodeType": "False", "minChar": 30, "limChar": 35, "startLine": 2, "startCol": 5, "endLine": 2, "endCol": 10, "children": []},
+          {"nodeType": "Block", "minChar": 37, "limChar": 50, "startLine": 2, "startCol": 12, "endLine": 2, "endCol": 25, "children": [
+            {"nodeType": "List", "minChar": 37, "limChar": 50, "startLine": 2, "startCol": 12, "endLine": 2, "endCol": 25, "children": [
+              {"nodeType": "Debugger", "minChar": 39, "limChar": 48, "startLine": 2, "startCol": 14, "endLine": 2, "endCol": 23, "children": []}]}]}]}]}]}
+}

@@ -257,4 +257,39 @@ module TypeScript {
         }
     }
 
+    // Simple Hash table with list of keys and values matching each other at the given index
+    export class SimpleHashTable {
+        private keys = [];
+        private values = [];
+
+        public lookup(key, findValue?: bool) {
+            var searchArray = this.keys;
+            if (findValue) {
+                searchArray = this.values;
+            }
+
+            for (var i = 0; i < searchArray.length; i++) {
+                if (searchArray[i] == key) {
+                    return {
+                        key: this.keys[i],
+                        data: this.values[i],
+                    };
+                }
+            }
+            return null;
+        }
+
+        public add(key, data): bool {
+            var lookupData = this.lookup(key);
+            if (lookupData) {
+                return false;
+            }
+
+            this.keys[this.keys.length] = key;
+            this.values[this.values.length] = data;
+
+            return true;
+        }
+    }
+
 }

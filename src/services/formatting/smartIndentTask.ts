@@ -54,13 +54,13 @@ module Formatting {
             var firstToken = FirstOrDefault(this.tokens, (item) => true);
             if (firstToken == null) {
                 // Nothing on the line, assume we have a semicolon
-                firstToken = new TokenSpan(AuthorTokenKind.atkSColon, TypeScript.TokenID.SColon, this.snapshotSpan);
+                firstToken = new TokenSpan(AuthorTokenKind.atkSColon, TypeScript.TokenID.Semicolon, this.snapshotSpan);
             }
             else if (firstToken.Token != AuthorTokenKind.atkElse &&
                          firstToken.Token != AuthorTokenKind.atkWhile &&
                          firstToken.Token != AuthorTokenKind.atkLCurly &&
                          firstToken.Token != AuthorTokenKind.atkRCurly) {
-                firstToken = new TokenSpan(AuthorTokenKind.atkSColon, TypeScript.TokenID.SColon, this.snapshotSpan);
+                firstToken = new TokenSpan(AuthorTokenKind.atkSColon, TypeScript.TokenID.Semicolon, this.snapshotSpan);
             }
 
             if (this.CanDoSmartIndent(context, { token: firstToken })) {
@@ -89,7 +89,7 @@ module Formatting {
 
             if (node.AuthorNode.Details.ast != null) {
                 switch (node.AuthorNode.Details.ast.nodeType) {
-                    case TypeScript.NodeType.Import:
+                    case TypeScript.NodeType.ImportDeclaration:
                         // only smart indent on the first line
                         return this.CanDoSmartIndentInStatement(node);
                 }
@@ -160,7 +160,7 @@ module Formatting {
                 var leftCurlyPos = astCursor.GetNodeProperty(AuthorParseNodeProperty.apnpLCurlyMin);
                 if (leftCurlyPos == 0 || this.snapshotSpan.startPosition() <= leftCurlyPos) {
                     // Assume the first token is an open curly so it will get indented correctly based on the function
-                    firstToken = { token: new TokenSpan(AuthorTokenKind.atkLCurly, TypeScript.TokenID.LCurly, this.snapshotSpan) };
+                    firstToken = { token: new TokenSpan(AuthorTokenKind.atkLCurly, TypeScript.TokenID.OpenBrace, this.snapshotSpan) };
                 }
 
                 return true;
@@ -176,7 +176,7 @@ module Formatting {
                 var leftCurlyPos = astCursor.GetNodeProperty(AuthorParseNodeProperty.apnpLCurlyMin);
                 if (leftCurlyPos == 0 || this.snapshotSpan.startPosition() <= leftCurlyPos) {
                     // Assume the first token is an open curly so it will get indented correctly based on the statement
-                    firstToken = { token: new TokenSpan(AuthorTokenKind.atkLCurly, TypeScript.TokenID.LCurly, this.snapshotSpan) };
+                    firstToken = { token: new TokenSpan(AuthorTokenKind.atkLCurly, TypeScript.TokenID.OpenBrace, this.snapshotSpan) };
                 }
 
                 return true;
@@ -193,7 +193,7 @@ module Formatting {
                 var leftCurlyPos = astCursor.GetNodeProperty(AuthorParseNodeProperty.apnpLCurlyMin);
                 if (rightParenPos > 0 && this.snapshotSpan.startPosition() > rightParenPos && (leftCurlyPos == 0 || this.snapshotSpan.startPosition() <= leftCurlyPos)) {
                     // Assume the first token is an open curly so it will get indented correctly based on the statement
-                    firstToken = { token: new TokenSpan(AuthorTokenKind.atkLCurly, TypeScript.TokenID.LCurly, this.snapshotSpan) };
+                    firstToken = { token: new TokenSpan(AuthorTokenKind.atkLCurly, TypeScript.TokenID.OpenBrace, this.snapshotSpan) };
                 }
 
                 return true;

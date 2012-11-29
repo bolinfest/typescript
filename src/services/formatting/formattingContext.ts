@@ -74,9 +74,9 @@ module Formatting {
                 //
                 // Fix this by finding the token *before* the end token of the AST node
                 var openToken = this.findTokenAtPosition(blockSpan.start());
-                if (openToken != null && openToken.tokenID == TypeScript.TokenID.LCurly) {
+                if (openToken != null && openToken.tokenID == TypeScript.TokenID.OpenBrace) {
                     var closeToken = this.findTokenAtPosition(blockSpan.end() - 1);
-                    if (closeToken == null || closeToken.tokenID != TypeScript.TokenID.RCurly) {
+                    if (closeToken == null || closeToken.tokenID != TypeScript.TokenID.CloseBrace) {
                         //REVIEW: This could be more efficient... But this is safe and works with EOF token
                         for (var position = blockSpan.end() - 2; position > openToken.Span.endPosition(); position--) {
                             closeToken = this.findTokenAtPosition(position);

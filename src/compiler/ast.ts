@@ -26,8 +26,11 @@ module TypeScript {
         }
 
         public isExpression() { return false; }
+
         public isStatementOrExpression() { return false; }
+
         public isCompoundStatement() { return false; }
+
         public isLeaf() { return this.isStatementOrExpression() && (!this.isCompoundStatement()); }
 
         public typeCheck(typeFlow: TypeFlow) {
@@ -227,7 +230,7 @@ module TypeScript {
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.recordSourceMappingStart(this);
-            emitter.emitJavascriptList(this, null, TokenID.SColon, startLine, false, false);
+            emitter.emitJavascriptList(this, null, TokenID.Semicolon, startLine, false, false);
             emitter.recordSourceMappingEnd(this);
         }
 
@@ -249,14 +252,18 @@ module TypeScript {
         public cloId = -1;
         public text: string;
 
-        // 'actualText' is the text that the user has entered for the identifier. the text might include any Unicode escape sequences (e.g.: \u0041 for 'A').
-        // 'text', however, contains the resolved value of any escape sequences in the actual text; so in the previous example, actualText = '\u0041', text = 'A'.
+        // 'actualText' is the text that the user has entered for the identifier. the text might 
+        // include any Unicode escape sequences (e.g.: \u0041 for 'A'). 'text', however, contains 
+        // the resolved value of any escape sequences in the actual text; so in the previous 
+        // example, actualText = '\u0041', text = 'A'.
         //
-        // For purposes of finding a symbol, use text, as this will allow you to match all variations of the variable text.
-        // For full-fidelity translation of the user input, such as emitting, use the actualText field.
+        // For purposes of finding a symbol, use text, as this will allow you to match all 
+        // variations of the variable text. For full-fidelity translation of the user input, such
+        // as emitting, use the actualText field.
         // 
         // Note: 
-        //    To change text, and to avoid running into a situation where 'actualText' does not match 'text', always use setText.
+        //    To change text, and to avoid running into a situation where 'actualText' does not 
+        //    match 'text', always use setText.
         constructor (public actualText: string, public hasEscapeSequence?: bool) {
             super(NodeType.Name);
             this.setText(actualText, hasEscapeSequence);
@@ -305,7 +312,10 @@ module TypeScript {
         constructor () {
             super("__missing");
         }
-        public isMissing() { return true; }
+
+        public isMissing() {
+            return true;
+        }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             // Emit nothing for a missing ID
@@ -334,22 +344,25 @@ module TypeScript {
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
-
     }
-    
-    export class UnaryExpression extends AST {
 
-        public targetType: Type = null; // Target type for an object literal (null if no target type)
-        public castTerm: AST = null;
-        public nty: NodeType;
-
-        constructor (nty: number, public operand: AST) {
-            super(nty);
-            this.nty = nty;
+    export class Expression extends AST {
+        constructor (nodeType: NodeType) {
+            super(nodeType);
         }
 
         public isExpression() { return true; }
+
         public isStatementOrExpression() { return true; }
+    }
+
+    export class UnaryExpression extends Expression {
+        public targetType: Type = null; // Target type for an object literal (null if no target type)
+        public castTerm: AST = null;
+
+        constructor (nodeType: NodeType, public operand: AST) {
+            super(nodeType);
+        }
 
         public addToControlFlow(context: ControlFlowContext): void {
             super.addToControlFlow(context);
@@ -360,7 +373,7 @@ module TypeScript {
         }
 
         public typeCheck(typeFlow: TypeFlow) {
-            switch (this.nty) {
+            switch (this.nodeType) {
                 case NodeType.Not:
                     return typeFlow.typeCheckBitNot(this);
 
@@ -428,17 +441,17 @@ module TypeScript {
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            switch (this.nty) {
+            switch (this.nodeType) {
                 case NodeType.IncPost:
-                    emitter.emitJavascript(this.operand, TokenID.Inc, false);
+                    emitter.emitJavascript(this.operand, TokenID.PlusPlus, false);
                     emitter.writeToOutput("++");
                     break;
                 case NodeType.LogNot:
                     emitter.writeToOutput("!");
-                    emitter.emitJavascript(this.operand, TokenID.Bang, false);
+                    emitter.emitJavascript(this.operand, TokenID.Exclamation, false);
                     break;
                 case NodeType.DecPost:
-                    emitter.emitJavascript(this.operand, TokenID.Dec, false);
+                    emitter.emitJavascript(this.operand, TokenID.MinusMinus, false);
                     emitter.writeToOutput("--");
                     break;
                 case NodeType.ObjectLit:
@@ -456,22 +469,22 @@ module TypeScript {
                     if (this.operand.nodeType == NodeType.Neg) {
                         this.operand.isParenthesized = true;
                     }
-                    emitter.emitJavascript(this.operand, TokenID.Sub, false);
+                    emitter.emitJavascript(this.operand, TokenID.Minus, false);
                     break;
                 case NodeType.Pos:
                     emitter.writeToOutput("+");
                     if (this.operand.nodeType == NodeType.Pos) {
                         this.operand.isParenthesized = true;
                     }
-                    emitter.emitJavascript(this.operand, TokenID.Add, false);
+                    emitter.emitJavascript(this.operand, TokenID.Plus, false);
                     break;
                 case NodeType.IncPre:
                     emitter.writeToOutput("++");
-                    emitter.emitJavascript(this.operand, TokenID.Inc, false);
+                    emitter.emitJavascript(this.operand, TokenID.PlusPlus, false);
                     break;
                 case NodeType.DecPre:
                     emitter.writeToOutput("--");
-                    emitter.emitJavascript(this.operand, TokenID.Dec, false);
+                    emitter.emitJavascript(this.operand, TokenID.MinusMinus, false);
                     break;
                 case NodeType.Throw:
                     emitter.writeToOutput("throw ");
@@ -499,24 +512,20 @@ module TypeScript {
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
-
     }
 
-    export class CallExpression extends AST {
-
-        public nty: NodeType;
-
-        constructor (nty: number, public target: AST, public args: ASTList) {
-            super(nty);
-            this.nty = nty;
+    export class CallExpression extends Expression {
+        constructor (nodeType: NodeType,
+                     public target: AST,
+                     public arguments: ASTList) {
+            super(nodeType);
             this.minChar = this.target.minChar;
         }
 
         public signature: Signature = null;
-        public isExpression() { return true; }
-        public isStatementOrExpression() { return true; }
+
         public typeCheck(typeFlow: TypeFlow) {
-            if (this.nty == NodeType.New) {
+            if (this.nodeType == NodeType.New) {
                 return typeFlow.typeCheckNew(this);
             }
             else {
@@ -528,11 +537,11 @@ module TypeScript {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
 
-            if (this.nty == NodeType.New) {
-                emitter.emitNew(this.target, this.args);
+            if (this.nodeType == NodeType.New) {
+                emitter.emitNew(this.target, this.arguments);
             }
             else {
-                emitter.emitCall(this, this.target, this.args);
+                emitter.emitCall(this, this.target, this.arguments);
             }
 
             emitter.recordSourceMappingEnd(this);
@@ -540,19 +549,13 @@ module TypeScript {
         }
     }
 
-    export class BinaryExpression extends AST {
-        public nty: NodeType;
-
-        constructor (nty: number, public operand1: AST, public operand2: AST) {
-            super(nty);
-            this.nty = nty;
+    export class BinaryExpression extends Expression {
+        constructor (nodeType: NodeType, public operand1: AST, public operand2: AST) {
+            super(nodeType);
         }
 
-        public isStatementOrExpression() { return true; }
-        public isExpression() { return true; }
-
         public typeCheck(typeFlow: TypeFlow) {
-            switch (this.nty) {
+            switch (this.nodeType) {
                 case NodeType.Dot:
                     return typeFlow.typeCheckDotOperator(this);
                 case NodeType.Asg:
@@ -571,11 +574,11 @@ module TypeScript {
                 case NodeType.Eq:
                     var text: string;
                     if (typeFlow.checker.styleSettings.eqeqeq) {
-                        text = nodeTypeTable[this.nty];
+                        text = nodeTypeTable[this.nodeType];
                         typeFlow.checker.errorReporter.styleError(this, "use of " + text);
                     }
                     else if (typeFlow.checker.styleSettings.eqnull) {
-                        text = nodeTypeTable[this.nty];
+                        text = nodeTypeTable[this.nodeType];
                         if ((this.operand2 !== null) && (this.operand2.nodeType == NodeType.Null)) {
                             typeFlow.checker.errorReporter.styleError(this, "use of " + text + " to compare with null");
                         }
@@ -651,7 +654,7 @@ module TypeScript {
                 emitter.emitJavascript(this.operand2, binTokenId, false);
             }
             else {
-                switch (this.nty) {
+                switch (this.nodeType) {
                     case NodeType.Dot:
                         if (!emitter.tryEmitConstant(this)) {
                             emitter.emitJavascript(this.operand1, TokenID.Dot, false);
@@ -699,20 +702,15 @@ module TypeScript {
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
-
     }
 
-    export class TrinaryExpression extends AST {
-        public nty: NodeType;
-
-        constructor (nty: number, public operand1: AST, public operand2: AST,
-                            public operand3: AST) {
-            super(nty);
-            this.nty = nty;
+    export class ConditionalExpression extends Expression {
+        constructor (public operand1: AST,
+                     public operand2: AST,
+                     public operand3: AST) {
+            super(NodeType.ConditionalExpression);
         }
 
-        public isExpression() { return true; }
-        public isStatementOrExpression() { return true; }
         public typeCheck(typeFlow: TypeFlow) {
             return typeFlow.typeCheckQMark(this);
         }
@@ -720,30 +718,30 @@ module TypeScript {
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            emitter.emitJavascript(this.operand1, TokenID.QMark, false);
+            emitter.emitJavascript(this.operand1, TokenID.Question, false);
             emitter.writeToOutput(" ? ");
-            emitter.emitJavascript(this.operand2, TokenID.QMark, false);
+            emitter.emitJavascript(this.operand2, TokenID.Question, false);
             emitter.writeToOutput(" : ");
-            emitter.emitJavascript(this.operand3, TokenID.QMark, false);
+            emitter.emitJavascript(this.operand3, TokenID.Question, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
     }
 
-    export class NumberLiteral extends AST {
-
-        constructor (public value: number) {
+    export class NumberLiteral extends Expression {
+        constructor (public value: number, public hasEmptyFraction?: bool) {
             super(NodeType.NumberLit);
         }
 
-        public isStatementOrExpression() { return true; }
         public isNegativeZero = false;
+
         public typeCheck(typeFlow: TypeFlow) {
             this.type = typeFlow.doubleType;
             return this;
         }
+
         public treeViewLabel() {
-            return "num: " + this.value;
+            return "num: " + this.printLabel();
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
@@ -754,6 +752,10 @@ module TypeScript {
             }
 
             emitter.writeToOutput(this.value.toString());
+
+            if (this.hasEmptyFraction)
+                emitter.writeToOutput(".0");
+
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -762,19 +764,20 @@ module TypeScript {
             if (Math.floor(this.value) != this.value) {
                 return this.value.toFixed(2).toString();
             }
+            else if (this.hasEmptyFraction) {
+                return this.value.toString() + ".0";
+            }
             else {
                 return this.value.toString();
             }
         }
     }
 
-    export class RegexLiteral extends AST {
-
+    export class RegexLiteral extends Expression {
         constructor (public regex) {
             super(NodeType.Regex);
         }
-
-        public isStatementOrExpression() { return true; }
+        
         public typeCheck(typeFlow: TypeFlow) {
             this.type = typeFlow.regexType;
             return this;
@@ -789,13 +792,11 @@ module TypeScript {
         }
     }
 
-    export class StringLiteral extends AST {
-
+    export class StringLiteral extends Expression {
         constructor (public text: string) {
             super(NodeType.QString);
         }
 
-        public isStatementOrExpression() { return true; }
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
@@ -818,13 +819,19 @@ module TypeScript {
         }
     }
 
-    export class ImportDecl extends AST {
+    export class ModuleElement extends AST {
+        constructor (nodeType: NodeType) {
+            super(nodeType);
+        }
+    }
+
+    export class ImportDeclaration extends ModuleElement {
         public isStatementOrExpression() { return true; }
         public varFlags = VarFlags.None;
         public isDynamicImport = false;
 
         constructor (public id: Identifier, public alias: AST) {
-            super(NodeType.Import);
+            super(NodeType.ImportDeclaration);
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
@@ -857,7 +864,7 @@ module TypeScript {
             return typeFlow.typeCheckImportDecl(this);
         }
 
-        public getAliasName(aliasAST?: AST = this.alias) {
+        public getAliasName(aliasAST?: AST = this.alias) : string {
             if (aliasAST.nodeType == NodeType.Name) {
                 return (<Identifier>aliasAST).actualText;
             } else {
@@ -904,7 +911,6 @@ module TypeScript {
     }
 
     export class VarDecl extends BoundDecl {
-
         constructor (id: Identifier, nest: number) {
             super(id, NodeType.VarDecl, nest);
         }
@@ -962,7 +968,7 @@ module TypeScript {
         public enclosingFnc: FuncDecl = null;
         public freeVariables: Symbol[] = [];
         public unitIndex = -1;
-        public classDecl: Record = null;
+        public classDecl: NamedDeclaration = null;
         public boundToProperty: VarDecl = null;
         public isOverload = false;
         public innerStaticFuncs: FuncDecl[] = [];
@@ -976,7 +982,7 @@ module TypeScript {
         public endingToken: ASTSpan = null;
 
         constructor (public name: Identifier, public bod: ASTList, public isConstructor: bool,
-                    public args: ASTList, public vars: ASTList, public scopes: ASTList, public statics: ASTList,
+                     public arguments: ASTList, public vars: ASTList, public scopes: ASTList, public statics: ASTList,
             nodeType: number) {
 
             super(nodeType);
@@ -1076,8 +1082,6 @@ module TypeScript {
         public isPublic() { return hasFlag(this.fncFlags, FncFlags.Public); }
         public isStatic() { return hasFlag(this.fncFlags, FncFlags.Static); }
 
-
-
         public treeViewLabel() {
             if (this.name == null) {
                 return "funcExpr";
@@ -1110,7 +1114,7 @@ module TypeScript {
         public isResident = false;
         public isDeclareFile = false;
         public hasBeenTypeChecked = false;
-        public topLevelMod: ModuleDecl = null;
+        public topLevelMod: ModuleDeclaration = null;
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
         public vars: ASTList;
@@ -1137,13 +1141,13 @@ module TypeScript {
             if (!this.isDeclareFile && !this.isResident && this.bod) {
                 for (var i = 0, len = this.bod.members.length; i < len; i++) {
                     var stmt = this.bod.members[i];
-                    if (stmt.nodeType == NodeType.Module) {
-                        if (!hasFlag((<ModuleDecl>stmt).modFlags, ModuleFlags.ShouldEmitModuleDecl | ModuleFlags.Ambient)) {
+                    if (stmt.nodeType == NodeType.ModuleDeclaration) {
+                        if (!hasFlag((<ModuleDeclaration>stmt).modFlags, ModuleFlags.ShouldEmitModuleDecl | ModuleFlags.Ambient)) {
                             return true;
                         }
                     }
-                    else if (stmt.nodeType == NodeType.Class) {
-                        if (!hasFlag((<TypeDecl>stmt).varFlags, VarFlags.Ambient)) {
+                    else if (stmt.nodeType == NodeType.ClassDeclaration) {
+                        if (!hasFlag((<InterfaceDeclaration>stmt).varFlags, VarFlags.Ambient)) {
                             return true;
                         }
                     }
@@ -1157,7 +1161,7 @@ module TypeScript {
                             return true;
                         }
                     }
-                    else if (stmt.nodeType != NodeType.Interface && stmt.nodeType != NodeType.Empty) {
+                    else if (stmt.nodeType != NodeType.InterfaceDeclaration && stmt.nodeType != NodeType.Empty) {
                         return true;
                     }
                 }
@@ -1169,47 +1173,40 @@ module TypeScript {
             if (this.emitRequired()) {
                 emitter.emitParensAndCommentsInPlace(this, true);
                 emitter.recordSourceMappingStart(this);
-                emitter.emitJavascriptList(this.bod, null, TokenID.SColon, true, false, false, true, this.requiresInherits);
+                emitter.emitJavascriptList(this.bod, null, TokenID.Semicolon, true, false, false, true, this.requiresInherits);
                 emitter.recordSourceMappingEnd(this);
                 emitter.emitParensAndCommentsInPlace(this, false);
             }
         }
-
     }
 
-    export class Record extends AST {
-        public nty: NodeType;
-        constructor (nty: number, public name: AST, public members: AST) {
-            super(nty);
-            this.nty = nty;
+    export class NamedDeclaration extends ModuleElement {
+        public leftCurlyCount = 0;
+        public rightCurlyCount = 0;
+
+        constructor (nodeType: NodeType,
+                     public name: Identifier,
+                     public members: ASTList) {
+            super(nodeType);
         }
     }
 
-    export class ModuleDecl extends Record {
-
+    export class ModuleDeclaration extends NamedDeclaration {
         public modFlags = ModuleFlags.ShouldEmitModuleDecl;
         public mod: ModuleType;
-        public alias: AST = null;
-        public leftCurlyCount = 0;
-        public rightCurlyCount = 0;
         public prettyName: string;
         public amdDependencies: string[] = [];
-        public members: ASTList;
         public vars: ASTList;
-        public name: Identifier;
         public scopes: ASTList;
         // Remember if the module contains Unicode chars, that is needed for dynamic module as we will generate a file for each.
         public containsUnicodeChar = false;
         public containsUnicodeCharInComment = false;
 
         constructor (name: Identifier, members: ASTList, vars: ASTList, scopes: ASTList, public endingToken: ASTSpan) {
-            super(NodeType.Module, name, members);
+            super(NodeType.ModuleDeclaration, name, members);
 
-            this.members = members;
             this.vars = vars;
-            this.name = name;
             this.scopes = scopes;
-
             this.prettyName = this.name.actualText;
         }
 
@@ -1236,44 +1233,38 @@ module TypeScript {
         }
     }
 
-    export class NamedType extends Record {
-        public name: Identifier;
-        public members: AST;
+    export class TypeDeclaration extends NamedDeclaration {
+        public varFlags = VarFlags.None;
 
-        constructor (nty: NodeType, name: Identifier, public extendsList: ASTList, public implementsList: ASTList, members: AST) {
-            super(nty, name, members);
-            this.name = name;
-            this.members = members;
+        constructor (nodeType: NodeType,
+                     name: Identifier,
+                     public extendsList: ASTList,
+                     public implementsList: ASTList,
+                     members: ASTList) {
+            super(nodeType, name, members);
+        }
+
+        public isExported() { 
+            return hasFlag(this.varFlags, VarFlags.Exported);
+        }
+
+        public isAmbient() {
+            return hasFlag(this.varFlags, VarFlags.Ambient);
         }
     }
 
-    export class ClassDecl extends NamedType {
-        public varFlags = VarFlags.None;
-        public leftCurlyCount = 0;
-        public rightCurlyCount = 0;
+    export class ClassDeclaration extends TypeDeclaration {
         public knownMemberNames: any = {};
         public constructorDecl: FuncDecl = null;
         public constructorNestingLevel = 0;
-        public allMemberDefinitions: ASTList = new ASTList();
-        public name: Identifier;
-        public baseClass: ASTList;
-        public implementsList: ASTList;
-        public definitionMembers: ASTList;
         public endingToken: ASTSpan = null;
 
-        constructor (name: Identifier, definitionMembers: ASTList, baseClass: ASTList,
-            implementsList: ASTList) {
-
-            super(NodeType.Class, name, baseClass, implementsList, definitionMembers);
-
-            this.name = name;
-            this.baseClass = baseClass;
-            this.implementsList = implementsList;
-            this.definitionMembers = definitionMembers;
+        constructor (name: Identifier,
+                     members: ASTList,
+                     extendsList: ASTList,
+                     implementsList: ASTList) {
+            super(NodeType.ClassDeclaration, name, extendsList, implementsList, members);
         }
-
-        public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }
-        public isAmbient() { return hasFlag(this.varFlags, VarFlags.Ambient); }
 
         public typeCheck(typeFlow: TypeFlow) {
             return typeFlow.typeCheckClass(this);
@@ -1284,55 +1275,34 @@ module TypeScript {
         }
     }
 
-    export class TypeDecl extends NamedType {
-        public varFlags = VarFlags.None;
-        public isOverload = false;
-        public leftCurlyCount = 0;
-        public rightCurlyCount = 0;
-        public nty: NodeType;
-        public name: Identifier;
-        public extendsList: ASTList;
-        public implementsList: ASTList;
-        public members: AST;
-
-        constructor (nty: NodeType, name: Identifier, members: AST, public args: ASTList, extendsList: ASTList,
-            implementsList: ASTList) {
-            super(nty, name, extendsList, implementsList, members);
-
-            this.nty = nty;
-            this.name = name;
-            this.extendsList = extendsList;
-            this.implementsList = implementsList;
-            this.members = members;
+    export class InterfaceDeclaration extends TypeDeclaration {
+        constructor (name: Identifier,
+                     members: ASTList,
+                     extendsList: ASTList,
+                     implementsList: ASTList) {
+            super(NodeType.InterfaceDeclaration, name, extendsList, implementsList, members);
         }
 
-        public isExported() { return hasFlag(this.varFlags, VarFlags.Exported); }
-        public isAmbient() { return hasFlag(this.varFlags, VarFlags.Ambient); }
-
         public typeCheck(typeFlow: TypeFlow) {
-            if (this.nty == NodeType.Interface) {
-                return typeFlow.typeCheckInterface(this);
-            }
-            else {
-                throw new Error("please implement type check for node type" + this.nty);
-            }
+            return typeFlow.typeCheckInterface(this);
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
-            if (this.nty != NodeType.Interface) {
-                throw new Error("please implement emit for node type" + this.nty);
-            }
         }
     }
 
-    export class Statement extends AST {
-
-        constructor (nty: number) {
-            super(nty);
+    export class Statement extends ModuleElement {
+        constructor (nodeType: NodeType) {
+            super(nodeType);
             this.flags |= ASTFlags.IsStatement;
         }
+
         public isLoop() { return false; }
+
+        public isStatementOrExpression() { return true; }
+
         public isCompoundStatement() { return this.isLoop(); }
+
         public typeCheck(typeFlow: TypeFlow) {
             this.type = typeFlow.voidType;
             return this;
@@ -1340,7 +1310,6 @@ module TypeScript {
     }
 
     export class LabeledStatement extends Statement {
-
         constructor (public labels: ASTList, public stmt: AST) {
             super(NodeType.LabeledStatement);
         }
@@ -1374,8 +1343,8 @@ module TypeScript {
     }
 
     export class Block extends Statement {
-
-        constructor (public stmts: ASTList, public isStatementBlock: bool) {
+        constructor (public statements: ASTList,
+                     public isStatementBlock: bool) {
             super(NodeType.Block);
         }
 
@@ -1386,11 +1355,11 @@ module TypeScript {
                 emitter.writeLineToOutput(" {");
                 emitter.indenter.increaseIndent();
             } else {
-                emitter.setInVarBlock(this.stmts.members.length);
+                emitter.setInVarBlock(this.statements.members.length);
             }
             var temp = emitter.setInObjectLiteral(false);
-            if (this.stmts) {
-                emitter.emitJavascriptList(this.stmts, null, TokenID.SColon, true, false, false);
+            if (this.statements) {
+                emitter.emitJavascriptList(this.statements, null, TokenID.Semicolon, true, false, false);
             }
             if (this.isStatementBlock) {
                 emitter.indenter.decreaseIndent();
@@ -1405,8 +1374,8 @@ module TypeScript {
         public addToControlFlow(context: ControlFlowContext) {
             var afterIfNeeded = new BasicBlock();
             context.pushStatement(this, context.current, afterIfNeeded);
-            if (this.stmts) {
-                context.walk(this.stmts, this);
+            if (this.statements) {
+                context.walk(this.statements, this);
             }
             context.walker.options.goChildren = false;
             context.popStatement();
@@ -1418,11 +1387,12 @@ module TypeScript {
 
         public typeCheck(typeFlow: TypeFlow) {
             if (!typeFlow.checker.styleSettings.emptyBlocks) {
-                if ((this.stmts === null) || (this.stmts.members.length == 0)) {
+                if ((this.statements === null) || (this.statements.members.length == 0)) {
                     typeFlow.checker.errorReporter.styleError(this, "empty block");
                 }
             }
-            typeFlow.typeCheck(this.stmts);
+
+            typeFlow.typeCheck(this.statements);
             return this;
         }
     }
@@ -1431,11 +1401,9 @@ module TypeScript {
         public target: string = null;
         public hasExplicitTarget() { return (this.target); }
         public resolvedTarget: Statement = null;
-        public nty;
 
-        constructor (nty: number) {
-            super(nty);
-            this.nty = nty;
+        constructor (nodeType: NodeType) {
+            super(nodeType);
         }
 
         public setResolvedTarget(parser: Parser, stmt: Statement): bool {
@@ -1443,7 +1411,7 @@ module TypeScript {
                 this.resolvedTarget = stmt;
                 return true;
             }
-            if (this.nty === NodeType.Continue) {
+            if (this.nodeType === NodeType.Continue) {
                 parser.reportParseError("continue statement applies only to loops");
                 return false;
             }
@@ -1461,13 +1429,13 @@ module TypeScript {
 
         public addToControlFlow(context: ControlFlowContext): void {
             super.addToControlFlow(context);
-            context.unconditionalBranch(this.resolvedTarget, (this.nty == NodeType.Continue));
+            context.unconditionalBranch(this.resolvedTarget, (this.nodeType == NodeType.Continue));
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            if (this.nty == NodeType.Break) {
+            if (this.nodeType == NodeType.Break) {
                 emitter.writeToOutput("break");
             }
             else {
@@ -1483,7 +1451,6 @@ module TypeScript {
     }
 
     export class WhileStatement extends Statement {
-        public isStatementOrExpression() { return true; }
         public body: AST = null;
 
         constructor (public cond: AST) {
@@ -1497,7 +1464,7 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
             emitter.writeToOutput("while(");
-            emitter.emitJavascript(this.cond, TokenID.WHILE, false);
+            emitter.emitJavascript(this.cond, TokenID.While, false);
             emitter.writeToOutput(")");
             emitter.emitJavascriptStatements(this.body, false, false);
             emitter.setInObjectLiteral(temp);
@@ -1539,7 +1506,6 @@ module TypeScript {
     }
 
     export class DoWhileStatement extends Statement {
-        public isStatementOrExpression() { return true; }
         public body: AST = null;
         public whileAST: AST = null;
         public cond: AST = null;
@@ -1559,7 +1525,7 @@ module TypeScript {
             emitter.writeToOutput("while");
             emitter.recordSourceMappingEnd(this.whileAST);
             emitter.writeToOutput('(');
-            emitter.emitJavascript(this.cond, TokenID.RParen, false);
+            emitter.emitJavascript(this.cond, TokenID.CloseParen, false);
             emitter.writeToOutput(")");
             emitter.setInObjectLiteral(temp);
             emitter.recordSourceMappingEnd(this);
@@ -1598,7 +1564,6 @@ module TypeScript {
     }
 
     export class IfStatement extends Statement {
-        public isStatementOrExpression() { return true; }
         public thenBod: AST;
         public elseBod: AST = null;
         public statement: ASTSpan = new ASTSpan();
@@ -1615,7 +1580,7 @@ module TypeScript {
             var temp = emitter.setInObjectLiteral(false);
             emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("if(");
-            emitter.emitJavascript(this.cond, TokenID.IF, false);
+            emitter.emitJavascript(this.cond, TokenID.If, false);
             emitter.writeToOutput(")");
             emitter.recordSourceMappingEnd(this.statement);
             emitter.emitJavascriptStatements(this.thenBod, true, false);
@@ -1686,15 +1651,13 @@ module TypeScript {
             super(NodeType.Return);
         }
 
-        public isStatementOrExpression() { return true; }
-        
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
             if (this.returnExpression) {
                 emitter.writeToOutput("return ");
-                emitter.emitJavascript(this.returnExpression, TokenID.SColon, false);
+                emitter.emitJavascript(this.returnExpression, TokenID.Semicolon, false);
             }
             else {
                 emitter.writeToOutput("return;");
@@ -1729,7 +1692,7 @@ module TypeScript {
         }
         public statement: ASTSpan = new ASTSpan();
         public body: AST;
-        public isStatementOrExpression() { return true; }
+
         public isLoop() { return true; }
 
         public isFiltered() {
@@ -1748,8 +1711,8 @@ module TypeScript {
                 if (singleItem !== null) {
                     if (singleItem.nodeType == NodeType.Block) {
                         var block = <Block>singleItem;
-                        if ((block.stmts !== null) && (block.stmts.members.length == 1)) {
-                            singleItem = block.stmts.members[0];
+                        if ((block.statements !== null) && (block.statements.members.length == 1)) {
+                            singleItem = block.statements.members[0];
                         }
                     }
                     if (singleItem.nodeType == NodeType.If) {
@@ -1763,7 +1726,7 @@ module TypeScript {
                                     ((<Identifier>binex.operand1).actualText == (<Identifier>this.obj).actualText)) {
                                     var prop = <Identifier>binex.operand2;
                                     if (prop.actualText == "hasOwnProperty") {
-                                        var args = (<CallExpression>cond).args;
+                                        var args = (<CallExpression>cond).arguments;
                                         if ((args !== null) && (args.members.length == 1)) {
                                             var arg = args.members[0];
                                             if ((arg.nodeType == NodeType.Name) &&
@@ -1789,9 +1752,9 @@ module TypeScript {
             var temp = emitter.setInObjectLiteral(false);
             emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("for(");
-            emitter.emitJavascript(this.lval, TokenID.FOR, false);
+            emitter.emitJavascript(this.lval, TokenID.For, false);
             emitter.writeToOutput(" in ");
-            emitter.emitJavascript(this.obj, TokenID.FOR, false);
+            emitter.emitJavascript(this.obj, TokenID.For, false);
             emitter.writeToOutput(")");
             emitter.recordSourceMappingEnd(this.statement);
             emitter.emitJavascriptStatements(this.body, true, false);
@@ -1848,7 +1811,6 @@ module TypeScript {
             super(NodeType.For);
         }
 
-        public isStatementOrExpression() { return true; }
         public isLoop() { return true; }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
@@ -1858,17 +1820,17 @@ module TypeScript {
             emitter.writeToOutput("for(");
             if (this.init) {
                 if (this.init.nodeType != NodeType.List) {
-                    emitter.emitJavascript(this.init, TokenID.FOR, false);
+                    emitter.emitJavascript(this.init, TokenID.For, false);
                 }
                 else {
                     emitter.setInVarBlock((<ASTList>this.init).members.length); 
-                    emitter.emitJavascriptList(this.init, null, TokenID.FOR, false, false, false);
+                    emitter.emitJavascriptList(this.init, null, TokenID.For, false, false, false);
                 }
             }
             emitter.writeToOutput("; ");
-            emitter.emitJavascript(this.cond, TokenID.FOR, false);
+            emitter.emitJavascript(this.cond, TokenID.For, false);
             emitter.writeToOutput("; ");
-            emitter.emitJavascript(this.incr, TokenID.FOR, false);
+            emitter.emitJavascript(this.incr, TokenID.For, false);
             emitter.writeToOutput(")");
             emitter.emitJavascriptStatements(this.body, true, false);
             emitter.setInObjectLiteral(temp);
@@ -1940,8 +1902,9 @@ module TypeScript {
 
     export class WithStatement extends Statement {
         public body: AST;
-        public isStatementOrExpression() { return true; }
+
         public isCompoundStatement() { return true; }
+
         public withSym: WithSymbol = null;
 
         constructor (public expr: AST) {
@@ -1953,7 +1916,7 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput("with (");
             if (this.expr) {
-                emitter.emitJavascript(this.expr, TokenID.WITH, false);
+                emitter.emitJavascript(this.expr, TokenID.With, false);
             }
 
             emitter.writeToOutput(")");
@@ -1976,7 +1939,6 @@ module TypeScript {
             super(NodeType.Switch);
         }
 
-        public isStatementOrExpression() { return true; }
         public isCompoundStatement() { return true; }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
@@ -1985,7 +1947,7 @@ module TypeScript {
             var temp = emitter.setInObjectLiteral(false);
             emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("switch(");
-            emitter.emitJavascript(this.val, TokenID.ID, false);
+            emitter.emitJavascript(this.val, TokenID.Identifier, false);
             emitter.writeToOutput(")"); 
             emitter.recordSourceMappingEnd(this.statement);
             emitter.writeLineToOutput(" {");
@@ -1993,7 +1955,7 @@ module TypeScript {
             var casesLen = this.caseList.members.length;
             for (var i = 0; i < casesLen; i++) {
                 var caseExpr = this.caseList.members[i];
-                emitter.emitJavascript(caseExpr, TokenID.CASE, true);
+                emitter.emitJavascript(caseExpr, TokenID.Case, true);
                 emitter.writeLineToOutput("");
             }
             emitter.indenter.decreaseIndent();
@@ -2057,7 +2019,7 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
             if (this.expr) {
                 emitter.writeToOutput("case ");
-                emitter.emitJavascript(this.expr, TokenID.ID, false);
+                emitter.emitJavascript(this.expr, TokenID.Identifier, false);
             }
             else {
                 emitter.writeToOutput("default");
@@ -2101,7 +2063,6 @@ module TypeScript {
     }
 
     export class TypeReference extends AST {
-
         constructor (public term: AST, public arrayCount: number) {
             super(NodeType.TypeRef);
         }
@@ -2135,18 +2096,16 @@ module TypeScript {
     }
 
     export class TryFinally extends Statement {
-
         constructor (public tryNode: AST, public finallyNode: Finally) {
             super(NodeType.TryFinally);
         }
 
-        public isStatementOrExpression() { return true; }
         public isCompoundStatement() { return true; }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.recordSourceMappingStart(this);
-            emitter.emitJavascript(this.tryNode, TokenID.TRY, false);
-            emitter.emitJavascript(this.finallyNode, TokenID.FINALLY, false);
+            emitter.emitJavascript(this.tryNode, TokenID.Try, false);
+            emitter.emitJavascript(this.finallyNode, TokenID.Finally, false);
             emitter.recordSourceMappingEnd(this);
         }
 
@@ -2182,19 +2141,17 @@ module TypeScript {
     }
 
     export class TryCatch extends Statement {
-
         constructor (public tryNode: Try, public catchNode: Catch) {
             super(NodeType.TryCatch);
         }
 
-        public isStatementOrExpression() { return true; }
         public isCompoundStatement() { return true; }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
-            emitter.emitJavascript(this.tryNode, TokenID.TRY, false);
-            emitter.emitJavascript(this.catchNode, TokenID.CATCH, false);
+            emitter.emitJavascript(this.tryNode, TokenID.Try, false);
+            emitter.emitJavascript(this.catchNode, TokenID.Catch, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -2234,17 +2191,15 @@ module TypeScript {
     }
 
     export class Try extends Statement {
-
         constructor (public body: AST) {
             super(NodeType.Try);
         }
 
-        public isStatementOrExpression() { return true; }
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput("try ");
-            emitter.emitJavascript(this.body, TokenID.TRY, false);
+            emitter.emitJavascript(this.body, TokenID.Try, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -2264,7 +2219,6 @@ module TypeScript {
     }
 
     export class Catch extends Statement {
-
         constructor (public param: VarDecl, public body: AST) {
             super(NodeType.Catch);
             if (this.param) {
@@ -2280,10 +2234,10 @@ module TypeScript {
             emitter.writeToOutput(" ");
             emitter.recordSourceMappingStart(this.statement);
             emitter.writeToOutput("catch (");
-            emitter.emitJavascript(this.param, TokenID.LParen, false);
+            emitter.emitJavascript(this.param, TokenID.OpenParen, false);
             emitter.writeToOutput(")");
             emitter.recordSourceMappingEnd(this.statement);
-            emitter.emitJavascript(this.body, TokenID.CATCH, false);
+            emitter.emitJavascript(this.body, TokenID.Catch, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -2341,9 +2295,7 @@ module TypeScript {
         }
     }
 
-
     export class Finally extends Statement {
-
         constructor (public body: AST) {
             super(NodeType.Finally);
         }
@@ -2352,7 +2304,7 @@ module TypeScript {
             emitter.emitParensAndCommentsInPlace(this, true);
             emitter.recordSourceMappingStart(this);
             emitter.writeToOutput("finally");
-            emitter.emitJavascript(this.body, TokenID.FINALLY, false);
+            emitter.emitJavascript(this.body, TokenID.Finally, false);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }

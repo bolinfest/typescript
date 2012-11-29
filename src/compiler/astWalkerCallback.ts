@@ -98,10 +98,10 @@ module TypeScript.AstWalkerWithDetailCallback {
         CatchCallback? (pre, ast: AST): bool;
         ListCallback? (pre, astList: ASTList): bool;
         ScriptCallback? (pre, script: Script): bool;
-        ClassCallback? (pre, ast: AST): bool;
-        InterfaceCallback? (pre, interfaceDecl: TypeDecl): bool;
-        ModuleCallback? (pre, moduleDecl: ModuleDecl): bool;
-        ImportCallback? (pre, ast: AST): bool;
+        ClassDeclarationCallback? (pre, ast: AST): bool;
+        InterfaceDeclarationCallback? (pre, interfaceDecl: InterfaceDeclaration): bool;
+        ModuleDeclarationCallback? (pre, moduleDecl: ModuleDeclaration): bool;
+        ImportDeclarationCallback? (pre, ast: AST): bool;
         WithCallback? (pre, ast: AST): bool;
         LabelCallback? (pre, labelAST: AST): bool;
         LabeledStatementCallback? (pre, ast: AST): bool;
@@ -121,7 +121,8 @@ module TypeScript.AstWalkerWithDetailCallback {
         }
 
         var post = (cur: AST, parent: AST) => {
-            AstWalkerCallback(false, cur, callback);            return cur;
+            AstWalkerCallback(false, cur, callback);
+            return cur;
         }
 
         var walker = TypeScript.getAstWalkerFactory().getWalker(pre, post);

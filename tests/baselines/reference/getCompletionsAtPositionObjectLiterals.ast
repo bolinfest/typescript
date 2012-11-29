@@ -37,10 +37,10 @@
   "ast":
     {"nodeType": "Script", "minChar": 0, "limChar": 520, "startLine": 1, "startCol": 1, "endLine": 34, "endCol": 1, "children": [
       {"nodeType": "List", "minChar": 0, "limChar": 520, "startLine": 1, "startCol": 1, "endLine": 34, "endCol": 1, "children": [
-        {"nodeType": "Module", "minChar": 0, "limChar": 518, "startLine": 1, "startCol": 1, "endLine": 33, "endCol": 2, "children": [
+        {"nodeType": "ModuleDeclaration", "minChar": 0, "limChar": 518, "startLine": 1, "startCol": 1, "endLine": 33, "endCol": 2, "children": [
           {"nodeType": "Name", "minChar": 7, "limChar": 21, "startLine": 1, "startCol": 8, "endLine": 1, "endCol": 22, "children": []},
           {"nodeType": "List", "minChar": 22, "limChar": 518, "startLine": 1, "startCol": 23, "endLine": 33, "endCol": 2, "children": [
-            {"nodeType": "Interface", "minChar": 29, "limChar": 97, "startLine": 2, "startCol": 5, "endLine": 5, "endCol": 6, "children": [
+            {"nodeType": "InterfaceDeclaration", "minChar": 29, "limChar": 97, "startLine": 2, "startCol": 5, "endLine": 5, "endCol": 6, "children": [
               {"nodeType": "Name", "minChar": 39, "limChar": 46, "startLine": 2, "startCol": 15, "endLine": 2, "endCol": 22, "children": []},
               {"nodeType": "List", "minChar": 47, "limChar": 97, "startLine": 2, "startCol": 23, "endLine": 5, "endCol": 6, "children": [
                 {"nodeType": "VarDecl", "minChar": 58, "limChar": 69, "startLine": 3, "startCol": 9, "endLine": 3, "endCol": 20, "children": [

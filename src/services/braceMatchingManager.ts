@@ -15,9 +15,9 @@ module Services {
         // If the position is not on any range, return "null".
         public getBraceMatchingAtPosition(position: number): TextRange[]{
             var openBraces = "{([";
-            var openBracesTokens = [TypeScript.TokenID.LCurly, TypeScript.TokenID.LParen, TypeScript.TokenID.LBrack];
+            var openBracesTokens = [TypeScript.TokenID.OpenBrace, TypeScript.TokenID.OpenParen, TypeScript.TokenID.OpenBracket];
             var closeBraces = "})]";
-            var closeBracesTokens = [TypeScript.TokenID.RCurly, TypeScript.TokenID.RParen, TypeScript.TokenID.RBrack];
+            var closeBracesTokens = [TypeScript.TokenID.CloseBrace, TypeScript.TokenID.CloseParen, TypeScript.TokenID.CloseBracket];
 
             var result = new TextRange[]();
             var character = this.scriptSyntaxAST.getSourceText().getText(position, position + 1);

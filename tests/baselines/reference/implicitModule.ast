@@ -7,10 +7,10 @@
   "ast":
     {"nodeType": "Script", "minChar": 0, "limChar": 39, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 1, "children": [
       {"nodeType": "List", "minChar": 0, "limChar": 39, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 1, "children": [
-        {"nodeType": "Module", "minChar": 0, "limChar": 39, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 1, "children": [
+        {"nodeType": "ModuleDeclaration", "minChar": 0, "limChar": 39, "startLine": 1, "startCol": 1, "endLine": 4, "endCol": 1, "children": [
           {"nodeType": "Name", "minChar": -1, "limChar": -1, "startLine": -1, "startCol": -1, "endLine": -1, "endCol": -1, "children": []},
           {"nodeType": "List", "minChar": 8, "limChar": 39, "startLine": 1, "startCol": 9, "endLine": 4, "endCol": 1, "children": [
-            {"nodeType": "Class", "minChar": 8, "limChar": 37, "startLine": 1, "startCol": 9, "endLine": 3, "endCol": 10, "children": [
+            {"nodeType": "ClassDeclaration", "minChar": 8, "limChar": 37, "startLine": 1, "startCol": 9, "endLine": 3, "endCol": 10, "children": [
               {"nodeType": "Name", "minChar": 21, "limChar": 22, "startLine": 1, "startCol": 22, "endLine": 1, "endCol": 23, "children": []},
               {"nodeType": "List", "minChar": 23, "limChar": 37, "startLine": 1, "startCol": 24, "endLine": 3, "endCol": 10, "children": []}]}]}]}]}]}
 }
