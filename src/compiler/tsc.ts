@@ -10,8 +10,15 @@ class CommandLineHost implements TypeScript.IResolverHost {
     public pathMap: any = {};
     public resolvedPaths: any = {};
 
+    constructor(public compilationSettings: TypeScript.CompilationSettings) { 
+    }
+
+    public getPathIdentifier(path: string) { 
+        return this.compilationSettings.useCaseSensitiveFileResolution ? path : path.toLocaleUpperCase();
+    }
+
     public isResolved(path: string) {
-        return this.resolvedPaths[this.pathMap[path]] != undefined;
+        return this.resolvedPaths[this.getPathIdentifier(this.pathMap[path])] != undefined;
     }
 
     public resolveCompilationEnvironment(preEnv: TypeScript.CompilationEnvironment,
@@ -30,9 +37,10 @@ class CommandLineHost implements TypeScript.IResolverHost {
         var resolutionDispatcher: TypeScript.IResolutionDispatcher = {
             postResolutionError: postResolutionError,
             postResolution: (path: string, code: TypeScript.ISourceText) => {
-                if (!this.resolvedPaths[path]) {
+                var pathId = this.getPathIdentifier(path);
+                if (!this.resolvedPaths[pathId]) {
                     resolvedEnv.code.push(<TypeScript.SourceUnit>code);
-                    this.resolvedPaths[path] = true;
+                    this.resolvedPaths[pathId] = true;
                 }
             }
         };
@@ -40,9 +48,10 @@ class CommandLineHost implements TypeScript.IResolverHost {
         var residentResolutionDispatcher: TypeScript.IResolutionDispatcher = {
             postResolutionError: postResolutionError,
             postResolution: (path: string, code: TypeScript.ISourceText) => {
-                if (!this.resolvedPaths[path]) {
+                var pathId = this.getPathIdentifier(path);
+                if (!this.resolvedPaths[pathId]) {
                     resolvedEnv.residentCode.push(<TypeScript.SourceUnit>code);
-                    this.resolvedPaths[path] = true;
+                    this.resolvedPaths[pathId] = true;
                 }
             }
         };
@@ -66,12 +75,13 @@ class CommandLineHost implements TypeScript.IResolverHost {
 class BatchCompiler {
     public compilationSettings: TypeScript.CompilationSettings;
     public compilationEnvironment: TypeScript.CompilationEnvironment;
-    public commandLineHost = new CommandLineHost();
+    public commandLineHost: CommandLineHost;
     public resolvedEnvironment: TypeScript.CompilationEnvironment = null;
 
     constructor (public ioHost: IIO) { 
         this.compilationSettings = new TypeScript.CompilationSettings();
         this.compilationEnvironment = new TypeScript.CompilationEnvironment(this.compilationSettings, this.ioHost);
+        this.commandLineHost = new CommandLineHost(this.compilationSettings);
     }
 
     public resolve() {
