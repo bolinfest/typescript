@@ -38,7 +38,9 @@ module TypeScript {
         }
     }
 
-    export function instanceFilterStop(s: Symbol) => s.isInstanceProperty();
+    export function instanceFilterStop(s: Symbol) => {
+        return s.isInstanceProperty();
+    }
 
     export class ScopeSearchFilter {
 
