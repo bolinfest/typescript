@@ -38,7 +38,7 @@ module TypeScript {
         }
     }
 
-    export function instanceFilterStop(s: Symbol) => {
+    export function instanceFilterStop(s: Symbol) {
         return s.isInstanceProperty();
     }
 
