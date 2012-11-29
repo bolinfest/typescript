@@ -34,15 +34,16 @@ module TypeScript {
             for (; i < len; i++) {
                 var baseIsClass = type.extendsList[i].isClassInstance();
                 if (type.extendsList[i] != this.checker.anyType) {
+                    var baseRef = type.extendsTypeLinks[i].ast;
                     if (derivedIsClass) {
                         if (!baseIsClass) {
-                            this.checker.errorReporter.simpleErrorFromSym(type.symbol,
-                                                                     "A export class may only extend other classes, " + type.extendsList[i].symbol.fullName() + " is an interface.");
+                            this.checker.errorReporter.simpleError(baseRef,
+                                                                     "A class may only extend other classes, " + type.extendsList[i].symbol.fullName() + " is not a class.");
                         }
                     }
                     else {
                         if (baseIsClass) {
-                            this.checker.errorReporter.simpleErrorFromSym(type.symbol,
+                            this.checker.errorReporter.simpleError(baseRef,
                                                                      "An interface may only extend other interfaces, " + type.extendsList[i].symbol.fullName() + " is a class.");
                         }
                     }
@@ -54,9 +55,10 @@ module TypeScript {
             if (type.implementsList) {
                 for (i = 0, len = type.implementsList.length; i < len; i++) {
                     var iface = type.implementsList[i];
+                    var baseRef = type.implementsTypeLinks[i].ast;
                     if (iface.isClassInstance()) {
                         if (derivedIsClass) {
-                            this.checker.errorReporter.simpleErrorFromSym(type.symbol,
+                            this.checker.errorReporter.simpleError(baseRef,
                                                                      "A class may only implement an interface; " + iface.symbol.fullName() + " is a class.");
                         }
                     }

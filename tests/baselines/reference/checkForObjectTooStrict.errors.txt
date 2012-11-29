@@ -1,2 +1,2 @@
-0.ts line 22 col 0: A export class may only extend other classes, Object is an interface.
+0.ts line 22 col 18: A class may only extend other classes, Object is not a class.
 0.ts line 24 col 4: Calls to 'super' constructor are not allowed in classes that either inherit directly from 'Object' or have no base class

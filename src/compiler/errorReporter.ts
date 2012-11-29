@@ -93,7 +93,7 @@ module TypeScript {
 
             this.hasErrors = true;
             if (this.parser.errorRecovery && this.parser.errorCallback) {
-                this.parser.errorCallback(symbol.location, 1, message, this.checker.locationInfo.unitIndex);
+                this.parser.errorCallback(symbol.location, symbol.length, message, this.checker.locationInfo.unitIndex);
             }
             else {
                 this.writePrefixFromSym(symbol);

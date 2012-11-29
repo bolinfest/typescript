@@ -1,9 +1,8 @@
-// 0.ts  line 34 col 13: Expected '{'
-// 0.ts  line 35 col 0: Expected '}'
-0.ts line 1 col 20: The name '"interfaceDeclaration5"' does not exist in the current scope
-0.ts line 1 col 20: A module cannot be aliased to a non-module type
-0.ts line 1 col 0: Interface base type must be interface
-0.ts line 1 col 0: Interface base type must be interface
-0.ts line 1 col 0: Interface base type must be interface
-0.ts line 1 col 0: Interface base type must be interface
-0.ts line 1 col 0: Interface base type must be interface
+// 0.ts  line 39 col 13: Expected '{'
+// 0.ts  line 40 col 0: Expected '}'
+0.ts line 34 col 21: An interface may only extend other interfaces, Foo.C1 is a class.
+0.ts line 19 col 4: Type of overridden member 'item' is not subtype of original member defined by type 'I1'
+0.ts line 27 col 6: Class 'C2' declares interface 'I4' but does not implement it: Type 'C2' is missing property 'item' from type 'I4'
+0.ts line 31 col 21: Types may not be derived from module types
+0.ts line 34 col 21: Interface base type must be interface
+0.ts line 36 col 6: Class 'C3' declares interface 'I1' but does not implement it: Type 'C3' is missing property 'item' from type 'I1'

@@ -126,7 +126,7 @@ module TypeScript {
             // shared global state is resident
             this.setCollectionMode(TypeCheckCollectionMode.Resident);
 
-            this.wildElm = new TypeSymbol("_element", 0, -1, new Type());
+            this.wildElm = new TypeSymbol("_element", -1, 0, -1, new Type());
             this.importedGlobalsTypeTable.addPublicMember(this.wildElm.name, this.wildElm);
 
             this.mod = new ModuleType(dualGlobalScopedEnclosedTypes, dualGlobalScopedAmbientEnclosedTypes);
@@ -134,7 +134,7 @@ module TypeScript {
             this.mod.ambientMembers = dualGlobalScopedAmbientMembers;
             this.mod.containedScope = this.globalScope;
 
-            this.gloMod = new TypeSymbol(globalId, 0, -1, this.mod);
+            this.gloMod = new TypeSymbol(globalId, -1, 0, -1, this.mod);
             this.mod.members.addPublicMember(this.gloMod.name, this.gloMod);
 
             this.defineGlobalValue("undefined", this.undefinedType);
@@ -144,7 +144,7 @@ module TypeScript {
         public enterPrimitive(flags: number, name: string) {
             var primitive = new Type();
             primitive.primitiveTypeClass = flags;
-            var symbol = new TypeSymbol(name, 0, -1, primitive);
+            var symbol = new TypeSymbol(name, -1, name.length, -1, primitive);
             symbol.typeCheckStatus = TypeCheckStatus.Finished;
             primitive.symbol = symbol;
             this.importedGlobals.enter(null, null, symbol, this.errorReporter, true, true, true);
@@ -535,7 +535,8 @@ module TypeScript {
             if (groupType.symbol == null) {
                 groupType.symbol =
                     new TypeSymbol(funcName ? funcName : this.anon,
-                                    funcDecl.minChar, this.locationInfo.unitIndex,
+                                    funcDecl.minChar, funcDecl.limChar - funcDecl.minChar,
+                                    this.locationInfo.unitIndex,
                                     groupType);
                 if (!useOverloadGroupSym) {
                     groupType.symbol.declAST = funcDecl;
@@ -1059,6 +1060,7 @@ module TypeScript {
                                 var interfaceType = new Type();
                                 var interfaceSymbol = new TypeSymbol((<Identifier>interfaceDecl.name).text,
                                                                    ast.minChar,
+                                                                   ast.limChar - ast.minChar,
                                                                    this.locationInfo.unitIndex,
                                                                    interfaceType);
                                 interfaceType.symbol = interfaceSymbol;

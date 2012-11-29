@@ -121,6 +121,18 @@ module FourSlash {
             }
         }
 
+        public verifyNumberOfErrorsInCurrentFile(expected: number) {
+            var fileIndex = this.getScriptIndex(this.activeFile);
+            var errors = this.realLangSvc.getErrors(9999);
+            errors = errors.filter( (error: TypeScript.ErrorEntry) => error.unitIndex == fileIndex);
+            var actual = errors.length;
+            if (actual != expected) {
+                var errorMsg = "Actual number of errors (" + actual + ") does not match expected number (" + expected + ")";
+                IO.printLine(errorMsg);
+                throw new Error(errorMsg);
+            }
+        }
+
         public verifyMemberListContains(symbol: string) {
             var members = this.getMemberListAtCaret();
             this.assertItemInList(members.entries.map(c => c.name), symbol);

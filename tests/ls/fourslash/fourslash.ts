@@ -144,6 +144,10 @@ module FourSlashInterface {
         public errorExistsBetweenMarkers(startMarker: string, endMarker: string) {
             FourSlash.currentTestState.verifyErrorExistsBetweenMarkers(startMarker, endMarker);
         }
+
+        public numberOfErrorsInCurrentFile(expected: number) {
+            FourSlash.currentTestState.verifyNumberOfErrorsInCurrentFile(expected);
+        }
     }
     
     export class edit {

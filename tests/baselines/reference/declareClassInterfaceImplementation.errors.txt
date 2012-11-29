@@ -1,1 +1,1 @@
-0.ts line 8 col 0: Class 'Buffer' declares interface 'IBuffer' but does not implement it: Index signatures of types 'Buffer' and 'IBuffer' are incompatible
+0.ts line 8 col 14: Class 'Buffer' declares interface 'IBuffer' but does not implement it: Index signatures of types 'Buffer' and 'IBuffer' are incompatible

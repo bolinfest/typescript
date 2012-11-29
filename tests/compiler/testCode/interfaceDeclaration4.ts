@@ -1,4 +1,9 @@
-import Foo = module("interfaceDeclaration5")
+// Import this module when test harness supports external modules. Also remove the internal module below.
+// import Foo = module("interfaceDeclaration5")
+module Foo {
+    export interface I1 { item: string; }
+    export class C1 { }
+}
 
 class C1 implements Foo.I1 {
 	public item:string;

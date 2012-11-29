@@ -2613,6 +2613,7 @@ module TypeScript {
         public typeCheckBases(type: Type) {
             var seenInterface = false;
             var bases = type.extendsList;
+            var baseLinks = type.extendsTypeLinks;
             if (bases) {
                 var len = bases.length;
 
@@ -2622,6 +2623,7 @@ module TypeScript {
 
                 for (var i = 0; i < len; i++) {
                     var base = bases[i];
+                    var baseRef = baseLinks[i].ast;
 
                     // make sure it's the global 'Object' and not some alias
                     var baseTypeOfObject = base.symbol && base.symbol.name == "Object" && base.symbol.container == this.checker.gloMod;
@@ -2635,16 +2637,16 @@ module TypeScript {
                             this.currentScript.requiresInherits = true;
                         }
                         if (!(type.isClassInstance())) {
-                            this.checker.errorReporter.simpleErrorFromSym(base.symbol, "Interface base type must be interface");
+                            this.checker.errorReporter.simpleError(baseRef, "Interface base type must be interface");
                         }
                         else {
                             if (seenInterface) {
-                                this.checker.errorReporter.simpleErrorFromSym(base.symbol, "Class may not follow interface as base type");
+                                this.checker.errorReporter.simpleError(baseRef, "Class may not follow interface as base type");
                             }
                         }
                     }
                     else if (base.isModuleType()) {
-                        this.checker.errorReporter.simpleErrorFromSym(base.symbol, "Types may not be derived from module types");
+                        this.checker.errorReporter.simpleError(baseRef, "Types may not be derived from module types");
                     }
                     else if (base.members) {
                         if (!seenInterface) {
@@ -2653,11 +2655,11 @@ module TypeScript {
                     }
                     else {
                         if (!(type.isClassInstance())) {
-                            this.checker.errorReporter.simpleErrorFromSym(base.symbol,
+                            this.checker.errorReporter.simpleError(baseRef,
                                                                      "Interface base type must be interface");
                         }
                         else {
-                            this.checker.errorReporter.simpleErrorFromSym(base.symbol,
+                            this.checker.errorReporter.simpleError(baseRef,
                                                                      "Base type must be interface or class");
                         }
                         break;
@@ -3103,6 +3105,7 @@ module TypeScript {
 
             var resultType = new Type();
             resultType.symbol = new TypeSymbol(this.checker.anon, objectLit.minChar,
+                                             objectLit.limChar - objectLit.minChar,
                                              this.checker.locationInfo.unitIndex,
                                              resultType);
 

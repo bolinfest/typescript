@@ -166,7 +166,7 @@ module TypeScript {
             }
         }
 
-        typeSymbol = new TypeSymbol(importDecl.id.text, importDecl.minChar,
+        typeSymbol = new TypeSymbol(importDecl.id.text, importDecl.id.minChar, importDecl.limChar - importDecl.minChar,
                                     context.checker.locationInfo.unitIndex, modType);
 
         typeSymbol.aliasLink = importDecl;
@@ -213,7 +213,7 @@ module TypeScript {
                 modType.setHasImplementation();
             }
 
-            typeSymbol = new TypeSymbol(modName, moduleDecl.minChar,
+            typeSymbol = new TypeSymbol(modName, moduleDecl.name.minChar, modName.length,
                                         context.checker.locationInfo.unitIndex, modType);
 
             if (context.scopeChain.moduleDecl) {
@@ -347,7 +347,7 @@ module TypeScript {
             addPrototypeField(classType, classDecl, context);
             instanceType.members = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
             instanceType.ambientMembers = new ScopedMembers(new DualStringHashTable(new StringHashTable(), new StringHashTable()));
-            typeSymbol = new TypeSymbol(className, classDecl.minChar,
+            typeSymbol = new TypeSymbol(className, classDecl.name.minChar, className.length,
                                         context.checker.locationInfo.unitIndex, classType);
             typeSymbol.declAST = classDecl;
             typeSymbol.instanceType = instanceType;
@@ -431,7 +431,8 @@ module TypeScript {
         if (interfaceSymbol == null) {
             interfaceType = new Type();
             interfaceSymbol = new TypeSymbol(interfaceName,
-                                        ast.minChar,
+                                        interfaceDecl.name.minChar,
+                                        interfaceName.length,
                                         context.checker.locationInfo.unitIndex,
                                         interfaceType);
             interfaceType.symbol = interfaceSymbol;

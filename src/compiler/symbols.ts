@@ -56,7 +56,7 @@ module TypeScript {
 
         public passSymbolCreated: number = CompilerDiagnostics.analysisPass;
 
-        constructor(public name: string, public location: number,
+        constructor(public name: string, public location: number, public length: number,
                  public unitIndex: number) { }
 
         public isInstanceProperty() {
@@ -301,8 +301,8 @@ module TypeScript {
     }
 
     export class InferenceSymbol extends Symbol {
-        constructor (name: string, location: number, unitIndex: number) {
-            super(name, location, unitIndex);
+        constructor (name: string, location: number, length: number, unitIndex: number) {
+            super(name, location, length, unitIndex);
         }
 
         public typeCheckStatus = TypeCheckStatus.NotStarted;
@@ -339,8 +339,8 @@ module TypeScript {
         public additionalLocations: number[];
         public expansions: Type[] = []; // For types that may be "split", keep track of the subsequent definitions
 
-        constructor (locName: string, location: number, unitIndex: number, public type: Type) {
-            super(locName, location, unitIndex);
+        constructor (locName: string, location: number, length: number, unitIndex: number, public type: Type) {
+            super(locName, location, length, unitIndex);
             this.prettyName = this.name;
         }
 
@@ -392,7 +392,7 @@ module TypeScript {
             else {
                 var replType = this.type.specializeType(pattern, replacement, checker, false);
                 if (replType != this.type) {
-                    var result = new TypeSymbol(this.name, 0, -1, replType);
+                    var result = new TypeSymbol(this.name, -1, 0, -1, replType);
                     return result;
                 }
                 else {
@@ -443,7 +443,7 @@ module TypeScript {
 
     export class WithSymbol extends TypeSymbol {
         constructor (location: number, unitIndex: number, withType: Type) {
-            super("with", location, unitIndex, withType);
+            super("with", location, 4, unitIndex, withType);
         }
         public isWith() { return true; }
     }
@@ -455,7 +455,7 @@ module TypeScript {
         constructor (name: string, location: number, unitIndex: number, public canWrite: bool,
                       public field: ValueLocation) {
 
-            super(name, location, unitIndex);
+            super(name, location, name.length, unitIndex);
             this.name = name;
             this.location = location;
         }
@@ -504,7 +504,7 @@ module TypeScript {
 
         constructor (name: string, location: number, unitIndex: number,
                           public parameter: ValueLocation) {
-            super(name, location, unitIndex);
+            super(name, location, name.length, unitIndex);
 
             this.name = name;
             this.location = location;
@@ -551,7 +551,7 @@ module TypeScript {
     export class VariableSymbol extends InferenceSymbol {
 
         constructor (name: string, location: number, unitIndex: number, public variable: ValueLocation) {
-            super(name, location, unitIndex);
+            super(name, location, name.length, unitIndex);
         }
         public kind() { return SymbolKind.Variable; }
         public writeable() { return true; }

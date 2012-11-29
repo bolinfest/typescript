@@ -2,7 +2,7 @@
 // 0.ts  line 99 col 10: Property declarations are not permitted within constructor bodies
 // 0.ts  line 105 col 2: Property declarations are not permitted within constructor bodies
 // 0.ts  line 111 col 10: Property declarations are not permitted within constructor bodies
-0.ts line 46 col 0: A export class may only extend other classes, Object is an interface.
+0.ts line 46 col 16: A class may only extend other classes, Object is not a class.
 0.ts line 34 col 1: Constructors for derived classes must contain a call to the class's 'super' constructor
 0.ts line 43 col 1: Calls to 'super' constructor are not allowed in classes that either inherit directly from 'Object' or have no base class
 0.ts line 43 col 17: Keyword 'super' can only be used inside a class instance method

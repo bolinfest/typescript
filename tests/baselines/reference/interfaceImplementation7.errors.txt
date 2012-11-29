@@ -1,3 +1,3 @@
-0.ts line 8 col 0: Class 'C1' declares interface 'i4' but does not implement it: Types of property 'name' of types 'C1' and 'i4' are incompatible:
+0.ts line 8 col 6: Class 'C1' declares interface 'i4' but does not implement it: Types of property 'name' of types 'C1' and 'i4' are incompatible:
 	Call signatures of types '() => string' and '() => { s: string; n: number; }' are incompatible:
 	Type 'String' is missing property 's' from type '{ s: string; n: number; }'

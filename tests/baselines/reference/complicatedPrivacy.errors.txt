@@ -16,4 +16,4 @@
 0.ts line 60 col 31: exported class 'C5' implements private interface 'i'
 0.ts line 64 col 4: exported variable 'v2' has or is using private type 'C1'
 0.ts line 73 col 48: exported class 'c_pr' implements private interface 'i6'
-0.ts line 73 col 8: Class 'c_pr' declares interface 'i6' but does not implement it: Type 'c_pr' is missing property 'f6' from type 'i6'
+0.ts line 73 col 21: Class 'c_pr' declares interface 'i6' but does not implement it: Type 'c_pr' is missing property 'f6' from type 'i6'
