@@ -1,0 +1,17 @@
+// 0.ts  line 2 col 10: Unterminated string constant
+// 0.ts  line 3 col 0: Unterminated string constant
+// 0.ts  line 4 col 10: Unterminated string constant
+// 0.ts  line 5 col 0: Unterminated string constant
+// 0.ts  line 8 col 10: Unterminated string constant
+// 0.ts  line 9 col 0: Unterminated string constant
+// 0.ts  line 10 col 10: Unterminated string constant
+// 0.ts  line 11 col 0: Unterminated string constant
+// 0.ts  line 14 col 10: Unterminated string constant
+// 0.ts  line 15 col 10: Unterminated string constant
+// 0.ts  line 18 col 10: Unterminated string constant
+// 0.ts  line 19 col 10: Unterminated string constant
+// 0.ts  line 22 col 10: Invalid Unicode escape sequence
+// 0.ts  line 23 col 11: Invalid Unicode escape sequence
+// 0.ts  line 24 col 11: Invalid Unicode escape sequence
+// 0.ts  line 25 col 11: Invalid Unicode escape sequence
+// 0.ts  line 28 col 11: Unterminated string constant

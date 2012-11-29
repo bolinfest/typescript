@@ -7,6 +7,5 @@
 ////f./**/
 
 goTo.marker();
-// Bug 16635: Error recovery for unclosed string literals
-// verify.memberListContains('x');
-verify.not.memberListContains('x');
+// Error recovery for unclosed string literals
+verify.memberListContains('x');

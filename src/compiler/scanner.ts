@@ -9,6 +9,8 @@ module TypeScript {
 
     export var LexCodeNWL = 0x0A;
     export var LexCodeRET = 0x0D;
+    export var LexCodeLS =  0x2028;
+    export var LexCodePS =  0x2029;
     export var LexCodeTAB = 0x09;
     export var LexCodeVTAB = 0x0B;
     export var LexCode_e = 'e'.charCodeAt(0);
@@ -252,6 +254,8 @@ module TypeScript {
     export enum LexState {
         Start,
         InMultilineComment,
+        InMultilineSingleQuoteString,
+        InMultilineDoubleQuoteString,
     }
 
     export enum LexMode {
@@ -910,7 +914,7 @@ module TypeScript {
         }
 
         public endsLine(c: number) {
-            return (c == LexCodeNWL) || (c == LexCodeRET) || (c == 0x2028) || (c == 0x2029);
+            return (c == LexCodeNWL) || (c == LexCodeRET) || (c == LexCodeLS) || (c == LexCodePS);
         }
 
         public finishSinglelineComment() {
@@ -1079,6 +1083,16 @@ module TypeScript {
                 else {
                     return staticTokens[TokenID.EndOfFile];
                 }
+            } 
+            else if (this.lexState == LexState.InMultilineSingleQuoteString && this.pos < this.len) { 
+                this.ch = LexCodeAPO;
+                this.lexState = LexState.Start;
+                return this.scanStringConstant();
+            }
+            else if (this.lexState == LexState.InMultilineDoubleQuoteString && this.pos < this.len) { 
+                this.ch = LexCodeQUO;
+                this.lexState = LexState.Start;
+                return this.scanStringConstant();
             }
             this.prevLine = this.line;
             this.prevTok = this.innerScan();
@@ -1092,6 +1106,103 @@ module TypeScript {
             var valid = LexIsUnicodeIdStart(this.ch) || LexIsUnicodeDigit(this.ch);
             this.seenUnicodeChar = this.seenUnicodeChar || valid;
             return valid;
+        }
+
+        private scanStringConstant(): Token {
+            var endCode = this.ch;
+            
+            // Skip the first quote
+            this.nextChar();
+            
+            // Accumulate with escape characters
+            scanStringConstantLoop:
+            for (;;) {
+                switch (this.ch) {
+                    case LexEOF:
+                        // Unexpected end of file
+                        this.reportScannerError("Unterminated string constant");
+                        break scanStringConstantLoop;
+
+                    case LexCodeLS:
+                    case LexCodePS:
+                        this.seenUnicodeChar = true;
+                    // Intentional fall through
+                    case LexCodeRET:
+                    case LexCodeNWL:
+                        this.reportScannerError("Unterminated string constant");
+                        break scanStringConstantLoop;
+
+                    case LexCodeAPO:
+                    case LexCodeQUO:
+                        if (this.ch == endCode) {
+                            // Found string terminator. Skip past end code.
+                            this.nextChar();
+                            break scanStringConstantLoop;
+                        }
+                        break;
+
+                    case LexCodeBSL:
+                        // Consume the current slash
+                        this.nextChar();
+
+                        switch (this.ch) {
+                            case LexCodeAPO:
+                            case LexCodeQUO:
+                            case LexCodeBSL:
+                                // Valid escape sequences
+                                this.nextChar();
+                                continue scanStringConstantLoop;
+
+                            case LexCodeLS:
+                            case LexCodePS:
+                                this.seenUnicodeChar = true;
+                            // Intentional fall through
+                            case LexCodeRET:
+                            case LexCodeNWL:
+                                // Skip /r in a /r/n sequence
+                                if (this.ch == LexCodeRET && this.peekCharAt(this.pos + 1) == LexCodeNWL) {
+                                    this.nextChar();
+                                }
+
+                                // Consume the new line char
+                                this.nextChar();
+
+                                // Record new line
+                                this.newLine();
+
+                                if (this.mode == LexMode.Line) {
+                                    this.lexState = endCode == LexCodeAPO ? LexState.InMultilineSingleQuoteString : LexState.InMultilineDoubleQuoteString;
+                                    break scanStringConstantLoop;
+                                }
+                                break;
+
+                            case LexCode_x:
+                            case LexCode_u:
+                                var expectedHexDigits = this.ch == LexCode_x ? 2 : 4;
+                                this.nextChar();
+                                for (var i = 0; i < expectedHexDigits; i++) {
+                                    if (this.IsHexDigit(this.ch)) {
+                                        this.nextChar();
+                                    }
+                                    else {
+                                        this.reportScannerError("Invalid Unicode escape sequence");
+                                        break;
+                                    }
+                                }
+                                continue scanStringConstantLoop;
+                        }
+                        break;
+                }
+
+                // Record seeing a Unicode char
+                if (this.ch >= LexCodeASCIIChars) {
+                    this.seenUnicodeChar = true;
+                }
+
+                this.nextChar();
+            }
+
+            return new StringLiteralToken(this.src.substring(this.startPos, this.pos));
         }
 
         private scanIdentifier(): Token {
@@ -1114,7 +1225,7 @@ module TypeScript {
                                 this.nextChar();
                             }
                             else {
-                                this.reportScannerError("Invalid unicode escape sequence");
+                                this.reportScannerError("Invalid Unicode escape sequence");
                                 return staticTokens[TokenID.Error];
                             }
                         }
@@ -1134,7 +1245,7 @@ module TypeScript {
                         continue;
                     }
 
-                    this.reportScannerError("Invalid unicode escape sequence");
+                    this.reportScannerError("Invalid Unicode escape sequence");
                     return staticTokens[TokenID.Error];
                 }
                 break;
@@ -1208,7 +1319,7 @@ module TypeScript {
                         this.nextChar();  // Skip the "*"
                         this.finishMultilineComment();
                         var commentText = this.src.substring(commentStartPos, this.pos);
-                        var endsLine = this.peekChar() == LexCodeNWL || this.peekChar() == LexCodeRET;
+                        var endsLine = this.endsLine(this.peekChar());
                         var commentToken = new CommentToken(TokenID.Comment, commentText,/*isBlock*/true, commentStartPos, commentStartLine, endsLine);
                         if (this.scanComments) {
                             // respect scanner contract: when returning a token, startPos is the start position of the token
@@ -1241,30 +1352,7 @@ module TypeScript {
                     return staticTokens[TokenID.Semicolon];
                 }
                 else if ((this.ch == LexCodeAPO) || (this.ch == LexCodeQUO)) {
-                    var endCode = this.ch;
-                    var prevCh = 0;
-                    // accumulate with escape characters; convert to unescaped string
-                    // where necessary
-                    var liveEsc = false;
-                    do {
-                        prevCh = this.ch;
-                        if (liveEsc) {
-                            liveEsc = false;
-                        }
-                        else {
-                            liveEsc = (prevCh == LexCodeBSL);
-                        }
-                        if (prevCh >= LexCodeASCIIChars) {
-                            this.seenUnicodeChar = true;
-                        }
-                        this.nextChar();
-                    } while ((this.ch != LexEOF) && (liveEsc || (this.ch != endCode)));
-
-                    if (this.ch != LexEOF) {
-                        // skip past end code
-                        this.nextChar();
-                    }
-                    return new StringLiteralToken(this.src.substring(this.startPos, this.pos));
+                    return this.scanStringConstant();
                 }
                 else if (autoToken[this.ch]) {
                     var atok = autoToken[this.ch];
@@ -1310,8 +1398,8 @@ module TypeScript {
                     case 0xEF:    // UTF8 SEQUENCE
                     case 0xBB:
                     case 0xBF:
-                    case 0x2028:
-                    case 0x2029:
+                    case LexCodeLS:
+                    case LexCodePS:
                     case LexCodeNWL:
                     case LexCodeRET:
                         if (this.ch == LexCodeNWL) {
