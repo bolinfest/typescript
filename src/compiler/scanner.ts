@@ -630,18 +630,6 @@ module TypeScript {
             return this.lexState;
         }
 
-        public scanLine(line: string, initialState: number): Token[] {
-            this.lexState = initialState;
-            var result: Token[] = new Token[];
-            this.setText(line, LexMode.Line);
-            var t: Token = this.scan();
-            while (t.tokenId != TokenID.EndOfFile) {
-                result[result.length] = t;
-                t = this.scan();
-            }
-            return result;
-        }
-
         public tokenStart() {
             this.startPos = this.pos;
             this.startLine = this.line;
@@ -1070,7 +1058,7 @@ module TypeScript {
             return lookAheadToken;
         }
 
-        public scan(): Token {
+        public scanInLine(): Token {
             if ((this.lexState == LexState.InMultilineComment) && (this.scanComments)) {
                 this.ch = this.peekChar();
                 var commentLine = this.line;
@@ -1094,6 +1082,17 @@ module TypeScript {
                 this.lexState = LexState.Start;
                 return this.scanStringConstant();
             }
+            this.prevLine = this.line;
+            var prevTok = this.innerScan();
+
+            // Ingore white spaces
+            if (prevTok.tokenId != TokenID.Whitespace) {
+                this.prevTok = prevTok;
+            }
+            return prevTok;
+        }
+
+        public scan(): Token {
             this.prevLine = this.line;
             this.prevTok = this.innerScan();
             if (this.saveScan) {

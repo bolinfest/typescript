@@ -8,13 +8,13 @@ describe('Colorization', function() {
     
     /*  Classifications
         
-        0 => "OPERATOR"
+        0 => "PUNCTUATION"
         1 => "KEYWORD"
         2 => "OPERATOR"
         3 => "COMMENT"
         4 => "WHITESPACE"
         5 => "IDENTIFIER"
-        6 => "STRING"
+        6 => "LITERAL"
     */
         
     // Returns classifiers in the following format
@@ -63,4 +63,90 @@ describe('Colorization', function() {
             assert.equal(results[8], "20:6");
         });
     });
+
+    describe("test comment colorization after a divide operator", function() {
+        var results = getClassifiers('1 / 1 // comment');
+
+        it("checks for a literal", function() {
+            assert.equal(results[0], "1:6");
+        });
+
+        it("checks for a whitespace", function() {
+            assert.equal(results[1], "2:4");
+        });
+
+        it("checks for a operator", function() {
+            assert.equal(results[2], "3:2");
+        });
+
+        it("checks for a whitespace", function() {
+            assert.equal(results[3], "4:4");
+        });
+
+        it("checks for a literal", function() {
+            assert.equal(results[4], "5:6");
+        });
+
+        it("checks for a whitespace", function() {
+            assert.equal(results[5], "6:4");
+        });
+
+        it("checks for a comment", function() {
+            assert.equal(results[6], "16:3");
+        });
+    });
+
+    describe("test literal colorization after a divide operator", function() {
+        var results = getClassifiers('1 / 2, 1 / 2');
+
+        it("checks for a literal", function() {
+            assert.equal(results[0], "1:6");
+        });
+
+        it("checks for a whitespace", function() {
+            assert.equal(results[1], "2:4");
+        });
+
+        it("checks for a operator", function() {
+            assert.equal(results[2], "3:2");
+        });
+
+        it("checks for a whitespace", function() {
+            assert.equal(results[3], "4:4");
+        });
+
+        it("checks for a literal", function() {
+            assert.equal(results[4], "5:6");
+        });
+
+        it("checks for a operator", function() {
+            assert.equal(results[5], "6:2");
+        });
+
+        it("checks for a whitespace", function() {
+            assert.equal(results[6], "7:4");
+        });
+
+        it("checks for a literal", function() {
+            assert.equal(results[7], "8:6");
+        });
+
+        it("checks for a whitespace", function() {
+            assert.equal(results[8], "9:4");
+        });
+
+        it("checks for a operator", function() {
+            assert.equal(results[9], "10:2");
+        });
+
+        it("checks for a whitespace", function() {
+            assert.equal(results[10], "11:4");
+        });
+
+        it("checks for a literal", function() {
+            assert.equal(results[11], "12:6");
+        });
+
+    });
+
 });

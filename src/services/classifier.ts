@@ -18,10 +18,10 @@ module Services {
 
             this.scanner.lexState = lexState;
             this.scanner.setText(text, TypeScript.LexMode.Line);
-            var t = this.scanner.scan();
+            var t = this.scanner.scanInLine();
             while (t.tokenId != TypeScript.TokenID.EndOfFile) {
                 result.entries.push(new ClassificationInfo(this.scanner.pos, t.classification()));
-                t = this.scanner.scan();
+                t = this.scanner.scanInLine();
             }
 
             result.finalLexState = this.scanner.lexState;

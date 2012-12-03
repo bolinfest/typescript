@@ -1,2 +1,0 @@
-0.ts line 2 col 20: The name 'TypeScript' does not exist in the current scope
-0.ts line 4 col 17: The name 'TypeScript' does not exist in the current scope
