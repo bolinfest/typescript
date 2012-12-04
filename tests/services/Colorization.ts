@@ -7,16 +7,18 @@ describe('Colorization', function() {
     var classifier = new Services.ClassifierShim(ls.host);
     
     /*  Classifications
-        
-        0 => "PUNCTUATION"
-        1 => "KEYWORD"
-        2 => "OPERATOR"
-        3 => "COMMENT"
-        4 => "WHITESPACE"
-        5 => "IDENTIFIER"
-        6 => "LITERAL"
+
+        0 => "Punctuation",
+        1 => "Keyword",
+        2 => "Operator",
+        3 => "Comment",
+        4 => "Whitespace",
+        5 => "Identifier",
+        6 => "NumberLiteral",
+        7 => "StringLiteral",
+        8 => "RegExpLiteral",
     */
-        
+
     // Returns classifiers in the following format
     // Location:Classification
     function getClassifiers(code:string) {
@@ -59,15 +61,15 @@ describe('Colorization', function() {
             assert.equal(results[2], "5:5");
         });
         
-        it("checks for a string", function() {
-            assert.equal(results[8], "20:6");
+        it("checks for a string literal", function() {
+            assert.equal(results[8], "20:7");
         });
     });
 
     describe("test comment colorization after a divide operator", function() {
         var results = getClassifiers('1 / 1 // comment');
 
-        it("checks for a literal", function() {
+        it("checks for a number literal", function() {
             assert.equal(results[0], "1:6");
         });
 
@@ -83,7 +85,7 @@ describe('Colorization', function() {
             assert.equal(results[3], "4:4");
         });
 
-        it("checks for a literal", function() {
+        it("checks for a number literal", function() {
             assert.equal(results[4], "5:6");
         });
 
@@ -99,7 +101,7 @@ describe('Colorization', function() {
     describe("test literal colorization after a divide operator", function() {
         var results = getClassifiers('1 / 2, 1 / 2');
 
-        it("checks for a literal", function() {
+        it("checks for a number literal", function() {
             assert.equal(results[0], "1:6");
         });
 
@@ -115,7 +117,7 @@ describe('Colorization', function() {
             assert.equal(results[3], "4:4");
         });
 
-        it("checks for a literal", function() {
+        it("checks for a number literal", function() {
             assert.equal(results[4], "5:6");
         });
 
@@ -127,7 +129,7 @@ describe('Colorization', function() {
             assert.equal(results[6], "7:4");
         });
 
-        it("checks for a literal", function() {
+        it("checks for a number literal", function() {
             assert.equal(results[7], "8:6");
         });
 
@@ -143,7 +145,7 @@ describe('Colorization', function() {
             assert.equal(results[10], "11:4");
         });
 
-        it("checks for a literal", function() {
+        it("checks for a number literal", function() {
             assert.equal(results[11], "12:6");
         });
 

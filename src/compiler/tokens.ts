@@ -322,7 +322,9 @@ module TypeScript {
         Comment,
         Whitespace,
         Identifier,
-        Literal,
+        NumberLiteral,
+        StringLiteral,
+        RegExpLiteral,
     }
 
     export class SavedToken {
@@ -373,7 +375,7 @@ module TypeScript {
         }
 
         public classification(): TokenClass {
-            return TokenClass.Literal;
+            return TokenClass.NumberLiteral;
         }
     }
 
@@ -387,7 +389,7 @@ module TypeScript {
         }
 
         public classification(): TokenClass {
-            return TokenClass.Literal;
+            return TokenClass.StringLiteral;
         }
     }
 
@@ -441,7 +443,7 @@ module TypeScript {
         }
 
         public classification(): TokenClass {
-            return TokenClass.Literal;
+            return TokenClass.RegExpLiteral;
         }
     }
 
