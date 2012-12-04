@@ -36,6 +36,8 @@ module Services {
 
         getScriptSyntaxAST(fileName: string): ScriptSyntaxAST;
         getFormattingEditsForRange(fileName: string, minChar: number, limChar: number, options: FormatCodeOptions): TextEdit[];
+        getFormattingEditsForDocument(fileName: string, minChar: number, limChar: number, options: FormatCodeOptions): TextEdit[];
+        getFormattingEditsOnPaste(fileName: string, minChar: number, limChar: number, options: FormatCodeOptions): TextEdit[];
         getFormattingEditsAfterKeystroke(fileName: string, position: number, key: string, options: FormatCodeOptions): TextEdit[];
         getBraceMatchingAtPosition(fileName: string, position: number): TextRange[];
         getSmartIndentAtLineNumber(fileName: string, lineNumber: number, options: Services.EditorOptions): number;
@@ -1561,46 +1563,48 @@ module Services {
         public getFormattingEditsForRange(fileName: string, minChar: number, limChar: number, options: FormatCodeOptions): TextEdit[] {
             this.minimalRefresh();
 
-            if (this.logger.information()) {
-                this.logger.log("options.InsertSpaceAfterCommaDelimiter=" + options.InsertSpaceAfterCommaDelimiter);
-                this.logger.log("options.InsertSpaceAfterSemicolonInForStatements=" + options.InsertSpaceAfterSemicolonInForStatements);
-                this.logger.log("options.InsertSpaceBeforeAndAfterBinaryOperators=" + options.InsertSpaceBeforeAndAfterBinaryOperators);
-                this.logger.log("options.InsertSpaceAfterKeywordsInControlFlowStatements=" + options.InsertSpaceAfterKeywordsInControlFlowStatements);
-                this.logger.log("options.InsertSpaceAfterFunctionKeywordForAnonymousFunctions=" + options.InsertSpaceAfterFunctionKeywordForAnonymousFunctions);
-                this.logger.log("options.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis=" + options.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis);
-                this.logger.log("options.PlaceOpenBraceOnNewLineForFunctions=" + options.PlaceOpenBraceOnNewLineForFunctions);
-                this.logger.log("options.PlaceOpenBraceOnNewLineForControlBlocks=" + options.PlaceOpenBraceOnNewLineForControlBlocks);
-            }
-
             // Ensure rules are initialized and up to date wrt to formatting options
             this.formattingRulesProvider.ensureUptodate(options);
 
             var syntaxAST = this._getScriptSyntaxAST(fileName);
             var manager = new Formatting.FormattingManager(syntaxAST, this.formattingRulesProvider, options);
-            var result = manager.formatRange(minChar, limChar);
+            var result = manager.FormatSelection(minChar, limChar);
+
+           if (this.logger.information()) {
+               this.logFormatCodeOptions(options);
+               this.logEditResults(syntaxAST, result)
+            }
+
+            return result;
+        }
+
+        public getFormattingEditsForDocument(fileName: string, minChar: number, limChar: number, options: FormatCodeOptions): TextEdit[] {
+            this.minimalRefresh();
+            // Ensure rules are initialized and up to date wrt to formatting options
+            this.formattingRulesProvider.ensureUptodate(options);
+
+            var syntaxAST = this._getScriptSyntaxAST(fileName);
+            var manager = new Formatting.FormattingManager(syntaxAST, this.formattingRulesProvider, options);
+            var result = manager.FormatDocument(minChar, limChar);
 
             if (this.logger.information()) {
-                var logSourceText = (text: string) => {
-                    var textLines = text.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n").split(/\n/);
-                    for (var i = 0; i < textLines.length; i++) {
-                        var textLine = textLines[i];
-                        var msg = "line #" + i + "(length=" + textLine.length + "): \"" + textLine + "\"";
-                        this.logger.log(msg);
-                    }
-                }
+               this.logEditResults(syntaxAST, result)
+            }
 
-                var sourceText = syntaxAST.getSourceText();
-                logSourceText(sourceText.getText(0, sourceText.getLength()));
-                for (var i = 0; i < result.length; i++) {
-                    var edit = result[i];
-                    var oldSourceText = sourceText.getText(edit.minChar, edit.limChar);
-                    var text = "edit #" + i + ": minChar=" + edit.minChar + ", " +
-                        "limChar=" + edit.limChar + ", " +
-                        "oldText=\"" + TypeScript.stringToLiteral(oldSourceText, 30) + "\", " +
-                        "textLength=" + edit.text.length + ", " +
-                        "text=\"" + TypeScript.stringToLiteral(edit.text, 30) + "\"";
-                    this.logger.log(text);
-                }
+            return result;
+        }
+
+        public getFormattingEditsOnPaste(fileName: string, minChar: number, limChar: number, options: FormatCodeOptions): TextEdit[] {
+            this.minimalRefresh();
+            // Ensure rules are initialized and up to date wrt to formatting options
+            this.formattingRulesProvider.ensureUptodate(options);
+
+            var syntaxAST = this._getScriptSyntaxAST(fileName);
+            var manager = new Formatting.FormattingManager(syntaxAST, this.formattingRulesProvider, options);
+            var result = manager.FormatOnPaste(minChar, limChar);
+
+            if (this.logger.information()) {
+               this.logEditResults(syntaxAST, result)
             }
 
             return result;
@@ -1621,6 +1625,11 @@ module Services {
                 var syntaxAST = this._getScriptSyntaxAST(fileName);
                 var manager = new Formatting.FormattingManager(syntaxAST, this.formattingRulesProvider, options);
                 return manager.FormatOnSemicolon(position);
+            }
+            else if (key === "\n") {
+                var syntaxAST = this._getScriptSyntaxAST(fileName);
+                var manager = new Formatting.FormattingManager(syntaxAST, this.formattingRulesProvider, options);
+                return manager.FormatOnEnter(position);
             }
             return []; //TextEdit.createInsert(minChar, "/* format was invoked here!*/")];
         }
@@ -2319,5 +2328,45 @@ module Services {
 
             return null;
         }
+
+                private logFormatCodeOptions(options: FormatCodeOptions) {
+            if (this.logger.information()) {
+                this.logger.log("options.InsertSpaceAfterCommaDelimiter=" + options.InsertSpaceAfterCommaDelimiter);
+                this.logger.log("options.InsertSpaceAfterSemicolonInForStatements=" + options.InsertSpaceAfterSemicolonInForStatements);
+                this.logger.log("options.InsertSpaceBeforeAndAfterBinaryOperators=" + options.InsertSpaceBeforeAndAfterBinaryOperators);
+                this.logger.log("options.InsertSpaceAfterKeywordsInControlFlowStatements=" + options.InsertSpaceAfterKeywordsInControlFlowStatements);
+                this.logger.log("options.InsertSpaceAfterFunctionKeywordForAnonymousFunctions=" + options.InsertSpaceAfterFunctionKeywordForAnonymousFunctions);
+                this.logger.log("options.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis=" + options.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis);
+                this.logger.log("options.PlaceOpenBraceOnNewLineForFunctions=" + options.PlaceOpenBraceOnNewLineForFunctions);
+                this.logger.log("options.PlaceOpenBraceOnNewLineForControlBlocks=" + options.PlaceOpenBraceOnNewLineForControlBlocks);
+            }
+        }
+
+        private logEditResults(syntaxAST: ScriptSyntaxAST, result: Services.TextEdit[]) {
+            if (this.logger.information()) {
+                var logSourceText = (text: string) => {
+                    var textLines = text.replace(/^\s+|\s+$/g, "").replace(/\r\n?/g, "\n").split(/\n/);
+                    for (var i = 0; i < textLines.length; i++) {
+                        var textLine = textLines[i];
+                        var msg = "line #" + i + "(length=" + textLine.length + "): \"" + textLine + "\"";
+                        this.logger.log(msg);
+                    }
+                }
+
+                var sourceText = syntaxAST.getSourceText();
+                logSourceText(sourceText.getText(0, sourceText.getLength()));
+                for (var i = 0; i < result.length; i++) {
+                    var edit = result[i];
+                    var oldSourceText = sourceText.getText(edit.minChar, edit.limChar);
+                    var text = "edit #" + i + ": minChar=" + edit.minChar + ", " +
+                        "limChar=" + edit.limChar + ", " +
+                        "oldText=\"" + TypeScript.stringToLiteral(oldSourceText, 30) + "\", " +
+                        "textLength=" + edit.text.length + ", " +
+                        "text=\"" + TypeScript.stringToLiteral(edit.text, 30) + "\"";
+                    this.logger.log(text);
+                }
+            }
+        }
+
     }
 }

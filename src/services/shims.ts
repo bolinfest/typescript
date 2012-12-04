@@ -32,6 +32,8 @@ module Services {
         getCompletionsAtPosition(fileName: string, pos: number, isMemberCompletion: bool);
         getImplementorsAtPosition(fileName: string, pos: number): string;
         getFormattingEditsForRange(fileName: string, minChar: number, limChar: number, options: string/*Services.FormatCodeOptions*/): string;
+        getFormattingEditsForDocument(fileName: string, minChar: number, limChar: number, options: string/*Services.FormatCodeOptions*/): string;
+        getFormattingEditsOnPaste(fileName: string, minChar: number, limChar: number, options: string/*Services.FormatCodeOptions*/): string;
         getFormattingEditsAfterKeystroke(fileName: string, position: number, key: string, options: string/*Services.FormatCodeOptions*/): string;
         getNavigateToItems(searchValue: string): string;
         getScriptLexicalStructure(fileName: string): string;
@@ -372,13 +374,37 @@ module Services {
                 });
         }
 
-        /// FORMAT SELECTION/DOCUMENT
+        /// FORMAT SELECTION
         public getFormattingEditsForRange(fileName: string, minChar: number, limChar: number, options: string/*Services.FormatCodeOptions*/): string {
             return this.forwardJSONCall(
                 "getFormattingEditsForRange(\"" + fileName + "\", " + minChar + ", " + limChar + ")",
                 () => {
                     var localOptions: Services.FormatCodeOptions = JSON.parse(options);
                     var edits = this.languageService.getFormattingEditsForRange(fileName, minChar, limChar, localOptions);
+                    var result = _resultToJSON(edits);
+                    return result;
+                });
+        }
+
+        /// FORMAT DOCUMENT
+        public getFormattingEditsForDocument(fileName: string, minChar: number, limChar: number, options: string/*Services.FormatCodeOptions*/): string {
+            return this.forwardJSONCall(
+                "getFormattingEditsForDocument(\"" + fileName + "\", " + minChar + ", " + limChar + ")",
+                () => {
+                    var localOptions: Services.FormatCodeOptions = JSON.parse(options);
+                    var edits = this.languageService.getFormattingEditsForDocument(fileName, minChar, limChar, localOptions);
+                    var result = _resultToJSON(edits);
+                    return result;
+                });
+        }
+
+        /// FORMAT ON PASTE
+        public getFormattingEditsOnPaste(fileName: string, minChar: number, limChar: number, options: string/*Services.FormatCodeOptions*/): string {
+            return this.forwardJSONCall(
+                "getFormattingEditsOnPaste(\"" + fileName + "\", " + minChar + ", " + limChar + ")",
+                () => {
+                    var localOptions: Services.FormatCodeOptions = JSON.parse(options);
+                    var edits = this.languageService.getFormattingEditsOnPaste(fileName, minChar, limChar, localOptions);
                     var result = _resultToJSON(edits);
                     return result;
                 });

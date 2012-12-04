@@ -5,12 +5,12 @@
 
 module Formatting {
     export interface IFormatter {
-        FormatDocument(): void;
-        FormatSelection(span: SnapshotSpan): void;
-        FormatOnPaste(selection: SnapshotSpan): void;
+        FormatDocument(minChar: number, limChar: number): Services.TextEdit[];
+        FormatSelection(minChar: number, limChar: number): Services.TextEdit[];
+        FormatOnPaste(minChar: number, limChar: number): Services.TextEdit[];
         FormatOnSemicolon(caretPosition: number): Services.TextEdit[];
         FormatOnClosingCurlyBrace(caretPosition: number): Services.TextEdit[];
-        FormatOnEnter(caret: SnapshotPoint): void;
+        FormatOnEnter(caret: number): Services.TextEdit[];
         //ISmartIndent GetSmartIndenter();
     }
 }

@@ -20,21 +20,19 @@ module Formatting {
             this.tokenKindMap = AuthorTokenKindMap.getInstance();
         }
 
-        public formatRange(minChar: number, limChar: number): Services.TextEdit[]{
+        public FormatSelection(minChar: number, limChar: number): Services.TextEdit[]{
             var span = new SnapshotSpan(this.snapshot, Span.FromBounds(minChar, limChar));
             return this.Format(span, FormattingRequestKind.FormatSelection, (a, b) => true);
         }
 
-        public FormatDocument(): void {
+        public FormatDocument(minChar: number, limChar: number): Services.TextEdit[]{
+            var span = new SnapshotSpan(this.snapshot, Span.FromBounds(minChar, limChar));
+            return this.Format(span, FormattingRequestKind.FormatDocument, (a, b) => true);
         }
-
-        public FormatSelection(span: SnapshotSpan): void {
-        }
-
-        public FormatOnPaste(selection: SnapshotSpan): void {
-        }
-
-        public FormatOnEnter(caret: SnapshotPoint): void {
+        
+        public FormatOnPaste(minChar: number, limChar: number): Services.TextEdit[]{
+            var span = new SnapshotSpan(this.snapshot, Span.FromBounds(minChar, limChar));
+            return this.Format(span, FormattingRequestKind.FormatOnPaste, (a, b) => true);
         }
 
 /*
@@ -384,29 +382,26 @@ module Formatting {
             //CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfBrowserTools_LanguageServiceFormattingEnd);
         }
 
-        //public void FormatOnEnter(SnapshotPoint caret)
-        //{
-        //    CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfBrowserTools_LanguageServiceFormattingBegin);
+        public FormatOnEnter(caretPosition: number): Services.TextEdit[] {
+           // CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfBrowserTools_LanguageServiceFormattingBegin);
 
-        //    Stopwatch timeInTask = new Stopwatch();
+            //Stopwatch timeInTask = new Stopwatch();
+            var lineNumber = this.snapshot.GetLineNumberFromPosition(caretPosition);
+            
+            if (lineNumber > 0) {
+                // Format both lines
+                var prevLine = this.snapshot.GetLineFromLineNumber(lineNumber - 1);
+                var currentLine = this.snapshot.GetLineFromLineNumber(lineNumber);
+                var span = new SnapshotSpan(this.snapshot, Span.FromBounds(prevLine.startPosition(), currentLine.endPosition()));
 
-        //    int lineNumber = this.textView.TextSnapshot.GetLineNumberFromPosition(caret);
+                if (span != null) {
+                    return this.Format(span, FormattingRequestKind.FormatOnEnter, null);
+                }
+            }
 
-        //    if (lineNumber > 0)
-        //    {
-        //        // Format both lines
-        //        ITextSnapshotLine prevLine = this.textView.TextSnapshot.GetLineFromLineNumber(lineNumber - 1);
-        //        ITextSnapshotLine currentLine = this.textView.TextSnapshot.GetLineFromLineNumber(lineNumber);
-        //        SnapshotSpan? mappedSnapshotSpan = this.MapDownSnapshotSpan(new SnapshotSpan(prevLine.Start, currentLine.End));
-
-        //        if (mappedSnapshotSpan.HasValue)
-        //        {
-        //            this.Format(mappedSnapshotSpan.Value, FormattingRequestKind.FormatOnEnter, prerequisiteTokenTest: null, timeInTask: timeInTask);
-        //        }
-        //    }
-
-        //    CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfBrowserTools_LanguageServiceFormattingEnd);
-        //}
+            //CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfBrowserTools_LanguageServiceFormattingEnd);
+            return [];
+        }
 
         private FindMatchingBlockSpan(bracePoint: SnapshotPoint, formattingRequestKind: FormattingRequestKind): SnapshotSpan {
             var authoringProxy = this.fileAuthoringProxy;
@@ -448,17 +443,17 @@ module Formatting {
             }
         }
 
-        //    private SnapshotSpan? MapDownSnapshotSpan(SnapshotSpan snapshotSpan)
-        //    {
-        //        IList<SnapshotSpan> mappedSpans = this.textView.BufferGraph.MapDownToBuffer(snapshotSpan, SpanTrackingMode.EdgeInclusive, this.textBuffer);
-        //        if (mappedSpans == null || mappedSpans.Count == 0)
-        //            return null;
+        private MapDownSnapshotSpan(snapshotSpan: SnapshotSpan): SnapshotSpan {
+            //IList<SnapshotSpan> mappedSpans = this.textView.BufferGraph.MapDownToBuffer(snapshotSpan, SpanTrackingMode.EdgeInclusive, this.textBuffer);
+            //if (mappedSpans == null || mappedSpans.Count == 0)
+            //    return null;
 
-        //        SnapshotSpan firstSpan = mappedSpans.First();
-        //        SnapshotSpan lastSpan = mappedSpans.Last();
+            //SnapshotSpan firstSpan = mappedSpans.First();
+            //SnapshotSpan lastSpan = mappedSpans.Last();
 
-        //        return new SnapshotSpan(firstSpan.Start, lastSpan.End);
-        //    }
+            //return new SnapshotSpan(firstSpan.Start, lastSpan.End);
+            return snapshotSpan;
+        }
 
         private MapDownSnapshotPoint(snapshotPoint: SnapshotPoint): SnapshotPoint {
             //TypeScript: No support for projection buffers
