@@ -3668,7 +3668,6 @@ module TypeScript {
 
         public postTypeCheckCallArgs(callEx: CallExpression) {
 
-
             var acceptedTargetType = false;
             var i = 0;
 
@@ -3681,21 +3680,35 @@ module TypeScript {
                 if (sig && callEx.arguments.members.length >= sig.nonOptionalParameterCount) {
                     acceptedTargetType = true;
                     var targetType: Type = null;
-                    var len = callEx.arguments.members.length < sig.parameters.length ? callEx.arguments.members.length : sig.parameters.length;
+                    var nonVarArgFormalParamLength = sig.hasVariableArgList ? sig.parameters.length - 1 : sig.parameters.length;
+                    var nonVarArgActualParamLength = callEx.arguments.members.length < nonVarArgFormalParamLength ? callEx.arguments.members.length : nonVarArgFormalParamLength
 
-                    for (i = 0; i < len; i++) {
+                    for (i = 0; i < nonVarArgActualParamLength; i++) {
                         targetType = sig.parameters[i].getType();
-                        if (targetType && sig.hasVariableArgList && i >= sig.nonOptionalParameterCount - 1) {
-                            targetType = targetType.elementType;
-                        }
                         switch (callEx.arguments.members[i].nodeType) {
                             case NodeType.FuncDecl:
                             case NodeType.ObjectLit:
                             case NodeType.ArrayLit:
                                 this.checker.typeCheckWithContextualType(targetType, this.checker.inProvisionalTypecheckMode(), !sig.parameters[i].declAST.isParenthesized, callEx.arguments.members[i]);
                                 break;
-                            default:
-                                continue;
+                        }
+                    }
+
+                    if (sig.hasVariableArgList) {
+                        var varArgParamIndex = sig.nonOptionalParameterCount - 1;
+                        targetType = sig.parameters[varArgParamIndex].getType();
+                        if (targetType) {
+                            targetType = targetType.elementType;
+                        }
+                        var isParenthesized = !sig.parameters[varArgParamIndex].declAST.isParenthesized;
+                        for (i = nonVarArgActualParamLength; i < callEx.arguments.members.length; i++) {
+                            switch (callEx.arguments.members[i].nodeType) {
+                                case NodeType.FuncDecl:
+                                case NodeType.ObjectLit:
+                                case NodeType.ArrayLit:
+                                    this.checker.typeCheckWithContextualType(targetType, this.checker.inProvisionalTypecheckMode(), isParenthesized, callEx.arguments.members[i]);
+                                    break;
+                            }
                         }
                     }
                 }
