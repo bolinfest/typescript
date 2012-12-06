@@ -362,7 +362,7 @@ module TypeScript {
             this.recordSourceMappingEnd(classDecl);
         }
 
-        public emitInnerFunction(funcDecl: FuncDecl, printName: bool, isProtoMember: bool,
+        public emitInnerFunction(funcDecl: FuncDecl, printName: bool, isMember: bool,
             bases: ASTList, hasSelfRef: bool, classDecl: TypeDeclaration) {
             /// REVIEW: The code below causes functions to get pushed to a newline in cases where they shouldn't
             /// such as: 
@@ -551,61 +551,11 @@ module TypeScript {
 
             // The extra call is to make sure the caller's funcDecl end is recorded, since caller wont be able to record it
             this.recordSourceMappingEnd(funcDecl);
-            if (!isProtoMember &&
+            if (!isMember &&
                 //funcDecl.name != null &&
                 !hasFlag(funcDecl.fncFlags, FncFlags.IsFunctionExpression) &&
                 (hasFlag(funcDecl.fncFlags, FncFlags.Definition) || funcDecl.isConstructor)) {
                 this.writeLineToOutput("");
-            }
-
-            // Emit the function's statics
-            if (funcDecl.hasStaticDeclarations()) {
-                this.writeLineToOutput("");
-                this.emitIndent();
-                var funcName = funcDecl.getNameText();
-                this.writeLineToOutput("(function (" + funcName + ") {");
-                this.indenter.increaseIndent();
-
-                var len = 0;
-                var i = 0;
-
-                // Emit the function's local inner static functions
-                len = funcDecl.innerStaticFuncs.length;
-                for (i = 0; i < len; i++) {
-                    var innerFunc = funcDecl.innerStaticFuncs[i];
-                    if (innerFunc.isOverload) {
-                        continue;
-                    }
-                    this.emitIndent();
-                    if (innerFunc.isAccessor()) {
-                        this.emitPropertyAccessor(innerFunc, funcDecl.name.actualText, false);
-                    }
-                    else {
-                        this.recordSourceMappingStart(innerFunc);
-                        this.writeToOutput(funcName + "." + innerFunc.name.actualText + " = ");
-                        this.emitInnerFunction(innerFunc, (innerFunc.name && !innerFunc.name.isMissing()), false,
-                                         null, innerFunc.hasSelfReference(), null);
-                    }
-                }
-
-                // Emit the function's local static values
-                if (funcDecl.statics) {
-                    this.recordSourceMappingStart(funcDecl.statics);
-                    len = funcDecl.statics.members.length;
-                    for (i = 0; i < len; i++) {
-                        this.emitIndent();
-                        this.writeToOutput(funcName);
-                        this.emitJavascript(funcDecl.statics.members[i], TokenID.Tilde, false);
-                        this.writeLineToOutput("");
-                    }
-                    this.recordSourceMappingEnd(funcDecl.statics);
-                }
-
-                this.indenter.decreaseIndent();
-                this.emitIndent();
-                var printProto = isProtoMember && this.thisClassNode;
-                var prefix = printProto ? this.thisClassNode.name.actualText + ".prototype." : "";
-                this.writeLineToOutput("})(" + prefix + funcName + ");")
             }
             this.emitParensAndCommentsInPlace(funcDecl, false);
             /// TODO: See the other part of this at the beginning of function
@@ -1136,7 +1086,7 @@ module TypeScript {
             this.emitParensAndCommentsInPlace(name, false);
         }
 
-        public emitJavascriptStatements(stmts: AST, emitEmptyBod: bool, newlineAfterBlock: bool) {
+        public emitJavascriptStatements(stmts: AST, emitEmptyBod: bool) {
             if (stmts) {
                 if (stmts.nodeType != NodeType.Block) {
                     var hasContents = (stmts && (stmts.nodeType != NodeType.List || ((<ASTList>stmts).members.length > 0)));
@@ -1168,7 +1118,7 @@ module TypeScript {
             }
         }
 
-        public emitBareJavascriptStatements(stmts: AST, emitClassPropertiesAfterSuperCall: bool) {
+        public emitBareJavascriptStatements(stmts: AST, emitClassPropertiesAfterSuperCall: bool = false) {
             // just the statements without enclosing curly braces
             if (stmts.nodeType != NodeType.Block) {
                 if (stmts.nodeType == NodeType.List) {
@@ -1254,7 +1204,7 @@ module TypeScript {
             SourceMapper.EmitSourceMapping(this.allSourceMappers);
         }
 
-        public emitJavascriptList(ast: AST, delimiter: string, tokenId: TokenID, startLine: bool, onlyStatics: bool, emitClassPropertiesAfterSuperCall: bool, emitPrologue? = false, requiresInherit?: bool) {
+        public emitJavascriptList(ast: AST, delimiter: string, tokenId: TokenID, startLine: bool, onlyStatics: bool, emitClassPropertiesAfterSuperCall: bool = false, emitPrologue? = false, requiresInherit?: bool) {
             if (ast == null) {
                 return;
             }
@@ -1617,8 +1567,9 @@ module TypeScript {
                                     this.emitIndent();
                                     this.recordSourceMappingStart(fn)
                                     this.writeToOutput(classDecl.name.actualText + "." + fn.name.actualText + " = ");
-                                    this.emitInnerFunction(fn, (fn.name && !fn.name.isMissing()), false,
+                                    this.emitInnerFunction(fn, (fn.name && !fn.name.isMissing()), true,
                                             null, fn.hasSelfReference(), null);
+                                    this.writeLineToOutput(";");
                                 }
                             }
                         }

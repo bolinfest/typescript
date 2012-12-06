@@ -3,9 +3,14 @@ function R1(index: number) {
         case 0:
         case 1:
         case 2:
-            return 'a';
-		case 3:
+            var a = 'a';
+            return a;
+        case 3:
+        case 4: {
+            return 'b';
+        }
+		case 5:
 		default:
-			return 'b';
+			return 'c';
     }
 }

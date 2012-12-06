@@ -117,7 +117,7 @@ var Statics = (function () {
     Statics.bar = "";
     Statics.baz = function baz() {
         return "";
-    }
+    };
     return Statics;
 })();
 var stat = new Statics();

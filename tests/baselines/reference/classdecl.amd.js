@@ -28,7 +28,7 @@ var a = (function () {
         configurable: true
     });
     a.d2 = function d2() {
-    }
+    };
     Object.defineProperty(a, "p3", {
         get: function () {
             return "string";

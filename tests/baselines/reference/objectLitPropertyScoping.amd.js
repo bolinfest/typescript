@@ -11,4 +11,4 @@ function makePoint(x, y) {
         }
     };
 }
-; ;
+;

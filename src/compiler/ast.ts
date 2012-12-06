@@ -95,14 +95,11 @@ module TypeScript {
                     emitter.recordSourceMappingEnd(this);
                     break;
                 case NodeType.EndCode:
-                    break;
                 case NodeType.Error:
                 case NodeType.EmptyExpr:
                     break;
-
                 case NodeType.Empty:
                     emitter.recordSourceMappingStart(this);
-                    emitter.writeToOutput("; ");
                     emitter.recordSourceMappingEnd(this);
                     break;
                 case NodeType.Void:
@@ -1096,8 +1093,6 @@ module TypeScript {
         }
 
         public isSignature() { return (this.fncFlags & FncFlags.Signature) != FncFlags.None; }
-
-        public hasStaticDeclarations() { return (!this.isConstructor && (this.statics.members.length > 0 || this.innerStaticFuncs.length > 0)); }
     }
 
     export class LocationInfo {
@@ -1466,7 +1461,7 @@ module TypeScript {
             emitter.writeToOutput("while(");
             emitter.emitJavascript(this.cond, TokenID.While, false);
             emitter.writeToOutput(")");
-            emitter.emitJavascriptStatements(this.body, false, false);
+            emitter.emitJavascriptStatements(this.body, false);
             emitter.setInObjectLiteral(temp);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
@@ -1520,7 +1515,7 @@ module TypeScript {
             emitter.recordSourceMappingStart(this);
             var temp = emitter.setInObjectLiteral(false);
             emitter.writeToOutput("do");
-            emitter.emitJavascriptStatements(this.body, true, false);
+            emitter.emitJavascriptStatements(this.body, true);
             emitter.recordSourceMappingStart(this.whileAST);
             emitter.writeToOutput("while");
             emitter.recordSourceMappingEnd(this.whileAST);
@@ -1529,6 +1524,7 @@ module TypeScript {
             emitter.writeToOutput(")");
             emitter.setInObjectLiteral(temp);
             emitter.recordSourceMappingEnd(this);
+            emitter.writeToOutput(";");
             emitter.emitParensAndCommentsInPlace(this, false);
         }
 
@@ -1583,10 +1579,10 @@ module TypeScript {
             emitter.emitJavascript(this.cond, TokenID.If, false);
             emitter.writeToOutput(")");
             emitter.recordSourceMappingEnd(this.statement);
-            emitter.emitJavascriptStatements(this.thenBod, true, false);
+            emitter.emitJavascriptStatements(this.thenBod, true);
             if (this.elseBod) {
                 emitter.writeToOutput(" else");
-                emitter.emitJavascriptStatements(this.elseBod, true, true);
+                emitter.emitJavascriptStatements(this.elseBod, true);
             }
             emitter.setInObjectLiteral(temp);
             emitter.recordSourceMappingEnd(this);
@@ -1757,7 +1753,7 @@ module TypeScript {
             emitter.emitJavascript(this.obj, TokenID.For, false);
             emitter.writeToOutput(")");
             emitter.recordSourceMappingEnd(this.statement);
-            emitter.emitJavascriptStatements(this.body, true, false);
+            emitter.emitJavascriptStatements(this.body, true);
             emitter.setInObjectLiteral(temp);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
@@ -1832,7 +1828,7 @@ module TypeScript {
             emitter.writeToOutput("; ");
             emitter.emitJavascript(this.incr, TokenID.For, false);
             emitter.writeToOutput(")");
-            emitter.emitJavascriptStatements(this.body, true, false);
+            emitter.emitJavascriptStatements(this.body, true);
             emitter.setInObjectLiteral(temp);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
@@ -1920,7 +1916,7 @@ module TypeScript {
             }
 
             emitter.writeToOutput(")");
-            emitter.emitJavascriptStatements(this.body, true, false);
+            emitter.emitJavascriptStatements(this.body, true);
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }
@@ -1956,7 +1952,6 @@ module TypeScript {
             for (var i = 0; i < casesLen; i++) {
                 var caseExpr = this.caseList.members[i];
                 emitter.emitJavascript(caseExpr, TokenID.Case, true);
-                emitter.writeLineToOutput("");
             }
             emitter.indenter.decreaseIndent();
             emitter.emitIndent();
@@ -2025,7 +2020,17 @@ module TypeScript {
                 emitter.writeToOutput("default");
             }
             emitter.writeToOutput(":");
-            emitter.emitJavascriptStatements(this.body, false, false);
+            if (this.body.members.length == 1 && this.body.members[0].nodeType == NodeType.Block) {
+                // The case statement was written with curly braces, so emit it with the appropriate formatting
+                emitter.emitJavascriptStatements(this.body, false);
+            }
+            else {
+                // No curly braces. Format in the expected way
+                emitter.writeLineToOutput("");
+                emitter.indenter.increaseIndent();
+                emitter.emitBareJavascriptStatements(this.body);
+                emitter.indenter.decreaseIndent();
+            }
             emitter.recordSourceMappingEnd(this);
             emitter.emitParensAndCommentsInPlace(this, false);
         }

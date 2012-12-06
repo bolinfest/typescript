@@ -18,19 +18,19 @@ var Vector = (function () {
     }
     Vector.norm = function norm(v) {
         return null;
-    }
+    };
     Vector.minus = function minus(v1, v2) {
         return null;
-    }
+    };
     Vector.times = function times(v1, v2) {
         return null;
-    }
+    };
     Vector.cross = function cross(v1, v2) {
         return null;
-    }
+    };
     Vector.dot = function dot(v1, v2) {
         return null;
-    }
+    };
     return Vector;
 })();
 var Camera = (function () {

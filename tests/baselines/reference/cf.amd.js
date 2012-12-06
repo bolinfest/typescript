@@ -19,7 +19,7 @@ for(var i = 0; i < 19; i++) {
                 break;
                 x = 12;
             }
-        }while(y < 41)
+        }while(y < 41);
         y++;
     }
     while(y > 2) {

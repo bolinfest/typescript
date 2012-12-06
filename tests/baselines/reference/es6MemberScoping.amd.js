@@ -11,6 +11,6 @@ var Foo2 = (function () {
     function Foo2() { }
     Foo2.Foo2 = function Foo2() {
         return 0;
-    }
+    };
     return Foo2;
 })();

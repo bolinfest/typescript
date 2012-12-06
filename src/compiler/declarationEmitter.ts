@@ -384,12 +384,7 @@ module TypeScript {
                 this.emitTypeSignature(funcDecl.signature.returnType.type);
             }
 
-            if (funcDecl.hasStaticDeclarations()) {
-                this.declFile.WriteLine(" {");
-            }
-            else {
-                this.declFile.WriteLine(";");
-            }
+            this.declFile.WriteLine(";");
 
             return false;
         }

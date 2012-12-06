@@ -1,5 +1,5 @@
 
-; ;
+;
 function foo() {
     return null;
 }

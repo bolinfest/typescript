@@ -11,7 +11,7 @@ var C1 = (function () {
         v = 1;
         this.p = 0;
         C1.s = 1;
-    }
+    };
     return C1;
 })();
 var C2 = (function () {
