@@ -134,6 +134,13 @@ class HarnessBatch
                 }
                 if (code.content != null)
                 {
+                    // Log any bugs associated with the test
+                    var bugs = code.content.match(/\bbug (\d+)/i);
+                    if (bugs)
+                    {
+                        bugs.forEach(bug => assert.bug(bug));
+                    }
+
                     if (_self.compilationSettings.parseOnly)
                     {
                         compiler.parseUnit(code.content, code.path);
@@ -367,7 +374,7 @@ describe("Compiling a project", function (done)
                 {
                     assert.equal(batch.errout.lines.join("\n"), '');
                 });
-            } 
+            }
             else
             {
                 it("compiles without error", function ()
@@ -652,6 +659,19 @@ describe("Compiling a project", function (done)
         , collectedFiles: ['app.ts', 'A.ts', 'B.ts']
         , outputFiles: ['app.js', 'A/A.js', 'A/B.js']
         , skipRun: true
+    })
+
+    tests.push({
+        scenario: "declare Variable Collision"
+        , projectRoot: 'tests/projects/declareVariableCollision'
+        , inputFiles: ['decl.d.ts', 'in1.d.ts', 'in2.d.ts']
+        , collectedFiles: ['decl.d.ts', 'in1.d.ts', 'in2.d.ts']
+        , outputFiles: []
+        , negative: true
+        , skipRun: true
+        , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/declareVariableCollision/in2.d.ts(1,0): Duplicate identifier \'a\''
+                , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/declareVariableCollision/in2.d.ts(1,0): Duplicate identifier \'a\''
+            ]
     })
 
     var amdDriverTemplate = "var requirejs = require('../r.js');\n\n" +
