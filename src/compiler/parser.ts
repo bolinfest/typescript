@@ -700,7 +700,7 @@ module TypeScript {
             if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
                 moduleDecl.modFlags |= ModuleFlags.Ambient;
             }
-            if (this.parsingDeclareFile || svAmbient || hasFlag(modifiers, Modifiers.Exported)) {
+            if (svAmbient || hasFlag(modifiers, Modifiers.Exported)) {
                 moduleDecl.modFlags |= ModuleFlags.Exported;
             }
             if (isDynamicMod) {
