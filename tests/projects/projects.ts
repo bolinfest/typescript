@@ -295,6 +295,11 @@ describe("Compiling a project", function (done)
 
         describe("with " + spec.scenario + " - Node Codegen", function ()
         {
+            if (spec.bug && spec.bug !== '')
+            {
+                assert.bug(spec.bug)
+            }
+
             cleanProjectDirectory(spec.projectRoot);
 
             TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
@@ -316,7 +321,7 @@ describe("Compiling a project", function (done)
                 });
             } else
             {
-                it("compiles without error", function ()
+                it("compiles with errors", function ()
                 {
                     assert.equal(batch.errout.lines.join("\n"), spec.errors.join("\n") + "\n");
                 });
@@ -354,6 +359,11 @@ describe("Compiling a project", function (done)
 
         describe("with " + spec.scenario + " - AMD Codegen", function ()
         {
+            if (spec.bug && spec.bug !== '')
+            {
+                assert.bug(spec.bug)
+            }
+
             cleanProjectDirectory(spec.projectRoot);
 
             TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
@@ -377,7 +387,7 @@ describe("Compiling a project", function (done)
             }
             else
             {
-                it("compiles without error", function ()
+                it("compiles with errors", function ()
                 {
                     assert.equal(batch.errout.lines.join("\n"), spec.errors.join("\n") + "\n");
                 });
@@ -671,8 +681,30 @@ describe("Compiling a project", function (done)
         , skipRun: true
         , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/declareVariableCollision/in2.d.ts(1,0): Duplicate identifier \'a\''
                 , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/declareVariableCollision/in2.d.ts(1,0): Duplicate identifier \'a\''
-            ]
+        ]
     })
+
+    tests.push({
+        scenario: "module merging ordering 1"
+        , projectRoot: 'tests/projects/moduleMergeOrder'
+        , inputFiles: ['a.ts', 'b.ts']
+        , collectedFiles: ['a.ts', 'b.ts']
+        , outputFiles: ['a.js']
+        , skipRun: true
+    });
+
+    tests.push({
+        scenario: "module merging ordering 2"
+        , projectRoot: 'tests/projects/moduleMergeOrder'
+        , inputFiles: ['b.ts', 'a.ts']
+        , collectedFiles: ['a.ts', 'b.ts']
+        , outputFiles: ['a.js']
+        , skipRun: true
+        , negative: true
+        , bug: "524607"
+        , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/projects/moduleMergeOrder/a.ts(11,24): The name \'A\' does not exist in the current scope'
+         ]
+    });
 
     var amdDriverTemplate = "var requirejs = require('../r.js');\n\n" +
 "requirejs.config({\n" +
