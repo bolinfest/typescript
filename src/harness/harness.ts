@@ -1420,91 +1420,122 @@ module Harness {
             IO.deleteFile(reportFilename);
         }
 
+        function prepareBaselineReport(): string {
+            var reportContent = htmlLeader;
+            // Delete the baseline-report.html file if needed
+            if (IO.fileExists(reportFilename)) {
+                reportContent = IO.readFile(reportFilename);
+                reportContent = reportContent.replace(htmlTrailer, '');
+            } else {
+                reportContent = htmlLeader;
+            }
+            return reportContent;
+        }
+        
+        function generateActual(actualFilename: string, generateContent: () => string): string {
+            // Create folders if needed
+            IO.createDirectory(IO.dirName(IO.dirName(actualFilename)));
+            IO.createDirectory(IO.dirName(actualFilename));
+            
+            // Delete the actual file in case it fails
+            if (IO.fileExists(actualFilename)) {
+                IO.deleteFile(actualFilename);
+            }
+            
+            var actual = generateContent();
+
+            if (actual === undefined) {
+                throw new Error('The generated content was "undefined". Return "null" if no baselining is required."');
+            }
+
+            // Store the content in the 'local' folder so we
+            // can accept it later (manually)
+            if (actual !== null) {
+                IO.writeFile(actualFilename, actual);
+            }
+
+            return actual;
+        }
+
+        function compareToBaseline(actual: string, relativeFilename: string, opts: BaselineOptions) {
+            // actual is now either undefined (the generator had an error), null (no file requested),
+            // or some real output of the function
+            if (actual === undefined) {
+                // Nothing to do
+                return;
+            }
+
+            var refFilename = referencePath(relativeFilename);
+
+            if (actual === null) {
+                actual = '<no content>';
+            }
+
+            var expected = '<no content>';
+            if (IO.fileExists(refFilename)) {
+                expected = IO.readFile(refFilename);
+            }
+
+            var lineEndingSensitive = opts && opts.LineEndingSensitive;
+
+            if (!lineEndingSensitive) {
+                expected = expected.replace(/\r\n?/g, '\n')
+                actual = actual.replace(/\r\n?/g, '\n')
+            }
+
+            return { expected: expected, actual: actual };
+        }
+
+        function writeComparison(expected: string, actual: string, relativeFilename: string, actualFilename: string, descriptionForDescribe: string, reportContentSoFar: string) {
+            if (expected != actual) {
+                // Overwrite & issue error
+                var errMsg = 'The baseline file ' + relativeFilename + ' has changed. Please refer to baseline-report.html and ';
+                errMsg += 'either fix the regression (if unintended) or run nmake baseline-accept (if intended).'
+
+                var refFilename = referencePath(relativeFilename);
+
+                // Append diff to the report
+                var diff = new Diff.StringDiff(expected, actual);
+                var header = '<h2>' + descriptionForDescribe + '</h2>';
+                header += '<h4>Left file: ' + actualFilename + '; Right file: ' + refFilename + '</h4>';
+                var trailer = '<hr>';
+                reportContentSoFar = reportContentSoFar + header + '<div class="code">' + diff.mergedHtml + '</div>' + trailer + htmlTrailer;
+                IO.writeFile(reportFilename, reportContentSoFar);
+
+                throw new Error(errMsg);
+            }
+        }
+
         export function runBaseline(
             descriptionForDescribe: string,
             relativeFilename: string,
             generateContent: () => string,
+            runImmediately?=false,
             opts?: BaselineOptions) {
+            
+            var actual = <string>undefined;
+            var actualFilename = localPath(relativeFilename);
 
-            describe(descriptionForDescribe, () => {
-                var reportContent = htmlLeader;
-                // Delete the baseline-report.html file if needed
-                if (IO.fileExists(reportFilename)) {
-                    reportContent = IO.readFile(reportFilename);
-                    reportContent = reportContent.replace(htmlTrailer, '');
-                } else {
-                    reportContent = htmlLeader;
-                }
+            if (runImmediately) {
+                var reportContent = prepareBaselineReport();
+                var actual = generateActual(actualFilename, generateContent);
+                var comparison = compareToBaseline(actual, relativeFilename, opts);
+                writeComparison(comparison.expected, comparison.actual, relativeFilename, actualFilename, descriptionForDescribe, reportContent);
+            } else {
+                describe(descriptionForDescribe, () => {
+                    var reportContent = prepareBaselineReport();
+                    var actual: string;
 
-                var actual = <string>undefined;
-                var actualFilename = localPath(relativeFilename);
+                    it('Can generate the content without error', () => {
+                        actual = generateActual(actualFilename, generateContent);
+                    });
 
-                it('Can generate the content without error', () => {
-                    // Create folders if needed
-                    IO.createDirectory(IO.dirName(IO.dirName(actualFilename)));
-                    IO.createDirectory(IO.dirName(actualFilename));
-
-                    // Delete the actual file in case it fails
-                    if (IO.fileExists(actualFilename)) {
-                        IO.deleteFile(actualFilename);
-                    }
-
-                    actual = generateContent();
-
-                    if (actual === undefined) {
-                        throw new Error('The generated content was "undefined". Return "null" if no baselining is required."');
-                    }
-
-                    // Store the content in the 'local' folder so we
-                    // can accept it later (manually)
-                    if (actual !== null) {
-                        IO.writeFile(localPath(relativeFilename), actual);
-                    }
+                    it('Matches the baseline file', () => {
+                        var comparison = compareToBaseline(actual, relativeFilename, opts);
+                        writeComparison(comparison.expected, comparison.actual, relativeFilename, actualFilename, descriptionForDescribe, reportContent);
+                    });
                 });
-
-                it('Matches the baseline file', () => {
-                    // actual is now either undefined (the generator had an error), null (no file requested),
-                    // or some real output of the function
-                    if (actual === undefined) {
-                        // Nothing to do
-                        return;
-                    }
-
-                    var refFilename = referencePath(relativeFilename);
-
-                    if (actual === null) {
-                        actual = '<no content>';
-                    }
-
-                    var expected = '<no content>';
-                    if (IO.fileExists(refFilename)) {
-                        expected = IO.readFile(refFilename);
-                    }
-
-                    var lineEndingSensitive = opts && opts.LineEndingSensitive;
-
-                    if (!lineEndingSensitive) {
-                        expected = expected.replace(/\r\n?/g, '\n')
-                        actual = actual.replace(/\r\n?/g, '\n')
-                    }
-
-                    if (expected != actual) {
-                        // Overwrite & issue error
-                        var errMsg = 'The baseline file ' + relativeFilename + ' has changed. Please refer to baseline-report.html and ';
-                        errMsg += 'either fix the regression (if unintended) or run nmake baseline-accept (if intended).'
-
-                        // Append diff to the report
-                        var diff = new Diff.StringDiff(expected, actual);
-                        var header = '<h2>' + descriptionForDescribe + '</h2>';
-                        header += '<h4>Left file: ' + actualFilename + '; Right file: ' + refFilename + '</h4>';
-                        var trailer = '<hr>';
-                        reportContent = reportContent + header + '<div class="code">' + diff.mergedHtml + '</div>' + trailer + htmlTrailer;
-                        IO.writeFile(reportFilename, reportContent);
-
-                        throw new Error(errMsg);
-                    }
-                });
-            });
+            }
         }
     }
 

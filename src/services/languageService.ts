@@ -639,7 +639,7 @@ module Services {
                                 containerASTs.push(cur);
                                 break;
 
-                            // These are expressions we cant be used as statements
+                            // These are statements or expressions that cant be used as valid breakpoint statements
                             case TypeScript.NodeType.Script:
                             case TypeScript.NodeType.List:
                             case TypeScript.NodeType.NumberLit:
@@ -652,6 +652,7 @@ module Services {
                             case TypeScript.NodeType.Neg:
                             case TypeScript.NodeType.Not:
                             case TypeScript.NodeType.LogNot:
+                            case TypeScript.NodeType.Block:
                                 break;
 
                             // Type Reference cannot have breakpoint, nor can its children

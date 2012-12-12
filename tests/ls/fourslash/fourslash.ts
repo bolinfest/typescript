@@ -148,6 +148,10 @@ module FourSlashInterface {
         public numberOfErrorsInCurrentFile(expected: number) {
             FourSlash.currentTestState.verifyNumberOfErrorsInCurrentFile(expected);
         }
+
+        public baselineCurrentFileBreakpointLocations() {
+            FourSlash.currentTestState.baselineCurrentFileBreakpointLocations();
+        }
     }
     
     export class edit {
@@ -193,8 +197,12 @@ module FourSlashInterface {
             FourSlash.currentTestState.printMemberListMembers();
         }
 
-        public printCompletionListMembers() { 
+        public printCompletionListMembers() {
             FourSlash.currentTestState.printCompletionListMembers();
+         }
+
+        public printBreakpointLocation(pos: number) {
+            FourSlash.currentTestState.printBreakpointLocation(pos);
         }
     }
 

@@ -46,7 +46,7 @@ module FourSlash {
 
     // List of allowed metadata names
     var fileMetadataNames = ['Filename'];
-    var globalMetadataNames = ['Module', 'Target']; // Note: Neither actually supported at the moment
+    var globalMetadataNames = ['Module', 'Target', 'BaselineFile']; // Note: Only BaselineFile is actually supported at the moment
 
     export var currentTestState: TestState = null;
 
@@ -232,8 +232,36 @@ module FourSlash {
             // Same logic as in getActiveSignatureHelp - this value might be -1 until a parameter value actually gets typed
             var currentParam = help.actual.currentParameter;
             if (currentParam === -1) currentParam = 0;
-            
+
             return currentSig.parameters[currentParam];
+        }
+
+        public getBreakpointStatementLocation(pos: number) {
+            var spanInfo = this.realLangSvc.getBreakpointStatementAtPosition(this.activeFile.name, pos);
+            var resultString = "\n**Pos: " + pos + " SpanInfo: " + JSON2.stringify(spanInfo) + "\n** Statement: ";
+            if (spanInfo !== null) {
+                resultString = resultString + this.activeFile.content.substr(spanInfo.minChar, spanInfo.limChar - spanInfo.minChar);
+            }
+            return resultString;
+        }
+
+        public baselineCurrentFileBreakpointLocations() {
+            Harness.Baseline.runBaseline(
+                "Breakpoint Locations for " + this.activeFile.name,
+                this.testData.globalOptions['BaselineFile'],
+                () => {
+                    var fileLength = this.langSvc.getScriptSourceLength(this.getActiveFileIndex());
+                    var resultString = "";
+                    for (var pos = 0; pos < fileLength; pos++) {
+                        resultString = resultString + this.getBreakpointStatementLocation(pos);
+                    }
+                    return resultString;
+                },
+                true /* run immediately */);
+        }
+
+        public printBreakpointLocation(pos: number) {
+            IO.printLine(this.getBreakpointStatementLocation(pos));
         }
 
         public printCurrentParameterHelp() {
@@ -586,10 +614,7 @@ module FourSlash {
         // Split up the input file by line
         // Note: IE JS engine incorrectly handles consecutive delimiters here when using RegExp split, so
         // we have to string-based splitting instead and try to figure out the delimiting chars
-        var lines = contents.split('\r\n');
-        if (lines.length === 1) {
-            lines = contents.split('\n');
-        }
+        var lines = contents.split('\n');
 
         var markers: MarkerMap = {};
         var markerNames: string[] = [];
@@ -601,6 +626,11 @@ module FourSlash {
 
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
+            var lineLength = line.length;
+            
+            if (lineLength > 0 && line.charAt(lineLength - 1) == '\r') {
+                line = line.substr(0, lineLength - 1);
+            }
 
             if (line.substr(0, 4) === '////') {
                 // Subfile content line
