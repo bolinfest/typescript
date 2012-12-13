@@ -1,4 +1,3 @@
-
 var MyClass = (function () {
     function MyClass() { }
     Object.defineProperty(MyClass.prototype, "Count", {

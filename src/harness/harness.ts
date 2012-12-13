@@ -153,7 +153,7 @@ module Harness {
             }
         }
 
-        export function arrayContainsOnce(arr: any[], filter: (item: any) =>bool) {
+        export function arrayContainsOnce(arr: any[], filter: (item: any) => bool) {
             var foundCount = 0;
 
             for (var i = 0; i < arr.length; i++) {
@@ -169,7 +169,17 @@ module Harness {
 
     // Reads a file under tests
     export function readFile(path: string) {
-        return IO.readFile(Harness.userSpecifiedroot + "tests/" + path);
+
+        if (path.indexOf('tests') < 0) {
+            path = "tests/" + path;
+        }
+
+        var content = IO.readFile(Harness.userSpecifiedroot + path);
+        if (content.length < 1) {
+            throw new Error("failed to read file at: '" + Harness.userSpecifiedroot + path + "'");
+        }
+
+        return content;
     }
 
     // Logger
@@ -206,7 +216,7 @@ module Harness {
     export function registerLogger(logger: ILogger) {
         loggers.push(logger);
     }
-    export function emitLog(field: string, ... params: any[]) {
+    export function emitLog(field: string, ...params: any[]) {
         for (var i = 0; i < loggers.length; i++) {
             if (typeof loggers[i][field] === 'function') {
                 loggers[i][field].apply(loggers[i], params);
@@ -219,7 +229,7 @@ module Harness {
         (e?: Error): void;
     }
     export class Runnable {
-        constructor (public description: string, public block: any) { }
+        constructor(public description: string, public block: any) { }
 
         // The current stack of Runnable objects
         static currentStack: Runnable[] = [];
@@ -308,7 +318,7 @@ module Harness {
         public description: string;
         public block;
 
-        constructor (description: string, block: any) {
+        constructor(description: string, block: any) {
             super(description, block);
             this.description = description;
             this.block = block;
@@ -351,7 +361,7 @@ module Harness {
         public description: string;
         public block;
 
-        constructor (description: string, block: any) {
+        constructor(description: string, block: any) {
             super(description, block);
             this.description = description;
             this.block = block;
@@ -370,7 +380,7 @@ module Harness {
                 if (e) {
                     that.passed = false;
                     that.error = e;
-                    var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: false, bugs: assert.bugIds};
+                    var metadata: IScenarioMetadata = { id: undefined, desc: this.description, pass: false, bugs: assert.bugIds };
                     // Report all bugs affecting this scenario
                     assert.bugIds.forEach(desc => emitLog('bug', metadata, desc));
                     emitLog('scenarioEnd', metadata, e);
@@ -410,7 +420,7 @@ module Harness {
         }
     }
     export class Run extends Runnable {
-        constructor () {
+        constructor() {
             super('Test Run', null);
         }
 
@@ -667,12 +677,12 @@ module Harness {
         var currentUnit = 0;
         var maxUnit = 0;
 
-        export var compiler: TypeScript.TypeScriptCompiler;
+        var compiler: TypeScript.TypeScriptCompiler;
         recreate();
 
         // Types
         export class Type {
-            constructor (public type, public code, public identifier) { }
+            constructor(public type, public code, public identifier) { }
 
             public normalizeToArray(arg: any) {
                 if ((Array.isArray && Array.isArray(arg)) || arg instanceof Array)
@@ -807,14 +817,14 @@ module Harness {
             public string: Type;
             public bool: Type;
 
-            constructor () {
+            constructor() {
                 this.any = this.get('var x : any', 'x');
                 this.number = this.get('var x : number', 'x');
                 this.string = this.get('var x : string', 'x');
                 this.bool = this.get('var x : bool', 'x');
             }
 
-            public get(code: string, identifier: string) {
+            public get (code: string, identifier: string) {
                 var errors = null;
                 compileString(code, 'test.ts', function (compilerResult) {
                     errors = compilerResult.errors;
@@ -887,7 +897,7 @@ module Harness {
             public code: string;
             public errors: CompilerError[];
 
-            constructor (codeLines: string[], errorLines: string[], public scripts: TypeScript.Script[]) {
+            constructor(codeLines: string[], errorLines: string[], public scripts: TypeScript.Script[]) {
                 this.code = codeLines.join("\n")
                 this.errors = [];
 
@@ -914,7 +924,7 @@ module Harness {
 
         // Compiler Error.
         export class CompilerError {
-            constructor (public file: string,
+            constructor(public file: string,
                     public line: number,
                     public column: number,
                     public message: string) { }
@@ -925,6 +935,9 @@ module Harness {
         }
 
         export function recreate() {
+            stdout.reset();
+            stderr.reset();
+
             compiler = new TypeScript.TypeScriptCompiler(stderr);
             compiler.parser.errorRecovery = true;
             compiler.settings.codeGenTarget = TypeScript.CodeGenTarget.ES5;
@@ -936,6 +949,7 @@ module Harness {
             currentUnit = 0;
             maxUnit = 0;
         }
+
         export function reset() {
             stdout.reset();
             stderr.reset();
@@ -975,17 +989,17 @@ module Harness {
             path = switchToForwardSlashes(path);
             compileString(readFile(path), path.match(/[^\/]*$/)[0], callback);
         }
-        export function compileUnits(callback: (res: Compiler.CompilerResult) => void, settingsCallback?: () => void ) {
+        export function compileUnits(callback: (res: Compiler.CompilerResult) => void , settingsCallback?: () => void ) {
             reset();
             if (settingsCallback) {
                 settingsCallback();
-            } 
-            
+            }
+
             compiler.reTypeCheck();
             compiler.emitToOutfile(stdout);
 
             callback(new CompilerResult(stdout.lines, stderr.lines, []));
-            
+
             recreate();
             reset();
         }
@@ -1019,7 +1033,7 @@ module Harness {
         public version: number;
         public editRanges: { length: number; editRange: TypeScript.ScriptEditRange; }[] = [];
 
-        constructor (public name: string, public content: string, public isResident: bool, public maxScriptVersions: number) {
+        constructor(public name: string, public content: string, public isResident: bool, public maxScriptVersions: number) {
             this.version = 1;
         }
 
@@ -1431,17 +1445,17 @@ module Harness {
             }
             return reportContent;
         }
-        
+
         function generateActual(actualFilename: string, generateContent: () => string): string {
             // Create folders if needed
             IO.createDirectory(IO.dirName(IO.dirName(actualFilename)));
             IO.createDirectory(IO.dirName(actualFilename));
-            
+
             // Delete the actual file in case it fails
             if (IO.fileExists(actualFilename)) {
                 IO.deleteFile(actualFilename);
             }
-            
+
             var actual = generateContent();
 
             if (actual === undefined) {
@@ -1510,9 +1524,9 @@ module Harness {
             descriptionForDescribe: string,
             relativeFilename: string,
             generateContent: () => string,
-            runImmediately?=false,
+            runImmediately? = false,
             opts?: BaselineOptions) {
-            
+
             var actual = <string>undefined;
             var actualFilename = localPath(relativeFilename);
 

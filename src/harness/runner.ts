@@ -8,6 +8,12 @@
 ///<reference path='dumpAST-baselining.ts'/>
 ///<reference path='exec.ts'/>
 ///<reference path='diff.ts'/>
+///<reference path='..\..\tests\runners\flags\flagsrunner.ts' />
+///<reference path='..\..\tests\runners\compiler\runner.ts' />
+///<reference path='..\..\tests\runners\compiler\sourcemapRunner.ts' />
+///<reference path='..\..\tests\runners\fourslash\fsrunner.ts' />
+///<reference path='..\..\tests\runners\projects\runner.ts' />
+///<reference path='..\..\tests\runners\unittest\unittestrunner.ts' />
 
 declare var IO: IIO;
 declare var Exec: IExec;
@@ -49,7 +55,7 @@ class ConsoleLogger extends Harness.Logger {
     }
 
     public start() {
-        IO.printLine("Running " + files.length + " files");
+        IO.printLine("Running tests.");
     }
 
     public end() {
@@ -58,7 +64,7 @@ class ConsoleLogger extends Harness.Logger {
         IO.printLine('');
         IO.printLine(this.errorString);
         IO.printLine('');
-        
+
         IO.printLine('Scenarios: ' + (this.passCounts['Scenario'] || 0) + ' passed, ' + (this.failCounts['Scenario'] || 0) + ' failed.');
         IO.printLine('Testcases: ' + (this.passCounts['Testcase'] || 0) + ' passed, ' + (this.failCounts['Testcase'] || 0) + ' failed.');
         IO.printLine('  Blocked: ' + this.blockedScenarioCount);
@@ -112,7 +118,7 @@ class ConsoleLogger extends Harness.Logger {
         } else {
             this.failCounts.Scenario++;
         }
-        
+
         if (scenario.bugs && scenario.bugs.length > 0) {
             this.blockedScenarioCount++;
         }
@@ -128,7 +134,7 @@ class JSONLogger extends Harness.Logger {
     private root = [];
     private scenarioStack: Harness.IScenarioMetadata[] = [];
 
-    constructor (public path: string) {
+    constructor(public path: string) {
         super();
     }
 
@@ -174,75 +180,46 @@ class JSONLogger extends Harness.Logger {
     }
 }
 
-function runTests(tests: string[]) {
-    var outfile = new Harness.Compiler.WriterAggregator()
-      , outerr = new Harness.Compiler.WriterAggregator()
-      , compiler = <TypeScript.TypeScriptCompiler>new TypeScript.TypeScriptCompiler(outerr)
-      , code;
-
-    compiler.parser.errorRecovery = true;
-    compiler.addUnit(Harness.Compiler.libText, "lib.d.ts", true);
+function runTests(tests: RunnerBase[]) {
 
     for (var i = 0; i < tests.length; i++) {
-        try {
-            compiler.addUnit(IO.readFile(tests[i]), tests[i]);
-        } catch (e) {
-            IO.printLine('FATAL ERROR COMPILING TEST: ' + tests[i]);
-            throw e;
-        }
-    }
-
-    compiler.typeCheck();
-    compiler.emitToOutfile(outfile);
-
-    code = outfile.lines.join("\n") + ";";
-
-    if (typeof require !== "undefined") {
-
-        var vm = require('vm');
-        vm.runInNewContext(code,
-            {
-                require: require,
-                TypeScript: TypeScript,
-                process: process,
-                describe: describe,
-                it: it,
-                assert: assert,
-                Harness: Harness,
-                IO: IO,
-                Exec: Exec,
-                Services: Services,
-                DumpAST: DumpAST,
-                Formatting: Formatting,
-                Diff: Diff,
-                FourSlash: FourSlash
-            },
-            "generated_test_code.js"
-        );
-    } else {
-        eval(code);
+        tests[i].runTests();
     }
 
     run();
 }
 
-var files: string[] = [];
+var runners: RunnerBase[] = [];
+
 var opts = new OptionsParser(IO);
 
 opts.option('compiler', {
-    set: function () { files = IO.dir("tests/compiler", /\.ts$/) }
+    set: function () {
+        runners.push(new UnitTestRunner('compiler'));
+        runners.push(new CompilerBaselineRunner());
+        runners.push(new SourcemapRunner());
+        runners.push(new ProjectRunner());
+        runners.push(new FlagsRunner());
+    }
 });
 
 opts.option('ls', {
-    set: function () { files = IO.dir("tests/ls", /\.ts$/) }
+    set: function () {
+        runners.push(new UnitTestRunner('ls'));
+        runners.push(new FourslashRunner());
+    }
 });
 
 opts.option('services', {
-    set: function () { files = IO.dir("tests/services", /\.ts$/) }
+    set: function () {
+        runners.push(new UnitTestRunner('services'));
+    }
 });
 
 opts.option('harness', {
-    set: function () => { files = IO.dir("tests/harness", /\.ts$/) }
+    set: function () => {
+        runners.push(new UnitTestRunner('harness'));
+    }
 });
 
 opts.option('dump', {
@@ -258,19 +235,32 @@ opts.option('root', {
 });
 opts.parse(IO.arguments)
 
-if (opts.unnamed.length === 0 && files.length === 0) {
-    files = IO.dir(Harness.userSpecifiedroot + "tests/compiler", /\.ts$/)
-            .concat(IO.dir(Harness.userSpecifiedroot + "tests/ls", /\.ts$/))
-            .concat(IO.dir(Harness.userSpecifiedroot + "tests/services", /\.ts$/))
-            .concat(IO.dir(Harness.userSpecifiedroot + "tests/projects", /\.ts$/))
-            .concat(IO.dir(Harness.userSpecifiedroot + "tests/flags", /\.ts$/));
+if (opts.unnamed.length === 0 && runners.length === 0) {
+    // compiler
+    runners.push(new UnitTestRunner('compiler'));
+    runners.push(new CompilerBaselineRunner());
+    runners.push(new SourcemapRunner());
+    runners.push(new FlagsRunner());
+    runners.push(new ProjectRunner());
+
+    // language services
+    runners.push(new UnitTestRunner('ls'));
+    runners.push(new FourslashRunner());
+
+    // services
+    runners.push(new UnitTestRunner('services'));
+
+    // samples
+    runners.push(new UnitTestRunner('samples'));
 } else {
     for (var i = 0; i < opts.unnamed.length; i++) {
-        files.push(Harness.userSpecifiedroot + opts.unnamed[i]);
+        var runner = new UnitTestRunner();
+        runner.addTest(Harness.userSpecifiedroot + opts.unnamed[i]);
+        runners.push(runner);
     }
 }
 
 var c = new ConsoleLogger();
 Harness.registerLogger(c);
-runTests(files);
+runTests(runners);
 

@@ -565,7 +565,7 @@ module FourSlash {
             fsCompiler = new TypeScript.TypeScriptCompiler(fsErrors, new TypeScript.NullLogger(), settings);
             
             // TODO: Figure out how to make the reference tags in the input file resolve correctly?
-            var tsFn = './tests/ls/fourslash/fourslash.ts';
+            var tsFn = './tests/cases/fourslash/fourslash.ts';
             fsCompiler.addUnit(IO.readFile(tsFn), tsFn);
             fsCompiler.addUnit(content, mockFilename);
             fsCompiler.addUnit(Harness.Compiler.libText, 'lib.d.ts', true);

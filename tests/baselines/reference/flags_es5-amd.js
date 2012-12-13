@@ -1,4 +1,3 @@
-
 var A = (function () {
     function A() {
     }
