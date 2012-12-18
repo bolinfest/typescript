@@ -26,6 +26,9 @@ Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Globa
 Array Reduce Compatibility Method, 
 Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/Reduce
 
+Array some Compatibility Method, 
+Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/some
+
 String Trim Compatibility Method, 
 Available at https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/Trim
 
@@ -309,4 +312,32 @@ if (!Date.now) {
     (<any>Date).now = function() {
         return +(new Date);
     };
+}
+
+// Compatibility with non ES5 compliant engines
+// Production steps of ECMA-262, Edition 5.1, 15.4.4.17
+if (!Array.prototype.some)
+{
+  Array.prototype.some = function(fun /*, thisp */)
+  {
+    "use strict";
+ 
+    if (this == null)
+      throw new TypeError();
+ 
+    var t = Object(this);
+    var len = t.length >>> 0;
+    if (typeof fun != "function")
+      throw new TypeError();
+ 
+    var thisp = arguments[1];
+    for (var i = 0; i < len; i++)
+    {
+      var idx = i.toString(); // REVIEW: this line is not from the Mozilla page, necessary to avoid our compile time checks against non-string/any types in an in expression
+      if (idx in t && fun.call(thisp, t[i], i, t))
+        return true;
+    }
+ 
+    return false;
+  };
 }

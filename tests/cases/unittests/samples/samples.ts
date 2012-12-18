@@ -74,75 +74,75 @@ describe('Compiling samples', function ()
     });
 
     // jquery
-    it('compiles the jquery sample without error', function ()
-    {
-        var scroller = loadSample("jquery/parallax.ts");
-        var lib = loadSample("jquery/jquery.d.ts");
+    //it('compiles the jquery sample without error', function ()
+    //{
+    //    var scroller = loadSample("jquery/parallax.ts");
+    //    var lib = loadSample("jquery/jquery.d.ts");
 
-        Harness.Compiler.compileUnits(function (result)
-        {
-            assert.equal(result.errors.length, 0);
-        }, function ()
-        {
-            Harness.Compiler.addUnit(lib, false, true);
-            Harness.Compiler.addUnit(scroller);
-        });
-    });
+    //    Harness.Compiler.compileUnits(function (result)
+    //    {
+    //        assert.equal(result.errors.length, 0);
+    //    }, function ()
+    //    {
+    //        Harness.Compiler.addUnit(lib, false, true);
+    //        Harness.Compiler.addUnit(scroller);
+    //    });
+    //});
 
     // mankala
-    it('compiles the mankala sample without error', function ()
-    {
-        var base = loadSample("mankala/Base.ts");
-        var driver = loadSample("mankala/Driver.ts");
-        var features = loadSample("mankala/Features.ts");
-        var game = loadSample("mankala/Game.ts");
-        var geometry = loadSample("mankala/Geometry.ts");
-        var position = loadSample("mankala/Position.ts");
+    //it('compiles the mankala sample without error', function ()
+    //{
+    //    var base = loadSample("mankala/Base.ts");
+    //    var driver = loadSample("mankala/Driver.ts");
+    //    var features = loadSample("mankala/Features.ts");
+    //    var game = loadSample("mankala/Game.ts");
+    //    var geometry = loadSample("mankala/Geometry.ts");
+    //    var position = loadSample("mankala/Position.ts");
 
-        Harness.Compiler.compileUnits(function (result)
-        {
-            assert.arrayLengthIs(result.errors, 0);
-        }, function ()
-        {
-            Harness.Compiler.addUnit(base);
-            Harness.Compiler.addUnit(driver);
-            Harness.Compiler.addUnit(features);
-            Harness.Compiler.addUnit(game);
-            Harness.Compiler.addUnit(geometry);
-            Harness.Compiler.addUnit(position);
-        });
-    });
+    //    Harness.Compiler.compileUnits(function (result)
+    //    {
+    //        assert.arrayLengthIs(result.errors, 0);
+    //    }, function ()
+    //    {
+    //        Harness.Compiler.addUnit(base);
+    //        Harness.Compiler.addUnit(driver);
+    //        Harness.Compiler.addUnit(features);
+    //        Harness.Compiler.addUnit(game);
+    //        Harness.Compiler.addUnit(geometry);
+    //        Harness.Compiler.addUnit(position);
+    //    });
+    //});
 
     // node
-    it('compiles the node sample-1 without error', function ()
-    {
-        var HttpServer = loadSample("node/HttpServer.ts");
-        var lib = loadSample("node/node.d.ts");
+    //it('compiles the node sample-1 without error', function ()
+    //{
+    //    var HttpServer = loadSample("node/HttpServer.ts");
+    //    var lib = loadSample("node/node.d.ts");
 
-        Harness.Compiler.compileUnits(function (result)
-        {
-            assert.equal(result.errors.length, 0);
-        }, function ()
-        {
-            Harness.Compiler.addUnit(lib, false, true);
-            Harness.Compiler.addUnit(HttpServer);
-        });
-    });
+    //    Harness.Compiler.compileUnits(function (result)
+    //    {
+    //        assert.equal(result.errors.length, 0);
+    //    }, function ()
+    //    {
+    //        Harness.Compiler.addUnit(lib, false, true);
+    //        Harness.Compiler.addUnit(HttpServer);
+    //    });
+    //});
 
-    it('compiles the node sample-2 without error', function ()
-    {
-        var HttpServer = loadSample("node/TcpServer.ts");
-        var lib = loadSample("node/node.d.ts");
+    //it('compiles the node sample-2 without error', function ()
+    //{
+    //    var HttpServer = loadSample("node/TcpServer.ts");
+    //    var lib = loadSample("node/node.d.ts");
 
-        Harness.Compiler.compileUnits(function (result)
-        {
-            assert.equal(result.errors.length, 0);
-        }, function ()
-        {
-            Harness.Compiler.addUnit(lib, false, true);
-            Harness.Compiler.addUnit(HttpServer);
-        });
-    });
+    //    Harness.Compiler.compileUnits(function (result)
+    //    {
+    //        assert.equal(result.errors.length, 0);
+    //    }, function ()
+    //    {
+    //        Harness.Compiler.addUnit(lib, false, true);
+    //        Harness.Compiler.addUnit(HttpServer);
+    //    });
+    //});
 
     // raytracer
     it('compiles raytracer without error', function ()
@@ -178,22 +178,22 @@ describe('Compiling samples', function ()
     });
 
     // warship
-    it('compiles warship combat without error', function ()
-    {
-        var src = loadSample("warship/warship.ts");
-        var lib = loadSample("warship/jquery.d.ts");
-        var uilib = loadSample("warship/jqueryui.d.ts");
+    //it('compiles warship combat without error', function ()
+    //{
+    //    var src = loadSample("warship/warship.ts");
+    //    var lib = loadSample("warship/jquery.d.ts");
+    //    var uilib = loadSample("warship/jqueryui.d.ts");
 
-        Harness.Compiler.compileUnits(function (result)
-        {
-            assert.equal(result.errors.length, 0);
-        }, function ()
-        {
-            Harness.Compiler.addUnit(lib);
-            Harness.Compiler.addUnit(uilib);
-            Harness.Compiler.addUnit(src);
-        });
-    });
+    //    Harness.Compiler.compileUnits(function (result)
+    //    {
+    //        assert.equal(result.errors.length, 0);
+    //    }, function ()
+    //    {
+    //        Harness.Compiler.addUnit(lib);
+    //        Harness.Compiler.addUnit(uilib);
+    //        Harness.Compiler.addUnit(src);
+    //    });
+    //});
 
     // win8
 

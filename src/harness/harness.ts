@@ -43,6 +43,7 @@ declare module process {
 module Harness {
     // Settings 
     export var userSpecifiedroot = "";
+    export var userSpecifiedTests = [];
     var global = <any>Function("return this").call(null);
 
     export interface ITestMetadata {
@@ -165,6 +166,18 @@ module Harness {
             if (foundCount !== 1)
                 throw new Error("Expected array to match element only once (instead of " + foundCount + " times)");
         }
+    }
+
+    // Splits the given string on \r\n or on only \n if that fails
+    export function splitContentByNewlines(content: string) {
+        // Split up the input file by line
+        // Note: IE JS engine incorrectly handles consecutive delimiters here when using RegExp split, so
+        // we have to string-based splitting instead and try to figure out the delimiting chars
+        var lines = content.split('\r\n');
+        if (lines.length === 1) {
+            lines = content.split('\n');
+        }
+        return lines;
     }
 
     // Reads a file under tests
@@ -674,8 +687,21 @@ module Harness {
 
         var stdout = new WriterAggregator();
         var stderr = new WriterAggregator();
-        var currentUnit = 0;
-        var maxUnit = 0;
+
+        export function isDeclareFile(filename: string) {
+            return /\.d\.ts$/.test(filename);
+        }
+        
+        export function makeDefaultCompilerForTest(c?: TypeScript.TypeScriptCompiler) {
+            var compiler = c ? c : new TypeScript.TypeScriptCompiler(stderr);
+            compiler.parser.errorRecovery = true;
+            compiler.settings.codeGenTarget = TypeScript.CodeGenTarget.ES5;
+            compiler.settings.controlFlow = true;
+            compiler.settings.controlFlowUseDef = true;
+            TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
+            compiler.addUnit(Harness.Compiler.libText, "lib.d.ts", true);
+            return compiler;
+        }
 
         var compiler: TypeScript.TypeScriptCompiler;
         recreate();
@@ -833,14 +859,28 @@ module Harness {
                 if (errors.length > 0)
                     throw new Error("Type definition contains errors: " + errors.join(","));
 
-                // REVIEW: For a multi-file test, this won't work
-                var script = compiler.scripts.members[1];
-                var enclosingScopeContext = TypeScript.findEnclosingScopeAt(new TypeScript.NullLogger(), <TypeScript.Script>script, new TypeScript.StringSourceText(code), 0, false);
-                var entries = new TypeScript.ScopeTraversal(compiler).getScopeEntries(enclosingScopeContext);
-                for (var i = 0; i < entries.length; i++) {
-                    if (entries[i].name === identifier) {
-                        return new Type(entries[i].type, code, identifier);
+                var matchingIdentifiers = [];
+                
+                // This will find the requested identifier in the first script where it's present, a naive search of each member in each script,
+                // which means this won't play nicely if the same identifier is used in multiple units, but it will enable this to work on multi-file tests.
+                // m = 1 because the first script will always be lib.d.ts which we don't want to search.                                
+                for (var m = 1; m < compiler.scripts.members.length; m++) {
+                    var script = compiler.scripts.members[m];
+                    var enclosingScopeContext = TypeScript.findEnclosingScopeAt(new TypeScript.NullLogger(), <TypeScript.Script>script, new TypeScript.StringSourceText(code), 0, false);
+                    var entries = new TypeScript.ScopeTraversal(compiler).getScopeEntries(enclosingScopeContext);
+
+                    for (var i = 0; i < entries.length; i++) {
+                        if (entries[i].name === identifier) {
+                            matchingIdentifiers.push(new Type(entries[i].type, code, identifier));
+                        }
                     }
+                }
+
+                if (matchingIdentifiers.length === 0) {
+                    throw new Error("Could not find an identifier " + identifier + " in any known scopes");
+                }
+                else {
+                    return matchingIdentifiers[0];
                 }
             }
 
@@ -853,13 +893,17 @@ module Harness {
             }
         }
 
-        export function generateDeclFile(code: string, verifyNoDeclFile: bool): string {
+        export function generateDeclFile(code: string, verifyNoDeclFile: bool, unitName?: string, compilationContext?: Harness.Compiler.CompilationContext, references?: TypeScript.IFileReference[]): string {
             reset();
 
             compiler.settings.generateDeclarationFiles = true;
             var oldOutputMany = compiler.settings.outputMany;
             try {
-                addUnit(code);
+                if (compilationContext && compilationContext.preCompile) {
+                    compilationContext.preCompile();
+                }
+
+                addUnit(code, unitName, false, false, references); 
                 compiler.reTypeCheck();
 
                 var outputs = {};
@@ -870,6 +914,7 @@ module Harness {
                     return outputs[fn];
                 });
 
+                var results: string = null;
                 for (var fn in outputs) {
                     if (fn.indexOf('.d.ts') >= 0) {
                         var writer = <Harness.Compiler.WriterAggregator>outputs[fn];
@@ -877,8 +922,12 @@ module Harness {
                         if (verifyNoDeclFile) {
                             throw new Error('Compilation should not produce ' + fn);
                         }
-                        return writer.lines.join('\n');
+                        results = writer.lines.join('\n');
                     }
+                }
+
+                if (results) {
+                    return results;
                 }
 
                 if (!verifyNoDeclFile) {
@@ -887,6 +936,13 @@ module Harness {
             } finally {
                 compiler.settings.generateDeclarationFiles = false;
                 compiler.settings.outputMany = oldOutputMany;
+
+                if (compilationContext && compilationContext.postCompile) {
+                    compilationContext.postCompile();
+                }
+
+                var uName = unitName || '0.ts';
+                compiler.updateUnit('', uName, false/*setRecovery*/);
             }
 
             return '';
@@ -935,60 +991,74 @@ module Harness {
         }
 
         export function recreate() {
-            stdout.reset();
-            stderr.reset();
-
-            compiler = new TypeScript.TypeScriptCompiler(stderr);
-            compiler.parser.errorRecovery = true;
-            compiler.settings.codeGenTarget = TypeScript.CodeGenTarget.ES5;
-            compiler.settings.controlFlow = true;
-            compiler.settings.controlFlowUseDef = true;
-            TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
-            compiler.addUnit(libText, 'lib.d.ts', true);
+            compiler = makeDefaultCompilerForTest();
             compiler.typeCheck();
-            currentUnit = 0;
-            maxUnit = 0;
         }
 
         export function reset() {
             stdout.reset();
             stderr.reset();
 
-            for (var i = 0; i < currentUnit; i++) {
-                compiler.updateUnit('', i + '.ts', false/*setRecovery*/);
+            for (var i = 0; i < compiler.units.length; i++) {
+                var fname = compiler.units[i].filename;
+                compiler.updateUnit('', fname, false/*setRecovery*/);
             }
 
             compiler.errorReporter.hasErrors = false;
-            currentUnit = 0;
         }
 
-        export function addUnit(code: string, isResident?: bool, isDeclareFile?: bool) {
+        // Defines functions to invoke before compiling a piece of code and a post compile action intended to clean up the
+        // effects of preCompile, preferably with something lighter weight than a full recreate()
+        export interface CompilationContext {
+            filename: string;
+            preCompile: () => void;
+            postCompile: () => void;
+        }
+
+        // TODO: is isDeclareFile still necessary? should you just always pass a declare file with a unitName?
+        export function addUnit(code: string, unitName?: string, isResident?: bool, isDeclareFile?: bool, references?: TypeScript.IFileReference[]) {
             var script: TypeScript.Script = null;
-            if (currentUnit >= maxUnit) {
-                script = compiler.addUnit(code, currentUnit++ + (isDeclareFile ? '.d.ts' : '.ts'), isResident);
-                maxUnit++;
-            } else {
-                var filename = currentUnit + (isDeclareFile ? '.d.ts' : '.ts');
-                compiler.updateUnit(code, filename, false/*setRecovery*/);
+            var uName = unitName ? unitName : '0.ts';
 
-                for (var i = 0; i < compiler.units.length; i++) {
-                    if (compiler.units[i].filename === filename)
-                        script = <TypeScript.Script>compiler.scripts.members[i];
+            var exists = false;
+            for (var i = 0; i < compiler.units.length; i++) {
+                if (compiler.units[i].filename === uName) {
+                    compiler.updateUnit(code, uName, false/*setRecovery*/);
+                    exists = true;
+                    script = <TypeScript.Script>compiler.scripts.members[i];
                 }
-
-                currentUnit++;
+            }
+            if (!exists) {
+                script = compiler.addUnit(code, uName, isResident, references);
             }
 
             return script;
         }
 
-        export function compileUnit(path: string, callback: (res: CompilerResult) => void , settingsCallback?: () => void ) {
+        export function updateUnit(code: string, unitName: string, setRecovery?: bool) {
+            compiler.updateUnit(code, unitName, setRecovery);
+        }
+
+        export function compileUnit(path: string, callback: (res: CompilerResult) => void , settingsCallback?: () => void, context?: CompilationContext, references?: TypeScript.IFileReference[]) {
+            var oldCompilerSettings = compiler.settings;
+            var oldEmitSettings = compiler.emitSettings;
+            var oldModuleGenTarget = TypeScript.moduleGenTarget;
+
             if (settingsCallback) {
                 settingsCallback();
             }
             path = switchToForwardSlashes(path);
-            compileString(readFile(path), path.match(/[^\/]*$/)[0], callback);
+            compileString(readFile(path), path.match(/[^\/]*$/)[0], callback, context, references);
+
+            // if settingsCallback exists, assume that it modified the global compiler instance's settings in some way.
+            // So that a test doesn't have side effects for tests run after it, restore the compiler settings to their previous state.
+            if (settingsCallback) {
+                compiler.settings = oldCompilerSettings;
+                compiler.emitSettings = oldEmitSettings;
+                TypeScript.moduleGenTarget = oldModuleGenTarget;
+            }
         }
+
         export function compileUnits(callback: (res: Compiler.CompilerResult) => void , settingsCallback?: () => void ) {
             reset();
             if (settingsCallback) {
@@ -1003,7 +1073,8 @@ module Harness {
             recreate();
             reset();
         }
-        export function compileString(code: string, unitName: string, callback: (res: Compiler.CompilerResult) => void , refreshUnitsForLSTests? = false) {
+        
+        export function compileString(code: string, unitName: string, callback: (res: Compiler.CompilerResult) => void, context?: CompilationContext, references?: TypeScript.IFileReference[]) {
             var scripts: TypeScript.Script[] = [];
 
             // TODO: How to overload?
@@ -1014,18 +1085,209 @@ module Harness {
 
             reset();
 
-            // Some command-line tests may pollute the global namespace, which could interfere with
-            // with language service testing.
-            // In the case of LS tests, make sure that we refresh the first unit, and not try to update it
-            if (refreshUnitsForLSTests) {
-                maxUnit = 0;
+            if (context) {
+                context.preCompile();
             }
 
-            scripts.push(addUnit(code));
+            // TODO: something isn't getting cleaned up correctly and adding with a real unit name is causing some failures (duplicate identifier)
+            // For now just only add via unitName for a multi file test
+            if (!context) {
+                var units = makeUnitsFromTest(code, unitName);
+                var dependencies = units.slice(0, units.length - 1);
+                var lastUnit = units[units.length - 1];
+                context = defineCompilationContextForTest(lastUnit.name, dependencies);
+                if (context) {
+                    context.preCompile();
+                }
+                scripts.push(addUnit(lastUnit.content));
+            }
+            else {
+                scripts.push(addUnit(code, unitName, false, Harness.Compiler.isDeclareFile(unitName), references));
+            }
+            
             compiler.reTypeCheck();
-            compiler.emitToOutfile(stdout);
+            
+            // If we're in a multi file test then remove all but the current unit for purposes of getting a nice baseline output
+            // otherwise multiple units would be concatenated into one output. We've already typechecked so they're unnecessary now.
+            if (references && references.length > 0) {
+                for (var i = 0; i < compiler.units.length; i++) {
+                    if (compiler.units[i].filename != unitName) {
+                        compiler.updateUnit('', compiler.units[i].filename, false/*setRecovery*/);
+                    }
+                }
+            }
+            compiler.emitToOutfile(stdout); // emits all units into a single js file
+  
+            if (context) {
+                context.postCompile();
+            }
 
             callback(new CompilerResult(stdout.lines, stderr.lines, scripts));
+        }
+
+        // All the necessary information to turn a multi file test into useful units for later compilation
+        export interface TestUnitData {
+            content: string;
+            name: string;
+            originalFilePath: string;
+            references: TypeScript.IFileReference[];
+        }
+
+        // List of allowed metadata names
+        var fileMetadataNames = ['Filename'];
+
+        function isMultiFileTest(code: string) {
+            return (code.indexOf('// @Filename') != -1);
+        }
+
+        // Given a test file containing // @Filename directives, return an array of named units of code to be added to an existing compiler instance
+        export function makeUnitsFromTest(code: string, filename: string): TestUnitData[] {
+            if (code.indexOf('@Filename') === -1) {
+                return [{ content: code, name: filename, originalFilePath: filename, references: [] }];
+            }
+            else {          
+                // Regex for parsing options in the format "@Alpha: Value of any sort"
+                var optionRegex = /^\s*@(\w+): (.*)\s*/;
+
+                // List of all the subfiles we've parsed out
+                var files: TestUnitData[] = [];
+                // Global options
+                var opts = {};
+
+                var lines = splitContentByNewlines(code);
+
+                // Stuff related to the subfile we're parsing
+                var currentFileContent: string = null;
+                var currentFileOptions = {};
+                var currentFileName = null;
+
+                var refs: TypeScript.IFileReference[] = null;
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i];
+                    // Triple slash references need to be tracked as they are added to the compiler as an additional parameter to addUnit
+                    if (line.substr(0, 3) === '///') {
+                        var isRef = line.match(/reference\spath='(\w*_?\w*\.?d?\.ts)'/);
+                        if (isRef) {
+                            var ref =
+                            {
+                                minChar: 0,
+                                limChar: 0,
+                                path: isRef[1],
+                                isResident: false
+                            };
+                            if (!refs) {
+                                refs = [];
+                            }
+                            refs.push(ref);
+                        }
+                    }
+                    else if (line.substr(0, 2) === '//') {
+                        // Comment line, check for global/file @options and record them
+                        var match = optionRegex.exec(line.substr(2));
+                        if (match) {
+                            var fileNameIndex = fileMetadataNames.indexOf(match[1]);
+                            if (fileNameIndex == -1) {
+                                throw new Error('Unrecognized metadata name "' + match[1] + '". Available file metadata names are: ' + fileMetadataNames.join(', '));
+                            } else {
+                                currentFileOptions[match[1]] = match[2];
+                            }
+                            // New metadata statement after having collected some code to go with the previous metadata
+                            if (currentFileName) {
+                                // Store result file
+                                var newTestFile =
+                                    {
+                                        content: currentFileContent,
+                                        name: currentFileName,
+                                        fileOptions: currentFileOptions,
+                                        originalFilePath: filename,
+                                        references: refs
+                                    };
+                                files.push(newTestFile);
+
+                                // Reset local data
+                                currentFileContent = null;
+                                currentFileOptions = {};
+                                currentFileName = match[2];
+                                refs = null;
+                            }                            
+                            else {
+                                // First metadata marker in the file
+                                currentFileName = match[2];
+                            };
+                        }
+                    }
+                    else {
+                        // Subfile content line
+                        // Append to the current subfile content, inserting a newline needed
+                        if (currentFileContent === null) {
+                            currentFileContent = '';
+                        } else {
+                            // End-of-line
+                            currentFileContent = currentFileContent + '\n';
+                        }
+                        currentFileContent = currentFileContent + line;
+                    }
+                }
+
+                // EOF, push whatever remains
+                var newTestFile =
+                    {
+                        content: currentFileContent,
+                        name: currentFileName,
+                        fileOptions: currentFileOptions,
+                        originalFilePath: filename,
+                        references: refs
+                    };
+                files.push(newTestFile);
+
+                if (files.length < 2) {
+                    throw new Error("Only parsed 0 or 1 units out of a supposed multi file test");
+                }
+
+                return files;
+            }
+        }
+
+        // Returns a set of functions which can be later executed to add and remove given dependencies to the compiler so that
+        // a file can be successfully compiled. These functions will add/remove named units and code to the compiler for each dependency.
+        // If basePathForTempFiles is provided then those named units will also be written to temp files (necessary for baseline tests)
+        // and deleted by the postCompile function.
+        export function defineCompilationContextForTest(filename: string, dependencies: TestUnitData[], basePathForTempFiles?: string): CompilationContext {
+            // if the given file has no dependencies, there is no context to return, it can be compiled without additional work
+            if (dependencies.length == 0) {
+                return null;
+            } else {
+                var addedFiles = [];
+                var precompile = () => {
+                    // REVIEW: if any dependency has a triple slash reference then does postCompile potentially have to do a recreate since we can't update references with updateUnit?
+                    // easy enough to do if so, prefer to avoid the recreate cost until it proves to be an issue
+                    dependencies.forEach(dep => {
+                        addUnit(dep.content, dep.name, false, Harness.Compiler.isDeclareFile(dep.name));
+                        addedFiles.push(dep.name);
+
+                        if (basePathForTempFiles) {
+                            var tempFilePath = basePathForTempFiles + dep.name;
+                            IO.writeFile(tempFilePath, dep.content);
+                        }
+                    });
+                };
+                var postcompile = () => {
+                    addedFiles.forEach(file => {
+                        Harness.Compiler.updateUnit('', file, false/*setRecovery*/);
+
+                        if (basePathForTempFiles) {
+                            var tempFilePath = basePathForTempFiles + file;
+                            IO.deleteFile(tempFilePath);
+                        }
+                    });
+                };
+                var context = {
+                    filename: filename,
+                    preCompile: precompile,
+                    postCompile: postcompile
+                };
+                return context;
+            }
         }
     }
 
