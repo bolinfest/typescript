@@ -5,8 +5,7 @@ class FlagsRunner extends RunnerBase {
     private fsOutput = new Harness.Compiler.WriterAggregator();
     private fsErrors = new Harness.Compiler.WriterAggregator();
     // Regex for parsing options in the format "@Alpha: Value of any sort"
-    // want to write a regexp like : /^[//]*\s*@(\w+): (.*)\s*/gm
-    private optionRegex = new RegExp("^[//]*\\s*@(\\w+): (\\w+)\\s*", "gm");  // multiple matches on multiple lines
+    private optionRegex = /^[\/]{2}\s*@(\w+): (.*)$/gm;  // multiple matches on multiple lines
 
     private supportedFlags = [
     { flag: 'comments', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.emitComments = value.toLowerCase() === 'true' ? true : false; } },
