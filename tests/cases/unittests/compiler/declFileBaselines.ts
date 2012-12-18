@@ -30,7 +30,8 @@ checkDeclOutput('tests/cases/compiler/withExportDecl.ts');
 checkDeclOutput('tests/cases/compiler/withImportDecl.ts');
 checkDeclOutput('tests/cases/compiler/importDecl.ts');
 
-var multiFileTests = [ 'declFileMultiFileTest.ts' ];
+// Add multi-file tests to this list as necessary
+var multiFileTests = [];
 multiFileTests.forEach(file => {
     var basePath = 'tests/cases/compiler/';
     var content = IO.readFile(basePath + file);
