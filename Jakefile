@@ -192,10 +192,10 @@ var typescriptFile = path.join(builtLocalDirectory, "typescript.js");
 compileFile(typescriptFile, compilerSources, [builtLocalDirectory, copyright].concat(compilerSources), [copyright]);
 
 var tscFile = path.join(builtLocalDirectory, "tsc.js");
-compileFile(tscFile, compilerSources.concat(tscSources), compilerSources.concat(tscSources), [copyright]);
+compileFile(tscFile, compilerSources.concat(tscSources), [builtLocalDirectory, copyright].concat(compilerSources).concat(tscSources), [copyright]);
 
 var serviceFile = path.join(builtLocalDirectory, "typescriptServices.js");
-compileFile(serviceFile, compilerSources.concat(servicesSources), [thirdParty].concat(compilerSources).concat(servicesSources), [thirdParty, copyright]);
+compileFile(serviceFile, compilerSources.concat(servicesSources), [builtLocalDirectory, thirdParty, copyright].concat(compilerSources).concat(servicesSources), [thirdParty, copyright]);
 
 // Local target to build the compiler and services
 desc("Builds the full compiler and services");
