@@ -1107,15 +1107,17 @@ module Harness {
             
             compiler.reTypeCheck();
             
-            // If we're in a multi file test then remove all but the current unit for purposes of getting a nice baseline output
-            // otherwise multiple units would be concatenated into one output. We've already typechecked so they're unnecessary now.
-            if (references && references.length > 0) {
-                for (var i = 0; i < compiler.units.length; i++) {
-                    if (compiler.units[i].filename != unitName) {
-                        compiler.updateUnit('', compiler.units[i].filename, false/*setRecovery*/);
-                    }
+            // Before emitting JS, clean any units other than the current one or 0.ts 
+            // 0.ts is the unit name where single file units go (which includes when baselining the first unit in a multi file test)
+            // Without this, the emitted baseline for a test will include all (non-resident) units in the compiler, so for example a
+            // multi file test's baseline for footest_file2.ts would include the JS from footest_file1.ts and footest_file2.ts concatenated.
+            for (var i = 0; i < compiler.units.length; i++) {
+                var curUnit = compiler.units[i].filename;
+                if (curUnit != unitName && curUnit != '0.ts') {
+                    compiler.updateUnit('', compiler.units[i].filename, false/*setRecovery*/);
                 }
             }
+
             compiler.emitToOutfile(stdout); // emits all units into a single js file
   
             if (context) {
