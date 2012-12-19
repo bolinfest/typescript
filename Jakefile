@@ -165,7 +165,7 @@ function prependFile(prefixFile, destinationFile) {
 function compileFile(outFile, sources, prereqs, prefixes, useBuiltCompiler) {
 	file(outFile, prereqs, function() {
 		var dir = useBuiltCompiler ? builtLocalDirectory : LKGDirectory;
-		var cmd = (process.env.TYPESCRIPT_HOST || "Node") + " " + dir + "tsc.js " + sources.join(" ") + " -out " + outFile;
+		var cmd = (process.env.TYPESCRIPT_HOST || "Node") + " " + dir + "tsc.js -cflowu " + sources.join(" ") + " -out " + outFile;
 		console.log(cmd);
 		jake.exec([cmd], function() {
 			if (prefixes) {
@@ -192,14 +192,17 @@ var typescriptFile = path.join(builtLocalDirectory, "typescript.js");
 compileFile(typescriptFile, compilerSources, [builtLocalDirectory, copyright].concat(compilerSources), [copyright]);
 
 var tscFile = path.join(builtLocalDirectory, "tsc.js");
-compileFile(tscFile, tscSources, [typescriptFile].concat(tscSources), [typescriptFile]);
+compileFile(tscFile, compilerSources.concat(tscSources), compilerSources.concat(tscSources), [copyright]);
 
 var serviceFile = path.join(builtLocalDirectory, "typescriptServices.js");
-compileFile(serviceFile, servicesSources, [typescriptFile, thirdParty].concat(servicesSources), [typescriptFile, thirdParty]);
+compileFile(serviceFile, compilerSources.concat(servicesSources), [thirdParty].concat(compilerSources).concat(servicesSources), [thirdParty, copyright]);
 
 // Local target to build the compiler and services
 desc("Builds the full compiler and services");
 task("local", ["libraryDecls", typescriptFile, tscFile, serviceFile]);
+
+// Set the default task to "local"
+task("default", ["local"]);
 
 // Cleans the built directory
 desc("Cleans the compiler output, declare files, and tests");
