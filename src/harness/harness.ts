@@ -43,7 +43,6 @@ declare module process {
 module Harness {
     // Settings 
     export var userSpecifiedroot = "";
-    export var userSpecifiedTests = [];
     var global = <any>Function("return this").call(null);
 
     export interface ITestMetadata {
@@ -73,6 +72,14 @@ module Harness {
         export function bug(id: string) {
             if (bugIds.indexOf(id) < 0) {
                 bugIds.push(id);
+            }
+        }
+
+        // If there are any bugs in the test code, mark the scenario as impacted appropriately
+        export function bugs(content: string) {
+            var bugs = content.match(/\bbug (\d+)/i);
+            if (bugs) {
+                bugs.forEach(bug => assert.bug(bug));
             }
         }
 
@@ -1015,20 +1022,17 @@ module Harness {
             postCompile: () => void;
         }
 
-        // TODO: is isDeclareFile still necessary? should you just always pass a declare file with a unitName?
         export function addUnit(code: string, unitName?: string, isResident?: bool, isDeclareFile?: bool, references?: TypeScript.IFileReference[]) {
             var script: TypeScript.Script = null;
-            var uName = unitName ? unitName : '0.ts';
+            var uName = unitName || '0' + (isDeclareFile ? '.d.ts' : '.ts');
 
-            var exists = false;
             for (var i = 0; i < compiler.units.length; i++) {
                 if (compiler.units[i].filename === uName) {
                     compiler.updateUnit(code, uName, false/*setRecovery*/);
-                    exists = true;
                     script = <TypeScript.Script>compiler.scripts.members[i];
                 }
             }
-            if (!exists) {
+            if (!script) {
                 script = compiler.addUnit(code, uName, isResident, references);
             }
 
@@ -1099,7 +1103,7 @@ module Harness {
                 if (context) {
                     context.preCompile();
                 }
-                scripts.push(addUnit(lastUnit.content));
+                scripts.push(addUnit(lastUnit.content, undefined, false, Harness.Compiler.isDeclareFile(unitName)));
             }
             else {
                 scripts.push(addUnit(code, unitName, false, Harness.Compiler.isDeclareFile(unitName), references));

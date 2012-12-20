@@ -1,0 +1,2 @@
+0.d.ts line 44 col 22: The property 'ma' does not exist on value of type 'c.a.b'
+0.d.ts line 44 col 16: A module cannot be aliased to a non-module type

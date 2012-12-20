@@ -548,11 +548,7 @@ module FourSlash {
         // Parse out the files and their metadata
         var testData = parseTestData(content);
 
-        // Log any bugs associated with the test
-        var bugs = content.match(/\bbug (\d+)/i);
-        if (bugs) {
-            bugs.forEach(bug => assert.bug(bug));
-        }
+        assert.bugs(content);
 
         currentTestState = new TestState(testData);
 

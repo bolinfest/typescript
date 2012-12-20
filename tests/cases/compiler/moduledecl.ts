@@ -42,6 +42,7 @@ module m0 {
     import m5 = c;
     import m6 = c.a;
     import m7 = c.a.b;
+    // BUG 553671
     import m8 = c.a.b.ma;
 }
 
@@ -82,7 +83,8 @@ module m1 {
     export import m5 = c;
     export import m6 = c.a;
     export import m7 = c.a.b;
-    export import m8 = c.a.b.ma;
+    // BUG 553671
+    export import m8 = c.a.b.ma; 
 }
 
 module m {

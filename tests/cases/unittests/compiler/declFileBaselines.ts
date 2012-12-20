@@ -1,16 +1,29 @@
 /// <reference path='..\..\..\..\src\harness\harness.ts' />
 
+// Runs 2 baseline checks: verifies that the given file generates the expected .d.ts, and that the generated .d.ts compiles correctly itself
 function checkDeclOutput(filename: string, unitName?: string, context?: Harness.Compiler.CompilationContext, references?: TypeScript.IFileReference[]) {
     filename = filename.replace(/\\/g, "/");
     var dFilename = filename.replace(/\.ts/, '.d.ts');
     dFilename = dFilename.substr(dFilename.lastIndexOf('/') + 1);
-    
-    var declFileCode: string;
-    // Baseline to generate declaration file and match it against the baseline
+      
+    var declFileCode: string;        
     Harness.Baseline.runBaseline('.d.ts output for ' + filename, dFilename, () => {
-        declFileCode = Harness.Compiler.generateDeclFile(IO.readFile(Harness.userSpecifiedroot + filename), false, unitName, context, references);
+        var testCode = IO.readFile(Harness.userSpecifiedroot + filename);
+        assert.bugs(testCode); // TODO: right now this doesn't do anything with runImmediate === true
+        declFileCode = Harness.Compiler.generateDeclFile(testCode, false, unitName, context, references);
         return declFileCode;
     }, true); // runImmediate so that temp files/units can be immediately cleaned up and not leak into compilerBaselines
+
+    var errorDescriptionLocal = '';
+    Harness.Compiler.compileString(declFileCode, dFilename, function (result) {
+        for (var i = 0; i < result.errors.length; i++) {
+            errorDescriptionLocal += result.errors[i].file + ' line ' + result.errors[i].line + ' col ' + result.errors[i].column + ': ' + result.errors[i].message + '\r\n';
+        }
+    });
+
+    Harness.Baseline.runBaseline('.d.ts for ' + filename + ' compiles without error', dFilename.replace(/\.ts/, '.errors.txt'), () => {
+        return (errorDescriptionLocal === '') ? null : errorDescriptionLocal;
+    });
 }
 
 function checkNoDeclFile(filename: string) {
@@ -37,7 +50,7 @@ multiFileTests.forEach(file => {
     var content = IO.readFile(basePath + file);
     var units = Harness.Compiler.makeUnitsFromTest(content, file);
     units.forEach(unit => {
-        if (!Harness.Compiler.isDeclareFile(unit.name)) {
+        if (!Harness.Compiler.isDeclareFile(unit.name)) {           
             var unitIdx = units.indexOf(unit);
             var dependencies = units.slice(0, unitIdx);
             // generateDeclFile will use this to ensure prerequisities are added to the compiler and cleaned up after typecheck/emit

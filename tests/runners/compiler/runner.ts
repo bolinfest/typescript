@@ -14,10 +14,7 @@ class CompilerBaselineRunner extends RunnerBase
         units.forEach(unit => {
             if (!Harness.Compiler.isDeclareFile(unit.name)) {
                 describe('JS output and errors for ' + unit.name, function () {                    
-                    var bugs = content.match(/\bbug (\d+)/i);
-                    if (bugs) {
-                        bugs.forEach(bug => assert.bug(bug));
-                    }
+                    assert.bugs(content);
 
                     var jsOutputAsync = '';
                     var jsOutputSync = '';
