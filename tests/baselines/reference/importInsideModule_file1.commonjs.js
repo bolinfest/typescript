@@ -1,1 +1,1 @@
-exports.x = "foo";
+exports.x = 1;
