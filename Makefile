@@ -159,7 +159,7 @@ unit-tests-dependencies:  $(FRONTEND_SOURCES) $(SERVICES_SOURCES) $(BUILT_LOCALT
 $(BUILT_LOCALTEST)\run.js: unit-tests-dependencies
 	$(STRC_LOCAL) -noresolve $(BUILT_LOCALTEST)\typescriptServices.d.ts $(CSRC)\io.ts $(HSRC)\exec.ts $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\external\json2.ts $(HSRC)\baselining.ts $(HSRC)\fourslash.ts $(HSRC)\dumpAST-baselining.ts  -out $(BUILT_LOCALTEST)\harness.js
 	$(STRC_LOCAL) -noresolve $(BUILT_LOCALTEST)\typescriptServices.d.ts $(CSRC)\io.ts $(HSRC)\exec.ts  $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\external\json2.ts $(HSRC)\generate.ts -out $(BUILT_LOCALTEST)\generate.js
-	$(STRC_LOCAL) -noresolve -target es5 $(BUILT_LOCALTEST)\typescriptServices.d.ts $(CSRC)\io.ts $(CSRC)\optionsParser.ts $(HSRC)\exec.ts  $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\baselining.ts $(HSRC)\fourslash.ts $(HSRC)\dumpAST-baselining.ts $(HSRC)\external\json2.ts $(RSRC)\runnerbase.ts $(RSRC)\flags\flagsrunner.ts $(RSRC)\compiler\runner.ts $(RSRC)\compiler\sourcemapRunner.ts $(RSRC)\fourslash\fsrunner.ts $(RSRC)\projects\runner.ts $(RSRC)\unittest\unittestrunner.ts $(HSRC)\runner.ts -out $(BUILT_LOCALTEST)\run.js
+	$(STRC_LOCAL) -noresolve -target es5 $(BUILT_LOCALTEST)\typescriptServices.d.ts $(CSRC)\io.ts $(CSRC)\optionsParser.ts $(HSRC)\exec.ts  $(HSRC)\diff.ts $(HSRC)\harness.ts $(HSRC)\baselining.ts $(HSRC)\fourslash.ts $(HSRC)\dumpAST-baselining.ts $(HSRC)\external\json2.ts $(RSRC)\runnerbase.ts $(RSRC)\runnerfactory.ts $(RSRC)\flags\flagsrunner.ts $(RSRC)\compiler\runner.ts $(RSRC)\compiler\sourcemapRunner.ts $(RSRC)\fourslash\fsrunner.ts $(RSRC)\projects\runner.ts $(RSRC)\unittest\unittestrunner.ts $(HSRC)\runner.ts -out $(BUILT_LOCALTEST)\run.js
     copy /Y $(LSRC)\lib.d.ts $(BUILT_LOCALTEST)
 
 # build unit test programs

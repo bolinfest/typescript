@@ -8,6 +8,7 @@
 ///<reference path='dumpAST-baselining.ts'/>
 ///<reference path='exec.ts'/>
 ///<reference path='diff.ts'/>
+///<reference path='..\..\tests\runners\runnerfactory.ts' />
 ///<reference path='..\..\tests\runners\flags\flagsrunner.ts' />
 ///<reference path='..\..\tests\runners\compiler\runner.ts' />
 ///<reference path='..\..\tests\runners\compiler\sourcemapRunner.ts' />
@@ -235,28 +236,31 @@ opts.option('root', {
 });
 opts.parse(IO.arguments)
 
-if (opts.unnamed.length === 0 && runners.length === 0) {
-    // compiler
-    runners.push(new UnitTestRunner('compiler'));
-    runners.push(new CompilerBaselineRunner());
-    runners.push(new SourcemapRunner());
-    runners.push(new FlagsRunner());
-    runners.push(new ProjectRunner());
+if (runners.length === 0) {
+    if (opts.unnamed.length === 0) {
+        // compiler
+        runners.push(new UnitTestRunner('compiler'));
+        runners.push(new CompilerBaselineRunner());
+        runners.push(new SourcemapRunner());
+        runners.push(new FlagsRunner());
+        runners.push(new ProjectRunner());
 
-    // language services
-    runners.push(new UnitTestRunner('ls'));
-    runners.push(new FourslashRunner());
+        // language services
+        runners.push(new UnitTestRunner('ls'));
+        runners.push(new FourslashRunner());
 
-    // services
-    runners.push(new UnitTestRunner('services'));
+        // services
+        runners.push(new UnitTestRunner('services'));
 
-    // samples
-    runners.push(new UnitTestRunner('samples'));
-} else {
-    for (var i = 0; i < opts.unnamed.length; i++) {
-        var runner = new UnitTestRunner();
-        runner.addTest(Harness.userSpecifiedroot + opts.unnamed[i]);
-        runners.push(runner);
+        // samples
+        runners.push(new UnitTestRunner('samples'));
+    } else if (runners.length == 0) {
+        var runnerFactory = new RunnerFactory();
+        var tests = opts.unnamed[0].split(' ');
+        for (var i = 0; i < tests.length; i++) {
+            runnerFactory.addTest(tests[i]);
+        }
+        runners = runnerFactory.getRunners();
     }
 }
 

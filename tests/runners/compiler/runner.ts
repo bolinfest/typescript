@@ -99,9 +99,14 @@ class CompilerBaselineRunner extends RunnerBase
     {
         Harness.Compiler.recreate()
 
-        this.enumerateFiles('tests/cases/compiler').forEach(fn => {
-            fn = fn.replace(/\\/g, "/");
-            this.checkTestCodeOutput(fn);
-        });
+        if (this.tests.length === 0) {
+            this.enumerateFiles('tests/cases/compiler').forEach(fn => {
+                fn = fn.replace(/\\/g, "/");
+                this.checkTestCodeOutput(fn);
+            });
+        }
+        else {
+            this.tests.forEach(test => this.checkTestCodeOutput(test));
+        }
     }
 }

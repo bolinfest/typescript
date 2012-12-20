@@ -2,20 +2,13 @@
 ///<reference path="../runnerbase.ts" />
 
 class UnitTestRunner extends RunnerBase {
-    constructor(private name?: string) {
-        super();
-    }
 
-    // contains the tests to run
-    private tests: string[] = [];
-
-    public addTest(filename: string) {
-        this.tests.push(filename);
+    constructor(public testType?: string) {
+        super();        
     }
 
     public runTests() {
-
-        switch (this.name) {
+        switch (this.testType) {
             case 'compiler':
                 this.tests = this.enumerateFiles('tests/cases/unittests/compiler');
                 break;
@@ -30,9 +23,9 @@ class UnitTestRunner extends RunnerBase {
                 break;
             case 'samples':
                 this.tests = this.enumerateFiles('tests/cases/unittests/samples');
-            default:
+            default:               
                 if (this.tests.length === 0) {
-                    throw new Error('Unsupported test cases: ' + this.name);
+                    throw new Error('Unsupported test cases: ' + this.testType);
                 }
                 break;
         }
