@@ -10,6 +10,7 @@ tests/cases/*/*/*.js.map
 tests/cases/*/*/*/*.js.map
 tests/cases/*/*/*/*/*.js.map
 !tests/cases/projects/r.js
+tests/cases/projects/*/local/*
 diff-*.html
 test-args.txt
 *.suo

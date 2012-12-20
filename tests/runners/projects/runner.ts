@@ -56,15 +56,16 @@ class HarnessBatch {
     public resolvedEnvironment: TypeScript.CompilationEnvironment;
     public errout: Harness.Compiler.WriterAggregator;
 
-    constructor() {
+    constructor(getDeclareFiles: bool) {
         this.host = IO;
         this.compilationSettings = new TypeScript.CompilationSettings();
+        this.compilationSettings.generateDeclarationFiles = getDeclareFiles;
         this.compilationEnvironment = new TypeScript.CompilationEnvironment(this.compilationSettings, this.host);
         this.commandLineHost = new HarnessHost();
         this.resolvedEnvironment = null;
         this.errout = new Harness.Compiler.WriterAggregator();
 
-        this.harnessCompile = function (files: string[]) {
+        this.harnessCompile = function (files: string[], createDeclareFile: (path: string, useUTF8?: bool) => ITextWriter) {
             TypeScript.CompilerDiagnostics.diagnosticWriter = { Alert: function (s: string) { this.host.printLine(s); } }
 
             files.unshift(Harness.userSpecifiedroot + 'typings\\lib.d.ts');
@@ -83,7 +84,7 @@ class HarnessBatch {
             // resolve file dependencies
             this.resolvedEnvironment = this.resolve();
 
-            this.compile();
+            this.compile(createDeclareFile);
         }
     }
 
@@ -94,7 +95,7 @@ class HarnessBatch {
 
     /// Do the actual compilation reading from input files and
     /// writing to output file(s).
-    private compile() {
+    private compile(createDeclareFile : (path: string, useUTF8?: bool) => ITextWriter) {
         var outfile: ITextWriter = this.compilationSettings.outputFileName ? this.host.createFile(this.compilationSettings.outputFileName) : null;
         var compiler: TypeScript.TypeScriptCompiler;
         var _self = this;
@@ -157,6 +158,7 @@ class HarnessBatch {
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
             compiler.emit(this.host.createFile);
+            compiler.emitDeclarationFile(createDeclareFile);
         }
 
         if (outfile) {
@@ -190,6 +192,23 @@ class HarnessBatch {
 
         return paths;
     }
+}
+
+function createRecursiveDirectory(dirName: string) {
+    var dirParentName = IO.dirName(dirName);
+    if (dirParentName != "") {
+        if (!IO.directoryExists(dirParentName)) {
+            createRecursiveDirectory(dirParentName);
+        }
+    }
+    IO.createDirectory(dirName);
+}
+
+function createRecursiveFile(fileName: string) {
+    var path = IO.resolvePath(fileName);
+    var dirName = IO.dirName(path);
+    createRecursiveDirectory(dirName);
+    return IO.createFile(path);
 }
 
 class ProjectRunner extends RunnerBase {
@@ -240,6 +259,36 @@ class ProjectRunner extends RunnerBase {
                     outputFiles.push(Harness.userSpecifiedroot + spec.projectRoot + "/" + spec.outputFiles[i]);
                 }
 
+                var declareFiles: string[] = [];
+                var generatedDeclareFiles: { fname: string; file: Harness.Compiler.WriterAggregator;  }[] = [];
+                var getDeclareFiles = false;
+                if (spec.declareFiles) {
+                    getDeclareFiles = true;
+                }
+
+                var writeDeclareFile = (fn: string) => {
+                    var fnEntry = { fname: fn, file: new Harness.Compiler.WriterAggregator() };
+                    generatedDeclareFiles.push(fnEntry);
+                    return fnEntry.file;
+                }
+
+                var codeGenType: string;
+                var baseFileName = TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + "/" + spec.projectRoot + "/";
+                var compareDeclareFiles = () => {
+                    assert.equal(generatedDeclareFiles.length, spec.declareFiles.length);
+                    for (var i = 0; i < spec.declareFiles.length; i++) {
+                        var expectedFName = baseFileName + spec.declareFiles[i];
+                        assert.equal(generatedDeclareFiles[i].fname, expectedFName);
+                        var fileContents = generatedDeclareFiles[i].file.lines.join("\n");
+                        var localFileName = baseFileName + "local/" + codeGenType + "/" + spec.declareFiles[i];
+                        var localFile = createRecursiveFile(localFileName);
+                        var referenceFileName = baseFileName + "reference/" + codeGenType + "/" + spec.declareFiles[i];
+                        localFile.Write(fileContents);
+                        localFile.Close();
+                        assert.noDiff(fileContents, IO.readFile(referenceFileName));
+                    }
+                }
+
                 /********************************************************
                                      NODE CODEGEN
                 *********************************************************/
@@ -251,10 +300,12 @@ class ProjectRunner extends RunnerBase {
 
                     cleanProjectDirectory(spec.projectRoot);
 
+                    generatedDeclareFiles = [];
                     TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
-                    var batch = new HarnessBatch();
-                    batch.harnessCompile(inputFiles);
-
+                    codeGenType = "node";
+                    var batch = new HarnessBatch(getDeclareFiles);
+                    batch.harnessCompile(inputFiles, writeDeclareFile);
+                    
                     it("collects the right files", function () {
                         var resolvedFiles = batch.getResolvedFilePaths();
                         assertRelativePathsInArray(resolvedFiles, spec.collectedFiles);
@@ -288,7 +339,13 @@ class ProjectRunner extends RunnerBase {
                     if (spec.baselineCheck) {
                         it("checks baseline", function () {
                             assert.noDiff(Harness.readFile(spec.path + spec.outputFiles[0] + ""),
-                                 Harness.readFile(spec.path + spec.baselineFiles[0] + ".node"));
+                                 Harness.readFile(spec.path + spec.baselineFiles[0] + "." + codeGenType));
+                        });
+                    }
+
+                    if (getDeclareFiles) {
+                        it("checks declare files baseline", function () {
+                            compareDeclareFiles();
                         });
                     }
                 });
@@ -303,8 +360,10 @@ class ProjectRunner extends RunnerBase {
                     cleanProjectDirectory(spec.projectRoot);
 
                     TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
-                    var batch = new HarnessBatch();
-                    batch.harnessCompile(inputFiles);
+                    generatedDeclareFiles = [];
+                    codeGenType = "amd";
+                    var batch = new HarnessBatch(getDeclareFiles);
+                    batch.harnessCompile(inputFiles, writeDeclareFile);
 
                     it("collects the right files", function () {
                         var resolvedFiles = batch.getResolvedFilePaths();
@@ -344,7 +403,13 @@ class ProjectRunner extends RunnerBase {
                     if (spec.baselineCheck) {
                         it("checks baseline", function () {
                             assert.noDiff(Harness.readFile(spec.path + spec.outputFiles[0] + ""),
-                                 Harness.readFile(spec.path + spec.baselineFiles[0] + ".amd"));
+                                 Harness.readFile(spec.path + spec.baselineFiles[0] + "." + codeGenType));
+                        });
+                    }
+
+                    if (getDeclareFiles) {
+                        it("checks declare files baseline", function () {
+                            compareDeclareFiles();
                         });
                     }
                 });
@@ -635,6 +700,87 @@ class ProjectRunner extends RunnerBase {
                 , bug: "524607"
                 , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/moduleMergeOrder/a.ts(11,24): The name \'A\' does not exist in the current scope'
                 ]
+            });
+
+            tests.push({
+                scenario: "declarations_SimpleImport"
+                    , projectRoot: 'tests/cases/projects/declarations_SimpleImport'
+                    , inputFiles: ['useModule.ts']
+                    , collectedFiles: ['useModule.ts', 'm4.ts']
+                    , outputFiles: ['useModule.js', 'm4.js']
+                    , declareFiles: ['m4.d.ts', 'useModule.d.ts']
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "declarations_GlobalImport"
+                    , projectRoot: 'tests/cases/projects/declarations_GlobalImport'
+                    , inputFiles: ['useModule.ts']
+                    , collectedFiles: ['useModule.ts', 'glo_m4.ts']
+                    , outputFiles: ['useModule.js', 'glo_m4.js']
+                    , declareFiles: ['glo_m4.d.ts', 'useModule.d.ts']
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "declarations_ImportedInPrivate"
+                    , projectRoot: 'tests/cases/projects/declarations_ImportedInPrivate'
+                    , inputFiles: ['useModule.ts']
+                    , collectedFiles: ['useModule.ts', 'private_m4.ts']
+                    , outputFiles: ['useModule.js', 'private_m4.js']
+                    , declareFiles: ['private_m4.d.ts', 'useModule.d.ts']
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "declarations_ImportedUseInFunction"
+                    , projectRoot: 'tests/cases/projects/declarations_ImportedUseInFunction'
+                    , inputFiles: ['useModule.ts']
+                    , collectedFiles: ['useModule.ts', 'fncOnly_m4.ts']
+                    , outputFiles: ['useModule.js', 'fncOnly_m4.js']
+                    , declareFiles: ['fncOnly_m4.d.ts', 'useModule.d.ts']
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "declarations_MultipleTimesImport"
+                    , projectRoot: 'tests/cases/projects/declarations_MultipleTimesImport'
+                    , inputFiles: ['useModule.ts']
+                    , collectedFiles: ['useModule.ts', 'm4.ts']
+                    , outputFiles: ['useModule.js', 'm4.js']
+                    , declareFiles: ['m4.d.ts', 'useModule.d.ts']
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "declarations_MultipleTimesMultipleImport"
+                    , projectRoot: 'tests/cases/projects/declarations_MultipleTimesMultipleImport'
+                    , inputFiles: ['useModule.ts']
+                    , collectedFiles: ['useModule.ts', 'm4.ts', 'm5.ts']
+                    , outputFiles: ['useModule.js', 'm4.js', 'm5.js']
+                    , declareFiles: ['m4.d.ts', 'm5.d.ts', 'useModule.d.ts']
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "declarations_CascadingImports"
+                    , projectRoot: 'tests/cases/projects/declarations_CascadingImports'
+                    , inputFiles: ['useModule.ts']
+                    , collectedFiles: ['useModule.ts', 'm4.ts']
+                    , outputFiles: ['m4.js']
+                    , declareFiles: ['m4.d.ts', 'useModule.d.ts']
+                    , skipRun: true
+            });
+
+            // BUG: to be fixed later.
+            tests.push({
+                scenario: "declarations_IndirectImport"
+                    , projectRoot: 'tests/cases/projects/declarations_IndirectImport'
+                    , inputFiles: ['useModule.ts']
+                    , collectedFiles: ['useModule.ts', 'm4.ts', 'm5.ts']
+                    , outputFiles: ['useModule.js', 'm4.js', 'm5.js']
+                    , declareFiles: ['m4.d.ts', 'm5.d.ts', 'useModule.d.ts']
+                    , skipRun: true
             });
 
             var amdDriverTemplate = "var requirejs = require('../r.js');\n\n" +

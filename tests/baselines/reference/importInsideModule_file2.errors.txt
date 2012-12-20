@@ -1,0 +1,1 @@
+// importInsideModule_file2.ts  line 2 col 24: Import declaration of external module is permitted only in global or top level dynamic modules
