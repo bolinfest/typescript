@@ -70,6 +70,7 @@ module TypeScript {
         private ambientModule = false;
         private ambientClass = false;
         private topLevel = true;
+        private allowImportDeclaration = true;
         private currentUnitIndex = (-1);
         private prevIDTok: Token = null;
         private statementInfoStack: IStatementInfo[] = new IStatementInfo[];
@@ -516,6 +517,8 @@ module TypeScript {
 
                                 if (this.topLevel) {
                                     this.hasTopLevelImportOrExport = true;
+                                } else if (!this.allowImportDeclaration) {
+                                    this.reportParseError("Import declaration of external module is permitted only in global or top level dynamic modules");
                                 }
 
                                 var aliasText = this.currentToken.getText();
@@ -573,10 +576,6 @@ module TypeScript {
             importDecl = new ImportDeclaration(name, alias);
             importDecl.isDynamicImport = isDynamicImport;
 
-            if (hasFlag(modifiers, Modifiers.Exported)) {
-                importDecl.varFlags |= VarFlags.Exported;
-            }
-
             importDecl.minChar = minChar;
             importDecl.limChar = limChar;
 
@@ -590,7 +589,7 @@ module TypeScript {
             var svAmbient = this.ambientModule;
             var svTopLevel = this.topLevel;
             this.topLevel = false;
-            if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
+            if (this.parsingDeclareFile || svAmbient || hasFlag(modifiers, Modifiers.Ambient)) {
                 this.ambientModule = true;
             }
 
@@ -609,6 +608,10 @@ module TypeScript {
                     isDynamicMod = true;
                     if (!this.ambientModule) {
                         this.reportParseError("Only ambient dynamic modules may have string literal names");
+                    }
+
+                    if (!svTopLevel) {
+                        this.reportParseError("Dynamic modules may not be nested within other modules");
                     }
                 }
 
@@ -638,6 +641,12 @@ module TypeScript {
             var moduleBody = new ASTList();
             var bodyMinChar = this.scanner.startPos;
             this.checkCurrentToken(TokenID.OpenBrace, errorRecoverySet | ErrorRecoverySet.ID);
+
+            if (svTopLevel && isDynamicMod) {
+                this.allowImportDeclaration = true;
+            } else {
+                this.allowImportDeclaration = false;
+            }
             this.parseStatementList(
                 errorRecoverySet | ErrorRecoverySet.RCurly, moduleBody,
                 /*sourceElements:*/ true, /*noLeadingCase:*/ true, AllowedElements.Global, modifiers);
@@ -651,6 +660,8 @@ module TypeScript {
 
             var limChar = this.scanner.lastTokenLimChar();
             var moduleDecl: ModuleDeclaration;
+
+            this.allowImportDeclaration = svTopLevel;
 
             if (enclosedList && (enclosedList.length > 0)) {
                 var len = enclosedList.length;
@@ -697,7 +708,7 @@ module TypeScript {
                 this.popDeclLists();
             }
 
-            if (this.parsingDeclareFile || hasFlag(modifiers, Modifiers.Ambient)) {
+            if (this.parsingDeclareFile || svAmbient || hasFlag(modifiers, Modifiers.Ambient)) {
                 moduleDecl.modFlags |= ModuleFlags.Ambient;
             }
             if (svAmbient || hasFlag(modifiers, Modifiers.Exported)) {
@@ -3376,6 +3387,9 @@ module TypeScript {
                             ast.limChar = this.scanner.lastTokenLimChar();
                         }
                         else {
+                            if (hasFlag(modifiers, Modifiers.Exported)) {
+                                this.reportParseError("export keyword not permitted on import declaration");
+                            }
                             ast = this.parseImportDeclaration(errorRecoverySet, modifiers);
                             needTerminator = true;
                         }

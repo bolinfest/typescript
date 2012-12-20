@@ -3,11 +3,8 @@ module a {
 module b.a {
 }
 module c.a.b {
-    import ma = a;
 }
 module mImport {
-    import d1 = a;
-    import e1 = b.a;
 }
 module m0 {
 }
@@ -29,19 +26,12 @@ module m1 {
             y: string;
         };
         constructor (n, n2: number, n3, n4: string);
-        public f: c.a;
+        public f: c.a.b;
     }
     interface i1 {
         (): Object;
         [n: number]: c1;
     }
-    import m2 = a;
-    import m3 = b;
-    import m4 = b.a;
-    import m5 = c;
-    import m6 = c.a;
-    import m7 = c.a.b;
-    import m8 = c.a.b.ma;
 }
 module m {
     module m2 {
@@ -74,9 +64,6 @@ module m55 {
 }
 module "m3" {
     var b: number;
-}
-module mQImport {
-    import _m3 = module ("m3");
 }
 module exportTests {
     class C1_public {

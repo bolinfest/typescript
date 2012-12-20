@@ -120,7 +120,7 @@ module TypeScript {
         }
 
         // Gets the pretty Name for the symbol withing the scope
-        public getPrettyName(scopeSymbol: Symbol, searchTillRoot: bool) {
+        public getPrettyName(scopeSymbol: Symbol) {
             return this.name;
         }
 
@@ -338,6 +338,7 @@ module TypeScript {
     export class TypeSymbol extends InferenceSymbol {
         public additionalLocations: number[];
         public expansions: Type[] = []; // For types that may be "split", keep track of the subsequent definitions
+        public isDynamic = false;
 
         constructor (locName: string, location: number, length: number, unitIndex: number, public type: Type) {
             super(locName, location, length, unitIndex);
@@ -403,27 +404,44 @@ module TypeScript {
 
         // Gets the pretty name of the symbol with respect to symbol of the scope (scopeSymbol)
         // searchTillRoot specifies if the name need to searched in the root path of the scope
-        public getPrettyName(scopeSymbol: Symbol, searchTillRoot: bool) {
+        public getPrettyName(scopeSymbol: Symbol) {
             if (isQuoted(this.prettyName) && this.type.isModuleType()) {
                 // Its a dynamic module - and need to be specialized with the scope
-                var scopePath = searchTillRoot ? scopeSymbol.pathToRoot() : [scopeSymbol];
-                var ignoreSymbols: Symbol[] = [];
-
                 // Check in exported module members in each scope
-                for (var i = 0; i < scopePath.length; i++) {
-                    var symbolType = scopePath[i].getType();
-                    if (symbolType.isModuleType()) {
-                        ignoreSymbols.push(scopePath[i]);
-                        var moduleType = <ModuleType>symbolType;
-                        var prettyName = moduleType.findDynamicModuleName(<ModuleType>this.type, "", false, ignoreSymbols);
-                        if (prettyName != null) {
-                            return prettyName;
-                        }
-                    }
+                var symbolPath = scopeSymbol.pathToRoot();
+                var prettyName = this.getPrettyNameOfDynamicModule(symbolPath);
+                if (prettyName != null) {
+                    return prettyName.name;
                 }
             }
 
             return this.prettyName;
+        }
+
+        public getPrettyNameOfDynamicModule(scopeSymbolPath: Symbol[]) {
+            var scopeSymbolPathLength = scopeSymbolPath.length;
+            var externalSymbol: { name: string; symbol: Symbol; } = null;
+            if (scopeSymbolPath.length > 0 &&
+                scopeSymbolPath[scopeSymbolPathLength - 1].getType().isModuleType() &&
+                (<TypeSymbol>scopeSymbolPath[scopeSymbolPathLength - 1]).isDynamic) {
+
+                // Check if submodule is dynamic
+                if (scopeSymbolPathLength > 1 &&
+                    scopeSymbolPath[scopeSymbolPathLength - 2].getType().isModuleType() &&
+                    (<TypeSymbol>scopeSymbolPath[scopeSymbolPathLength - 2]).isDynamic) {
+                    var moduleType = <ModuleType>scopeSymbolPath[scopeSymbolPathLength - 2].getType();
+                    externalSymbol = moduleType.findDynamicModuleName(this.type);
+
+                }
+
+                if (externalSymbol == null) {
+                    // Check in this module
+                    var moduleType = <ModuleType>scopeSymbolPath[scopeSymbolPathLength - 1].getType();
+                    externalSymbol = moduleType.findDynamicModuleName(this.type);
+                }
+            }
+
+            return externalSymbol;
         }
 
         public scopeRelativeName(scope: SymbolScope): string {
@@ -433,10 +451,10 @@ module TypeScript {
             var lca = this.findCommonAncestorPath(scope.container);
             var builder = "";
             for (var i = 0, len = lca.length; i < len; i++) {
-                var prettyName = lca[i].getPrettyName(i == len - 1 ? scope.container : lca[i + 1], i == len - 1);
+                var prettyName = lca[i].getPrettyName(i == len - 1 ? scope.container : lca[i + 1]);
                 builder = prettyName + "." + builder;
             }
-            builder += this.getPrettyName(len == 0 ? scope.container : lca[0], len == 0) + this.getOptionalNameString();
+            builder += this.getPrettyName(len == 0 ? scope.container : lca[0]) + this.getOptionalNameString();
             return builder;
         }
     }

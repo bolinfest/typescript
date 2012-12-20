@@ -499,14 +499,17 @@ module TypeScript {
         }
 
         public ImportDeclarationCallback(pre: bool, importDecl: ImportDeclaration): bool {
-            if (pre && this.canEmitSignature(ToDeclFlags(importDecl.varFlags))) {
-                this.emitDeclFlags(ToDeclFlags(importDecl.varFlags), "import");
+            if (pre) {
+                if ((<Script>this.declarationContainerStack[0]).isExternallyVisibleSymbol(importDecl.id.sym)) {
+                    this.emitIndent();
+                    this.declFile.Write("import ");
 
-                this.declFile.Write(importDecl.id.text + " = ");
-                if (importDecl.isDynamicImport) {
-                    this.declFile.WriteLine("module (" + importDecl.getAliasName() + ");");
-                } else {
-                    this.declFile.WriteLine(importDecl.getAliasName() + ";");
+                    this.declFile.Write(importDecl.id.text + " = ");
+                    if (importDecl.isDynamicImport) {
+                        this.declFile.WriteLine("module (" + importDecl.getAliasName() + ");");
+                    } else {
+                        this.declFile.WriteLine(importDecl.getAliasName() + ";");
+                    }
                 }
             }
 

@@ -1,4 +1,4 @@
-export module myModule {
+module myModule {
  
  import foo = module("test2");
 

@@ -1,4 +1,4 @@
-export import A = module("A");
+import A = module("A");
  
 export class B extends A.A { 
     constructor () { 

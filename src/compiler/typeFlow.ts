@@ -1905,34 +1905,36 @@ module TypeScript {
         }
 
         // Checks if the privacy is satisfied by typeSymbol that is used in the declaration inside container
-        private checkSymbolPrivacy(typeSymbol: TypeSymbol, declSymbol: Symbol, errorCallback: (typeName: string, isModuleName? : bool) =>void ) {
-            var isImportedTypeSymbol = false;
+        private checkSymbolPrivacy(typeSymbol: TypeSymbol, declSymbol: Symbol, errorCallback: (typeName: string, isModuleName?: bool) => void ) {
+            var externalModuleSymbol: TypeSymbol = null;
             var declSymbolPath: Symbol[] = null;
-            var declSymbolPathLength = 0;
-            var topTypeSymbol: TypeSymbol = null;
 
             // Type is visible type, so this can be used by anyone.
             if (typeSymbol.isExternallyVisible(this.checker)) {
-                // Symbol could be visible externally but it might not be visible in declSymbol Scope
-                // if the top most parent of the symbol is dynamically imported symbol
+                // Symbol could be from external module, go ahead and find the external module
                 var typeSymbolPath = typeSymbol.pathToRoot();
                 declSymbolPath = declSymbol.pathToRoot();
                 var typeSymbolLength = typeSymbolPath.length;
-                declSymbolPathLength = declSymbolPath.length;
+                var declSymbolPathLength = declSymbolPath.length;
 
-                if (typeSymbolLength > 0 && declSymbolPathLength > 0) {
-                    topTypeSymbol = <TypeSymbol>typeSymbolPath[typeSymbolLength - 1];
-                    var topDeclSymbol = declSymbolPath[declSymbolPathLength - 1];
-                    if (topTypeSymbol != topDeclSymbol && 
-                        topTypeSymbol.getType().isModuleType() && 
-                        isQuoted(topTypeSymbol.prettyName)) {
-                        // The typeSymbol is imported from different module, 
-                        // so we would need to go ahead and look up later to see if it is really exported 
-                        isImportedTypeSymbol = true;
+                if (typeSymbolLength > 0) {
+                    if (typeSymbolPath[typeSymbolLength - 1].getType().isModuleType() &&
+                        (<TypeSymbol>typeSymbolPath[typeSymbolLength - 1]).isDynamic &&
+                        typeSymbolPath[typeSymbolLength - 1] != declSymbolPath[declSymbolPathLength - 1]) {
+                        // Symbol from external module that was imported using one of the import statement
+                        externalModuleSymbol = <TypeSymbol>typeSymbolPath[typeSymbolLength - 1];
+                    } else if (typeSymbolLength > 1) {
+                        // Is symbol from declared quoted module
+                        if (typeSymbolPath[typeSymbolLength - 2].getType().isModuleType() &&
+                            (<TypeSymbol>typeSymbolPath[typeSymbolLength - 2]).isDynamic &&
+                            (declSymbolPathLength == 1 || typeSymbolPath[typeSymbolLength - 2] != declSymbolPath[declSymbolPathLength - 2])) {
+                            // From quoted module name
+                            externalModuleSymbol = <TypeSymbol>typeSymbolPath[typeSymbolLength - 2];
+                        }
                     }
                 }
 
-                if (!isImportedTypeSymbol) {
+                if (externalModuleSymbol == null) {
                     return;
                 }
             }
@@ -1953,46 +1955,20 @@ module TypeScript {
                     // Its a member from class so check visibility of its container
                     checkVisibilitySymbol = declSymbol.container;
                 }
-            } 
-
-            var importDecl = declSymbol.getImportDeclFromSymbol();
-            if (importDecl) {
-                if (!hasFlag(importDecl.varFlags, VarFlags.Exported)) {
-                    return;
-                }
-                
-                checkVisibilitySymbol = declSymbol.container;
             }
 
             // If the container is visible from global scrope it is error
             if (checkVisibilitySymbol.isExternallyVisible(this.checker)) {
                 var privateSymbolName = typeSymbol.name;
 
-                // If imported typeSymbol check if it is externally visible in the declaration symbols scope
-                if (isImportedTypeSymbol) {
-                    var ignoreSymbols: Symbol[] = [];
-                    privateSymbolName = null;
-
-                    // Check in exported module members in each scope
-                    for (var i = 0; i < declSymbolPathLength; i++) {
-                        var symbolType = declSymbolPath[i].getType();
-                        if (symbolType.isModuleType()) {
-                            ignoreSymbols.push(declSymbolPath[i]);
-                            var moduleType = <ModuleType>symbolType;
-                            var prettyName = moduleType.findDynamicModuleName(<ModuleType>topTypeSymbol.type, "", true, ignoreSymbols);
-                            if (prettyName != null) {
-                                // Was able to find the publically visible moduleType name
-                                // This means the typeSymbol is visible externally from top decl Symbol scope
-                                return;
-                            }
-
-                            if (privateSymbolName == null) {
-                                privateSymbolName = moduleType.findDynamicModuleName(<ModuleType>topTypeSymbol.type, "", false, ignoreSymbols);
-                            }
-                        }
+                // If imported typeSymbol mark it as visible externally and verify that the symbol it imports is visible externally
+                if (externalModuleSymbol != null) {
+                    var prettyName = externalModuleSymbol.getPrettyNameOfDynamicModule(declSymbolPath);
+                    if (prettyName != null) {
+                        this.currentScript.AddExternallyVisibleImportedSymbol(prettyName.symbol, this.checker);
                     }
+                    return;
                 }
-           
 
                 // Visible declaration using non visible type.
                 errorCallback(privateSymbolName, typeSymbol.name != privateSymbolName);
@@ -2934,13 +2910,6 @@ module TypeScript {
                     (<ModuleDeclaration>mod.symbol.declAST).modFlags &= ~ModuleFlags.ShouldEmitModuleDecl;
                 }
 
-                this.checkSymbolPrivacy(mod.symbol, importDecl.id.sym, (typeName: string) => {
-                    var quotes = "";
-                    if (!isQuoted(mod.symbol.name)) {
-                        quotes = "'";
-                    }
-                    this.checker.errorReporter.simpleError(importDecl, "exported module '" + importDecl.id.sym.name + "' imports non exported module " + quotes + mod.symbol.name + quotes);
-                });
                 //importDecl.id.sym = sym;
                 // REVIEW: Uncomment when you can toggle module codegen targets from the language service
                 //else if (typeFlow.checker.currentModDecl == null && 
@@ -2973,12 +2942,6 @@ module TypeScript {
             var prevCurrentModDecl = this.checker.currentModDecl;
             this.checker.currentModDecl = moduleDecl;
             this.inBoundPropTypeCheck = false;
-
-
-            if (!this.inImportTypeCheck && prevCurrentModDecl &&
-                hasFlag(moduleDecl.modFlags, ModuleFlags.IsDynamic) && !hasFlag(moduleDecl.modFlags, ModuleFlags.Ambient)) {
-                this.checker.errorReporter.simpleError(moduleDecl, "Dynamic modules may not be nested within other modules");
-            }
 
             this.thisType = null;
             this.scope = mod.containedScope;

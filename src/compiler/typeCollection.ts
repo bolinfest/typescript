@@ -152,7 +152,6 @@ module TypeScript {
         var typeSymbol: TypeSymbol = null;
         var modType: ModuleType = null;
         var importDecl = <ImportDeclaration>ast;
-        var isExported = hasFlag(importDecl.varFlags, VarFlags.Exported);
 
         // REVIEW: technically, this call isn't strictly necessary, since we'll find the type during the call to resolveTypeMembers
         var aliasedModSymbol = findSymbolFromAlias(importDecl.alias, { topLevelScope: scopeChain, members: null, tcContext: context });
@@ -172,14 +171,16 @@ module TypeScript {
         typeSymbol.aliasLink = importDecl;
 
         if (context.scopeChain.moduleDecl) {
+            typeSymbol.flags |= SymbolFlags.ModuleMember;
             typeSymbol.declModule = context.scopeChain.moduleDecl;
         }
+
         typeSymbol.declAST = importDecl;
         importDecl.id.sym = typeSymbol;
         scopeChain.scope.enter(scopeChain.container, ast, typeSymbol,
-                                context.checker.errorReporter, isExported || isGlobal, true, false);
+                                context.checker.errorReporter, isGlobal, true, false);
         scopeChain.scope.enter(scopeChain.container, ast, typeSymbol,
-                                context.checker.errorReporter, isExported || isGlobal, false, false);
+                                context.checker.errorReporter, isGlobal, false, false);
         return true;
     }
 
@@ -215,6 +216,7 @@ module TypeScript {
 
             typeSymbol = new TypeSymbol(modName, moduleDecl.name.minChar, modName.length,
                                         context.checker.locationInfo.unitIndex, modType);
+            typeSymbol.isDynamic = isQuoted(moduleDecl.prettyName);
 
             if (context.scopeChain.moduleDecl) {
                 typeSymbol.declModule = context.scopeChain.moduleDecl;

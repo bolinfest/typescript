@@ -1,4 +1,44 @@
-0.ts line 24 col 4: exported module 'm1_im2_public' imports non exported module 'm1_M2_private'
-0.ts line 26 col 4: exported module 'm1_im4_public' imports non exported module "m1_M4_private"
-0.ts line 79 col 0: exported module 'glo_iglo_public' imports non exported module 'glo_M2_private'
-0.ts line 81 col 0: exported module 'glo_im4_public' imports non exported module "glo_M4_private"
+// 0.ts  line 22 col 26: Dynamic modules may not be nested within other modules
+// 0.ts  line 30 col 19: Dynamic modules may not be nested within other modules
+// 0.ts  line 59 col 35: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 69 col 35: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 80 col 11: export keyword not permitted on import declaration
+// 0.ts  line 81 col 11: export keyword not permitted on import declaration
+// 0.ts  line 82 col 11: export keyword not permitted on import declaration
+// 0.ts  line 82 col 41: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 83 col 11: export keyword not permitted on import declaration
+// 0.ts  line 83 col 41: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 107 col 26: Dynamic modules may not be nested within other modules
+// 0.ts  line 115 col 19: Dynamic modules may not be nested within other modules
+// 0.ts  line 144 col 35: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 154 col 35: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 165 col 11: export keyword not permitted on import declaration
+// 0.ts  line 166 col 11: export keyword not permitted on import declaration
+// 0.ts  line 167 col 11: export keyword not permitted on import declaration
+// 0.ts  line 167 col 41: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 168 col 11: export keyword not permitted on import declaration
+// 0.ts  line 168 col 41: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 250 col 7: export keyword not permitted on import declaration
+// 0.ts  line 251 col 7: export keyword not permitted on import declaration
+// 0.ts  line 252 col 7: export keyword not permitted on import declaration
+// 0.ts  line 253 col 7: export keyword not permitted on import declaration
+// 0.ts  line 274 col 36: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 278 col 43: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 303 col 36: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 307 col 43: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 315 col 23: Dynamic modules may not be nested within other modules
+// 0.ts  line 320 col 15: Dynamic modules may not be nested within other modules
+// 0.ts  line 323 col 11: Dynamic modules may not be nested within other modules
+// 0.ts  line 329 col 23: Dynamic modules may not be nested within other modules
+// 0.ts  line 334 col 15: Dynamic modules may not be nested within other modules
+// 0.ts  line 337 col 11: Dynamic modules may not be nested within other modules
+// 0.ts  line 342 col 23: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 345 col 27: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 351 col 23: Import declaration of external module is permitted only in global or top level dynamic modules
+// 0.ts  line 354 col 27: Import declaration of external module is permitted only in global or top level dynamic modules
+0.ts line 50 col 4: exported variable 'm1_im2_private_v1_public' has or is using private type 'c1'
+0.ts line 51 col 4: exported variable 'm1_im2_private_v2_public' has or is using private type 'c1'
+0.ts line 52 col 4: exported variable 'm1_im2_private_v3_public' has or is using private type 'c1'
+0.ts line 53 col 4: exported variable 'm1_im2_private_v4_public' has or is using private type 'c1'
+0.ts line 70 col 4: exported variable 'm1_im4_private_v1_public' has or is using private type 'c1'
+0.ts line 71 col 4: exported variable 'm1_im4_private_v2_public' has or is using private type 'c1'

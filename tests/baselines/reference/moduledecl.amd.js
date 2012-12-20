@@ -42,7 +42,6 @@ var m0;
     var m5 = c;
     var m6 = c.a;
     var m7 = c.a.b;
-    var m8 = c.a.b.ma;
 })(m0 || (m0 = {}));
 var m1;
 (function (m1) {
@@ -58,7 +57,7 @@ var m1;
             this.n2 = n2;
             this.n3 = n3;
             this.n4 = n4;
-            this.f = c.a.b.ma;
+            this.f = c.a.b;
         }
         c1.s1 = undefined;
         c1.s2 = undefined;
@@ -74,7 +73,6 @@ var m1;
     var m5 = c;
     var m6 = c.a;
     var m7 = c.a.b;
-    var m8 = c.a.b.ma;
 })(m1 || (m1 = {}));
 var m;
 (function (m) {

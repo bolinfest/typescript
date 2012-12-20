@@ -204,6 +204,12 @@ opts.option('compiler', {
     }
 });
 
+opts.option('project', {
+    set: function () {
+        runners.push(new ProjectRunner());
+    }
+});
+
 opts.option('ls', {
     set: function () {
         runners.push(new UnitTestRunner('ls'));

@@ -149,11 +149,12 @@ local: prebuild-local $(BUILT_LOCAL)\typescript.js $(BUILT_LOCAL)\tsc.js $(BUILT
 compiler: local
 
 COMPILER_TESTS=--compiler
+PROJECT_TESTS=--project
 LS_TESTS=--ls
 SERVICES_TESTS=--services
 HARNESS_TESTS=--harness
 
-unit-tests-dependencies:  $(FRONTEND_SOURCES) $(SERVICES_SOURCES) $(BUILT_LOCALTEST)\typescriptServices.js $(HSRC)\harness.ts $(HSRC)\diff.ts $(HSRC)\exec.ts $(HSRC)\baselining.ts $(HSRC)\fourslash.ts $(HSRC)\dumpAST-baselining.ts $(HSRC)\external\json2.ts $(HSRC)\runner.ts
+unit-tests-dependencies:  $(FRONTEND_SOURCES) $(SERVICES_SOURCES) $(BUILT_LOCALTEST)\typescriptServices.js $(HSRC)\harness.ts $(HSRC)\diff.ts $(HSRC)\exec.ts $(HSRC)\baselining.ts $(HSRC)\fourslash.ts $(HSRC)\dumpAST-baselining.ts $(HSRC)\external\json2.ts $(RSRC)\runnerbase.ts $(RSRC)\flags\flagsrunner.ts $(RSRC)\compiler\runner.ts $(RSRC)\compiler\sourcemapRunner.ts $(RSRC)\fourslash\fsrunner.ts $(RSRC)\projects\runner.ts $(RSRC)\unittest\unittestrunner.ts $(HSRC)\runner.ts
 
 # conditionally build unit test progrmams
 $(BUILT_LOCALTEST)\run.js: unit-tests-dependencies
@@ -172,6 +173,9 @@ runtests: tests
 
 runtests-compiler: tests
 	$(HOST) $(BUILT_LOCALTEST)\run.js $(COMPILER_TESTS)
+
+runtests-projects: tests
+	$(HOST) $(BUILT_LOCALTEST)\run.js $(PROJECT_TESTS)
 
 runtests-ls: tests
 	$(HOST) $(BUILT_LOCALTEST)\run.js $(LS_TESTS)

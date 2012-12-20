@@ -5,14 +5,14 @@ module b.a {
 }
 
 module c.a.b {
-    export import ma = a;
+    import ma = a;
 }
 
 module mImport {
     import d = a;
     import e = b.a;
-    export import d1 = a;
-    export import e1 = b.a;
+    import d1 = a;
+    import e1 = b.a;
 }
 
 module m0 {
@@ -42,8 +42,6 @@ module m0 {
     import m5 = c;
     import m6 = c.a;
     import m7 = c.a.b;
-    // BUG 553671
-    import m8 = c.a.b.ma;
 }
 
 module m1 {
@@ -69,7 +67,7 @@ module m1 {
         constructor (public n, public n2: number, private n3, private n4: string) {
         }
 
-        public f = c.a.b.ma;
+        public f = c.a.b;
     }
 
     export interface i1 {
@@ -77,14 +75,12 @@ module m1 {
         [n: number]: c1;
     }
 
-    export import m2 = a;
-    export import m3 = b;
-    export import m4 = b.a;
-    export import m5 = c;
-    export import m6 = c.a;
-    export import m7 = c.a.b;
-    // BUG 553671
-    export import m8 = c.a.b.ma; 
+    import m2 = a;
+    import m3 = b;
+    import m4 = b.a;
+    import m5 = c;
+    import m6 = c.a;
+    import m7 = c.a.b;
 }
 
 module m {
@@ -139,10 +135,6 @@ declare module m55 {
 
 declare module "m3" {
     export var b: number;
-}
-module mQImport {
-    import m3 = module ("m3");
-    export import _m3 = module("m3");
 }
 
 module exportTests {

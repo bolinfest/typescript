@@ -102,6 +102,7 @@ class HarnessBatch {
 
         compiler = new TypeScript.TypeScriptCompiler(outfile, new TypeScript.NullLogger(), this.compilationSettings);
         compiler.setErrorOutput(this.errout);
+        compiler.parser.errorRecovery = true;
 
         if (this.compilationSettings.emitComments) {
             compiler.emitCommentsToOutput();
@@ -475,7 +476,9 @@ class ProjectRunner extends RunnerBase {
                     , inputFiles: ['internal2.ts']
                     , collectedFiles: ['internal2.ts', 'external2.ts']
                     , outputFiles: ['external2.js']
+                    , negative: true
                     , skipRun: true /* this requires a host which is able to resolve the script in the reference tag */
+                    , errors: ['// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/ext-int-ext/internal2.ts (2,19): Import declaration of external module is permitted only in global or top level dynamic modules']
             });
 
             tests.push({
@@ -509,8 +512,11 @@ class ProjectRunner extends RunnerBase {
                     , projectRoot: 'tests/cases/projects/NestedLocalModule-WithRecursiveTypecheck'
                     , inputFiles: ['test1.ts']
                     , collectedFiles: ['test1.ts', 'test2.ts']
-                    , outputFiles: ['test1.js', 'test2.js']
+                    , outputFiles: []
+                    , negative: true
                     , skipRun: true
+                    , errors: ['// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/NestedLocalModule-WithRecursiveTypecheck/test1.ts (3,21): Import declaration of external module is permitted only in global or top level dynamic modules'
+                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/NestedLocalModule-WithRecursiveTypecheck/test2.ts (5,25): Import declaration of external module is permitted only in global or top level dynamic modules']
             });
 
             tests.push({
@@ -518,8 +524,10 @@ class ProjectRunner extends RunnerBase {
                     , projectRoot: 'tests/cases/projects/NestedLocalModule-SimpleCase'
                     , inputFiles: ['test1.ts']
                     , collectedFiles: ['test1.ts', 'test2.ts']
-                    , outputFiles: ['test1.js', 'test2.js']
+                    , outputFiles: []
+                    , negative: true
                     , skipRun: true
+                    , errors: ['// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/NestedLocalModule-SimpleCase/test1.ts (2,21): Import declaration of external module is permitted only in global or top level dynamic modules']
             });
 
             tests.push({
@@ -527,13 +535,10 @@ class ProjectRunner extends RunnerBase {
                     , projectRoot: 'tests/cases/projects/privacyCheck-SimpleReference'
                     , inputFiles: ['test.ts']
                     , collectedFiles: ['test.ts', 'mExported.ts', 'mNonExported.ts']
-                    , outputFiles: ['test.js', 'mExported.js', 'mNonExported.js']
+                    , outputFiles: ['mExported.js', 'mNonExported.js']
                     , negative: true
                     , skipRun: true
-                    , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-SimpleReference/test.ts(21,0): exported variable \'c3\' has or is using private type \'mNonExported\''
-                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-SimpleReference/test.ts(23,4): exported function return type has or is using private type \'mNonExported\''
-                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-SimpleReference/test.ts(25,0): exported variable \'x3\' has or is using private type \'mNonExported\''
-                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-SimpleReference/test.ts(27,28): exported class \'class3\' extends class from private module \'mNonExported\'']
+                    , errors: ['// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-SimpleReference/test.ts (1,7): export keyword not permitted on import declaration']
             });
 
             tests.push({
@@ -541,13 +546,12 @@ class ProjectRunner extends RunnerBase {
                     , projectRoot: 'tests/cases/projects/privacyCheck-InsideModule'
                     , inputFiles: ['testGlo.ts']
                     , collectedFiles: ['testGlo.ts', 'mExported.ts', 'mNonExported.ts']
-                    , outputFiles: ['testGlo.js', 'mExported.js', 'mNonExported.js']
+                    , outputFiles: ['mExported.js', 'mNonExported.js']
                     , negative: true
                     , skipRun: true
-                    , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(22,4): exported variable \'c3\' has or is using private type \'mNonExported\''
-                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(24,8): exported function return type has or is using private type \'mNonExported\''
-                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(26,4): exported variable \'x3\' has or is using private type \'mNonExported\''
-                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(28,32): exported class \'class3\' extends class from private module \'mNonExported\'']
+                    , errors: ['// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts (2,11): export keyword not permitted on import declaration'
+                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts (2,37): Import declaration of external module is permitted only in global or top level dynamic modules'
+                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts (21,33): Import declaration of external module is permitted only in global or top level dynamic modules']
             });
 
             tests.push({
@@ -556,7 +560,11 @@ class ProjectRunner extends RunnerBase {
                     , inputFiles: ['test.ts']
                     , collectedFiles: ['test.ts', 'mExported.ts', 'mNonExported.ts']
                     , outputFiles: ['test.js', 'mExported.js', 'mNonExported.js']
+                    , negative: true
                     , skipRun: true
+                    , errors: ['// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/test.ts (5,11): export keyword not permitted on import declaration'
+                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/test.ts (5,37): Import declaration of external module is permitted only in global or top level dynamic modules'
+                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/test.ts (24,33): Import declaration of external module is permitted only in global or top level dynamic modules']
             });
 
             tests.push({
@@ -567,10 +575,9 @@ class ProjectRunner extends RunnerBase {
                     , outputFiles: ['test.js', 'mExported.js', 'mNonExported.js']
                     , negative: true
                     , skipRun: true
-                    , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(64,8): exported variable \'c3\' has or is using private type \'mNonExported\''
-                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(66,12): exported function return type has or is using private type \'mNonExported\''
-                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(68,8): exported variable \'x3\' has or is using private type \'mNonExported\''
-                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(70,36): exported class \'class3\' extends class from private module \'mNonExported\'']
+                    , errors: ['// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts (2,11): export keyword not permitted on import declaration'
+                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts (2,37): Import declaration of external module is permitted only in global or top level dynamic modules'
+                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts (42,33): Import declaration of external module is permitted only in global or top level dynamic modules']
             });
 
             tests.push({

@@ -768,7 +768,7 @@ module TypeScript {
             return resultScope;
         }
 
-        public lookupMemberType(containingType: Type, name: string): Type {
+        public lookupMemberTypeSymbol(containingType: Type, name: string): Symbol {
             var symbol: Symbol = null;
             if (containingType.containedScope) {
                 symbol = containingType.containedScope.find(name, false, true);
@@ -793,7 +793,7 @@ module TypeScript {
                 }
             }
             if (symbol && symbol.isType()) {
-                return symbol.getType();
+                return symbol;
             }
             else {
                 return null;
@@ -942,13 +942,14 @@ module TypeScript {
 
                 if (lhsType != this.anyType) {
                     var rhsIdentifier = <Identifier>rhs;
-                    resultType = this.lookupMemberType(lhsType, rhsIdentifier.text);
-                    if (resultType == null) {
+                    var resultSymbol = this.lookupMemberTypeSymbol(lhsType, rhsIdentifier.text);
+                    if (resultSymbol == null) {
                         resultType = this.anyType;
                         this.errorReporter.simpleError(dotNode, "Expected type");
                     }
                     else {
-                        if (!resultType.symbol.visible(scope, this)) {
+                        resultType = resultSymbol.getType();
+                        if (!resultSymbol.visible(scope, this)) {
                             this.errorReporter.simpleError(lhs, "The symbol '" + (<Identifier>rhs).actualText + "' is not visible at this point");
                         }
                     }
