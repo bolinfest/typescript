@@ -96,12 +96,11 @@ class HarnessBatch {
     /// Do the actual compilation reading from input files and
     /// writing to output file(s).
     private compile(createDeclareFile : (path: string, useUTF8?: bool) => ITextWriter) {
-        var outfile: ITextWriter = this.compilationSettings.outputFileName ? this.host.createFile(this.compilationSettings.outputFileName) : null;
         var compiler: TypeScript.TypeScriptCompiler;
         var _self = this;
         this.errout.reset();
 
-        compiler = new TypeScript.TypeScriptCompiler(outfile, new TypeScript.NullLogger(), this.compilationSettings);
+        compiler = new TypeScript.TypeScriptCompiler(this.errout, new TypeScript.NullLogger(), this.compilationSettings);
         compiler.setErrorOutput(this.errout);
         compiler.parser.errorRecovery = true;
 
@@ -127,7 +126,7 @@ class HarnessBatch {
                     }
                     else {
                         if (_self.compilationSettings.errorRecovery) {
-                            compiler.parser.setErrorRecovery(outfile);
+                            compiler.parser.setErrorRecovery(this.errorOut);
                         }
                         compiler.addUnit(code.content, code.path, addAsResident);
                     }
@@ -155,20 +154,22 @@ class HarnessBatch {
             }
         }
 
+
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
-            compiler.emit(this.host.createFile);
-            compiler.emitDeclarations(createDeclareFile);
-        }
-
-        if (outfile) {
-            outfile.Close();
+            compiler.emit({
+                createFile: (fileName: string, useUTF8?: bool) => createFileAndFolderStructure(IO, fileName, useUTF8),
+                directoryExists: IO.directoryExists,
+                fileExists: IO.fileExists,
+                resolvePath: IO.resolvePath
+            });
+            compiler.emitSettings.ioHost.createFile = createDeclareFile;
+            compiler.emitDeclarations();
         }
 
         if (this.errout) {
             this.errout.Close();
         }
-
     }
 
     // Execute the provided inputs
@@ -192,23 +193,6 @@ class HarnessBatch {
 
         return paths;
     }
-}
-
-function createRecursiveDirectory(dirName: string) {
-    var dirParentName = IO.dirName(dirName);
-    if (dirParentName != "") {
-        if (!IO.directoryExists(dirParentName)) {
-            createRecursiveDirectory(dirParentName);
-        }
-    }
-    IO.createDirectory(dirName);
-}
-
-function createRecursiveFile(fileName: string) {
-    var path = IO.resolvePath(fileName);
-    var dirName = IO.dirName(path);
-    createRecursiveDirectory(dirName);
-    return IO.createFile(path);
 }
 
 class ProjectRunner extends RunnerBase {
@@ -281,7 +265,7 @@ class ProjectRunner extends RunnerBase {
                         assert.equal(generatedDeclareFiles[i].fname, expectedFName);
                         var fileContents = generatedDeclareFiles[i].file.lines.join("\n");
                         var localFileName = baseFileName + "local/" + codeGenType + "/" + spec.declareFiles[i];
-                        var localFile = createRecursiveFile(localFileName);
+                        var localFile = createFileAndFolderStructure(IO, localFileName);
                         var referenceFileName = baseFileName + "reference/" + codeGenType + "/" + spec.declareFiles[i];
                         localFile.Write(fileContents);
                         localFile.Close();

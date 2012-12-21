@@ -41,8 +41,8 @@ module TypeScript {
                 this.setError(ast);
             }
             else {
-                this.lineCol.line = -1;
-                this.lineCol.col = -1;
+                this.lineCol.line = 0;
+                this.lineCol.col = 0;
             }
             this.emitPrefix();
         }
@@ -75,8 +75,8 @@ module TypeScript {
             }
 
             this.hasErrors = true;
-            var len = (ast.limChar - ast.minChar);
             if (this.parser.errorRecovery && this.parser.errorCallback) {
+                var len = (ast.limChar - ast.minChar);
                 this.parser.errorCallback(ast.minChar, len, message, this.checker.locationInfo.unitIndex);
             }
             else {

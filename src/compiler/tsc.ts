@@ -118,9 +118,6 @@ class BatchCompiler {
     /// Do the actual compilation reading from input files and
     /// writing to output file(s).
     public compile() {
-        if (this.compilationSettings.outputFileName) {
-            this.compilationSettings.outputFileName = TypeScript.switchToForwardSlashes(this.ioHost.resolvePath(this.compilationSettings.outputFileName));
-        }
         var compiler: TypeScript.TypeScriptCompiler;
 
         compiler = new TypeScript.TypeScriptCompiler(this.ioHost.stderr, new TypeScript.NullLogger(), this.compilationSettings);
@@ -190,10 +187,17 @@ class BatchCompiler {
             }
         }
 
+        var emitterIOHost = {
+            createFile: (fileName: string, useUTF8?: bool) => createFileAndFolderStructure(this.ioHost, fileName, useUTF8),
+            directoryExists: this.ioHost.directoryExists,
+            fileExists: this.ioHost.fileExists,
+            resolvePath: this.ioHost.resolvePath
+        };
+
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
             try {
-                compiler.emit(this.ioHost.createFile);
+                compiler.emit(emitterIOHost); 
             } catch (err) {
                 compiler.errorReporter.hasErrors = true;
                 // Catch emitter exceptions
@@ -202,12 +206,12 @@ class BatchCompiler {
                 }
             }
 
-            compiler.emitDeclarations(this.ioHost.createFile);
+            compiler.emitDeclarations();
         }
         else { 
-            compiler.emitAST(this.compilationSettings.outputMany, this.ioHost.createFile);
+            compiler.emitAST(emitterIOHost);
         }
-
+        
         if (compiler.errorReporter.hasErrors) {
             this.ioHost.quit(1);
         }
@@ -240,10 +244,10 @@ class BatchCompiler {
         var opts = new OptionsParser(this.ioHost);
 
         opts.option('out', {
-            usage: 'Concatenate and emit output to single file',
-            type: 'file',
+            usage: 'Concatenate and emit output to single file | Redirect output structure to the directory',
+            type: 'file|directory',
             set: (str) => {
-                this.compilationSettings.outputOne(str);
+                this.compilationSettings.outputOption = str;
             }
         });
 

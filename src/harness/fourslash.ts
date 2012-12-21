@@ -556,7 +556,7 @@ module FourSlash {
         if (fsCompiler === undefined) {
             // Set up the compiler
             var settings = new TypeScript.CompilationSettings();
-            settings.outputMany = false;
+            settings.outputOption = "fourslash.js";
             settings.resolve = true;
             fsCompiler = new TypeScript.TypeScriptCompiler(fsErrors, new TypeScript.NullLogger(), settings);
             
@@ -574,7 +574,15 @@ module FourSlash {
 
         var result = '';
         fsCompiler.typeCheck();
-        fsCompiler.emit((s) => fsOutput);
+
+        var emitterIOHost: TypeScript.EmitterIOHost = {
+            createFile: (s) => fsOutput,
+            directoryExists: (s: string) => false,
+            fileExists: (s: string) => true,
+            resolvePath: (s: string)=>s
+        }
+
+        fsCompiler.emit(emitterIOHost);
         if (fsErrors.lines.length > 0) {
             throw new Error('Error compiling ' + filename + ': ' + fsErrors.lines.join('\r\n'));
         }

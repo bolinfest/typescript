@@ -77,17 +77,25 @@ class FlagsRunner extends RunnerBase {
             }
 
             // due to the way we output and baseline we should only output 1 file
-            settings.outputMany = false;
+            var emitterIOHost: TypeScript.EmitterIOHost = {
+                createFile: (s) => this.fsOutput,
+                directoryExists: (s: string) => false,
+                fileExists: (s: string) => true,
+                resolvePath: (s: string) => s
+            }
+
+
+            settings.outputOption = "test_input.js";
 
             var compiler = new TypeScript.TypeScriptCompiler(this.fsErrors, new TypeScript.NullLogger(), settings);
             compiler.addUnit(Harness.Compiler.libText, 'lib.d.ts', true);
             compiler.addUnit(content, 'test_input.ts');
             compiler.typeCheck();
-            compiler.emit(() => this.fsOutput);
+            compiler.emit(emitterIOHost);
 
             if (settings.generateDeclarationFiles) {
                 this.fsOutput.WriteLine("/* DECLARATION FILE */");
-                compiler.emitDeclarations(() => this.fsOutput);
+                compiler.emitDeclarations();
             }
         });
 

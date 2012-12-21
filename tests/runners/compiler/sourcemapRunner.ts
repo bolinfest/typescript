@@ -28,14 +28,21 @@ class SourcemapRunner extends RunnerBase {
             testFile('recursiveClassReferenceTest.ts');
             testFile('sourceMapSample.ts');
 
+            var emitterIOHost = {
+                createFile: (fileName: string, useUTF8?: bool) => createFileAndFolderStructure(IO, fileName, useUTF8),
+                directoryExists: IO.directoryExists,
+                fileExists: IO.fileExists,
+                resolvePath: IO.resolvePath
+            };
+
             files.forEach(filename => {
                 var filenameOnly = filenameRegex.exec(filename)[0];
 
                 it('Matches the map of ' + filenameOnly, () => {
                     cc.addUnit(IO.readFile(filename), filename);
                     cc.settings.mapSourceFiles = true;
-                    cc.settings.outputMany = true;
-                    cc.emit(IO.createFile);
+                    cc.settings.outputOption = "";
+                    cc.emit(emitterIOHost);
                     cc.settings.mapSourceFiles = false;
                 });
 

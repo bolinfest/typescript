@@ -1117,6 +1117,12 @@ module TypeScript {
         // Remember if the script contains Unicode chars, that is needed when generating code for this script object to decide the output file correct encoding.
         public containsUnicodeChar = false;
         public containsUnicodeCharInComment = false;
+        public cachedEmitRequired: bool;
+
+        private setCachedEmitRequired(value: bool) {
+            this.cachedEmitRequired = value;
+            return this.cachedEmitRequired;
+        }
 
         constructor (vars: ASTList, scopes: ASTList) {
             super(new Identifier("script"), null, false, null, vars, scopes, null, NodeType.Script);
@@ -1133,35 +1139,39 @@ module TypeScript {
         }
 
         public emitRequired() {
+            if (this.cachedEmitRequired != undefined) {
+                return this.cachedEmitRequired;
+            }
+
             if (!this.isDeclareFile && !this.isResident && this.bod) {
                 for (var i = 0, len = this.bod.members.length; i < len; i++) {
                     var stmt = this.bod.members[i];
                     if (stmt.nodeType == NodeType.ModuleDeclaration) {
                         if (!hasFlag((<ModuleDeclaration>stmt).modFlags, ModuleFlags.ShouldEmitModuleDecl | ModuleFlags.Ambient)) {
-                            return true;
+                            return this.setCachedEmitRequired(true);
                         }
                     }
                     else if (stmt.nodeType == NodeType.ClassDeclaration) {
                         if (!hasFlag((<InterfaceDeclaration>stmt).varFlags, VarFlags.Ambient)) {
-                            return true;
+                            return this.setCachedEmitRequired(true);
                         }
                     }
                     else if (stmt.nodeType == NodeType.VarDecl) {
                         if (!hasFlag((<VarDecl>stmt).varFlags, VarFlags.Ambient)) {
-                            return true;
+                            return this.setCachedEmitRequired(true);
                         }
                     }
                     else if (stmt.nodeType == NodeType.FuncDecl) {
                         if (!(<FuncDecl>stmt).isSignature()) {
-                            return true;
+                            return this.setCachedEmitRequired(true);
                         }
                     }
                     else if (stmt.nodeType != NodeType.InterfaceDeclaration && stmt.nodeType != NodeType.Empty) {
-                        return true;
+                        return this.setCachedEmitRequired(true);
                     }
                 }
             }
-            return false;
+            return this.setCachedEmitRequired(false);
         }
 
         public emit(emitter: Emitter, tokenId: TokenID, startLine: bool) {

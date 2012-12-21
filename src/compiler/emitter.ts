@@ -32,13 +32,34 @@ module TypeScript {
         }
     }
 
-    export interface IEmitOptions {
-        minWhitespace: bool;
-        propagateConstants: bool;
-        emitComments: bool;
-        path: string;
-        createFile: (path: string, useUTF8?: bool) =>ITextWriter;
-        outputMany: bool;
+    export class EmitOptions {
+        public minWhitespace: bool;
+        public propagateConstants: bool;
+        public emitComments: bool;
+        public outputOption: string;
+        public ioHost: EmitterIOHost = null;
+        public outputMany: bool = true;
+        public commonDirectoryPath = "";
+
+        constructor(settings: CompilationSettings) {
+            this.minWhitespace = settings.minWhitespace;
+            this.propagateConstants = settings.propagateConstants;
+            this.emitComments = settings.emitComments;
+            this.outputOption = settings.outputOption;
+        }
+
+        public mapOutputFileName(fileName: string, extentionChanger: (fname: string, wholeFileNameReplaced: bool) => string) {
+            if (this.outputMany) {
+                var updatedFileName = fileName;
+                if (this.outputOption != "") {
+                    // Replace fileName string;
+                    updatedFileName = fileName.replace(this.commonDirectoryPath, this.outputOption);
+                }
+                return extentionChanger(updatedFileName, false);
+            } else {
+                return extentionChanger(this.outputOption, true);
+            }
+        }
     }
 
     export class Indenter {
@@ -84,7 +105,7 @@ module TypeScript {
         public captureThisStmtString = "var _this = this;";
         private varListCount: number = 0; 
 
-        constructor (public checker: TypeChecker, public outfile: ITextWriter, public emitOptions: IEmitOptions) { 
+        constructor(public checker: TypeChecker, public emittingFileName: string, public outfile: ITextWriter, public emitOptions: EmitOptions) {
         }
 
         public setSourceMappings(mapper: SourceMapper) {
@@ -576,6 +597,7 @@ module TypeScript {
             if (!hasFlag(moduleDecl.modFlags, ModuleFlags.Ambient)) {
                 var isDynamicMod = hasFlag(moduleDecl.modFlags, ModuleFlags.IsDynamic);
                 var prevOutFile = this.outfile;
+                var prevOutFileName = this.emittingFileName;
                 var prevAllSourceMappers = this.allSourceMappers;
                 var prevSourceMapper = this.sourceMapper;
                 var prevColumn = this.emitState.column;
@@ -593,17 +615,18 @@ module TypeScript {
                     var tsModFileName = stripQuotes(moduleDecl.name.actualText);
                     var modFilePath = trimModName(tsModFileName) + ".js";
 
-                    if (this.emitOptions.createFile) {
+                    if (this.emitOptions.ioHost) {
                         // Ensure that the slashes are normalized so that the comparison is fair
                         // REVIEW: Note that modFilePath is normalized to forward slashes in Parser.parse, so the 
                         // first call to switchToForwardSlashes is technically a no-op, but it will prevent us from
                         // regressing if the parser changes
-                        if (switchToForwardSlashes(modFilePath) != switchToForwardSlashes(this.emitOptions.path)) {
+                        if (switchToForwardSlashes(modFilePath) != switchToForwardSlashes(this.emittingFileName)) {
+                            this.emittingFileName = this.emitOptions.mapOutputFileName(modFilePath, TypeScriptCompiler.mapToJSFileName);
                             var useUTF8InOutputfile = moduleDecl.containsUnicodeChar || (this.emitOptions.emitComments && moduleDecl.containsUnicodeCharInComment);
-                            this.outfile = this.emitOptions.createFile(modFilePath, useUTF8InOutputfile);
+                            this.outfile = this.emitOptions.ioHost.createFile(this.emittingFileName, useUTF8InOutputfile);
                             if (prevSourceMapper != null) {
                                 this.allSourceMappers = [];
-                                this.setSourceMappings(new TypeScript.SourceMapper(tsModFileName, modFilePath, this.outfile, this.emitOptions.createFile(modFilePath + SourceMapper.MapFileExtension)));
+                                this.setSourceMappings(new TypeScript.SourceMapper(tsModFileName, this.emittingFileName, this.outfile, this.emitOptions.ioHost.createFile(this.emittingFileName + SourceMapper.MapFileExtension)));
                                 this.emitState.column = 0;
                                 this.emitState.line = 0;
                             }
@@ -706,15 +729,15 @@ module TypeScript {
 
                     // close the module outfile, and restore the old one
                     if (this.outfile != prevOutFile) {
+                        this.Close();
                         if (prevSourceMapper != null) {
-                            this.emitSourceMappings();
                             this.allSourceMappers = prevAllSourceMappers;
                             this.sourceMapper = prevSourceMapper;
                             this.emitState.column = prevColumn;
                             this.emitState.line = prevLine;
                         }
-                        this.outfile.Close();
                         this.outfile = prevOutFile;
+                        this.emittingFileName = prevOutFileName;
                     }
                 }
                 else {
@@ -1200,8 +1223,11 @@ module TypeScript {
             }
         }
 
-        public emitSourceMappings() {
-            SourceMapper.EmitSourceMapping(this.allSourceMappers);
+        public Close() {
+            if (this.sourceMapper != null) {
+                SourceMapper.EmitSourceMapping(this.allSourceMappers);
+            }
+            this.outfile.Close();
         }
 
         public emitJavascriptList(ast: AST, delimiter: string, tokenId: TokenID, startLine: bool, onlyStatics: bool, emitClassPropertiesAfterSuperCall: bool = false, emitPrologue? = false, requiresInherit?: bool) {

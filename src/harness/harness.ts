@@ -904,7 +904,8 @@ module Harness {
             reset();
 
             compiler.settings.generateDeclarationFiles = true;
-            var oldOutputMany = compiler.settings.outputMany;
+            var oldOutputOption = compiler.settings.outputOption;
+            var oldEmitterIOHost = compiler.emitSettings.ioHost;
             try {
                 if (compilationContext && compilationContext.preCompile) {
                     compilationContext.preCompile();
@@ -915,11 +916,18 @@ module Harness {
 
                 var outputs = {};
 
-                compiler.settings.outputMany = true;
-                compiler.emitDeclarations((fn: string) => {
-                    outputs[fn] = new Harness.Compiler.WriterAggregator();
-                    return outputs[fn];
-                });
+                compiler.settings.outputOption = "";
+                compiler.parseEmitOption(
+                    {
+                        createFile: (fn: string) => {
+                            outputs[fn] = new Harness.Compiler.WriterAggregator();
+                            return outputs[fn];
+                        },
+                        directoryExists: (path: string) => true,
+                        fileExists: (path: string) => true,
+                        resolvePath: (path: string) => path
+                    });
+                compiler.emitDeclarations();
 
                 var results: string = null;
                 for (var fn in outputs) {
@@ -942,8 +950,8 @@ module Harness {
                 }
             } finally {
                 compiler.settings.generateDeclarationFiles = false;
-                compiler.settings.outputMany = oldOutputMany;
-
+                compiler.settings.outputOption = oldOutputOption;
+                compiler.parseEmitOption(oldEmitterIOHost);
                 if (compilationContext && compilationContext.postCompile) {
                     compilationContext.postCompile();
                 }

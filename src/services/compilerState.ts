@@ -757,16 +757,23 @@ module Services {
                 return result;
             }
 
-            var createFile = (fileName: string, useUTF8encoding?: bool = false) => {
-                var outputFile = new TextWriter(fileName, useUTF8encoding);
-                result.push(outputFile);
-                return outputFile;
+
+            var emitterIOHost = {
+                createFile: (fileName: string, useUTF8encoding?: bool = false) => {
+                    var outputFile = new TextWriter(fileName, useUTF8encoding);
+                    result.push(outputFile);
+                    return outputFile;
+                },
+                directoryExists: (fname: string) => true,
+                fileExists: (fname: string) => false,
+                resolvePath: (fname: string) => fname
             };
 
             // Call the emitter
             var script = <TypeScript.Script>this.compiler.scripts.members[unitIndex];
-            this.compiler.emitUnit(script, createFile);
-            this.compiler.emitDeclarationUnit(script, createFile);
+            this.compiler.parseEmitOption(emitterIOHost)
+            this.compiler.emitUnit(script);
+            this.compiler.emitDeclarationsUnit(script);
 
             return result;
         }

@@ -63,33 +63,46 @@ module TypeScript {
         return isSTRFile(fname) ? changePathToDSTR(fname) : isTSFile(fname) ? changePathToDTS(fname) : changePathToDTS(fname);
     }
 
+    function isFileOfExtension(fname: string, ext: string) {
+        var extLength = ext.length;
+        return fname.length > extLength && fname.substring(fname.length - extLength, fname.length) == ext;
+    }
+
+    export function isJSFile(fname: string) {
+        return isFileOfExtension(fname, ".js");
+    }
+
     export function isSTRFile(fname: string) {
-        return fname.length > 4 && fname.substring(fname.length - 4, fname.length) == ".str"
+        return isFileOfExtension(fname, ".str");
     }
 
     export function isTSFile(fname: string) {
-        return fname.length > 3 && fname.substring(fname.length - 3, fname.length) == ".ts"
+        return isFileOfExtension(fname, ".ts");
     }
 
     export function isDSTRFile(fname: string) {
-        return fname.length > 6 && fname.substring(fname.length - 6, fname.length) == ".d.str"
+        return isFileOfExtension(fname, ".d.str");
     }
 
     export function isDTSFile(fname: string) {
-        return fname.length > 5 && fname.substring(fname.length - 5, fname.length) == ".d.ts"
+        return isFileOfExtension(fname, ".d.ts");
     }
 
     export function getPrettyName(modPath: string, quote?=true, treatAsFileName?=false) { 
         var modName = treatAsFileName ? switchToForwardSlashes(modPath) : trimModName(stripQuotes(modPath));
-        var components = modName.split("/");
+        var components = this.getPathComponents(modName);
         return components.length ? (quote ? quoteStr(components[components.length - 1]) : components[components.length - 1]) : modPath;
+    }
+
+    export function getPathComponents(path: string) {
+        return path.split("/");
     }
 
     export function getRelativePathToFixedPath(fixedModFilePath: string, absoluteModPath: string) {
         absoluteModPath = switchToForwardSlashes(absoluteModPath);
 
-        var modComponents = absoluteModPath.split("/");
-        var fixedModComponents = fixedModFilePath.split("/");
+        var modComponents = this.getPathComponents(absoluteModPath);
+        var fixedModComponents = this.getPathComponents(fixedModFilePath);
 
         // Find the component that differs
         var joinStartIndex = 0;
@@ -161,10 +174,14 @@ module TypeScript {
         }
     }
 
-    export function  filePath(fullPath: string) {
+    export function filePathComponents(fullPath: string) {
         fullPath = switchToForwardSlashes(fullPath);
-        var components = fullPath.split("/");
-        var path: string[] = components.slice(0, components.length - 1);
+        var components = getPathComponents(fullPath);
+        return components.slice(0, components.length - 1);
+    }
+
+    export function filePath(fullPath: string) {
+        var path = filePathComponents(fullPath);
         return path.join("/") + "/";
     }
 
@@ -184,7 +201,7 @@ module TypeScript {
     export function normalizePath(path: string): string {
         path = switchToForwardSlashes(path);
         var startedWithSep = path.charAt(0) === "/";
-        var parts = path.split("/");
+        var parts = this.getPathComponents(path);
         for (var i = 0; i < parts.length; i++) {
             if (parts[i] === "." || parts[i] === "") {
                 parts.splice(i, 1);

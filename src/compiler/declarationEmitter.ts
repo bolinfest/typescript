@@ -21,11 +21,15 @@ module TypeScript {
             return (this.isDottedModuleName.length == 0) ? false : this.isDottedModuleName[this.isDottedModuleName.length - 1];
         }
 
-        constructor (public checker: TypeChecker, public emitOptions: IEmitOptions) {
+        constructor (public checker: TypeChecker, public emitOptions: EmitOptions) {
         }
 
         public setDeclarationFile(file: ITextWriter) {
             this.declFile = file;
+        }
+
+        public Close() {
+            this.declFile.Close();
         }
 
         public emitDeclarations(script: TypeScript.Script): void {
@@ -553,8 +557,9 @@ module TypeScript {
                             this.singleDeclFile = this.declFile;
                             CompilerDiagnostics.assert(this.indenter.indentAmt == 0, "Indent has to be 0 when outputing new file");
                             // Create new file
-                            var declareFileName = getDeclareFilePath(stripQuotes(moduleDecl.name.sym.name));
-                            this.declFile = this.emitOptions.createFile(declareFileName);
+                            var declareFileName = this.emitOptions.mapOutputFileName(stripQuotes(moduleDecl.name.sym.name), TypeScriptCompiler.mapToDTSFileName);
+                            var useUTF8InOutputfile = moduleDecl.containsUnicodeChar || (this.emitOptions.emitComments && moduleDecl.containsUnicodeCharInComment);
+                            this.declFile = this.emitOptions.ioHost.createFile(declareFileName, useUTF8InOutputfile);
                         }
                         this.pushDeclarationContainer(moduleDecl);
                     } else {

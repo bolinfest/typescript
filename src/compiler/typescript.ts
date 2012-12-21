@@ -104,6 +104,20 @@ module TypeScript {
 
     export var defaultSettings = new CompilationSettings();
 
+    export interface EmitterIOHost {
+        // function that can even create a folder structure if needed
+        createFile(path: string, useUTF8?: bool): ITextWriter;
+
+        // function to check if file exists on the disk
+        fileExists(path: string): bool;
+
+        // Function to check if the directory exists on the disk
+        directoryExists(path: string): bool;
+
+        // Resolves the path
+        resolvePath(path: string): string;
+    }
+
     export class TypeScriptCompiler {
         public parser = new Parser();
         public typeChecker: TypeChecker;
@@ -115,7 +129,7 @@ module TypeScript {
         public persistentTypeState: PersistentGlobalTypeState;
 
 
-        public emitSettings: { minWhitespace: bool; propagateConstants: bool; emitComments: bool; path: string; createFile: (path: string) =>ITextWriter; outputMany: bool; };
+        public emitSettings: EmitOptions;
 
         constructor (public errorOutput: ITextWriter, public logger: ILogger = new NullLogger(), public settings: CompilationSettings = defaultSettings) {
             this.errorReporter = new ErrorReporter(this.errorOutput);
@@ -126,8 +140,7 @@ module TypeScript {
             this.parser.style_requireSemi = this.settings.styleSettings.requireSemi;
             this.parser.style_funcInLoop = this.settings.styleSettings.funcInLoop;
             this.parser.inferPropertiesFromThisAssignment = this.settings.inferPropertiesFromThisAssignment;
-            this.emitSettings = { minWhitespace: this.settings.minWhitespace, propagateConstants: this.settings.propagateConstants, emitComments: this.settings.emitComments, path: this.settings.outputFileName, createFile: null, outputMany: this.settings.outputMany };
-
+            this.emitSettings = new EmitOptions(this.settings);
             codeGenTarget = settings.codeGenTarget;
         }
 
@@ -162,7 +175,7 @@ module TypeScript {
         }
 
         public emitCommentsToOutput() {
-            this.emitSettings = { minWhitespace: this.settings.minWhitespace, propagateConstants: this.settings.propagateConstants, emitComments: this.settings.emitComments, path: this.settings.outputFileName, createFile: null, outputMany: this.settings.outputMany };
+            this.emitSettings = new EmitOptions(this.settings);
         }
 
         public setErrorCallback(fn: (minChar: number, charLen: number, message: string,
@@ -400,38 +413,149 @@ module TypeScript {
             });
         }
 
-        public emitDeclarationUnit(script: Script, createFile: (path: string, useUTF8?: bool) => ITextWriter) {
-            if (!this.settings.generateDeclarationFiles) {
+        private isDynamicModuleCompilation() {
+            for (var i = 0, len = this.scripts.members.length; i < len; i++) {
+                var script = <Script>this.scripts.members[i];
+                if (!script.isDeclareFile && script.topLevelMod != null) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private updateCommonDirectoryPath() {
+            var commonComponents: string[] = [];
+            var commonComponentsLength = -1;
+            for (var i = 0, len = this.scripts.members.length; i < len; i++) {
+                var script = <Script>this.scripts.members[i];
+                if (script.emitRequired()) {
+                    var fileName = script.locationInfo.filename;
+                    var fileComponents = filePathComponents(fileName);
+                    if (commonComponentsLength == -1) {
+                        // First time at finding common path
+                        // So common path = directory of file
+                        commonComponents = fileComponents;
+                        commonComponentsLength = commonComponents.length;
+                    } else {
+                        var updatedPath = false;
+                        for (var j = 0; j < commonComponentsLength && j < fileComponents.length; j++) {
+                            if (commonComponents[j] != fileComponents[j]) {
+                                // The new components = 0 ... j -1
+                                commonComponentsLength = j;
+                                updatedPath = true;
+
+                                if (j == 0) {
+                                    // Its error to not have common path
+                                    this.errorReporter.emitterError(null, "Cannot find the common subdirectory path for the input files");
+                                    return;
+                                }
+
+                                break;
+                            }
+                        }
+
+                        // If the fileComponent path completely matched and less than already found update the length
+                        if (!updatedPath && fileComponents.length < commonComponentsLength) {
+                            commonComponentsLength = fileComponents.length;
+                        }
+                    }
+                }
+            }
+
+            this.emitSettings.commonDirectoryPath = commonComponents.slice(0, commonComponentsLength).join("/") + "/";
+            if (this.emitSettings.outputOption.charAt(this.emitSettings.outputOption.length - 1) != "/") {
+                this.emitSettings.outputOption += "/";
+            }
+        }
+
+        public parseEmitOption(ioHost: EmitterIOHost) {
+            this.emitSettings.ioHost = ioHost;
+            if (this.emitSettings.outputOption == "") {
+                this.emitSettings.outputMany = true;
+                this.emitSettings.commonDirectoryPath = "";
                 return;
+            }
+
+            this.emitSettings.outputOption = switchToForwardSlashes(this.emitSettings.ioHost.resolvePath(this.emitSettings.outputOption));
+
+            // Determine if output options is directory or file
+            if (this.emitSettings.ioHost.directoryExists(this.emitSettings.outputOption)) {
+                // Existing directory
+                this.emitSettings.outputMany = true;
+            } else if (this.emitSettings.ioHost.fileExists(this.emitSettings.outputOption)) {
+                // Existing file
+                this.emitSettings.outputMany = false;
+            }
+            else {
+                // New File/directory
+                this.emitSettings.outputMany = !isJSFile(this.emitSettings.outputOption);
+            }
+
+            // Verify if options are correct
+            if (this.isDynamicModuleCompilation() && !this.emitSettings.outputMany) {
+                this.errorReporter.emitterError(null, "Cannot compile dynamic modules when emitting into single file");
+            }
+
+            // Parse the directory structure
+            if (this.emitSettings.outputMany) {
+                this.updateCommonDirectoryPath();
+            }
+        }
+
+        public useUTF8ForFile(script: Script) {
+            if (this.emitSettings.outputMany) {
+                return this.outputScriptToUTF8(script);
+            } else {
+                return this.outputScriptsToUTF8(<Script[]>(this.scripts.members));
+            }
+        }
+
+        static mapToDTSFileName(fileName: string, wholeFileNameReplaced: bool) {
+            return getDeclareFilePath(fileName);
+        }
+
+        private canEmitDeclarations(script?: Script) {
+            if (!this.settings.generateDeclarationFiles) {
+                return false;
             }
 
             if (this.errorReporter.hasErrors) {
                 // There were errors reported, do not generate declaration file
-                return;
+                return false;
             }
 
             // If its already a declare file or is resident or does not contain body 
-            if (script.isDeclareFile || script.isResident || script.bod == null) {
-                return;
+            if (!!script && (script.isDeclareFile || script.isResident || script.bod == null)) {
+                return false;
             }
 
-            var declarationFileName = getDeclareFilePath(script.locationInfo.filename);
-            var declarationFile: ITextWriter = createFile(declarationFileName, this.outputScriptToUTF8(script));
-            var declarationEmitter: DeclarationEmitter = new DeclarationEmitter(this.typeChecker, this.emitSettings);
-
-            declarationEmitter.setDeclarationFile(declarationFile);
-            declarationEmitter.emitDeclarations(script);
-
-            declarationFile.Close();
+            return true;
         }
 
-        public emitDeclarations(createFile: (path: string, useUTF8?: bool) => ITextWriter) {
-            if (!this.settings.generateDeclarationFiles) {
-                return;
+        public emitDeclarationsUnit(script: Script, reuseEmitter?: bool, declarationEmitter?: DeclarationEmitter) {
+            if (!this.canEmitDeclarations(script)) {
+                return null;
             }
 
-            if (this.errorReporter.hasErrors) {
-                // There were errors reported, do not generate declaration file
+            if (!declarationEmitter) {
+                var declareFileName = this.emitSettings.mapOutputFileName(script.locationInfo.filename, TypeScriptCompiler.mapToDTSFileName);
+                var declareFile = this.emitSettings.ioHost.createFile(declareFileName, this.useUTF8ForFile(script));
+                declarationEmitter = new DeclarationEmitter(this.typeChecker, this.emitSettings);
+                declarationEmitter.setDeclarationFile(declareFile);
+            }
+
+            declarationEmitter.emitDeclarations(script);
+
+            if (!reuseEmitter) {
+                declarationEmitter.Close();
+                return null;
+            } else {
+                return declarationEmitter;
+            }
+        }
+
+        public emitDeclarations() {
+            if (!this.canEmitDeclarations()) {
                 return;
             }
 
@@ -439,122 +563,89 @@ module TypeScript {
                 return;
             }
 
-            if (this.emitSettings.outputMany) {
-                // Emit every file to its own output file
-                for (var i = 0, len = this.scripts.members.length; i < len; i++) {
-                    var script = <Script>this.scripts.members[i];
-                    this.emitDeclarationUnit(script, createFile);
+            var declarationEmitter: DeclarationEmitter = null;
+            for (var i = 0, len = this.scripts.members.length; i < len; i++) {
+                var script = <Script>this.scripts.members[i];
+                if (this.emitSettings.outputMany || declarationEmitter == null) {
+                    // Create or reuse file
+                    declarationEmitter = this.emitDeclarationsUnit(script, !this.emitSettings.outputMany);
+                } else {
+                    // Emit in existing emitter
+                    this.emitDeclarationsUnit(script, true, declarationEmitter);
                 }
             }
-            else {
-                // Emit all files to a single output file
-                var declarationFileName = getDeclareFilePath(this.settings.outputFileName);
-                var declarationFile: ITextWriter = createFile(declarationFileName, this.outputScriptsToUTF8(<Script[]>(this.scripts.members)));
-                var declarationEmitter: DeclarationEmitter = new DeclarationEmitter(this.typeChecker, this.emitSettings);
-                declarationEmitter.setDeclarationFile(declarationFile);
-                for (var i = 0, len = this.scripts.members.length; i < len; i++) {
-                    var script = <Script>this.scripts.members[i];
 
-                    // If its already a declare file or is resident or does not contain body 
-                    if (script.isDeclareFile || script.isResident || script.bod == null) {
-                        continue;
-                    }
-
-                    declarationEmitter.emitDeclarations(script);
-                }
-                declarationFile.Close();
+            if (declarationEmitter) {
+                declarationEmitter.Close();
             }
         }
 
-        private emitScript(script: Script, emitter: Emitter, outputFile: ITextWriter, sourceMapOutputFile: ITextWriter, inputFileName: string, outputFileName: string) {
+        static mapToFileNameExtention(extention: string, fileName: string, wholeFileNameReplaced: bool) {
+            if (wholeFileNameReplaced) {
+                // The complete output is redirected in this file so do not change extention
+                return fileName;
+            } else {
+                // Change the extention of the file
+                var splitFname = fileName.split(".");
+                splitFname.pop();
+                return splitFname.join(".") + extention;
+            }
+        }
+
+        static mapToJSFileName(fileName: string, wholeFileNameReplaced: bool) {
+            return TypeScriptCompiler.mapToFileNameExtention(".js", fileName, wholeFileNameReplaced);
+        }
+
+        public emitUnit(script: Script, reuseEmitter?: bool, emitter?: Emitter) {
+            if (!script.emitRequired()) {
+                return null;
+            }
+
+            var fname = script.locationInfo.filename;
+            var outFname: string;
+            var outFile: ITextWriter;
+            if (!emitter) {
+                outFname = this.emitSettings.mapOutputFileName(fname, TypeScriptCompiler.mapToJSFileName);
+                outFile = this.emitSettings.ioHost.createFile(outFname, this.useUTF8ForFile(script));
+                emitter = new Emitter(this.typeChecker, outFname, outFile, this.emitSettings);
+            } else {
+                outFname = emitter.emittingFileName;
+                outFile = emitter.outfile;
+            }
+
             if (this.settings.mapSourceFiles) {
-                emitter.setSourceMappings(new TypeScript.SourceMapper(inputFileName, outputFileName, outputFile, sourceMapOutputFile));
+                emitter.setSourceMappings(new TypeScript.SourceMapper(fname, outFname, outFile, this.emitSettings.ioHost.createFile(outFname + SourceMapper.MapFileExtension)));
             }
 
             this.typeChecker.locationInfo = script.locationInfo;
             emitter.emitJavascript(script, TokenID.Comma, false);
-
-            if (this.settings.mapSourceFiles) {
-                emitter.emitSourceMappings();
+            if (!reuseEmitter) {
+                emitter.Close();
+                return null;
+            } else {
+                return emitter;
             }
         }
 
-        public emitUnit(script: Script, createFile: (path: string, useUTF8?: bool) => ITextWriter) {
-            if (!this.emitSettings.outputMany) {
-                throw new Error("emitUnit is not supported when outputMany is enabled.");
-            }
+        public emit(ioHost: EmitterIOHost) {
+            this.parseEmitOption(ioHost);
 
-            if (!script.emitRequired()) {
-                return;
-            }
-
-            var inputFileName = script.locationInfo.filename;
-            var outputFileName = this.getOutputFileName(inputFileName, ".js");
-            var useUTF8ForOutputFile = this.outputScriptToUTF8(script);
-            var outputFile: ITextWriter = createFile(outputFileName, useUTF8ForOutputFile);
-            var sourceMapOutputFile: ITextWriter = null;
-
-            this.emitSettings.createFile = createFile;
-            this.emitSettings.path = outputFileName;
-            var emitter: Emitter = new Emitter(this.typeChecker, outputFile, this.emitSettings);
-
-            if (this.settings.mapSourceFiles) {
-                // Create the source map file if needed
-                var sourceMapOutputFileName = outputFileName + SourceMapper.MapFileExtension;
-                sourceMapOutputFile = createFile(sourceMapOutputFileName);
-            }
-
-            this.emitScript(script, emitter, outputFile, sourceMapOutputFile, inputFileName, outputFileName);
-
-            outputFile.Close();
-        }
-
-        public emit(createFile: (path: string, useUTF8?: bool) => ITextWriter) {
-            if (this.scripts.members.length == 0) {
-                return;
-            }
-
-            if (this.emitSettings.outputMany) {
-                // Emit every file to its own output file
-                for (var i = 0, len = this.scripts.members.length; i < len; i++) {
-                    var script = <Script>this.scripts.members[i];
-                    if (!script.emitRequired()) {
-                        continue;
-                    }
-                    this.emitUnit(script, createFile);
+            var emitter: Emitter = null;
+            for (var i = 0, len = this.scripts.members.length; i < len; i++) {
+                var script = <Script>this.scripts.members[i];
+                if (this.emitSettings.outputMany || emitter == null) {
+                    emitter = this.emitUnit(script, !this.emitSettings.outputMany);
+                } else {
+                    this.emitUnit(script, true, emitter);
                 }
             }
-            else {
-                // Emit all files to a single output file
-                var outputFileName = this.settings.outputFileName;
-                var useUTF8ForOutputFile = this.outputScriptsToUTF8(<Script[]>(this.scripts.members));
-                var outputFile: ITextWriter = createFile(outputFileName, useUTF8ForOutputFile);
-                var sourceMapOutputFile: ITextWriter = null;
 
-                this.emitSettings.createFile = createFile;
-                this.emitSettings.path = outputFileName;
-                var emitter: Emitter = new Emitter(this.typeChecker, outputFile, this.emitSettings);
-
-                if (this.settings.mapSourceFiles) {
-                    // Create the source map file if needed
-                    var sourceMapOutputFileName = outputFileName + SourceMapper.MapFileExtension;
-                    sourceMapOutputFile = createFile(sourceMapOutputFileName);
-                }
-
-                for (var i = 0, len = this.scripts.members.length; i < len; i++) {
-                    var script = <Script>this.scripts.members[i];
-                    var inputFileName = script.locationInfo.filename;
-                    if (!script.emitRequired()) {
-                        continue;
-                    }
-                    this.emitScript(script, emitter, outputFile, sourceMapOutputFile, inputFileName, outputFileName);
-                }
-                outputFile.Close();
+            if (emitter) {
+                emitter.Close();
             }
         }
 
         public emitToOutfile(outputFile: ITextWriter) {
-            var emitter: Emitter = null;
             if (this.settings.mapSourceFiles) {
                 throw Error("Cannot generate source map");
             }
@@ -563,41 +654,42 @@ module TypeScript {
                 throw Error("Cannot generate declaration files");
             }
 
-            var emitter: Emitter = new Emitter(this.typeChecker, outputFile, this.emitSettings);
+            if (this.settings.outputOption != "") {
+                throw Error("Cannot parse output option");
+            }
 
+            var emitter: Emitter = emitter = new Emitter(this.typeChecker, "stdout", outputFile, this.emitSettings);;
             for (var i = 0, len = this.scripts.members.length; i < len; i++) {
                 var script = <Script>this.scripts.members[i];
-                this.emitScript(script, emitter, outputFile, null, null, null);
+                this.typeChecker.locationInfo = script.locationInfo;
+                emitter.emitJavascript(script, TokenID.Comma, false);
             }
         }
 
-        public emitAST(outputMany: bool, createFile: (path: string, useUTF8?: bool) => ITextWriter) {
+        public emitAST(ioHost: EmitterIOHost) {
+            this.parseEmitOption(ioHost);
+
             var outFile: ITextWriter = null;
             var context: PrintContext = null;
 
             for (var i = 0, len = this.scripts.members.length; i < len; i++) {
                 var script = <Script>this.scripts.members[i];
-                if (outputMany) {
+                if (this.emitSettings.outputMany || context == null) {
                     var fname = this.units[i].filename;
-                    var outFname = this.getOutputFileName(fname, ".txt");
-                    this.emitSettings.path = outFname;
-                    outFile = createFile(outFname, this.outputScriptToUTF8(script));
+                    var mapToTxtFileName = (fileName: string, wholeFileNameReplaced: bool) => {
+                        return TypeScriptCompiler.mapToFileNameExtention(".txt", fileName, wholeFileNameReplaced);
+                    };
+                    var outFname = this.emitSettings.mapOutputFileName(fname, mapToTxtFileName);
+                    outFile = this.emitSettings.ioHost.createFile(outFname, this.useUTF8ForFile(script));
                     context = new PrintContext(outFile, this.parser);
                 }
-                else if (context == null) {
-                    // Create the file
-                    outFile = createFile(this.settings.outputFileName, this.outputScriptsToUTF8(<Script[]>(this.scripts.members)));
-
-                    context = new PrintContext(outFile, this.parser);
-                }
-
                 getAstWalkerFactory().walk(script, prePrintAST, postPrintAST, null, context);
-
-                if (outputMany) {
+                if (this.emitSettings.outputMany) {
                     outFile.Close();
                 }
             }
-            if (!outputMany) {
+
+            if (this.emitSettings.outputMany) {
                 outFile.Close();
             }
         }
@@ -614,15 +706,6 @@ module TypeScript {
                 }
             }
             return false;
-        }
-
-        private getOutputFileName(inputFileName: string, extension: string): string {
-            var splitFileName = inputFileName.split(".");
-            splitFileName.pop();
-            var baseFileName = splitFileName.join(".");
-            var outputFileName = baseFileName + extension;
-
-            return outputFileName;
         }
     }
 
