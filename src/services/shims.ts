@@ -480,6 +480,17 @@ module Services {
                 });
         }
 
+        /// Emit
+        public getEmitOutput(fileName: string): string {
+            return this.forwardJSONCall(
+                "getEmitOutput(\"" + fileName + "\")",
+                () => {
+                    var output = this.languageService.getEmitOutput(fileName);
+                    var result = _resultToJSON(output);
+                    return result;
+                });
+        }
+
         private _navigateToItemsToString(items: Services.NavigateToItem[]): string {
             var result = "";
             for (var i = 0; i < items.length; i++) {

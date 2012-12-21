@@ -916,7 +916,7 @@ module Harness {
                 var outputs = {};
 
                 compiler.settings.outputMany = true;
-                compiler.emitDeclarationFile((fn: string) => {
+                compiler.emitDeclarations((fn: string) => {
                     outputs[fn] = new Harness.Compiler.WriterAggregator();
                     return outputs[fn];
                 });

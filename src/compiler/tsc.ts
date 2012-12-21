@@ -202,7 +202,7 @@ class BatchCompiler {
                 }
             }
 
-            compiler.emitDeclarationFile(this.ioHost.createFile);
+            compiler.emitDeclarations(this.ioHost.createFile);
         }
         else { 
             compiler.emitAST(this.compilationSettings.outputMany, this.ioHost.createFile);

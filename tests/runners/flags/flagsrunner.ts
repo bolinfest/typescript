@@ -87,7 +87,7 @@ class FlagsRunner extends RunnerBase {
 
             if (settings.generateDeclarationFiles) {
                 this.fsOutput.WriteLine("/* DECLARATION FILE */");
-                compiler.emitDeclarationFile(() => this.fsOutput);
+                compiler.emitDeclarations(() => this.fsOutput);
             }
         });
 

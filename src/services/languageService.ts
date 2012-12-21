@@ -47,6 +47,7 @@ module Services {
         getSymbolAtPosition(script: TypeScript.AST, pos: number): TypeScript.Symbol;
 
         getSymbolTree(): Services.ISymbolTree;
+        getEmitOutput(fileName: string) : IOutputFile[];
     }
 
 
@@ -442,6 +443,12 @@ module Services {
         }
     }
 
+    export interface IOutputFile {
+        name: string;
+        useUTF8encoding: bool;
+        text: string;
+    }
+    
     export class LanguageService implements ILanguageService {
 
         public  logger: TypeScript.ILogger;
@@ -1798,6 +1805,13 @@ module Services {
 
             var unitIndex = this.compilerState.getUnitIndex(fileName);
             return this.compilerState.getErrorEntries(maxCount, (u, e) => { return u === unitIndex; });
+        }
+
+        /// Emit
+        public getEmitOutput(fileName: string): IOutputFile[] {
+            this.refresh();
+
+            return this.compilerState.getEmitOutput(fileName);
         }
 
         private getTypeInfoAtPosition(pos: number, script: TypeScript.AST): {

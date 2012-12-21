@@ -9,8 +9,8 @@ module Services {
     // Used to help with incremental behavior of language service.
     //
     export class ScriptMap {
-        private map: TypeScript.StringHashTable; 
-        
+        private map: TypeScript.StringHashTable;
+
         constructor() {
             // script id => ScriptMapEntry
             this.map = new TypeScript.StringHashTable();
@@ -50,8 +50,7 @@ module Services {
             public hostUnitIndex: number,
             public id: string,
             public version: number,
-            public isResident: bool) 
-        {
+            public isResident: bool) {
             this._cachedSourceText = null;
             this._sourceText = null;
         }
@@ -79,7 +78,7 @@ module Services {
     // set of scripts handled by the host changes.
     //
     export class HostCache {
-        
+
         private map: TypeScript.StringHashTable;
         private array: HostCacheEntry[];
 
@@ -218,6 +217,24 @@ module Services {
             else {
                 unitErrors.typeCheckErrors.push(entry);
             }
+        }
+    }
+
+    class TextWriter implements ITextWriter {
+        public text: string;
+        constructor(public name: string, public useUTF8encoding: bool) {
+            this.text = "";
+        }
+
+        public Write(s) {
+            this.text += s;
+        }
+
+        public WriteLine(s) {
+            this.text += s + '\n';
+        }
+
+        public Close() {
         }
     }
 
@@ -399,7 +416,6 @@ module Services {
         }
 
         private createCompiler() {
-            var outfile = { Write: (s) => { }, WriteLine: (s) => { }, Close: () => { } };
             var outerr = { Write: (s) => { }, WriteLine: (s) => { }, Close: () => { } };
 
             // Create and initialize compiler
@@ -725,6 +741,34 @@ module Services {
             var script = parser.parse(sourceText, fileName, 0);
 
             return new ScriptSyntaxAST(this.logger, script, sourceText);
+        }
+
+        public getEmitOutput(fileName: string): IOutputFile[] {
+            var unitIndex = this.compilerCache.getUnitIndex(fileName);
+            if (unitIndex < 0) {
+                throw new Error("Interal error: No AST found for file \"" + fileName + "\".");
+            }
+
+            var result: IOutputFile[] = [];
+
+            // Check for errors
+            var errors = this.errorCollector.fileMap[unitIndex];
+            if (errors !== undefined && errors.parseErrors.length > 0) {
+                return result;
+            }
+
+            var createFile = (fileName: string, useUTF8encoding?: bool = false) => {
+                var outputFile = new TextWriter(fileName, useUTF8encoding);
+                result.push(outputFile);
+                return outputFile;
+            };
+
+            // Call the emitter
+            var script = <TypeScript.Script>this.compiler.scripts.members[unitIndex];
+            this.compiler.emitUnit(script, createFile);
+            this.compiler.emitDeclarationUnit(script, createFile);
+
+            return result;
         }
     }
 }
