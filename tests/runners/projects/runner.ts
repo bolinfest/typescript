@@ -616,7 +616,15 @@ class ProjectRunner extends RunnerBase {
                     , skipRun: true
                     , errors: ['// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts (2,11): export keyword not permitted on import declaration'
                         , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts (2,37): Import declaration of external module is permitted only in global or top level dynamic modules'
-                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts (21,33): Import declaration of external module is permitted only in global or top level dynamic modules']
+                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts (21,33): Import declaration of external module is permitted only in global or top level dynamic modules'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(3,4): exported variable \'c1\' is using inaccessible module "mExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(5,8): exported function return type is using inaccessible module "mExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(7,4): exported variable \'x1\' is using inaccessible module "mExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(9,32): exported class \'class1\' extends class from private module "mExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(22,4): exported variable \'c3\' is using inaccessible module "mNonExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(24,8): exported function return type is using inaccessible module "mNonExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(26,4): exported variable \'x3\' is using inaccessible module "mNonExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-InsideModule/testGlo.ts(28,32): exported class \'class3\' extends class from private module "mNonExported"']
             });
 
             tests.push({
@@ -642,7 +650,15 @@ class ProjectRunner extends RunnerBase {
                     , skipRun: true
                     , errors: ['// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts (2,11): export keyword not permitted on import declaration'
                         , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts (2,37): Import declaration of external module is permitted only in global or top level dynamic modules'
-                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts (42,33): Import declaration of external module is permitted only in global or top level dynamic modules']
+                        , '// ' + TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts (42,33): Import declaration of external module is permitted only in global or top level dynamic modules'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(24,8): exported variable \'c1\' is using inaccessible module "mExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(26,12): exported function return type is using inaccessible module "mExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(28,8): exported variable \'x1\' is using inaccessible module "mExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(30,36): exported class \'class1\' extends class from private module "mExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(64,8): exported variable \'c3\' is using inaccessible module "mNonExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(66,12): exported function return type is using inaccessible module "mNonExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(68,8): exported variable \'x3\' is using inaccessible module "mNonExported"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/privacyCheck-ImportInParent/test.ts(70,36): exported class \'class3\' extends class from private module "mNonExported"']
             });
 
             tests.push({
@@ -772,15 +788,17 @@ class ProjectRunner extends RunnerBase {
                     , skipRun: true
             });
 
-            // BUG: to be fixed later.
             tests.push({
-                scenario: "declarations_IndirectImport"
+                scenario: "declarations_IndirectImport should result in error"
                     , projectRoot: 'tests/cases/projects/declarations_IndirectImport'
                     , inputFiles: ['useModule.ts']
                     , collectedFiles: ['useModule.ts', 'm4.ts', 'm5.ts']
                     , outputFiles: ['useModule.js', 'm4.js', 'm5.js']
-                    , declareFiles: ['m4.d.ts', 'm5.d.ts', 'useModule.d.ts']
+                    , negative: true
                     , skipRun: true
+                    , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/declarations_IndirectImport/useModule.ts(3,0): exported variable \'d\' is using inaccessible module "m4"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/declarations_IndirectImport/useModule.ts(4,0): exported variable \'x\' is using inaccessible module "m4"'
+                        , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/declarations_IndirectImport/useModule.ts(7,4): exported function return type is using inaccessible module "m4"']
             });
 
             var amdDriverTemplate = "var requirejs = require('../r.js');\n\n" +

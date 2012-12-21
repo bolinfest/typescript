@@ -19,5 +19,7 @@
 0.ts line 51 col 4: exported variable 'm1_im2_private_v2_public' has or is using private type 'c1'
 0.ts line 52 col 4: exported variable 'm1_im2_private_v3_public' has or is using private type 'c1'
 0.ts line 53 col 4: exported variable 'm1_im2_private_v4_public' has or is using private type 'c1'
+0.ts line 60 col 4: exported variable 'm1_im3_private_v1_public' is using inaccessible module "m1_M3_public"
+0.ts line 61 col 4: exported variable 'm1_im3_private_v2_public' is using inaccessible module "m1_M3_public"
 0.ts line 70 col 4: exported variable 'm1_im4_private_v1_public' has or is using private type 'c1'
 0.ts line 71 col 4: exported variable 'm1_im4_private_v2_public' has or is using private type 'c1'
