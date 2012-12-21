@@ -614,6 +614,7 @@ module TypeScript {
                     // create the new outfile for this module
                     var tsModFileName = stripQuotes(moduleDecl.name.actualText);
                     var modFilePath = trimModName(tsModFileName) + ".js";
+                    modFilePath = this.emitOptions.mapOutputFileName(modFilePath, TypeScriptCompiler.mapToJSFileName);
 
                     if (this.emitOptions.ioHost) {
                         // Ensure that the slashes are normalized so that the comparison is fair
@@ -621,7 +622,7 @@ module TypeScript {
                         // first call to switchToForwardSlashes is technically a no-op, but it will prevent us from
                         // regressing if the parser changes
                         if (switchToForwardSlashes(modFilePath) != switchToForwardSlashes(this.emittingFileName)) {
-                            this.emittingFileName = this.emitOptions.mapOutputFileName(modFilePath, TypeScriptCompiler.mapToJSFileName);
+                            this.emittingFileName = modFilePath;
                             var useUTF8InOutputfile = moduleDecl.containsUnicodeChar || (this.emitOptions.emitComments && moduleDecl.containsUnicodeCharInComment);
                             this.outfile = this.emitOptions.ioHost.createFile(this.emittingFileName, useUTF8InOutputfile);
                             if (prevSourceMapper != null) {
@@ -630,9 +631,8 @@ module TypeScript {
                                 this.emitState.column = 0;
                                 this.emitState.line = 0;
                             }
-                        } else if (!this.emitOptions.outputMany) {
-                            // If we are emitting single file then its path cannot collide with module output
-                            this.checker.errorReporter.emitterError(moduleDecl, "Module emit collides with emitted script: " + modFilePath);
+                        } else {
+                            CompilerDiagnostics.assert(this.emitOptions.outputMany, "Cannot have dynamic modules compiling into single file");
                         }
                     }
 

@@ -1058,7 +1058,7 @@ class ProjectRunner extends RunnerBase {
                     , skipRun: true
             });
 
-            // TODO: Add for multi folder that spans one level below where we are building
+            // TODO: Add for outputdir_multifolder that spans one level below where we are building
             //  Need to verify baselines as well
 
             tests.push({
@@ -1139,6 +1139,320 @@ class ProjectRunner extends RunnerBase {
                     , outputOption: 'outdir/simple'
                     , skipRun: true
             });
+
+            tests.push({
+                scenario: "outputdir_module_simple: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['m1.js', 'test.js']
+                    , declareFiles: ['m1.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , skipRun: true
+            });
+
+            // TODO: Verify Error
+            //tests.push({
+            //    scenario: "outputdir_module_simple: specify outputFile"
+            //        , projectRoot: 'tests/cases/projects/outputdir_module_simple'
+            //        , inputFiles: ['test.ts']
+            //        , collectedFiles: ['test.ts', 'm1.ts']
+            //        , outputFiles: ['bin/test.js']
+            //        , declareFiles: ['bin/test.d.ts']
+            //        , outputOption: 'bin/test.js'
+            //        , verifyEmitFiles: true
+            //        , skipRun: true
+            //});
+
+            tests.push({
+                scenario: "outputdir_module_simple: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['outdir/simple/m1.js', 'outdir/simple/test.js']
+                    , verifyEmitFiles: true
+                    , declareFiles: ['outdir/simple/m1.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_module_simple: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['m1.js', 'm1.js.map', 'test.js', 'test.js.map']
+                    , declareFiles: ['m1.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            // TODO: Verify that it results in error
+            //tests.push({
+            //    scenario: "[Sourcemap]: outputdir_module_simple: specify outputFile"
+            //        , projectRoot: 'tests/cases/projects/outputdir_module_simple'
+            //        , inputFiles: ['test.ts']
+            //        , collectedFiles: ['test.ts', 'm1.ts']
+            //        , outputFiles: ['bin/test.js', 'bin/test.js.map']
+            //        , declareFiles: ['bin/test.d.ts']
+            //        , outputOption: 'bin/test.js'
+            //        , verifyEmitFiles: true
+            //        , generateMapFiles: true
+            //        , skipRun: true
+            //});
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_module_simple: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['outdir/simple/m1.js', 'outdir/simple/m1.js.map', 'outdir/simple/test.js', 'outdir/simple/test.js.map']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , declareFiles: ['outdir/simple/m1.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_module_subfolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['ref/m1.js', 'test.js']
+                    , declareFiles: ['ref/m1.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , skipRun: true
+            });
+
+            // TODO: Verify that it results in error
+            //tests.push({
+            //    scenario: "outputdir_module_subfolder: specify outputFile"
+            //        , projectRoot: 'tests/cases/projects/outputdir_module_subfolder'
+            //        , inputFiles: ['test.ts']
+            //        , collectedFiles: ['test.ts', 'ref/m1.ts']
+            //        , outputFiles: ['bin/test.js']
+            //        , declareFiles: ['bin/test.d.ts']
+            //        , outputOption: 'bin/test.js'
+            //        , verifyEmitFiles: true
+            //        , skipRun: true
+            //});
+
+            tests.push({
+                scenario: "outputdir_module_subfolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['outdir/simple/ref/m1.js', 'outdir/simple/test.js']
+                    , verifyEmitFiles: true
+                    , declareFiles: ['outdir/simple/ref/m1.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_module_subfolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['ref/m1.js', 'ref/m1.js.map', 'test.js', 'test.js.map']
+                    , declareFiles: ['ref/m1.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            // TODO: Verify that it results in error
+            //tests.push({
+            //    scenario: "[Sourcemap]: outputdir_module_subfolder: specify outputFile"
+            //        , projectRoot: 'tests/cases/projects/outputdir_module_subfolder'
+            //        , inputFiles: ['test.ts']
+            //        , collectedFiles: ['test.ts', 'ref/m1.ts']
+            //        , outputFiles: ['bin/test.js', 'bin/test.js.map']
+            //        , declareFiles: ['bin/test.d.ts']
+            //        , outputOption: 'bin/test.js'
+            //        , verifyEmitFiles: true
+            //        , generateMapFiles: true
+            //        , skipRun: true
+            //});
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_module_subfolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['outdir/simple/ref/m1.js', 'outdir/simple/ref/m1.js.map', 'outdir/simple/test.js', 'outdir/simple/test.js.map']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , declareFiles: ['outdir/simple/ref/m1.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            // TODO: Add for outputdir_module_multifolder that spans one level below where we are building
+            //  Need to verify baselines as well
+
+            tests.push({
+                scenario: "outputdir_module_multifolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_module_multifolder_ref/m2.ts']
+                    , outputFiles: ['ref/m1.js', '../outputdir_module_multifolder_ref/m2.js', 'test.js']
+                    , declareFiles: ['ref/m1.d.ts', '../outputdir_module_multifolder_ref/m2.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , verifyFileNamesOnly: true
+                    , skipRun: true
+            });
+
+            // TODO: Verify that it results in error
+            //tests.push({
+            //    scenario: "outputdir_module_multifolder: specify outputFile"
+            //        , projectRoot: 'tests/cases/projects/outputdir_module_multifolder'
+            //        , inputFiles: ['test.ts']
+            //        , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_module_multifolder_ref/m2.ts']
+            //        , outputFiles: ['bin/test.js']
+            //        , declareFiles: ['bin/test.d.ts']
+            //        , outputOption: 'bin/test.js'
+            //        , verifyEmitFiles: true
+            //        , verifyFileNamesOnly: true
+            //        , skipRun: true
+            //});
+
+            tests.push({
+                scenario: "outputdir_module_multifolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_module_multifolder_ref/m2.ts']
+                    , outputFiles: ['outdir/simple/outputdir_module_multifolder/ref/m1.js', 'outdir/simple/outputdir_module_multifolder_ref/m2.js', 'outdir/simple/outputdir_module_multifolder/test.js']
+                    , verifyEmitFiles: true
+                    , verifyFileNamesOnly: true
+                    , declareFiles: ['outdir/simple/outputdir_module_multifolder/ref/m1.d.ts', 'outdir/simple/outputdir_module_multifolder_ref/m2.d.ts', 'outdir/simple/outputdir_module_multifolder/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_module_multifolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_module_multifolder_ref/m2.ts']
+                    , outputFiles: ['ref/m1.js', 'ref/m1.js.map', '../outputdir_module_multifolder_ref/m2.js', '../outputdir_module_multifolder_ref/m2.js.map', 'test.js', 'test.js.map']
+                    , declareFiles: ['ref/m1.d.ts', '../outputdir_module_multifolder_ref/m2.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , verifyFileNamesOnly: true
+                    , skipRun: true
+            });
+
+            // TODO: Verify that it results in error
+            //tests.push({
+            //    scenario: "[Sourcemap]: outputdir_module_multifolder: specify outputFile"
+            //        , projectRoot: 'tests/cases/projects/outputdir_module_multifolder'
+            //        , inputFiles: ['test.ts']
+            //        , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_module_multifolder_ref/m2.ts']
+            //        , outputFiles: ['bin/test.js', 'bin/test.js.map']
+            //        , declareFiles: ['bin/test.d.ts']
+            //        , outputOption: 'bin/test.js'
+            //        , verifyEmitFiles: true
+            //        , verifyFileNamesOnly: true
+            //        , generateMapFiles: true
+            //        , skipRun: true
+            //});
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_module_multifolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_module_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_module_multifolder_ref/m2.ts']
+                    , outputFiles: ['outdir/simple/outputdir_module_multifolder/ref/m1.js', 'outdir/simple/outputdir_module_multifolder/ref/m1.js.map', 'outdir/simple/outputdir_module_multifolder_ref/m2.js', 'outdir/simple/outputdir_module_multifolder_ref/m2.js.map', 'outdir/simple/outputdir_module_multifolder/test.js', 'outdir/simple/outputdir_module_multifolder/test.js.map']
+                    , verifyEmitFiles: true
+                    , verifyFileNamesOnly: true
+                    , generateMapFiles: true
+                    , declareFiles: ['outdir/simple/outputdir_module_multifolder/ref/m1.d.ts', 'outdir/simple/outputdir_module_multifolder_ref/m2.d.ts', 'outdir/simple/outputdir_module_multifolder/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_mixed_subfolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_mixed_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', 'ref/m2.ts']
+                    , outputFiles: ['ref/m1.js', 'ref/m2.js', 'test.js']
+                    , declareFiles: ['ref/m1.d.ts', 'ref/m2.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , skipRun: true
+            });
+
+            // TODO: Verify that it results in error
+            //tests.push({
+            //    scenario: "outputdir_mixed_subfolder: specify outputFile"
+            //        , projectRoot: 'tests/cases/projects/outputdir_mixed_subfolder'
+            //        , inputFiles: ['test.ts']
+            //        , collectedFiles: ['test.ts', 'ref/m1.ts', 'ref/m2.ts']
+            //        , outputFiles: ['bin/test.js']
+            //        , declareFiles: ['bin/test.d.ts']
+            //        , outputOption: 'bin/test.js'
+            //        , verifyEmitFiles: true
+            //        , skipRun: true
+            //});
+
+            tests.push({
+                scenario: "outputdir_mixed_subfolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_mixed_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', 'ref/m2.ts']
+                    , outputFiles: ['outdir/simple/ref/m1.js', 'outdir/simple/ref/m2.js', 'outdir/simple/test.js']
+                    , verifyEmitFiles: true
+                    , declareFiles: ['outdir/simple/ref/m1.d.ts', 'outdir/simple/ref/m2.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_mixed_subfolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_mixed_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', 'ref/m2.ts']
+                    , outputFiles: ['ref/m1.js', 'ref/m1.js.map', 'ref/m2.js', 'ref/m2.js.map', 'test.js', 'test.js.map']
+                    , declareFiles: ['ref/m1.d.ts', 'ref/m2.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            // TODO: Verify that it results in error
+            //tests.push({
+            //    scenario: "[Sourcemap]: outputdir_mixed_subfolder: specify outputFile"
+            //        , projectRoot: 'tests/cases/projects/outputdir_mixed_subfolder'
+            //        , inputFiles: ['test.ts']
+            //        , collectedFiles: ['test.ts', 'ref/m1.ts', 'ref/m2.ts']
+            //        , outputFiles: ['bin/test.js', 'bin/test.js.map']
+            //        , declareFiles: ['bin/test.d.ts']
+            //        , outputOption: 'bin/test.js'
+            //        , verifyEmitFiles: true
+            //        , generateMapFiles: true
+            //        , skipRun: true
+            //});
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_mixed_subfolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_mixed_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', 'ref/m2.ts']
+                    , outputFiles: ['outdir/simple/ref/m1.js', 'outdir/simple/ref/m1.js.map', 'outdir/simple/ref/m2.js', 'outdir/simple/ref/m2.js.map', 'outdir/simple/test.js', 'outdir/simple/test.js.map']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , declareFiles: ['outdir/simple/ref/m1.d.ts', 'outdir/simple/ref/m2.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            // TODO: case when folder is present and option --out is use
+            // TODO: case when file is present for the option --out in use
+            // TODO: since the precompiled info about the referenced files is not passed the declare files 
+            //       generated using this runner isnt emitting updated reference tag.
 
             var amdDriverTemplate = "var requirejs = require('../r.js');\n\n" +
         "requirejs.config({\n" +
