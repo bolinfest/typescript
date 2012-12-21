@@ -602,19 +602,15 @@ module TypeScript {
             }
 
             var fname = script.locationInfo.filename;
-            var outFname: string;
-            var outFile: ITextWriter;
             if (!emitter) {
-                outFname = this.emitSettings.mapOutputFileName(fname, TypeScriptCompiler.mapToJSFileName);
-                outFile = this.emitSettings.ioHost.createFile(outFname, this.useUTF8ForFile(script));
+                var outFname = this.emitSettings.mapOutputFileName(fname, TypeScriptCompiler.mapToJSFileName);
+                var outFile = this.emitSettings.ioHost.createFile(outFname, this.useUTF8ForFile(script));
                 emitter = new Emitter(this.typeChecker, outFname, outFile, this.emitSettings);
-            } else {
-                outFname = emitter.emittingFileName;
-                outFile = emitter.outfile;
-            }
-
-            if (this.settings.mapSourceFiles) {
-                emitter.setSourceMappings(new TypeScript.SourceMapper(fname, outFname, outFile, this.emitSettings.ioHost.createFile(outFname + SourceMapper.MapFileExtension)));
+                if (this.settings.mapSourceFiles) {
+                    emitter.setSourceMappings(new TypeScript.SourceMapper(fname, outFname, outFile, this.emitSettings.ioHost.createFile(outFname + SourceMapper.MapFileExtension)));
+                }
+            } else if (this.settings.mapSourceFiles) {
+                emitter.setSourceMappings(new TypeScript.SourceMapper(fname, emitter.emittingFileName, emitter.outfile, emitter.sourceMapper.sourceMapOut));
             }
 
             this.typeChecker.locationInfo = script.locationInfo;

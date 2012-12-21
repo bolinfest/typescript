@@ -56,20 +56,25 @@ class HarnessBatch {
     public resolvedEnvironment: TypeScript.CompilationEnvironment;
     public errout: Harness.Compiler.WriterAggregator;
 
-    constructor(getDeclareFiles: bool) {
+    constructor(getDeclareFiles: bool, generateMapFiles: bool, outputOption: string) {
         this.host = IO;
         this.compilationSettings = new TypeScript.CompilationSettings();
         this.compilationSettings.generateDeclarationFiles = getDeclareFiles;
+        this.compilationSettings.mapSourceFiles = generateMapFiles;
+        this.compilationSettings.outputOption = outputOption;
         this.compilationEnvironment = new TypeScript.CompilationEnvironment(this.compilationSettings, this.host);
         this.commandLineHost = new HarnessHost();
         this.resolvedEnvironment = null;
         this.errout = new Harness.Compiler.WriterAggregator();
 
-        this.harnessCompile = function (files: string[], createDeclareFile: (path: string, useUTF8?: bool) => ITextWriter) {
+        this.harnessCompile = function (
+            files: string[],
+            createEmitFiles: (path: string, useUTF8?: bool) => ITextWriter,
+            createDeclareFile: (path: string, useUTF8?: bool) => ITextWriter) {
             TypeScript.CompilerDiagnostics.diagnosticWriter = { Alert: function (s: string) { this.host.printLine(s); } }
 
             files.unshift(Harness.userSpecifiedroot + 'typings\\lib.d.ts');
-
+            
             for (var i = 0; i < files.length; i++) {
                 var code = new TypeScript.SourceUnit(files[i], null);
                 this.compilationEnvironment.code.push(code);
@@ -84,7 +89,7 @@ class HarnessBatch {
             // resolve file dependencies
             this.resolvedEnvironment = this.resolve();
 
-            this.compile(createDeclareFile);
+            this.compile(createEmitFiles, createDeclareFile);
         }
     }
 
@@ -95,7 +100,9 @@ class HarnessBatch {
 
     /// Do the actual compilation reading from input files and
     /// writing to output file(s).
-    private compile(createDeclareFile : (path: string, useUTF8?: bool) => ITextWriter) {
+    private compile(
+        createEmitFile: (path: string, useUTF8?: bool) => ITextWriter,
+        createDeclareFile: (path: string, useUTF8?: bool) => ITextWriter) {
         var compiler: TypeScript.TypeScriptCompiler;
         var _self = this;
         this.errout.reset();
@@ -158,7 +165,7 @@ class HarnessBatch {
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
             compiler.emit({
-                createFile: (fileName: string, useUTF8?: bool) => createFileAndFolderStructure(IO, fileName, useUTF8),
+                createFile: createEmitFile,
                 directoryExists: IO.directoryExists,
                 fileExists: IO.fileExists,
                 resolvePath: IO.resolvePath
@@ -243,30 +250,63 @@ class ProjectRunner extends RunnerBase {
                     outputFiles.push(Harness.userSpecifiedroot + spec.projectRoot + "/" + spec.outputFiles[i]);
                 }
 
-                var declareFiles: string[] = [];
                 var generatedDeclareFiles: { fname: string; file: Harness.Compiler.WriterAggregator;  }[] = [];
                 var getDeclareFiles = false;
                 if (spec.declareFiles) {
                     getDeclareFiles = true;
                 }
 
-                var writeDeclareFile = (fn: string) => {
+                var writeGeneratedFile = (files: { fname: string; file: Harness.Compiler.WriterAggregator; }[], fn: string) => {
                     var fnEntry = { fname: fn, file: new Harness.Compiler.WriterAggregator() };
-                    generatedDeclareFiles.push(fnEntry);
+                    files.push(fnEntry);
                     return fnEntry.file;
                 }
 
-                var codeGenType: string;
+                var writeDeclareFile = (fn: string) => {
+                    return writeGeneratedFile(generatedDeclareFiles, fn);
+                }
+
+                var generatedEmitFiles: { fname: string; file: Harness.Compiler.WriterAggregator; }[] = [];
+                var writeGeneratedEmitFile = (fn: string) => {
+                    return writeGeneratedFile(generatedEmitFiles, fn);
+                }
+
+                var writeEmitFile = (fileName: string, useUTF8?: bool) => createFileAndFolderStructure(IO, fileName, useUTF8);
+                var verifyEmitFiles = false;
+                if (spec.verifyEmitFiles) {
+                    verifyEmitFiles = true;
+                    writeEmitFile = writeGeneratedEmitFile;
+                }
+
+                var generateMapFiles = false;
+                var sourcemapDir = "";
+                if (spec.generateMapFiles) {
+                    generateMapFiles = true;
+                    sourcemapDir = "sourcemap/"
+                }
+
                 var baseFileName = TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + "/" + spec.projectRoot + "/";
-                var compareDeclareFiles = () => {
-                    assert.equal(generatedDeclareFiles.length, spec.declareFiles.length);
-                    for (var i = 0; i < spec.declareFiles.length; i++) {
-                        var expectedFName = baseFileName + spec.declareFiles[i];
-                        assert.equal(generatedDeclareFiles[i].fname, expectedFName);
-                        var fileContents = generatedDeclareFiles[i].file.lines.join("\n");
-                        var localFileName = baseFileName + "local/" + codeGenType + "/" + spec.declareFiles[i];
+                var outputOption = "";
+                if (spec.outputOption) {
+                    outputOption = baseFileName + spec.outputOption;
+                }
+
+                var codeGenType: string;
+                var compareGeneratedFiles = (
+                    generatedFiles: { fname: string; file: Harness.Compiler.WriterAggregator; }[],
+                    expectedFiles: string[]
+                    ) => {
+                    assert.equal(generatedFiles.length, expectedFiles.length);
+                    for (var i = 0; i < expectedFiles.length; i++) {
+                        var expectedFName = baseFileName + expectedFiles[i];
+                        assert.equal(IO.resolvePath(generatedFiles[i].fname), IO.resolvePath(expectedFName));
+                        if (spec.verifyFileNamesOnly) {
+                            continue;
+                        }
+                        var fileContents = generatedFiles[i].file.lines.join("\n");
+                        var localFileName = baseFileName + "local/" + codeGenType + "/" + sourcemapDir + expectedFiles[i];
                         var localFile = createFileAndFolderStructure(IO, localFileName);
-                        var referenceFileName = baseFileName + "reference/" + codeGenType + "/" + spec.declareFiles[i];
+                        var referenceFileName = baseFileName + "reference/" + codeGenType + "/" + sourcemapDir + expectedFiles[i];
                         localFile.Write(fileContents);
                         localFile.Close();
                         assert.noDiff(fileContents, IO.readFile(referenceFileName));
@@ -285,10 +325,11 @@ class ProjectRunner extends RunnerBase {
                     cleanProjectDirectory(spec.projectRoot);
 
                     generatedDeclareFiles = [];
+                    generatedEmitFiles = [];
                     TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
                     codeGenType = "node";
-                    var batch = new HarnessBatch(getDeclareFiles);
-                    batch.harnessCompile(inputFiles, writeDeclareFile);
+                    var batch = new HarnessBatch(getDeclareFiles, generateMapFiles, outputOption);
+                    batch.harnessCompile(inputFiles, writeEmitFile, writeDeclareFile);
                     
                     it("collects the right files", function () {
                         var resolvedFiles = batch.getResolvedFilePaths();
@@ -306,9 +347,15 @@ class ProjectRunner extends RunnerBase {
                         });
                     }
 
-                    it("creates the proper output files", function () {
-                        assertAllFilesExist(outputFiles);
-                    });
+                    if (verifyEmitFiles) {
+                        it("checks emit files baseline", function () {
+                            compareGeneratedFiles(generatedEmitFiles, spec.outputFiles);
+                        });
+                    } else {
+                        it("creates the proper output files", function () {
+                            assertAllFilesExist(outputFiles);
+                        });
+                    }
 
                     if (testExec && !spec.skipRun && !spec.skipNodeRun) {
                         it("runs without error", function (done) {
@@ -329,7 +376,7 @@ class ProjectRunner extends RunnerBase {
 
                     if (getDeclareFiles) {
                         it("checks declare files baseline", function () {
-                            compareDeclareFiles();
+                            compareGeneratedFiles(generatedDeclareFiles, spec.declareFiles);
                         });
                     }
                 });
@@ -345,9 +392,10 @@ class ProjectRunner extends RunnerBase {
 
                     TypeScript.moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
                     generatedDeclareFiles = [];
+                    generatedEmitFiles = [];
                     codeGenType = "amd";
-                    var batch = new HarnessBatch(getDeclareFiles);
-                    batch.harnessCompile(inputFiles, writeDeclareFile);
+                    var batch = new HarnessBatch(getDeclareFiles, generateMapFiles, outputOption);
+                    batch.harnessCompile(inputFiles, writeEmitFile, writeDeclareFile);
 
                     it("collects the right files", function () {
                         var resolvedFiles = batch.getResolvedFilePaths();
@@ -367,9 +415,15 @@ class ProjectRunner extends RunnerBase {
                         });
                     }
 
-                    it("creates the proper output files", function () {
-                        assertAllFilesExist(outputFiles);
-                    });
+                    if (verifyEmitFiles) {
+                        it("checks emit files baseline", function () {
+                            compareGeneratedFiles(generatedEmitFiles, spec.outputFiles);
+                        });
+                    } else {
+                        it("creates the proper output files", function () {
+                            assertAllFilesExist(outputFiles);
+                        });
+                    }
 
                     if (testExec && !spec.skipRun) {
                         var moduleName = spec.outputFiles[0].replace(/\.js$/, "");
@@ -393,7 +447,7 @@ class ProjectRunner extends RunnerBase {
 
                     if (getDeclareFiles) {
                         it("checks declare files baseline", function () {
-                            compareDeclareFiles();
+                            compareGeneratedFiles(generatedDeclareFiles, spec.declareFiles);
                         });
                     }
                 });
@@ -783,6 +837,307 @@ class ProjectRunner extends RunnerBase {
                     , errors: [TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/declarations_IndirectImport/useModule.ts(3,0): exported variable \'d\' is using inaccessible module "m4"'
                         , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/declarations_IndirectImport/useModule.ts(4,0): exported variable \'x\' is using inaccessible module "m4"'
                         , TypeScript.switchToForwardSlashes(IO.resolvePath(Harness.userSpecifiedroot)) + '/tests/cases/projects/declarations_IndirectImport/useModule.ts(7,4): exported function return type is using inaccessible module "m4"']
+            });
+
+            tests.push({
+                scenario: "outputdir_singleFile: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_singleFile'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts']
+                    , outputFiles: ['test.js']
+                    , declareFiles: ['test.d.ts']
+                    , verifyEmitFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_singleFile: specify outputFile"
+                    , projectRoot: 'tests/cases/projects/outputdir_singleFile'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts']
+                    , outputFiles: ['bin/test.js']
+                    , declareFiles: ['bin/test.d.ts']
+                    , outputOption: 'bin/test.js'
+                    , verifyEmitFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_singleFile: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_singleFile'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts']
+                    , outputFiles: ['outdir/simple/test.js']
+                    , verifyEmitFiles: true
+                    , declareFiles: ['outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_singleFile: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_singleFile'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts']
+                    , outputFiles: ['test.js', 'test.js.map']
+                    , declareFiles: ['test.d.ts']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_singleFile: specify outputFile"
+                    , projectRoot: 'tests/cases/projects/outputdir_singleFile'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts']
+                    , outputFiles: ['bin/test.js', 'bin/test.js.map']
+                    , declareFiles: ['bin/test.d.ts']
+                    , outputOption: 'bin/test.js'
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_singleFile: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_singleFile'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts']
+                    , outputFiles: ['outdir/simple/test.js', 'outdir/simple/test.js.map']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , declareFiles: ['outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_simple: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['m1.js', 'test.js']
+                    , declareFiles: ['m1.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_simple: specify outputFile"
+                    , projectRoot: 'tests/cases/projects/outputdir_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['bin/test.js']
+                    , declareFiles: ['bin/test.d.ts']
+                    , outputOption: 'bin/test.js'
+                    , verifyEmitFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_simple: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['outdir/simple/m1.js', 'outdir/simple/test.js']
+                    , verifyEmitFiles: true
+                    , declareFiles: ['outdir/simple/m1.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_simple: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['m1.js', 'm1.js.map', 'test.js', 'test.js.map']
+                    , declareFiles: ['m1.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_simple: specify outputFile"
+                    , projectRoot: 'tests/cases/projects/outputdir_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['bin/test.js', 'bin/test.js.map']
+                    , declareFiles: ['bin/test.d.ts']
+                    , outputOption: 'bin/test.js'
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_simple: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_simple'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'm1.ts']
+                    , outputFiles: ['outdir/simple/m1.js', 'outdir/simple/m1.js.map', 'outdir/simple/test.js', 'outdir/simple/test.js.map']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , declareFiles: ['outdir/simple/m1.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_subfolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['ref/m1.js', 'test.js']
+                    , declareFiles: ['ref/m1.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_subfolder: specify outputFile"
+                    , projectRoot: 'tests/cases/projects/outputdir_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['bin/test.js']
+                    , declareFiles: ['bin/test.d.ts']
+                    , outputOption: 'bin/test.js'
+                    , verifyEmitFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_subfolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['outdir/simple/ref/m1.js', 'outdir/simple/test.js']
+                    , verifyEmitFiles: true
+                    , declareFiles: ['outdir/simple/ref/m1.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_subfolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['ref/m1.js', 'ref/m1.js.map', 'test.js', 'test.js.map']
+                    , declareFiles: ['ref/m1.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_subfolder: specify outputFile"
+                    , projectRoot: 'tests/cases/projects/outputdir_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['bin/test.js', 'bin/test.js.map']
+                    , declareFiles: ['bin/test.d.ts']
+                    , outputOption: 'bin/test.js'
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_subfolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_subfolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts']
+                    , outputFiles: ['outdir/simple/ref/m1.js', 'outdir/simple/ref/m1.js.map', 'outdir/simple/test.js', 'outdir/simple/test.js.map']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , declareFiles: ['outdir/simple/ref/m1.d.ts', 'outdir/simple/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            // TODO: Add for multi folder that spans one level below where we are building
+            //  Need to verify baselines as well
+
+            tests.push({
+                scenario: "outputdir_multifolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_multifolder_ref/m2.ts']
+                    , outputFiles: ['ref/m1.js', '../outputdir_multifolder_ref/m2.js', 'test.js']
+                    , declareFiles: ['ref/m1.d.ts', '../outputdir_multifolder_ref/m2.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , verifyFileNamesOnly: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_multifolder: specify outputFile"
+                    , projectRoot: 'tests/cases/projects/outputdir_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_multifolder_ref/m2.ts']
+                    , outputFiles: ['bin/test.js']
+                    , declareFiles: ['bin/test.d.ts']
+                    , outputOption: 'bin/test.js'
+                    , verifyEmitFiles: true
+                    , verifyFileNamesOnly: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "outputdir_multifolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_multifolder_ref/m2.ts']
+                    , outputFiles: ['outdir/simple/outputdir_multifolder/ref/m1.js', 'outdir/simple/outputdir_multifolder_ref/m2.js', 'outdir/simple/outputdir_multifolder/test.js']
+                    , verifyEmitFiles: true
+                    , verifyFileNamesOnly: true
+                    , declareFiles: ['outdir/simple/outputdir_multifolder/ref/m1.d.ts', 'outdir/simple/outputdir_multifolder_ref/m2.d.ts', 'outdir/simple/outputdir_multifolder/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_multifolder: no outdir"
+                    , projectRoot: 'tests/cases/projects/outputdir_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_multifolder_ref/m2.ts']
+                    , outputFiles: ['ref/m1.js', 'ref/m1.js.map', '../outputdir_multifolder_ref/m2.js', '../outputdir_multifolder_ref/m2.js.map', 'test.js', 'test.js.map']
+                    , declareFiles: ['ref/m1.d.ts', '../outputdir_multifolder_ref/m2.d.ts', 'test.d.ts']
+                    , verifyEmitFiles: true
+                    , generateMapFiles: true
+                    , verifyFileNamesOnly: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_multifolder: specify outputFile"
+                    , projectRoot: 'tests/cases/projects/outputdir_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_multifolder_ref/m2.ts']
+                    , outputFiles: ['bin/test.js', 'bin/test.js.map']
+                    , declareFiles: ['bin/test.d.ts']
+                    , outputOption: 'bin/test.js'
+                    , verifyEmitFiles: true
+                    , verifyFileNamesOnly: true
+                    , generateMapFiles: true
+                    , skipRun: true
+            });
+
+            tests.push({
+                scenario: "[Sourcemap]: outputdir_multifolder: specify outputDirectory"
+                    , projectRoot: 'tests/cases/projects/outputdir_multifolder'
+                    , inputFiles: ['test.ts']
+                    , collectedFiles: ['test.ts', 'ref/m1.ts', '../outputdir_multifolder_ref/m2.ts']
+                    , outputFiles: ['outdir/simple/outputdir_multifolder/ref/m1.js', 'outdir/simple/outputdir_multifolder/ref/m1.js.map', 'outdir/simple/outputdir_multifolder_ref/m2.js', 'outdir/simple/outputdir_multifolder_ref/m2.js.map', 'outdir/simple/outputdir_multifolder/test.js', 'outdir/simple/outputdir_multifolder/test.js.map']
+                    , verifyEmitFiles: true
+                    , verifyFileNamesOnly: true
+                    , generateMapFiles: true
+                    , declareFiles: ['outdir/simple/outputdir_multifolder/ref/m1.d.ts', 'outdir/simple/outputdir_multifolder_ref/m2.d.ts', 'outdir/simple/outputdir_multifolder/test.d.ts']
+                    , outputOption: 'outdir/simple'
+                    , skipRun: true
             });
 
             var amdDriverTemplate = "var requirejs = require('../r.js');\n\n" +
