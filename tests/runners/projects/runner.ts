@@ -158,7 +158,7 @@ class HarnessBatch {
         if (!this.compilationSettings.parseOnly) {
             compiler.typeCheck();
             compiler.emit(this.host.createFile);
-            compiler.emitDeclarationFile(createDeclareFile);
+            compiler.emitDeclarations(createDeclareFile);
         }
 
         if (outfile) {
