@@ -271,7 +271,7 @@ class ProjectRunner extends RunnerBase {
                     return writeGeneratedFile(generatedEmitFiles, fn);
                 }
 
-                var writeEmitFile = (fileName: string, useUTF8?: bool) => createFileAndFolderStructure(IO, fileName, useUTF8);
+                var writeEmitFile = (fileName: string, useUTF8?: bool) => IOUtils.createFileAndFolderStructure(IO, fileName, useUTF8);
                 var verifyEmitFiles = false;
                 if (spec.verifyEmitFiles) {
                     verifyEmitFiles = true;
@@ -305,7 +305,7 @@ class ProjectRunner extends RunnerBase {
                         }
                         var fileContents = generatedFiles[i].file.lines.join("\n");
                         var localFileName = baseFileName + "local/" + codeGenType + "/" + sourcemapDir + expectedFiles[i];
-                        var localFile = createFileAndFolderStructure(IO, localFileName);
+                        var localFile = IOUtils.createFileAndFolderStructure(IO, localFileName);
                         var referenceFileName = baseFileName + "reference/" + codeGenType + "/" + sourcemapDir + expectedFiles[i];
                         localFile.Write(fileContents);
                         localFile.Close();

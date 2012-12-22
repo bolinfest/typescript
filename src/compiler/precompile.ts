@@ -93,6 +93,8 @@ module TypeScript {
 
         public codeGenTarget = CodeGenTarget.ES3;
         public moduleGenTarget = ModuleGenTarget.Synchronous;
+        // --out option passed. 
+        // Default is the "" which leads to multiple files generated next to the.ts files
         public outputOption: string = "";
         public mapSourceFiles = false;
         public generateDeclarationFiles = false;

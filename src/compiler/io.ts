@@ -29,25 +29,27 @@ interface IIO {
     quit(exitCode?: number);
 }
 
-// Creates the directory including its parent if not already present
-function createDirectoryStructure(ioHost: IIO, dirName: string) {
-    if (ioHost.directoryExists(dirName)) {
-        return;
+module IOUtils {
+    // Creates the directory including its parent if not already present
+    function createDirectoryStructure(ioHost: IIO, dirName: string) {
+        if (ioHost.directoryExists(dirName)) {
+            return;
+        }
+
+        var parentDirectory = ioHost.dirName(dirName);
+        if (parentDirectory != "") {
+            createDirectoryStructure(ioHost, parentDirectory);
+        }
+        ioHost.createDirectory(dirName);
     }
 
-    var parentDirectory = ioHost.dirName(dirName);
-    if (parentDirectory != "") {
-        createDirectoryStructure(ioHost, parentDirectory);
+    // Creates a file including its directory structure if not already present
+    export function createFileAndFolderStructure(ioHost: IIO, fileName: string, useUTF8?: bool) {
+        var path = ioHost.resolvePath(fileName);
+        var dirName = ioHost.dirName(path);
+        createDirectoryStructure(ioHost, dirName);
+        return ioHost.createFile(path, useUTF8);
     }
-    ioHost.createDirectory(dirName);
-}
-
-// Creates a file including its directory structure if not already present
-function createFileAndFolderStructure(ioHost: IIO, fileName: string, useUTF8?: bool) {
-    var path = ioHost.resolvePath(fileName);
-    var dirName = ioHost.dirName(path);
-    createDirectoryStructure(ioHost, dirName);
-    return ioHost.createFile(path, useUTF8);
 }
 
 // Declare dependencies needed for all supported hosts

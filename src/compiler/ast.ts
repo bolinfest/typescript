@@ -1152,7 +1152,7 @@ module TypeScript {
                         }
                     }
                     else if (stmt.nodeType == NodeType.ClassDeclaration) {
-                        if (!hasFlag((<InterfaceDeclaration>stmt).varFlags, VarFlags.Ambient)) {
+                        if (!hasFlag((<ClassDeclaration>stmt).varFlags, VarFlags.Ambient)) {
                             return this.setCachedEmitRequired(true);
                         }
                     }

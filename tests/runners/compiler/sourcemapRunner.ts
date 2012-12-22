@@ -29,7 +29,7 @@ class SourcemapRunner extends RunnerBase {
             testFile('sourceMapSample.ts');
 
             var emitterIOHost = {
-                createFile: (fileName: string, useUTF8?: bool) => createFileAndFolderStructure(IO, fileName, useUTF8),
+                createFile: (fileName: string, useUTF8?: bool) => IOUtils.createFileAndFolderStructure(IO, fileName, useUTF8),
                 directoryExists: IO.directoryExists,
                 fileExists: IO.fileExists,
                 resolvePath: IO.resolvePath
