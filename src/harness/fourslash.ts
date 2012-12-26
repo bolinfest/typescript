@@ -133,9 +133,9 @@ module FourSlash {
             }
         }
 
-        public verifyMemberListContains(symbol: string) {
+        public verifyMemberListContains(symbol: string, type?: string, docComment?: string) {
             var members = this.getMemberListAtCaret();
-            this.assertItemInList(members.entries.map(c => c.name), symbol);
+            this.assertItemInCompletionList(members.entries, symbol, type, docComment);
         }
 
         public verifyMemberListDoesNotContain(symbol: string) {
@@ -145,9 +145,9 @@ module FourSlash {
             }
         }
 
-        public verifyCompletionListContains(symbol: string) {
+        public verifyCompletionListContains(symbol: string, type?: string, docComment?: string) {
             var completions = this.getCompletionListAtCaret();
-            this.assertItemInList(completions.entries.map(c => c.name), symbol);
+            this.assertItemInCompletionList(completions.entries, symbol, type, docComment);
         }
 
         public verifyCompletionListDoesNotContain(symbol: string) {
@@ -167,7 +167,11 @@ module FourSlash {
 
         public verifyQuickInfo(expectedTypeName: string) {
             var actualQuickInfo = this.realLangSvc.getTypeAtPosition(this.activeFile.name, this.currentCaretPosition);
-            assert.equal(actualQuickInfo.memberName.toString(), expectedTypeName);
+            var actualQuickInfoString = actualQuickInfo.memberName.toString();
+            if (actualQuickInfo.docComment != "") {
+                actualQuickInfoString += "\n" + actualQuickInfo.docComment;
+            }
+            assert.equal(actualQuickInfoString, expectedTypeName);
         }
 
         public verifyCurrentParameterIsVariable(isVariable: bool) {
@@ -176,6 +180,10 @@ module FourSlash {
 
         public verifyCurrentParameterHelpName(name: string) {
             assert.equal(this.getActiveParameter().name, name);
+        }
+
+        public verifyCurrentParameterHelpDocComment(docComment: string) {
+            assert.equal(this.getActiveParameter().docComment, docComment);
         }
 
         public verifyCurrentParameterHelpType(typeName: string) {
@@ -191,6 +199,11 @@ module FourSlash {
         public verifyCurrentSignatureHelpReturnType(returnTypeName: string) {
             var actualReturnType = this.getActiveSignatureHelp().returnType;
             assert.equal(actualReturnType, returnTypeName);
+        }
+
+        public verifyCurrentSignatureHelpDocComment(docComment: string) {
+            var actualDocComment = this.getActiveSignatureHelp().docComment;
+            assert.equal(actualDocComment, docComment);
         }
 
         public verifyCurrentSignatureHelpCount(expected: number) {
@@ -453,13 +466,51 @@ module FourSlash {
             return this.langSvc.positionToLineCol(this.activeFile.name, this.currentCaretPosition);
         }
 
-        private assertItemInList(items: any[], value: any) {
-            var index = items.indexOf(value);
-            if (index === -1) {
-                var itemsDigest = items.slice(0, 10);
-                if (items.length > 10) itemsDigest.push('...');
-                throw new Error('Expected "' + value + '" to be in list [' + items.map(elem => '"' + elem + '"').join(',') + ']');
+        private assertItemInCompletionList(completionList: Services.CompletionEntry[], name: string, type?: string, docComment?: string) {
+            var items: { name: string; type: string; docComment: string; }[] = completionList.map(element => {
+                return {
+                    name: element.name,
+                    type: element.type,
+                    docComment: element.docComment
+                };
+            });
+
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if (item.name == name) {
+                    if (docComment != undefined) {
+                        assert.equal(item.docComment, docComment);
+                    }
+                    if (type != undefined) {
+                        assert.equal(item.type, type);
+                    }
+                    return;
+                }
             }
+
+            var getItemString = (item: { name: string; type: string; docComment: string; }) => {
+                if (docComment == undefined && type == undefined) {
+                    return item.name;
+                }
+
+                var returnString = "\n{ name: " + item.name;
+                if (type != undefined) {
+                    returnString += ",type: " + item.type;
+                }
+                if (docComment != undefined) {
+                    returnString += ",docComment: " + item.docComment;
+                }
+                returnString += " }"
+
+                return returnString;
+            };
+
+            var itemsDigest = items.slice(0, 10);
+            var itemsString = items.map(elem => getItemString(elem)).join(",");
+            if (items.length > 10) {
+                itemsString += ', ...';
+            }
+            throw new Error('Expected "' + getItemString({ name: name, type: type, docComment: docComment }) + '" to be in list [' + itemsString + ']');
         }
 
         private getScriptIndex(file: FourSlashFile) {

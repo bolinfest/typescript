@@ -144,7 +144,7 @@ module TypeScript {
             codeGenTarget = settings.codeGenTarget;
         }
 
-        public timeFunction(funcDescription: string, func: () =>any): any {
+        public timeFunction(funcDescription: string, func: () => any): any {
             return TypeScript.timeFunction(this.logger, funcDescription, func);
         }
 

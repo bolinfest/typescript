@@ -210,6 +210,12 @@ opts.option('project', {
     }
 });
 
+opts.option('fourslash', {
+    set: function () {
+        runners.push(new FourslashRunner());
+    }
+});
+
 opts.option('ls', {
     set: function () {
         runners.push(new UnitTestRunner('ls'));

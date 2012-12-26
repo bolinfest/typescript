@@ -73,21 +73,21 @@ module FourSlashInterface {
 
         // Verifies the member list contains the specified symbol. The
         // member list is brought up if necessary
-        public memberListContains(symbol: string) {
+        public memberListContains(symbol: string, type?: string, docComment?: string) {
             if (this.negative) {
                 FourSlash.currentTestState.verifyMemberListDoesNotContain(symbol);
             } else {
-                FourSlash.currentTestState.verifyMemberListContains(symbol);
+                FourSlash.currentTestState.verifyMemberListContains(symbol, type, docComment);
             }
         }
 
         // Verifies the completion list contains the specified symbol. The
         // completion list is brought up if necessary
-        public completionListContains(symbol: string) {
+        public completionListContains(symbol: string, type?: string, docComment?: string) {
             if (this.negative) {
                 FourSlash.currentTestState.verifyCompletionListDoesNotContain(symbol);
             } else {
-                FourSlash.currentTestState.verifyCompletionListContains(symbol);
+                FourSlash.currentTestState.verifyCompletionListContains(symbol, type, docComment);
             }
         }
 
@@ -121,8 +121,16 @@ module FourSlashInterface {
             FourSlash.currentTestState.verifyCurrentParameterHelpName(name);
         }
 
+        public currentParameterHelpArgumentDocCommentIs(docComment: string) {
+            FourSlash.currentTestState.verifyCurrentParameterHelpDocComment(docComment);
+        }
+
         public currentSignatureHelpReturnTypeIs(returnTypeName: string) {
             FourSlash.currentTestState.verifyCurrentSignatureHelpReturnType(returnTypeName);
+        }
+
+        public currentSignatureHelpDocCommentIs(docComment: string) {
+            FourSlash.currentTestState.verifyCurrentSignatureHelpDocComment(docComment);
         }
 
         public quickInfoIs(typeName: string) {

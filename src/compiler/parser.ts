@@ -257,6 +257,11 @@ module TypeScript {
                 var c: Comment = new Comment(comment.value, comment.isBlock, comment.endsLine);
                 c.minChar = comment.startPos;
                 c.limChar = comment.startPos + comment.value.length;
+                var lineCol = { line: -1, col: -1 };
+                this.getSourceLineCol(lineCol, c.minChar);
+                c.minLine = lineCol.line;
+                this.getSourceLineCol(lineCol, c.limChar);
+                c.limLine = lineCol.line;
 
                 if (!comment.isBlock && comment.value.length > 3 && comment.value.substring(0, 3) == "///") {
                     var dependencyPath = getAdditionalDependencyPath(comment.value);
@@ -719,7 +724,6 @@ module TypeScript {
             }
 
             moduleDecl.preComments = modulePreComments;
-            moduleDecl.postComments = this.parseComments();
             this.ambientModule = svAmbient;
 
             this.topLevel = svTopLevel;
@@ -1273,6 +1277,7 @@ module TypeScript {
             var fnMin = this.scanner.startPos;
             var minChar = this.scanner.pos;
             var prevNestingLevel = this.nestingLevel;
+            var preComments = this.parseComments();
             this.nestingLevel = 0;
             if ((!this.style_funcInLoop) && this.inLoop()) {
                 this.reportParseStyleError("function declaration in loop");
@@ -1370,6 +1375,7 @@ module TypeScript {
 
             this.nestingLevel = prevNestingLevel;
             this.parsingClassConstructorDefinition = prevInConstr;
+            funcDecl.preComments = preComments;
             return funcDecl;
         }
 
@@ -1803,8 +1809,6 @@ module TypeScript {
 
             this.parsingClassConstructorDefinition = false;
 
-            constructorFuncDecl.postComments = this.parseComments();
-
             return constructorFuncDecl;
         }
 
@@ -1819,6 +1823,12 @@ module TypeScript {
                 this.currentToken = this.scanner.scan();
                 varDecl.typeExpr =
                     this.parseTypeReference(errorRecoverySet | ErrorRecoverySet.Asg | ErrorRecoverySet.Comma, false);
+                if (varDecl.typeExpr && varDecl.typeExpr.nodeType == NodeType.TypeRef) {
+                    var typeExpr = (<TypeReference>varDecl.typeExpr);
+                    if (typeExpr.term && typeExpr.term.nodeType == NodeType.FuncDecl) {
+                        typeExpr.term.preComments = varDecl.preComments;
+                    }
+                }
             }
 
             if (this.currentToken.tokenId == TokenID.Equals) {
@@ -1890,8 +1900,6 @@ module TypeScript {
 
             errorRecoverySet |= ErrorRecoverySet.RParen;
 
-            var preComments = this.parseComments();
-
             if (isAccessor && (modifiers & Modifiers.Ambient)) {
                 this.reportParseError("Property accessors may not be declared in ambient classes");
             }
@@ -1903,7 +1911,6 @@ module TypeScript {
             }
 
             var funcDecl = <FuncDecl>ast;
-            funcDecl.preComments = preComments;
 
             funcDecl.minChar = minChar;
             if (funcDecl.bod !== null)
@@ -1941,8 +1948,6 @@ module TypeScript {
             this.currentClassDefinition.knownMemberNames[methodName.actualText] = true;
 
             this.currentClassDefinition.members.members[this.currentClassDefinition.members.members.length] = funcDecl;
-
-            funcDecl.postComments = this.parseComments();
 
             return funcDecl;
         }
@@ -2225,12 +2230,19 @@ module TypeScript {
             }
             else {
                 var varDecl = new VarDecl(text, this.nestingLevel);
+                varDecl.preComments = this.parseComments();
                 varDecl.minChar = minChar;
                 if (this.currentToken.tokenId == TokenID.Colon) {
                     this.currentToken = this.scanner.scan();
                     varDecl.typeExpr =
                         this.parseTypeReference(errorRecoverySet | ErrorRecoverySet.Asg |
                                            ErrorRecoverySet.Comma, false);
+                    if (varDecl.typeExpr && varDecl.typeExpr.nodeType == NodeType.TypeRef) {
+                        var typeExpr = (<TypeReference>varDecl.typeExpr);
+                        if (typeExpr.term && typeExpr.term.nodeType == NodeType.FuncDecl) {
+                            typeExpr.term.preComments = varDecl.preComments;
+                        }
+                    }
                 }
                 if (this.currentToken.tokenId == TokenID.Equals) {
                     if (requireSignature) {

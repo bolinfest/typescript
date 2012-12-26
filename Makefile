@@ -150,6 +150,7 @@ compiler: local
 
 COMPILER_TESTS=--compiler
 PROJECT_TESTS=--project
+FOURSLASH_TESTS=--fourslash
 LS_TESTS=--ls
 SERVICES_TESTS=--services
 HARNESS_TESTS=--harness
@@ -176,6 +177,9 @@ runtests-compiler: tests
 
 runtests-projects: tests
 	$(HOST) $(BUILT_LOCALTEST)\run.js $(PROJECT_TESTS)
+
+runtests-fourslash: tests
+	$(HOST) $(BUILT_LOCALTEST)\run.js $(FOURSLASH_TESTS)
 
 runtests-ls: tests
 	$(HOST) $(BUILT_LOCALTEST)\run.js $(LS_TESTS)

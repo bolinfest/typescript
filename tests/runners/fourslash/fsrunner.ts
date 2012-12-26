@@ -5,21 +5,20 @@ class FourslashRunner extends RunnerBase
 {
     public runTests()
     {
-        this.enumerateFiles('tests/cases/fourslash').forEach((fn) => {
-
+        var runSingleFourslashTest = (fn: string) => {
             var justName = fn.replace(/^.*[\\\/]/, '');
 
-            if (!justName.match(/fourslash.ts$/i))
-            {
-                describe('FourSlash test ' + justName, function ()
-                {
-                    it('Runs correctly', function ()
-                    {
+            if (!justName.match(/fourslash.ts$/i)) {
+                describe('FourSlash test ' + justName, function () {
+                    it('Runs correctly', function () {
                         FourSlash.runFourSlashTest(fn);
                     });
                 });
             }
-        });
+        }
+
+        //runSingleFourslashTest(Harness.userSpecifiedroot + 'tests/cases/fourslash/comments_Interface.ts');
+        this.enumerateFiles('tests/cases/fourslash').forEach(runSingleFourslashTest);
     }
 }
 

@@ -468,6 +468,30 @@ module TypeScript {
         public getAllAmbientEnclosedTypes(): ScopedMembers { return null; }
         public getPublicEnclosedTypes(): ScopedMembers { return null; }
         public getpublicAmbientEnclosedTypes(): ScopedMembers { return null; }
+
+        public getDocComments(): Comment[]{
+            if (this.elementType || !this.symbol) {
+                return [];
+            }
+
+            if (this.isClassInstance() || this.isClass()) {
+                if (this.symbol.declAST.nodeType == NodeType.FuncDecl) {
+                    // Its a constructor - use the class declaration instead
+                    return (<FuncDecl>this.symbol.declAST).classDecl.getDocComments();
+                } else {
+                    // Its a class without constructor
+                    return this.symbol.getDocComments();
+                }
+            }
+
+            if (this.symbol.name && this.symbol.name != "_anonymous" &&
+                (((this.call == null) && (this.construct == null) && (this.index == null))
+                  || this.members)) {
+                return this.symbol.getDocComments();
+            }
+
+            return [];
+        }
     }
 
     export interface ITypeCollection {

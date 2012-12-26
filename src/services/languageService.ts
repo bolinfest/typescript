@@ -301,6 +301,7 @@ module Services {
     export class TypeInfo {
         constructor (
             public memberName: TypeScript.MemberName,
+            public docComment: string,
             public minChar: number,
             public limChar: number) {
         }
@@ -322,12 +323,14 @@ module Services {
         public isNew: bool;
         public openParen: string;
         public closeParen: string;
+        public docComment: string;
         public signatureGroup: FormalSignatureItemInfo[] = [];
     }
 
     export class FormalSignatureItemInfo {
         public parameters: FormalParameterInfo[] = [];   // Array of parameters
         public returnType: string;                          // String representation of parameter type
+        public docComment: string; // Help for the signature
     }
 
     export class FormalParameterInfo {
@@ -335,6 +338,7 @@ module Services {
         public type: string;        // String representation of parameter type
         public isOptional: bool;    // true if parameter is optional
         public isVariable: bool;    // true if parameter is var args
+        public docComment: string; // Comments that contain help for the parameter
     }
 
     export class ActualSignatureInfo {
@@ -360,6 +364,7 @@ module Services {
         public type = "";
         public kind = "";            // see ScriptElementKind
         public kindModifiers = "";   // see ScriptElementKindModifier, comma separated
+        public docComment = "";
     }
 
     export class ScriptElementKind {
@@ -567,7 +572,7 @@ module Services {
             }
 
             var memberName = typeInfo.type.getScopedTypeNameEx(enclosingScopeContext.getScope());
-            return new TypeInfo(memberName, typeInfo.ast.minChar, typeInfo.ast.limChar);
+            return new TypeInfo(memberName, TypeScript.Comment.getDocCommentText(typeInfo.type.getDocComments()), typeInfo.ast.minChar, typeInfo.ast.limChar);
         }
 
         public getNameOrDottedNameSpan(fileName: string, startPos: number, endPos: number): SpanInfo {
@@ -930,10 +935,33 @@ module Services {
                 return null;
             }
 
-            var convertSignatureGroupToSignatureInfo = (name: string, isNew: bool, group: TypeScript.SignatureGroup) => {
+            var sourceText = this.compilerState.getSourceText(script);
+            var enclosingScopeContext = TypeScript.findEnclosingScopeAt(this.logger, script, sourceText, pos, /*isMemberCompletion*/false);
+            if (enclosingScopeContext == null) {
+                this.logger.log("No context found at the specified location.");
+                return null;
+            }
+
+            var getNameFromSymbol = (symbol: TypeScript.Symbol) => {
+                if (symbol != null && symbol.name != "_anonymous" /* see TypeChecker.anon*/) {
+                    return symbol.name;
+                }
+                return "";
+            }
+
+            var getDocCommentFromSymbol = (symbol: TypeScript.Symbol) => {
+                if (symbol != null) {
+                    return TypeScript.Comment.getDocCommentText(symbol.getDocComments());
+                }
+
+                return "";
+            }
+
+            var convertSignatureGroupToSignatureInfo = (symbol: TypeScript.Symbol, isNew: bool, group: TypeScript.SignatureGroup) => {
                 var result = new FormalSignatureInfo();
                 result.isNew = false;
-                result.name = name;
+                result.name = getNameFromSymbol(symbol);
+                result.docComment = getDocCommentFromSymbol(symbol);
                 result.openParen = (group.flags & TypeScript.SignatureFlags.IsIndexer ? "[" : "(");
                 result.closeParen = (group.flags & TypeScript.SignatureFlags.IsIndexer ? "]" : ")");
 
@@ -943,13 +971,15 @@ module Services {
                     .filter(signature => !(hasOverloads && signature === group.definitionSignature && !this.compilerState.getCompilationSettings().canCallDefinitionSignature))
                     .forEach(signature => {
                         var signatureGroupInfo = new FormalSignatureItemInfo();
-                        signatureGroupInfo.returnType = (signature.returnType === null ? "any" : signature.returnType.type.getScopedTypeName(/*scope*/null));
+                        signatureGroupInfo.docComment = (signature.declAST != null) ? TypeScript.Comment.getDocCommentText(signature.declAST.getDocComments()) : "";
+                        signatureGroupInfo.returnType = (signature.returnType === null ? "any" : signature.returnType.type.getScopedTypeName(enclosingScopeContext.getScope()));
                         signature.parameters.forEach((p, i) => {
                             var signatureParameterInfo = new FormalParameterInfo();
                             signatureParameterInfo.isVariable = (signature.hasVariableArgList) && (i === signature.parameters.length - 1);
                             signatureParameterInfo.isOptional = p.isOptional();
                             signatureParameterInfo.name = p.name;
-                            signatureParameterInfo.type = p.getType().getScopedTypeName(/*scope*/null);
+                            signatureParameterInfo.docComment = TypeScript.Comment.getDocCommentText(p.getDocComments());
+                            signatureParameterInfo.type = p.getType().getScopedTypeName(enclosingScopeContext.getScope());
                             signatureGroupInfo.parameters.push(signatureParameterInfo);
                         });
                         result.signatureGroup.push(signatureGroupInfo);
@@ -992,7 +1022,7 @@ module Services {
                 return group.signatures.indexOf(ast.signature);
             };
 
-            var getTargetSymbolName = (callExpr: TypeScript.CallExpression) => {
+            var getTargetSymbolWithName = (callExpr: TypeScript.CallExpression) => {
                 var sym: TypeScript.Symbol = null;
                 if ((<any>callExpr.target).sym != null) {
                     sym = (<any>callExpr.target).sym;
@@ -1001,35 +1031,34 @@ module Services {
                 }
 
                 if (sym != null) {
-                    if (sym.kind() == TypeScript.SymbolKind.Type) {
-                        if ((<TypeScript.TypeSymbol>sym).isMethod || (<TypeScript.TypeSymbol>sym).isClass() || (<TypeScript.TypeSymbol>sym).isFunction()) {
-                            if (sym.name != null && sym.name != "_anonymous" /* see TypeChecker.anon*/) {
-                                return sym.name;
-                            }
-                        }
-                    } else if (sym.kind() == TypeScript.SymbolKind.Parameter) {
-                        return sym.name;
+                    if (sym.kind() == TypeScript.SymbolKind.Type &&
+                        ((<TypeScript.TypeSymbol>sym).isMethod || (<TypeScript.TypeSymbol>sym).isClass() || (<TypeScript.TypeSymbol>sym).isFunction()) &&
+                        (sym.name != null)) {
+                        return sym;
+                    }
+                    else if (sym.kind() == TypeScript.SymbolKind.Parameter) {
+                        return sym;
                     }
                     else if (sym.kind() == TypeScript.SymbolKind.Variable) {
-                        return sym.name;
+                        return sym;
                     }
                     else if (sym.kind() == TypeScript.SymbolKind.Field) {
-                        return sym.name;
+                        return sym;
                     }
                 }
 
-                return "";
+                return null;
             };
-
-            var name = getTargetSymbolName(callExpr);
+            
+            var symbol = getTargetSymbolWithName(callExpr);
             var result = new SignatureInfo();
             if (callExpr.nodeType === TypeScript.NodeType.Call && callExpr.target.type.call !== null) {
-                result.formal = convertSignatureGroupToSignatureInfo(name, /*isNew:*/false, callExpr.target.type.call);
+                result.formal = convertSignatureGroupToSignatureInfo(symbol, /*isNew:*/false, callExpr.target.type.call);
                 result.actual = convertCallExprToActualSignatureInfo(callExpr, pos);
                 result.activeFormal = getSignatureIndex(callExpr, callExpr.target.type.call);
             }
             else if (callExpr.nodeType === TypeScript.NodeType.New && callExpr.target.type.construct !== null) {
-                result.formal = convertSignatureGroupToSignatureInfo(name, /*isNew:*/true, callExpr.target.type.construct);
+                result.formal = convertSignatureGroupToSignatureInfo(symbol, /*isNew:*/true, callExpr.target.type.construct);
                 result.actual = convertCallExprToActualSignatureInfo(callExpr, pos);
                 result.activeFormal = getSignatureIndex(callExpr, callExpr.target.type.construct);
             }
@@ -1370,6 +1399,17 @@ module Services {
                     entry.name = x.name;
                     entry.type = x.type;
                     entry.kind = this.getSymbolElementKind(x.sym);
+                    var type = x.sym.getType();
+                    if (type && type.isClass() && type.symbol.name == x.name) {
+                        entry.docComment = TypeScript.Comment.getDocCommentText(type.getDocComments());
+                    } else if (x.sym.kind() == TypeScript.SymbolKind.Type && (<TypeScript.TypeSymbol>x.sym).isMethod &&
+                        x.sym.declAST && x.sym.declAST.nodeType == TypeScript.NodeType.FuncDecl &&
+                        !TypeScript.hasFlag((<TypeScript.FuncDecl>x.sym.declAST).fncFlags, TypeScript.FncFlags.Definition) &&
+                        type.callCount() > 1) {
+                        entry.docComment = "";
+                    } else {
+                        entry.docComment = TypeScript.Comment.getDocCommentText(x.sym.getDocComments());
+                    }
                     entry.kindModifiers = this.getSymbolElementKindModifiers(x.sym);
                     result.entries.push(entry);
                 });

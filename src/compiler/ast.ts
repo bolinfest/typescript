@@ -32,6 +32,8 @@ module TypeScript {
         public isCompoundStatement() { return false; }
 
         public isLeaf() { return this.isStatementOrExpression() && (!this.isCompoundStatement()); }
+        
+        public isDeclaration() { return false; }
 
         public typeCheck(typeFlow: TypeFlow) {
             switch (this.nodeType) {
@@ -173,6 +175,31 @@ module TypeScript {
             // Append remaining string
             resolved += name.substring(start);
             return resolved;
+        }
+
+        public getDocComments() : Comment[] {
+            if (!this.isDeclaration() || !this.preComments || this.preComments.length == 0) {
+                return [];
+            }
+            
+            var preCommentsLength = this.preComments.length;
+            var docComments: Comment[] = [];
+            for (var i = preCommentsLength - 1; i >= 0; i--) {
+                if (this.preComments[i].isDocComment()) {
+                    var prevDocComment = docComments.length > 0 ? docComments[docComments.length - 1] : null;
+                    if (prevDocComment == null || // If the help comments were not yet set then this is the comment
+                        (((this.preComments[i].isBlockComment && prevDocComment.isBlockComment) ||
+                         (!this.preComments[i].isBlockComment && !prevDocComment.isBlockComment)) && // The comments are of same type
+                         (this.preComments[i].limLine == prevDocComment.minLine ||
+                          this.preComments[i].limLine + 1 == prevDocComment.minLine))) { // On same line or next line
+                        docComments.push(this.preComments[i]);
+                        continue;
+                    }
+                }
+                break;
+            }
+
+            return docComments.reverse();
         }
     }
 
@@ -826,6 +853,7 @@ module TypeScript {
         public isStatementOrExpression() { return true; }
         public varFlags = VarFlags.None;
         public isDynamicImport = false;
+        public isDeclaration() { return true; }
 
         constructor (public id: Identifier, public alias: AST) {
             super(NodeType.ImportDeclaration);
@@ -887,6 +915,7 @@ module TypeScript {
         public typeExpr: AST = null;
         public varFlags = VarFlags.None;
         public sym: Symbol = null;
+        public isDeclaration() { return true; }
 
         constructor (public id: Identifier, nodeType: NodeType, public nestingLevel: number) {
             super(nodeType);
@@ -977,6 +1006,7 @@ module TypeScript {
         public returnStatementsWithExpressions: ReturnStatement[] = [];
         public scopeType: Type = null; // Type of the FuncDecl, before target typing
         public endingToken: ASTSpan = null;
+        public isDeclaration() { return true; }
 
         constructor (public name: Identifier, public bod: ASTList, public isConstructor: bool,
                      public arguments: ASTList, public vars: ASTList, public scopes: ASTList, public statics: ASTList,
@@ -1217,6 +1247,7 @@ module TypeScript {
     export class NamedDeclaration extends ModuleElement {
         public leftCurlyCount = 0;
         public rightCurlyCount = 0;
+        public isDeclaration() { return true; }
 
         constructor (nodeType: NodeType,
                      public name: Identifier,
@@ -2370,6 +2401,9 @@ module TypeScript {
     export class Comment extends AST {
 
         public text: string[] = null;
+        public minLine: number;
+        public limLine: number;
+        private docCommentText: string = null;
 
         constructor (public content: string, public isBlockComment: bool, public endsLine) {
             super(NodeType.Comment);
@@ -2389,6 +2423,57 @@ module TypeScript {
             }
 
             return this.text;
+        }
+
+        public isDocComment() {
+            if (this.isBlockComment) {
+                return this.content.charAt(2) == "*";
+            } else {
+                return this.content.charAt(2) == "/";
+            }
+        }
+
+        static cleanDocCommentLine(line: string, removeStartingStar: bool) {
+            for (var i = 0; i < line.length; i++) {
+                if (line.charCodeAt(i) != LexCodeSpace) {
+                    if (removeStartingStar && line.charAt(i) == '*') {
+                        i++;
+                    }
+                    line = line.substr(i, line.charAt(line.length - 1) == "\r" ? line.length - i - 1 : line.length - i);
+                    return line;
+                }
+            }
+
+            return "";
+        }
+
+        public getDocCommentText() {
+            if (this.docCommentText == null) {
+                var docCommentLines: string[] = [];
+                if (this.isBlockComment) {
+                    var content = this.content.replace("/**", ""); // remove /**
+                    content = content.substring(0, content.length - 2); // remove last */
+                    var lines = content.split("\n");
+                    for (var l = 0; l < lines.length; l++) {
+                        var line = lines[l];
+                        docCommentLines.push(Comment.cleanDocCommentLine(lines[l], true));
+                    }
+                    this.docCommentText = docCommentLines.join("\n");
+                } else {
+                    var content = this.content.replace("///", ""); // remove ///
+                    this.docCommentText = Comment.cleanDocCommentLine(content, true);
+                }
+            }
+
+            return this.docCommentText;
+        }
+
+        static getDocCommentText(comments: Comment[]) {
+            var docCommentText: string[] = [];
+            for (var c = 0 ; c < comments.length; c++) {
+                docCommentText.push(comments[c].getDocCommentText());
+            }
+            return docCommentText.join("\n");
         }
     }
 

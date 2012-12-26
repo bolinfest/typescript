@@ -126,14 +126,15 @@ module TypeScript {
 
         public scopeRelativeName(scope: SymbolScope): string {
             if (scope == null) {
-                return this.name;
+                return this.getPrettyName(null) + this.getOptionalNameString();
             }
             var lca = this.findCommonAncestorPath(scope.container);
             var builder = "";
             for (var i = 0, len = lca.length; i < len; i++) {
-                builder = lca[i].name + "." + builder;
+                var prettyName = lca[i].getPrettyName(i == len - 1 ? scope.container : lca[i + 1]);
+                builder = prettyName + "." + builder;
             }
-            builder += this.name;
+            builder += this.getPrettyName(len == 0 ? scope.container : lca[0]) + this.getOptionalNameString();
             return builder;
         }
 
@@ -286,12 +287,12 @@ module TypeScript {
             return null;
         }
 
-        public getImportDeclFromSymbol() {
-            if (this.declAST != null && this.declAST.nodeType == NodeType.ImportDeclaration) {
-                return <ImportDeclaration>this.declAST;
+        public getDocComments() : Comment[] {
+            if (this.declAST != null) {
+                return this.declAST.getDocComments();
             }
 
-            return null;
+            return [];
         }
     }
 
@@ -405,7 +406,7 @@ module TypeScript {
         // Gets the pretty name of the symbol with respect to symbol of the scope (scopeSymbol)
         // searchTillRoot specifies if the name need to searched in the root path of the scope
         public getPrettyName(scopeSymbol: Symbol) {
-            if (isQuoted(this.prettyName) && this.type.isModuleType()) {
+            if (!!scopeSymbol && isQuoted(this.prettyName) && this.type.isModuleType()) {
                 // Its a dynamic module - and need to be specialized with the scope
                 // Check in exported module members in each scope
                 var symbolPath = scopeSymbol.pathToRoot();
@@ -442,20 +443,6 @@ module TypeScript {
             }
 
             return externalSymbol;
-        }
-
-        public scopeRelativeName(scope: SymbolScope): string {
-            if (scope == null) {
-                return this.prettyName + this.getOptionalNameString();
-            }
-            var lca = this.findCommonAncestorPath(scope.container);
-            var builder = "";
-            for (var i = 0, len = lca.length; i < len; i++) {
-                var prettyName = lca[i].getPrettyName(i == len - 1 ? scope.container : lca[i + 1]);
-                builder = prettyName + "." + builder;
-            }
-            builder += this.getPrettyName(len == 0 ? scope.container : lca[0]) + this.getOptionalNameString();
-            return builder;
         }
     }
 
@@ -514,6 +501,25 @@ module TypeScript {
                 return this;
             }
         }
+
+        public getDocComments(): Comment[] {
+            if (this.getter != null || this.setter != null) {
+                var comments : Comment[] = [];
+                if (this.getter != null) {
+                    comments = comments.concat(this.getter.getDocComments());
+                }
+                if (this.setter != null) {
+                    comments = comments.concat(this.setter.getDocComments());
+                }
+                return comments;
+            }
+            else if (this.declAST != null) {
+                return this.declAST.getDocComments();
+            }
+
+            return [];
+        }
+
     }
 
     export class ParameterSymbol extends InferenceSymbol {
