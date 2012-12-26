@@ -580,20 +580,20 @@ module TypeScript {
             }
         }
 
-        static mapToFileNameExtention(extention: string, fileName: string, wholeFileNameReplaced: bool) {
+        static mapToFileNameExtension(extension: string, fileName: string, wholeFileNameReplaced: bool) {
             if (wholeFileNameReplaced) {
-                // The complete output is redirected in this file so do not change extention
+                // The complete output is redirected in this file so do not change extension
                 return fileName;
             } else {
-                // Change the extention of the file
+                // Change the extension of the file
                 var splitFname = fileName.split(".");
                 splitFname.pop();
-                return splitFname.join(".") + extention;
+                return splitFname.join(".") + extension;
             }
         }
 
         static mapToJSFileName(fileName: string, wholeFileNameReplaced: bool) {
-            return TypeScriptCompiler.mapToFileNameExtention(".js", fileName, wholeFileNameReplaced);
+            return TypeScriptCompiler.mapToFileNameExtension(".js", fileName, wholeFileNameReplaced);
         }
 
         public emitUnit(script: Script, reuseEmitter?: bool, emitter?: Emitter) {
@@ -673,7 +673,7 @@ module TypeScript {
                 if (this.emitSettings.outputMany || context == null) {
                     var fname = this.units[i].filename;
                     var mapToTxtFileName = (fileName: string, wholeFileNameReplaced: bool) => {
-                        return TypeScriptCompiler.mapToFileNameExtention(".txt", fileName, wholeFileNameReplaced);
+                        return TypeScriptCompiler.mapToFileNameExtension(".txt", fileName, wholeFileNameReplaced);
                     };
                     var outFname = this.emitSettings.mapOutputFileName(fname, mapToTxtFileName);
                     outFile = this.emitSettings.ioHost.createFile(outFname, this.useUTF8ForFile(script));

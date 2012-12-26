@@ -48,16 +48,16 @@ module TypeScript {
             this.outputOption = settings.outputOption;
         }
 
-        public mapOutputFileName(fileName: string, extentionChanger: (fname: string, wholeFileNameReplaced: bool) => string) {
+        public mapOutputFileName(fileName: string, extensionChanger: (fname: string, wholeFileNameReplaced: bool) => string) {
             if (this.outputMany) {
                 var updatedFileName = fileName;
                 if (this.outputOption != "") {
                     // Replace fileName string;
                     updatedFileName = fileName.replace(this.commonDirectoryPath, this.outputOption);
                 }
-                return extentionChanger(updatedFileName, false);
+                return extensionChanger(updatedFileName, false);
             } else {
-                return extentionChanger(this.outputOption, true);
+                return extensionChanger(this.outputOption, true);
             }
         }
     }
