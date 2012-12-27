@@ -1104,7 +1104,7 @@ module Harness {
             // TODO: something isn't getting cleaned up correctly and adding with a real unit name is causing some failures (duplicate identifier)
             // For now just only add via unitName for a multi file test
             if (!context) {
-                var units = makeUnitsFromTest(code, unitName);
+                var units = TestCaseParser.makeUnitsFromTest(code, unitName);
                 var dependencies = units.slice(0, units.length - 1);
                 var lastUnit = units[units.length - 1];
                 context = defineCompilationContextForTest(lastUnit.name, dependencies);
@@ -1138,6 +1138,53 @@ module Harness {
 
             callback(new CompilerResult(stdout.lines, stderr.lines, scripts));
         }
+
+        // Returns a set of functions which can be later executed to add and remove given dependencies to the compiler so that
+        // a file can be successfully compiled. These functions will add/remove named units and code to the compiler for each dependency.
+        // If basePathForTempFiles is provided then those named units will also be written to temp files (necessary for baseline tests)
+        // and deleted by the postCompile function.
+        export function defineCompilationContextForTest(filename: string, dependencies: TestCaseParser.TestUnitData[], basePathForTempFiles?: string): CompilationContext {
+            // if the given file has no dependencies, there is no context to return, it can be compiled without additional work
+            if (dependencies.length == 0) {
+                return null;
+            } else {
+                var addedFiles = [];
+                var precompile = () => {
+                    // REVIEW: if any dependency has a triple slash reference then does postCompile potentially have to do a recreate since we can't update references with updateUnit?
+                    // easy enough to do if so, prefer to avoid the recreate cost until it proves to be an issue
+                    dependencies.forEach(dep => {
+                        addUnit(dep.content, dep.name, false, Harness.Compiler.isDeclareFile(dep.name));
+                        addedFiles.push(dep.name);
+
+                        if (basePathForTempFiles) {
+                            var tempFilePath = basePathForTempFiles + dep.name;
+                            IO.writeFile(tempFilePath, dep.content);
+                        }
+                    });
+                };
+                var postcompile = () => {
+                    addedFiles.forEach(file => {
+                        Harness.Compiler.updateUnit('', file, false/*setRecovery*/);
+
+                        if (basePathForTempFiles) {
+                            var tempFilePath = basePathForTempFiles + file;
+                            IO.deleteFile(tempFilePath);
+                        }
+                    });
+                };
+                var context = {
+                    filename: filename,
+                    preCompile: precompile,
+                    postCompile: postcompile
+                };
+                return context;
+            }
+        }
+    }
+
+    // Parses the test cases files 
+    // extracts options and individual files in a multifile test
+    export module TestCaseParser {
 
         // All the necessary information to turn a multi file test into useful units for later compilation
         export interface TestUnitData {
@@ -1259,48 +1306,6 @@ module Harness {
                 }
 
                 return files;
-            }
-        }
-
-        // Returns a set of functions which can be later executed to add and remove given dependencies to the compiler so that
-        // a file can be successfully compiled. These functions will add/remove named units and code to the compiler for each dependency.
-        // If basePathForTempFiles is provided then those named units will also be written to temp files (necessary for baseline tests)
-        // and deleted by the postCompile function.
-        export function defineCompilationContextForTest(filename: string, dependencies: TestUnitData[], basePathForTempFiles?: string): CompilationContext {
-            // if the given file has no dependencies, there is no context to return, it can be compiled without additional work
-            if (dependencies.length == 0) {
-                return null;
-            } else {
-                var addedFiles = [];
-                var precompile = () => {
-                    // REVIEW: if any dependency has a triple slash reference then does postCompile potentially have to do a recreate since we can't update references with updateUnit?
-                    // easy enough to do if so, prefer to avoid the recreate cost until it proves to be an issue
-                    dependencies.forEach(dep => {
-                        addUnit(dep.content, dep.name, false, Harness.Compiler.isDeclareFile(dep.name));
-                        addedFiles.push(dep.name);
-
-                        if (basePathForTempFiles) {
-                            var tempFilePath = basePathForTempFiles + dep.name;
-                            IO.writeFile(tempFilePath, dep.content);
-                        }
-                    });
-                };
-                var postcompile = () => {
-                    addedFiles.forEach(file => {
-                        Harness.Compiler.updateUnit('', file, false/*setRecovery*/);
-
-                        if (basePathForTempFiles) {
-                            var tempFilePath = basePathForTempFiles + file;
-                            IO.deleteFile(tempFilePath);
-                        }
-                    });
-                };
-                var context = {
-                    filename: filename,
-                    preCompile: precompile,
-                    postCompile: postcompile
-                };
-                return context;
             }
         }
     }

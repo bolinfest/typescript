@@ -210,6 +210,12 @@ opts.option('project', {
     }
 });
 
+opts.option('flags', {
+    set: function () {
+        runners.push(new FlagsRunner());
+    }
+});
+
 opts.option('fourslash', {
     set: function () {
         runners.push(new FourslashRunner());

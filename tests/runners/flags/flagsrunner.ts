@@ -2,10 +2,10 @@
 ///<reference path="../runnerbase.ts" />
 
 class FlagsRunner extends RunnerBase {
-    private fsOutput = new Harness.Compiler.WriterAggregator();
     private fsErrors = new Harness.Compiler.WriterAggregator();
+    private fsOutput = new emitterIOHost();
     // Regex for parsing options in the format "@Alpha: Value of any sort"
-    private optionRegex = /^[\/]{2}\s*@(\w+): (\w+)/gm;  // multiple matches on multiple lines
+    private optionRegex = /^[\/]{2}\s*@(\w+):\s*(\S*)/gm;  // multiple matches on multiple lines
 
     private supportedFlags = [
     { flag: 'comments', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.emitComments = value.toLowerCase() === 'true' ? true : false; } },
@@ -31,7 +31,8 @@ class FlagsRunner extends RunnerBase {
     },
     { flag: 'nolib', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.useDefaultLib = value.toLowerCase() === 'true' ? true : false; } },
     { flag: 'sourcemap', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.mapSourceFiles = value.toLowerCase() === 'true' ? true : false; } },
-    { flag: 'target', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.codeGenTarget = value.toLowerCase() === 'es3' ? TypeScript.CodeGenTarget.ES3 : TypeScript.CodeGenTarget.ES5; } }
+    { flag: 'target', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.codeGenTarget = value.toLowerCase() === 'es3' ? TypeScript.CodeGenTarget.ES3 : TypeScript.CodeGenTarget.ES5; } },
+    { flag: 'out', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.outputOption = value; } },
     ];
 
     public runTests(): void {
@@ -40,9 +41,7 @@ class FlagsRunner extends RunnerBase {
 
         try {
             this.enumerateFiles('tests/cases/flags').forEach(fn => {
-                if (!fn.match(/flags.ts$/i)) {
-                    describe('Compiler flags test ' + fn, () => this.compileFile(fn));
-                }
+                describe('Compiler flags test ' + fn, () => this.compileFile(fn));
             });
         } finally {
             TypeScript.moduleGenTarget = moduleGen;
@@ -56,7 +55,6 @@ class FlagsRunner extends RunnerBase {
         {
             this.fsErrors.reset();
             this.fsOutput.reset();
-
 
             var content = IO.readFile(filename);
             var bugs = content.match(/\bbug (\d+)/i);
@@ -76,25 +74,13 @@ class FlagsRunner extends RunnerBase {
                 idx[0].setFlag(settings, compilerFlags[prop]);
             }
 
-            // due to the way we output and baseline we should only output 1 file
-            var emitterIOHost: TypeScript.EmitterIOHost = {
-                createFile: (s) => this.fsOutput,
-                directoryExists: (s: string) => false,
-                fileExists: (s: string) => true,
-                resolvePath: (s: string) => s
-            }
-
-
-            settings.outputOption = "test_input.js";
-
             var compiler = new TypeScript.TypeScriptCompiler(this.fsErrors, new TypeScript.NullLogger(), settings);
             compiler.addUnit(Harness.Compiler.libText, 'lib.d.ts', true);
             compiler.addUnit(content, 'test_input.ts');
             compiler.typeCheck();
-            compiler.emit(emitterIOHost);
+            compiler.emit(this.fsOutput);
 
             if (settings.generateDeclarationFiles) {
-                this.fsOutput.WriteLine("/* DECLARATION FILE */");
                 compiler.emitDeclarations();
             }
         });
@@ -103,7 +89,7 @@ class FlagsRunner extends RunnerBase {
 
         Harness.Baseline.runBaseline('generated correct JS output for ' + filename, baseLineFileName.replace(/\.ts/, '.js'), () =>
         {
-            return this.fsOutput.lines.join('\n');
+            return this.fsOutput.output();
         });
     }
 
@@ -117,5 +103,43 @@ class FlagsRunner extends RunnerBase {
         }
 
         return opts;
+    }
+}
+
+// due to the way we output and baseline we should only output 1 file
+class emitterIOHost implements TypeScript.EmitterIOHost {
+
+    /* Dictionary<string, ITextWriter> */
+    private fileCollection = {};
+
+    // create file gets the whole path to create, so this works as expected with the --out parameter
+    public createFile(s: string, useUTF8?: bool): ITextWriter {
+
+        if (this.fileCollection[s]) {
+            return <ITextWriter>this.fileCollection[s];
+        }
+
+        var writer = new Harness.Compiler.WriterAggregator();
+        writer.WriteLine('[' + s + ']');
+        this.fileCollection[s] = writer;
+        return writer;
+    }
+    public directoryExists(s: string) { return false; }
+    public fileExists(s: string) { return typeof this.fileCollection[s] !== 'undefined'; }
+    public resolvePath(s: string) { return s; }
+
+    public reset() { this.fileCollection = {}; }
+    public output() {
+
+        var result = "";
+
+        for (var p in this.fileCollection) {
+            if (this.fileCollection.hasOwnProperty(p)) {
+                result += this.fileCollection[p].lines.join('\n');
+                result += '\n'; // improved readability of the output
+            }
+        }
+
+        return result;
     }
 }

@@ -1,3 +1,4 @@
+[test_input.js]
 var A = (function () {
     function A() {
     }
@@ -6,3 +7,4 @@ var A = (function () {
     };
     return A;
 })();
+

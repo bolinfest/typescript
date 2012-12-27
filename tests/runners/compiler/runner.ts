@@ -10,7 +10,7 @@ class CompilerBaselineRunner extends RunnerBase
         // strips the filename from the path.
         var justName = filename.replace(/^.*[\\\/]/, '');
         var content = IO.readFile(filename);
-        var units = Harness.Compiler.makeUnitsFromTest(content, justName);    
+        var units = Harness.TestCaseParser.makeUnitsFromTest(content, justName);    
         units.forEach(unit => {
             if (!Harness.Compiler.isDeclareFile(unit.name)) {
                 describe('JS output and errors for ' + unit.name, function () {                    

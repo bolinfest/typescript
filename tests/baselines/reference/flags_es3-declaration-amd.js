@@ -1,3 +1,4 @@
+[test_input.js]
 var A = (function () {
     function A() {
     }
@@ -7,8 +8,9 @@ var A = (function () {
     return A;
 })();
 
-/* DECLARATION FILE */
+[test_input.d.ts]
 class A {
     constructor ();
     public B(): number;
 }
+

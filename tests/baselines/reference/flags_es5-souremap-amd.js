@@ -1,3 +1,4 @@
+[test_input.js]
 var A = (function () {
     function A() {
     }
@@ -7,4 +8,6 @@ var A = (function () {
     return A;
 })();
 //@ sourceMappingURL=test_input.js.map
+
+[test_input.js.map]
 {"version":3,"file":"test_input.js","sources":["test_input.ts"],"names":["A","A.constructor","A.B"],"mappings":"AAAA;IAMIA,SAFEA,CAACA;IAKHC,CAACA;IAEDD,gBAAAA;QAEIE,OAAOA,EAAEA,CAACA;IACdA,CAACA;IACLF;AAACA,CAAAA,IAAA;AAAA"}

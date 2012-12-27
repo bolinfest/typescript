@@ -1,3 +1,4 @@
+[test_input.js]
 var MyClass = (function () {
     function MyClass() { }
     Object.defineProperty(MyClass.prototype, "Count", {
@@ -12,9 +13,11 @@ var MyClass = (function () {
     return MyClass;
 })();
 //@ sourceMappingURL=test_input.js.map
-{"version":3,"file":"test_input.js","sources":["test_input.ts"],"names":["MyClass","MyClass.constructor","MyClass.get_Count","MyClass.set_Count"],"mappings":"AAAA;IAKAA;AAWCA,IATGA;QAAAA,KAAAA;YAEIE,OAAOA,EAAEA,CAACA;QACdA,CAACA;QAEDF,KAAAA,UAAiBA,KAAaA;QAG9BG,CAACA;;;;AALAH,IAMLA;AAACA,CAAAA,IAAA;AAAA"}
 
-/* DECLARATION FILE */
+[test_input.js.map]
+{"version":3,"file":"test_input.js","sources":["test_input.ts"],"names":["MyClass","MyClass.constructor","MyClass.get_Count","MyClass.set_Count"],"mappings":"AAAA;IAKAA;AAWCA,IATGA;QAAAA,KAAAA;YAEIE,OAAOA,EAAEA,CAACA;QACdA,CAACA;QAEDF,KAAAA,UAAiBA,KAAaA;QAG9BG,CAACA;;;;AALAH,IAMLA;AAACA,CAAAA,IAAA;AAAA"}
+[test_input.d.ts]
 class MyClass {
     public Count : number;
 }
+
