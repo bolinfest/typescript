@@ -52,8 +52,9 @@ module TypeScript {
             if (this.outputMany) {
                 var updatedFileName = fileName;
                 if (this.outputOption != "") {
-                    // Replace fileName string;
-                    updatedFileName = fileName.replace(this.commonDirectoryPath, this.outputOption);
+                    // Replace the common directory path with the option specified
+                    updatedFileName = fileName.replace(this.commonDirectoryPath, "");
+                    updatedFileName = this.outputOption + updatedFileName;
                 }
                 return extensionChanger(updatedFileName, false);
             } else {
