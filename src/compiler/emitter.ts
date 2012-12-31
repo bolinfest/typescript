@@ -857,6 +857,39 @@ module TypeScript {
                 temp = this.setContainer(EmitContainer.Function);
             }
 
+            // If the signature is available, include the appropriate Google Closure annotations.
+            if (funcDecl.signature) {
+                // Open the JSDoc.
+                var signature = funcDecl.signature;
+                this.writeLineToOutput('/**');
+
+                // Write the params, if any.
+                if (signature.parameters != null) {
+                    var parameters = signature.parameters;
+                    parameters.forEach(function(parameterSymbol: ParameterSymbol) {
+                        var typeName = parameterSymbol.getType().getTypeName();
+                        if (typeName == 'any') {
+                            typeName = '*';
+                        }
+                        this.writeLineToOutput(
+                            ' * @param {' + typeName + '} ' + parameterSymbol.name);
+                    }, this);
+                }
+
+                // Note if it is a constructor.
+                if (funcDecl.isConstructor) {
+                    this.writeLineToOutput(' * @constructor');
+                }
+                // If not a constructor, then write the return type, if any.
+                else if (signature.returnType != null) {
+                    var returnType = signature.returnType.type.getTypeName();
+                    this.writeLineToOutput(' * @return {' + returnType + '}');
+                }
+
+                // Close the JSDoc.
+                this.writeLineToOutput(' */');
+            }
+
             var bases: ASTList = null;
             var hasSelfRef = false;
             var funcName = funcDecl.getNameText();
