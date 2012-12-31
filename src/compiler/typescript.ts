@@ -115,7 +115,15 @@ module TypeScript {
         public persistentTypeState: PersistentGlobalTypeState;
 
 
-        public emitSettings: { minWhitespace: bool; propagateConstants: bool; emitComments: bool; path: string; createFile: (path: string) =>ITextWriter; outputMany: bool; };
+        public emitSettings: {
+            minWhitespace: bool;
+            propagateConstants: bool;
+            emitComments: bool;
+            path: string;
+            createFile: (path: string) =>ITextWriter;
+            outputMany: bool;
+            outputGoogleClosureAnnotations: bool;
+        };
 
         constructor (public errorOutput: ITextWriter, public logger: ILogger = new NullLogger(), public settings: CompilationSettings = defaultSettings) {
             this.errorReporter = new ErrorReporter(this.errorOutput);
@@ -126,7 +134,15 @@ module TypeScript {
             this.parser.style_requireSemi = this.settings.styleSettings.requireSemi;
             this.parser.style_funcInLoop = this.settings.styleSettings.funcInLoop;
             this.parser.inferPropertiesFromThisAssignment = this.settings.inferPropertiesFromThisAssignment;
-            this.emitSettings = { minWhitespace: this.settings.minWhitespace, propagateConstants: this.settings.propagateConstants, emitComments: this.settings.emitComments, path: this.settings.outputFileName, createFile: null, outputMany: this.settings.outputMany };
+            this.emitSettings = {
+                minWhitespace: this.settings.minWhitespace,
+                propagateConstants: this.settings.propagateConstants,
+                emitComments: this.settings.emitComments,
+                path: this.settings.outputFileName,
+                createFile: null,
+                outputMany: this.settings.outputMany,
+                outputGoogleClosureAnnotations: this.settings.outputGoogleClosureAnnotations,
+            };
 
             codeGenTarget = settings.codeGenTarget;
         }
@@ -162,7 +178,15 @@ module TypeScript {
         }
 
         public emitCommentsToOutput() {
-            this.emitSettings = { minWhitespace: this.settings.minWhitespace, propagateConstants: this.settings.propagateConstants, emitComments: this.settings.emitComments, path: this.settings.outputFileName, createFile: null, outputMany: this.settings.outputMany };
+            this.emitSettings = {
+                minWhitespace: this.settings.minWhitespace,
+                propagateConstants: this.settings.propagateConstants,
+                emitComments: this.settings.emitComments,
+                path: this.settings.outputFileName,
+                createFile: null,
+                outputMany: this.settings.outputMany,
+                outputGoogleClosureAnnotations: this.settings.outputGoogleClosureAnnotations,
+            };
         }
 
         public setErrorCallback(fn: (minChar: number, charLen: number, message: string,

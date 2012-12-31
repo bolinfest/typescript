@@ -100,6 +100,9 @@ module TypeScript {
 
         public useCaseSensitiveFileResolution = false;
 
+        // TODO(bolinfest): Allow this to be overridden by a command-line argument.
+        public outputGoogleClosureAnnotations = true;
+
         public setStyleOptions(str: string) {
             this.styleSettings.parseOptions(str);
         }

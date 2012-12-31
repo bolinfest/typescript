@@ -39,6 +39,7 @@ module TypeScript {
         path: string;
         createFile: (path: string, useUTF8?: bool) =>ITextWriter;
         outputMany: bool;
+        outputGoogleClosureAnnotations: bool;
     }
 
     export class Indenter {
@@ -126,6 +127,10 @@ module TypeScript {
             this.writeToOutput(this.captureThisStmtString);
             this.recordSourceMappingEnd(ast);
             this.writeLineToOutput("");
+        }
+
+        private isOutputGoogleClosure() : bool {
+            return this.emitOptions.outputGoogleClosureAnnotations;
         }
 
         public setInVarBlock(count: number) {
@@ -842,6 +847,43 @@ module TypeScript {
             this.writeToOutput(text);
         }
 
+        private emitJsDocForFunction(funcDecl: FuncDecl) {
+            // If the signature is available, include the appropriate Google Closure annotations.
+            if (funcDecl.signature == null) {
+                return;
+            }
+
+            // Open the JSDoc.
+            var signature = funcDecl.signature;
+            this.writeLineToOutput('/**');
+
+            // Write the params, if any.
+            if (signature.parameters != null) {
+                var parameters = signature.parameters;
+                parameters.forEach(function(parameterSymbol: ParameterSymbol) {
+                    var typeName = parameterSymbol.getType().getTypeName();
+                    if (typeName == 'any') {
+                        typeName = '*';
+                    }
+                    this.writeLineToOutput(
+                        ' * @param {' + typeName + '} ' + parameterSymbol.name);
+                }, this);
+            }
+
+            // Note if it is a constructor.
+            if (funcDecl.isConstructor) {
+                this.writeLineToOutput(' * @constructor');
+            }
+            // If not a constructor, then write the return type, if any.
+            else if (signature.returnType != null) {
+                var returnType = signature.returnType.type.getTypeName();
+                this.writeLineToOutput(' * @return {' + returnType + '}');
+            }
+
+            // Close the JSDoc.
+            this.writeLineToOutput(' */');
+        }
+
         public emitJavascriptFunction(funcDecl: FuncDecl) {
             if (hasFlag(funcDecl.fncFlags, FncFlags.Signature) || funcDecl.isOverload) {
                 return;
@@ -857,37 +899,8 @@ module TypeScript {
                 temp = this.setContainer(EmitContainer.Function);
             }
 
-            // If the signature is available, include the appropriate Google Closure annotations.
-            if (funcDecl.signature) {
-                // Open the JSDoc.
-                var signature = funcDecl.signature;
-                this.writeLineToOutput('/**');
-
-                // Write the params, if any.
-                if (signature.parameters != null) {
-                    var parameters = signature.parameters;
-                    parameters.forEach(function(parameterSymbol: ParameterSymbol) {
-                        var typeName = parameterSymbol.getType().getTypeName();
-                        if (typeName == 'any') {
-                            typeName = '*';
-                        }
-                        this.writeLineToOutput(
-                            ' * @param {' + typeName + '} ' + parameterSymbol.name);
-                    }, this);
-                }
-
-                // Note if it is a constructor.
-                if (funcDecl.isConstructor) {
-                    this.writeLineToOutput(' * @constructor');
-                }
-                // If not a constructor, then write the return type, if any.
-                else if (signature.returnType != null) {
-                    var returnType = signature.returnType.type.getTypeName();
-                    this.writeLineToOutput(' * @return {' + returnType + '}');
-                }
-
-                // Close the JSDoc.
-                this.writeLineToOutput(' */');
+            if (this.isOutputGoogleClosure()) {
+                this.emitJsDocForFunction(funcDecl);
             }
 
             var bases: ASTList = null;
