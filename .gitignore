@@ -14,3 +14,7 @@ baseline-report.html
 *.swp
 build.json
 monaco.editor.json
+
+# JetBrains
+/.idea/tasks.xml
+/.idea/workspace.xml
