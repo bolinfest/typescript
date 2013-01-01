@@ -898,10 +898,7 @@ module TypeScript {
                 var parameters = signature.parameters;
                 var lastParamIndex = parameters.length - 1;
                 parameters.forEach(function(parameterSymbol: ParameterSymbol, index: number) {
-                    var typeName = parameterSymbol.getType().getTypeName();
-                    if (typeName == 'any') {
-                        typeName = '*';
-                    }
+                    var typeName = this.convertTypeNameToGoogleClosureType(parameterSymbol.getType());
 
                     // In Google Closure, a trailing = in a type expression indicates an optional parameter.
                     if (parameterSymbol.isOptional()) {
@@ -927,12 +924,30 @@ module TypeScript {
             }
             // If not a constructor, then write the return type, if any.
             else if (signature.returnType != null) {
-                var returnType = signature.returnType.type.getTypeName();
+                var returnType = this.convertTypeNameToGoogleClosureType(signature.returnType.type);
                 writeLine(' * @return {' + returnType + '}');
             }
 
             // Close the JSDoc.
             writeLine(' */');
+        }
+
+        private convertTypeNameToGoogleClosureType(type: Type) : string {
+            var typeName = type.getTypeName();
+
+            // Rather than use a real parser, split the type name into chunks and rewrite individual pieces.
+            var parts = typeName.split(/\b/);
+            parts = parts.map(function(part: string) : string {
+                if (part == 'any') {
+                    return '*';
+                } else if (part == 'bool') {
+                    return 'boolean';
+                } else {
+                    return part;
+                }
+            });
+
+            return parts.join('');
         }
 
         public emitJavascriptFunction(funcDecl: FuncDecl) {
