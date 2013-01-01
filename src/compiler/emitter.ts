@@ -878,10 +878,13 @@ module TypeScript {
                 var baseClass = instanceType ? instanceType.baseClass() : null;
                 baseClassName = baseClass || null;
             }
-            this.emitJsDocForFunction(funcDecl.signature, isConstructor, baseClassName);
+
+            var isVariableArgList = funcDecl.variableArgList;
+            this.emitJsDocForFunction(funcDecl.signature, isConstructor, baseClassName, isVariableArgList);
         }
 
-        private emitJsDocForFunction(signature: Signature, isConstructor: bool, baseClassName: string) {
+        /** Prefer emitJsDocForFuncDecl() to this method. */
+        private emitJsDocForFunction(signature: Signature, isConstructor: bool, baseClassName: string, isVariableArgList?: bool) {
             var writeLine: (string) => void = function(text: string) {
                 this.emitIndent();
                 this.writeLineToOutput(text);
@@ -893,7 +896,8 @@ module TypeScript {
             // Write the params, if any.
             if (signature.parameters != null) {
                 var parameters = signature.parameters;
-                parameters.forEach(function(parameterSymbol: ParameterSymbol) {
+                var lastParamIndex = parameters.length - 1;
+                parameters.forEach(function(parameterSymbol: ParameterSymbol, index: number) {
                     var typeName = parameterSymbol.getType().getTypeName();
                     if (typeName == 'any') {
                         typeName = '*';
@@ -902,6 +906,10 @@ module TypeScript {
                     // In Google Closure, a trailing = in a type expression indicates an optional parameter.
                     if (parameterSymbol.isOptional()) {
                         typeName += '=';
+                    } else if (isVariableArgList && index == lastParamIndex) {
+                        // Empirically, it appears that a vararg must be typed as an array type, in which case the name
+                        // must end in "[]". We strip that off and replace it with "...", which is what Closure expects.
+                        typeName = typeName.substring(0, typeName.length - 2) + "...";
                     }
 
                     writeLine(
