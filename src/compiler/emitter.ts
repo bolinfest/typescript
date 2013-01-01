@@ -361,7 +361,13 @@ module TypeScript {
                 }
                 if (baseExpr.nodeType == NodeType.Call) {
                     this.emitIndent();
-                    this.writeToOutput("_super.call(this");
+
+                    if (this.isOutputGoogleClosure()) {
+                        this.writeToOutput(baseName + ".call(this");
+                    } else {
+                        this.writeToOutput("_super.call(this");
+                    }
+
                     var args = (<CallExpression>baseExpr).arguments;
                     if (args && (args.members.length > 0)) {
                         this.writeToOutput(", ");
