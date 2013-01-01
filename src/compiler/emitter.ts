@@ -388,7 +388,10 @@ module TypeScript {
 
             this.emitParensAndCommentsInPlace(funcDecl, true);
             this.recordSourceMappingStart(funcDecl);
-            if (!(funcDecl.isAccessor() && (<FieldSymbol>funcDecl.accessorSymbol).isObjectLitField)) {
+            if (this.isOutputGoogleClosure() && isClassConstructor) {
+                this.writeToOutput(funcDecl.getNameText() + " = function");
+                printName = false;
+            } else if (!(funcDecl.isAccessor() && (<FieldSymbol>funcDecl.accessorSymbol).isObjectLitField)) {
                 this.writeToOutput("function ");
             }
             if (printName) {
@@ -847,19 +850,29 @@ module TypeScript {
             this.writeToOutput(text);
         }
 
-        private emitJsDocForFunction(funcDecl: FuncDecl) {
+        private emitJsDocForFuncDecl(funcDecl: FuncDecl) {
             // If the signature is available, include the appropriate Google Closure annotations.
             if (funcDecl.signature == null) {
                 return;
             }
 
+            var isConstructor = funcDecl.isConstructor;
+            var baseClassName = null;
+            if (isConstructor) {
+                var instanceType = funcDecl.classDecl.type.instanceType;
+                var baseClass = instanceType ? instanceType.baseClass() : null;
+                baseClassName = baseClass || null;
+            }
+            this.emitJsDocForFunction(funcDecl.signature, isConstructor, baseClassName);
+        }
+
+        private emitJsDocForFunction(signature: Signature, isConstructor: bool, baseClassName: string) {
             var writeLine: (string) => void = function(text: string) {
                 this.emitIndent();
                 this.writeLineToOutput(text);
             }.bind(this);
 
             // Open the JSDoc.
-            var signature = funcDecl.signature;
             writeLine('/**');
 
             // Write the params, if any.
@@ -876,8 +889,12 @@ module TypeScript {
             }
 
             // Note if it is a constructor.
-            if (funcDecl.isConstructor) {
+            if (isConstructor) {
                 writeLine(' * @constructor');
+
+                if (baseClassName) {
+                    writeLine(' * @extends {' + baseClassName + '}');
+                }
             }
             // If not a constructor, then write the return type, if any.
             else if (signature.returnType != null) {
@@ -905,7 +922,7 @@ module TypeScript {
             }
 
             if (this.isOutputGoogleClosure()) {
-                this.emitJsDocForFunction(funcDecl);
+                this.emitJsDocForFuncDecl(funcDecl);
             }
 
             var bases: ASTList = null;
@@ -1492,7 +1509,7 @@ module TypeScript {
                 }
                 else {
                     if (this.isOutputGoogleClosure()) {
-                        this.emitJsDocForFunction(funcDecl);
+                        this.emitJsDocForFuncDecl(funcDecl);
                     }
 
                     this.emitIndent();
@@ -1552,14 +1569,6 @@ module TypeScript {
                 this.emitParensAndCommentsInPlace(classDecl, true);
                 var temp = this.setContainer(EmitContainer.Class);
 
-                this.recordSourceMappingStart(classDecl);
-                if (hasFlag(classDecl.varFlags, VarFlags.Exported) && classDecl.type.symbol.container == this.checker.gloMod) {
-                    this.writeToOutput("this." + className);
-                }
-                else {
-                    this.writeToOutput("var " + className);
-                }
-
                 //if (hasFlag(classDecl.varFlags, VarFlags.Exported) && (temp == EmitContainer.Module || temp == EmitContainer.DynamicModule)) {
                 //    var modName = temp == EmitContainer.Module ? this.moduleName : "exports";
                 //    this.writeToOutput(" = " + modName + "." + className);
@@ -1571,23 +1580,36 @@ module TypeScript {
                 var baseNameDecl: AST = null;
                 var baseName: AST = null;
 
-                if (baseClass) {
-                    this.writeLineToOutput(" = (function (_super) {");
+                this.recordSourceMappingStart(classDecl);
+                if (this.isOutputGoogleClosure()) {
+                    this.writeLineToOutput("goog.provide('" + className + "');");
                 } else {
-                    this.writeLineToOutput(" = (function () {");
+                    if (hasFlag(classDecl.varFlags, VarFlags.Exported) && classDecl.type.symbol.container == this.checker.gloMod) {
+                        this.writeToOutput("this." + className);
+                    }
+                    else {
+                        this.writeToOutput("var " + className);
+                    }
+
+                    if (baseClass) {
+                        this.writeLineToOutput(" = (function (_super) {");
+                    } else {
+                        this.writeLineToOutput(" = (function () {");
+                    }
                 }
 
                 this.recordSourceMappingNameStart(className);
-                this.indenter.increaseIndent();
+
+                if (!this.isOutputGoogleClosure()) {
+                    this.indenter.increaseIndent();
+                }
 
                 if (baseClass) {
                     baseNameDecl = classDecl.extendsList.members[0];
                     baseName = baseNameDecl.nodeType == NodeType.Call ? (<CallExpression>baseNameDecl).target : baseNameDecl;
                     this.emitIndent();
 
-                    if (this.isOutputGoogleClosure()) {
-                        this.writeLineToOutput("goog.inherits(" + className + ", _super);");
-                    } else {
+                    if (!this.isOutputGoogleClosure()) {
                         this.writeLineToOutput("__extends(" + className + ", _super);");
                     }
 
@@ -1614,15 +1636,30 @@ module TypeScript {
                 else {
                     var wroteProps = 0;
 
+                    if (this.isOutputGoogleClosure()) {
+                        var sig : Signature = new Signature();
+                        var isConstructor = true;
+                        var baseClassName = baseClass ? baseClass.getTypeName() : null;
+                        this.emitJsDocForFunction(sig, isConstructor, baseClassName);
+                    }
+
                     this.recordSourceMappingStart(classDecl);
                     // default constructor
                     this.indenter.increaseIndent();
-                    this.writeToOutput("function " + classDecl.name.actualText + "() {");
+
+                    if (this.isOutputGoogleClosure()) {
+                        this.writeToOutput(classDecl.name.actualText + " = function() {");
+                    } else {
+                        this.writeToOutput("function " + classDecl.name.actualText + "() {");
+                    }
+
                     this.recordSourceMappingNameStart("constructor");
                     if (baseClass) {
                         this.writeLineToOutput("");
                         this.emitIndent();
-                        this.writeLineToOutput("_super.apply(this, arguments);");
+
+                        var superClassReference = this.isOutputGoogleClosure() ? baseClass.getTypeName() : "_super";
+                        this.writeLineToOutput(superClassReference + ".apply(this, arguments);");
                         wroteProps++;
                     }
 
@@ -1645,7 +1682,11 @@ module TypeScript {
                         }
                     }
                     if (wroteProps) {
-                        this.writeLineToOutput("");
+                        if (!this.isOutputGoogleClosure()) {
+                          // This does not appear to be necessary, but it is here to preserve existing behavior.
+                          this.writeLineToOutput("");
+                        }
+
                         this.indenter.decreaseIndent();
                         this.emitIndent();
                         this.writeLineToOutput("}");
@@ -1656,6 +1697,10 @@ module TypeScript {
                     }
                     this.recordSourceMappingNameEnd();
                     this.recordSourceMappingEnd(classDecl);
+                }
+
+                if (baseClass && this.isOutputGoogleClosure()) {
+                    this.writeLineToOutput("goog.inherits(" + className + ", " + baseClass.getTypeName() + ");");
                 }
 
                 var membersLen = classDecl.members.members.length;
@@ -1706,22 +1751,24 @@ module TypeScript {
                     }
                 }
 
-                this.emitIndent();
-                this.recordSourceMappingStart(classDecl.endingToken);
-                this.writeLineToOutput("return " + className + ";");
-                this.recordSourceMappingEnd(classDecl.endingToken);
-                this.indenter.decreaseIndent();
-                this.emitIndent();
-                this.recordSourceMappingStart(classDecl.endingToken);
-                this.writeToOutput("}");
-                this.recordSourceMappingNameEnd();
-                this.recordSourceMappingEnd(classDecl.endingToken);
-                this.recordSourceMappingStart(classDecl);
-                this.writeToOutput(")(");
-                if (baseClass)
-                    this.emitJavascript(baseName, TokenID.Tilde, false);
-                this.writeToOutput(");");
-                this.recordSourceMappingEnd(classDecl);
+                if (!this.isOutputGoogleClosure()) {
+                    this.emitIndent();
+                    this.recordSourceMappingStart(classDecl.endingToken);
+                    this.writeLineToOutput("return " + className + ";");
+                    this.recordSourceMappingEnd(classDecl.endingToken);
+                    this.indenter.decreaseIndent();
+                    this.emitIndent();
+                    this.recordSourceMappingStart(classDecl.endingToken);
+                    this.writeToOutput("}");
+                    this.recordSourceMappingNameEnd();
+                    this.recordSourceMappingEnd(classDecl.endingToken);
+                    this.recordSourceMappingStart(classDecl);
+                    this.writeToOutput(")(");
+                    if (baseClass)
+                        this.emitJavascript(baseName, TokenID.Tilde, false);
+                    this.writeToOutput(");");
+                    this.recordSourceMappingEnd(classDecl);
+                }
 
                 if ((temp == EmitContainer.Module || temp == EmitContainer.DynamicModule) && hasFlag(classDecl.varFlags, VarFlags.Exported)) {
                     this.writeLineToOutput("");
