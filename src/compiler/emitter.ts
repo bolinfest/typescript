@@ -898,6 +898,12 @@ module TypeScript {
                     if (typeName == 'any') {
                         typeName = '*';
                     }
+
+                    // In Google Closure, a trailing = in a type expression indicates an optional parameter.
+                    if (parameterSymbol.isOptional()) {
+                        typeName += '=';
+                    }
+
                     writeLine(
                         ' * @param {' + typeName + '} ' + parameterSymbol.name);
                 }, this);
