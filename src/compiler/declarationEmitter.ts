@@ -553,7 +553,7 @@ module TypeScript {
                     if (pre) {
                         if (!this.emitOptions.outputMany) {
                             this.singleDeclFile = this.declFile;
-                            CompilerDiagnostics.assert(this.indenter.indentAmt == 0, "Indent has to be 0 when outputing new file");
+                            CompilerDiagnostics.assert(!this.indenter.hasIndent(), "Indent has to be 0 when outputing new file");
                             // Create new file
                             var declareFileName = getDeclareFilePath(stripQuotes(moduleDecl.name.sym.name));
                             this.declFile = this.emitOptions.createFile(declareFileName);
@@ -562,7 +562,7 @@ module TypeScript {
                     } else {
                         if (!this.emitOptions.outputMany) {
                             CompilerDiagnostics.assert(this.singleDeclFile != this.declFile, "singleDeclFile cannot be null as we are going to revert back to it");
-                            CompilerDiagnostics.assert(this.indenter.indentAmt == 0, "Indent has to be 0 when outputing new file");
+                            CompilerDiagnostics.assert(!this.indenter.hasIndent(), "Indent has to be 0 when outputing new file");
                             this.declFile.Close();
                             this.declFile = this.singleDeclFile;
                         }

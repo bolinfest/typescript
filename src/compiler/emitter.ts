@@ -43,27 +43,40 @@ module TypeScript {
     }
 
     export class Indenter {
-        static indentStep : number = 4;
-        static indentStepString : string = "    ";
-        static indentStrings: string[] = [];
-        public indentAmt: number = 0;
+        private indentAmt: number = 0;
+        private indentStrings: string[] = [];
+        private indentStep : number;
+        private indentStepString : string;
+
+        /**
+         * @param indentStep defaults to 4 if unspecified
+         */
+        constructor(indentStep? : number) {
+            this.indentStep = indentStep ? indentStep : 4;
+            this.indentStepString = new Array(this.indentStep + 1).join(' ');
+        }
+
+        /** @return whether there is currently a non-zero indent. */
+        public hasIndent() : bool {
+            return this.indentAmt != 0;
+        }
 
         public increaseIndent() {
-            this.indentAmt += Indenter.indentStep;
+            this.indentAmt += this.indentStep;
         }
 
         public decreaseIndent() {
-            this.indentAmt -= Indenter.indentStep;
+            this.indentAmt -= this.indentStep;
         }
 
         public getIndent() {
-            var indentString = Indenter.indentStrings[this.indentAmt];
+            var indentString = this.indentStrings[this.indentAmt];
             if (indentString === undefined) {
                 indentString = "";
-                for (var i = 0; i < this.indentAmt; i = i + Indenter.indentStep) {
-                    indentString += Indenter.indentStepString;
+                for (var i = 0; i < this.indentAmt; i = i + this.indentStep) {
+                    indentString += this.indentStepString;
                 }
-                Indenter.indentStrings[this.indentAmt] = indentString;
+                this.indentStrings[this.indentAmt] = indentString;
             }
             return indentString;
         }
@@ -76,7 +89,7 @@ module TypeScript {
         public moduleDeclList: ModuleDeclaration[] = [];
         public moduleName = "";
         public emitState = new EmitState();
-        public indenter = new Indenter();
+        public indenter: Indenter;
         public ambientModule = false;
         public modAliasId: string = null;
         public firstModAlias: string = null;
@@ -85,7 +98,9 @@ module TypeScript {
         public captureThisStmtString = "var _this = this;";
         private varListCount: number = 0; 
 
-        constructor (public checker: TypeChecker, public outfile: ITextWriter, public emitOptions: IEmitOptions) { 
+        constructor (public checker: TypeChecker, public outfile: ITextWriter, public emitOptions: IEmitOptions) {
+            var indentStep = this.isOutputGoogleClosure() ? 2 : 4;
+            this.indenter = new Indenter(indentStep);
         }
 
         public setSourceMappings(mapper: SourceMapper) {
@@ -1432,7 +1447,7 @@ module TypeScript {
 
             var parenthesize = false;
             // REVIEW: simplify rules for indenting
-            if (startLine && (this.indenter.indentAmt > 0) && (ast.nodeType != NodeType.List) &&
+            if (startLine && (this.indenter.hasIndent()) && (ast.nodeType != NodeType.List) &&
                 (ast.nodeType != NodeType.Block)) {
                 if ((ast.nodeType != NodeType.InterfaceDeclaration) &&
                     (!((ast.nodeType == NodeType.VarDecl) &&
