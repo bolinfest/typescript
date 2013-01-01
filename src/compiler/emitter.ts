@@ -882,7 +882,7 @@ module TypeScript {
             if (isConstructor) {
                 var instanceType = funcDecl.classDecl.type.instanceType;
                 var baseClass = instanceType ? instanceType.baseClass() : null;
-                baseClassName = baseClass || null;
+                baseClassName = baseClass ? baseClass.getTypeName() : null;
             }
 
             var isVariableArgList = funcDecl.variableArgList;
