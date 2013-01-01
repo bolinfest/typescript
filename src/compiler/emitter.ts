@@ -1857,8 +1857,18 @@ module TypeScript {
             }
         }
 
-        public emitSuperReference() {
-            this.writeToOutput("_super.prototype");
+        public emitSuperReference(node: AST) {
+            if (node.nodeType != NodeType.Super) {
+                throw Error("Expected node of type Super.");
+            }
+
+            if (this.isOutputGoogleClosure()) {
+                // TypeFlow.typeCheckSuper() should assign the "type" field of node to the type of the class whose
+                // method contains node.
+                this.writeToOutput(node.type.getTypeName() + ".prototype");
+            } else {
+                this.writeToOutput("_super.prototype");
+            }
         }
 
         public emitSuperCall(callEx: CallExpression): bool {

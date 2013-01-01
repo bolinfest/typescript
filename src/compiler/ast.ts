@@ -91,7 +91,7 @@ module TypeScript {
                     break;
                 case NodeType.Super:
                     emitter.recordSourceMappingStart(this);
-                    emitter.emitSuperReference();
+                    emitter.emitSuperReference(this);
                     emitter.recordSourceMappingEnd(this);
                     break;
                 case NodeType.EndCode:
