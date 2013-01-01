@@ -853,9 +853,14 @@ module TypeScript {
                 return;
             }
 
+            var writeLine: (string) => void = function(text: string) {
+                this.emitIndent();
+                this.writeLineToOutput(text);
+            }.bind(this);
+
             // Open the JSDoc.
             var signature = funcDecl.signature;
-            this.writeLineToOutput('/**');
+            writeLine('/**');
 
             // Write the params, if any.
             if (signature.parameters != null) {
@@ -865,23 +870,23 @@ module TypeScript {
                     if (typeName == 'any') {
                         typeName = '*';
                     }
-                    this.writeLineToOutput(
+                    writeLine(
                         ' * @param {' + typeName + '} ' + parameterSymbol.name);
                 }, this);
             }
 
             // Note if it is a constructor.
             if (funcDecl.isConstructor) {
-                this.writeLineToOutput(' * @constructor');
+                writeLine(' * @constructor');
             }
             // If not a constructor, then write the return type, if any.
             else if (signature.returnType != null) {
                 var returnType = signature.returnType.type.getTypeName();
-                this.writeLineToOutput(' * @return {' + returnType + '}');
+                writeLine(' * @return {' + returnType + '}');
             }
 
             // Close the JSDoc.
-            this.writeLineToOutput(' */');
+            writeLine(' */');
         }
 
         public emitJavascriptFunction(funcDecl: FuncDecl) {
@@ -1486,6 +1491,10 @@ module TypeScript {
                     this.emitPropertyAccessor(funcDecl, className, true);
                 }
                 else {
+                    if (this.isOutputGoogleClosure()) {
+                        this.emitJsDocForFunction(funcDecl);
+                    }
+
                     this.emitIndent();
                     this.recordSourceMappingStart(funcDecl);
                     this.writeToOutput(className + ".prototype." + funcDecl.getNameText() + " = ");
@@ -1575,7 +1584,13 @@ module TypeScript {
                     baseNameDecl = classDecl.extendsList.members[0];
                     baseName = baseNameDecl.nodeType == NodeType.Call ? (<CallExpression>baseNameDecl).target : baseNameDecl;
                     this.emitIndent();
-                    this.writeLineToOutput("__extends(" + className + ", _super);");
+
+                    if (this.isOutputGoogleClosure()) {
+                        this.writeLineToOutput("goog.inherits(" + className + ", _super);");
+                    } else {
+                        this.writeLineToOutput("__extends(" + className + ", _super);");
+                    }
+
                     // REVIEW: mixins
                     var elen = instanceType.extendsList.length;
                     if (elen > 1) {
@@ -1729,11 +1744,14 @@ module TypeScript {
             if (!this.prologueEmitted) {
                 if (reqInherits) {
                     this.prologueEmitted = true;
-                    this.writeLineToOutput("var __extends = this.__extends || function (d, b) {");
-                    this.writeLineToOutput("    function __() { this.constructor = d; }");
-                    this.writeLineToOutput("    __.prototype = b.prototype;");
-                    this.writeLineToOutput("    d.prototype = new __();");
-                    this.writeLineToOutput("};");
+                    // For Google Closure output, goog.inherits() will be used instead.
+                    if (!this.isOutputGoogleClosure()) {
+                        this.writeLineToOutput("var __extends = this.__extends || function (d, b) {");
+                        this.writeLineToOutput("    function __() { this.constructor = d; }");
+                        this.writeLineToOutput("    __.prototype = b.prototype;");
+                        this.writeLineToOutput("    d.prototype = new __();");
+                        this.writeLineToOutput("};");
+                    }
                 }
                 if (this.checker.mustCaptureGlobalThis) {
                     this.prologueEmitted = true;
