@@ -74,6 +74,12 @@ demo.compile = function() {
     settings.outputGoogleClosureAnnotations = checkbox.checked;
 
     var compiler = new TypeScript.TypeScriptCompiler(errorOutput, logger, settings);
+
+    // EXTERNS may not be defined when developing the demo locally.
+    if (typeof EXTERNS != 'undefined') {
+      compiler.addUnit(EXTERNS, 'lib.d.ts');
+    }
+
     var filenameForErrorReportingPurposes = '<INPUT>';
     compiler.addUnit(input, filenameForErrorReportingPurposes);
     compiler.typeCheck();
