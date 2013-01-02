@@ -105,9 +105,7 @@ demo.compile = function() {
 
   // Update the UI to reflect whether there is an error. 
   var isError = (error != null);
-  if (isError) {
-    get('error').innerHTML = goog.string.htmlEscape(error);
-  }
+  get('error').innerHTML = goog.string.htmlEscape(error || '');
   get('error').style.visibility = isError ? 'visible' : 'hidden';
   // TOOD(bolinfest): Figure out why the text does not turn red.
   goog.dom.classes.enable(get('code-coffee'), 'error', isError);
