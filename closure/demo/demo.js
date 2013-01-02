@@ -105,7 +105,22 @@ demo.compile = function() {
 
   // Update the UI to reflect whether there is an error. 
   var isError = (error != null);
-  get('error').innerHTML = goog.string.htmlEscape(error || '');
+  if (isError) {
+    // Filter out duplicate errors.
+    var uniqueErrors = [];
+    var lines = {};
+    goog.array.forEach(error.split('\n'), function(line) {
+      if (line in lines) {
+        return;
+      }
+      lines[line] = true;
+      uniqueErrors.push(line);
+    });
+    error = uniqueErrors.join('\n');
+  } else {
+    error = '';
+  }
+  get('error').innerHTML = goog.string.htmlEscape(error);
   get('error').style.visibility = isError ? 'visible' : 'hidden';
   // TOOD(bolinfest): Figure out why the text does not turn red.
   goog.dom.classes.enable(get('code-coffee'), 'error', isError);
