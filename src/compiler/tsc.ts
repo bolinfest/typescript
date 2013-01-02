@@ -245,6 +245,16 @@ class BatchCompiler {
             }
         });
 
+        opts.option('google', {
+            usage: '',
+            // Users of this fork will likely expect to see this listed in the usage message,
+            // so do not mark it experimental, even though this feature is most definitely experimental.
+            experimental: false,
+            set: () => {
+                this.compilationSettings.outputGoogleClosureAnnotations = true;
+            }
+        });
+
         opts.flag('sourcemap', {
             usage: 'Generates corresponding .map file',
             set: () => {
