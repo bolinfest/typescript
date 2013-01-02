@@ -41,6 +41,12 @@ code {
   padding: 4px;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
+
+  /* May get multiline errors from the TypeScript parser. */
+  display: inline-block;
+  white-space: pre-wrap;
+  line-height: 18px;
+  text-align: left;
 }
 
 .error {
