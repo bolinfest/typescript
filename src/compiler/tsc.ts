@@ -246,7 +246,7 @@ class BatchCompiler {
         });
 
         opts.option('google', {
-            usage: '',
+            usage: 'Generates output with Google Closure type annotations',
             // Users of this fork will likely expect to see this listed in the usage message,
             // so do not mark it experimental, even though this feature is most definitely experimental.
             experimental: false,
