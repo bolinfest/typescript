@@ -945,7 +945,7 @@ module TypeScript {
             var parts = typeName.split(/\b/);
             parts = parts.map(function(part: string) : string {
                 if (part == 'any') {
-                    return '*';
+                    return '?';
                 } else if (part == 'bool') {
                     return 'boolean';
                 } else {
