@@ -55,20 +55,20 @@ module TypeScript {
 
             var shift = 0;
             for (var i = 0; i < inString.length; i++) {
-                var byte = Base64Format.decodeChar(inString[i]);
+                var decodedByte = Base64Format.decodeChar(inString[i]);
                 if (i === 0) {
                     // Sign bit appears in the LSBit of the first value
-                    if ((byte & 1) === 1) {
+                    if ((decodedByte & 1) === 1) {
                         negative = true;
                     }
-                    result = (byte >> 1) & 15; // 1111x
+                    result = (decodedByte >> 1) & 15; // 1111x
                 } else {
-                    result = result | ((byte & 31) << shift); // 11111
+                    result = result | ((decodedByte & 31) << shift); // 11111
                 }
 
                 shift += (i == 0) ? 4 : 5;
 
-                if ((byte & 32) === 32) {
+                if ((decodedByte & 32) === 32) {
                     // Continue
                 } else {
                     return { value: negative ? -(result) : result, rest: inString.substr(i + 1) };
